@@ -1,0 +1,13 @@
+{
+  "appId": "co.hotwax.import",
+  "appName": "import",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  },
+  "cordova": {}
+}
