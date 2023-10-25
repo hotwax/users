@@ -27,7 +27,7 @@ import '@hotwax/apps-theme';
 
 import i18n from './i18n'
 import store from './store'
-import { DateTime } from 'luxon';
+// import { DateTime } from 'luxon';
 
 import logger from './logger';
 
@@ -43,21 +43,21 @@ const app = createApp(App)
   .use(store);
 
 // Filters are removed in Vue 3 and global filter introduced https://v3.vuejs.org/guide/migration/filters.html#global-filters
-app.config.globalProperties.$filters = {
-  formatDate(value: any, inFormat?: string, outFormat?: string) {
-    // TODO Make default format configurable and from environment variables
-    if(inFormat){
-      return DateTime.fromFormat(value, inFormat).toFormat(outFormat ? outFormat : 'MM-dd-yyyy');
-    }
-    return DateTime.fromISO(value).toFormat(outFormat ? outFormat : 'MM-dd-yyyy');
-  },
-  formatUtcDate(value: any, inFormat?: any, outFormat?: string) {
-    // TODO Make default format configurable and from environment variables
-    const userProfile = store.getters['user/getUserProfile'];
-    // TODO Fix this setDefault should set the default timezone instead of getting it everytiem and setting the tz
-    return DateTime.fromISO(value, { zone: 'utc' }).setZone(userProfile.userTimeZone).toFormat(outFormat ? outFormat : 'MM-dd-yyyy')  
-  }
-}
+// app.config.globalProperties.$filters = {
+//   formatDate(value: any, inFormat?: string, outFormat?: string) {
+//     // TODO Make default format configurable and from environment variables
+//     if(inFormat){
+//       return DateTime.fromFormat(value, inFormat).toFormat(outFormat ? outFormat : 'MM-dd-yyyy');
+//     }
+//     return DateTime.fromISO(value).toFormat(outFormat ? outFormat : 'MM-dd-yyyy');
+//   },
+//   formatUtcDate(value: any, inFormat?: any, outFormat?: string) {
+//     // TODO Make default format configurable and from environment variables
+//     const userProfile = store.getters['user/getUserProfile'];
+//     // TODO Fix this setDefault should set the default timezone instead of getting it everytiem and setting the tz
+//     return DateTime.fromISO(value, { zone: 'utc' }).setZone(userProfile.userTimeZone).toFormat(outFormat ? outFormat : 'MM-dd-yyyy')
+//   }
+// }
 
 router.isReady().then(() => {
   app.mount('#app');

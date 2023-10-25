@@ -256,7 +256,85 @@ http://ionicframework.com/docs/theming/ */
   margin: var(--spacer-sm);
 }
 
+.find {
+  display: grid;
+  grid-template-areas: "search"
+                       "main";
+}
+
+.find > .filters{
+  display: none;
+}
+
+.find > main {
+  grid-area: main;
+}
+
+.filters {
+  grid-area: filters;
+}
+
+.search {
+  grid-area: search;
+}
+
+.list-item {
+  --columns-mobile: 2;
+  --columns-tablet: 5;
+  --columns-desktop: 8;
+  --col-calc: var(--columns-mobile);
+  --implicit-columns: calc(var(--col-calc) - 1);
+  display: grid;
+  grid-template-columns: repeat(var(--implicit-columns), 1fr) max-content;
+  justify-items: center;
+  align-items: center;
+}
+
+.list-item > * {
+  display: none;
+}
+
+.list-item > *:last-child {
+  display: unset;
+  justify-self: end;
+}
+
+.list-item > ion-label {
+  text-align: center;
+}
+
+.list-item > *:first-child {
+  display: unset;
+  justify-self: start
+}
+
+@media (min-width: 700px) {
+  .list-item {
+    --col-calc: var(--columns-tablet);
+  }
+}
+
 @media (min-width: 991px) {
+  .find {
+    grid: "search  main" min-content
+          "filters main" 1fr
+          / 375px;
+    column-gap: var(--spacer-2xl);
+    margin: var(--spacer-lg);
+  }
+
+  .filters {
+    margin-top: var(--spacer-lg);
+  }
+
+  .filters {
+    margin-top: var(--spacer-lg);
+  }
+
+  .find > .filters{
+    display: unset;
+  }
+
   .desktop-only {
     display: unset;
   }
@@ -264,4 +342,13 @@ http://ionicframework.com/docs/theming/ */
   .mobile-only {
     display: none;
   }
+
+  .list-item {
+    --col-calc: var(--columns-desktop);
+  }
+
+  .list-item > * {
+    display: unset;
+  }
+
 }
