@@ -1,22 +1,20 @@
 import { createStore, useStore as useVuexStore } from "vuex"
-import mutations  from './mutations'
-import getters  from './getters'
+import mutations from './mutations'
+import getters from './getters'
 import actions from './actions'
 import RootState from './RootState'
 import createPersistedState from "vuex-persistedstate";
 
-
 // TODO check how to register it from the components only
 // Handle same module registering multiple time on page refresh
 //store.registerModule('user', userModule);
-
 
 const state: any = {
 
 }
 
 const persistState = createPersistedState({
-    paths: ['user'],
+    paths: [],
     fetchBeforeUse: true
 })
 
@@ -26,7 +24,7 @@ const store = createStore<RootState>({
     actions,
     mutations,
     getters,
-    plugins: [ persistState ],
+    plugins: [persistState],
     modules: {},
 })
 
