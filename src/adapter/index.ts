@@ -1,11 +1,12 @@
 import {
   api,
   client,
-  fetchProducts,
+  getConfig,
+  hasError,
   initialise,
-  isError,
-  Product,
+  logout,
   resetConfig,
+  setUserLocale,
   updateToken,
   updateInstanceUrl
 } from '@hotwax/oms-api'
@@ -13,11 +14,12 @@ import {
 export {
   api,
   client,
-  fetchProducts,
+  getConfig,
+  hasError,
   initialise,
-  isError,
-  Product,
+  logout,
   resetConfig,
+  setUserLocale,
   updateToken,
   updateInstanceUrl
 }
