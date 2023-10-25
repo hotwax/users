@@ -1,6 +1,6 @@
 {
-  "appId": "co.hotwax.import",
-  "appName": "import",
+  "appId": "co.hotwax.user-management",
+  "appName": "user-management",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "dist",
