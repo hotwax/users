@@ -1,6 +1,6 @@
 {
     "name": "HotWax Commerce Import",
-    "short_name": "Import",
+    "short_name": "User Management",
     "theme_color": "#FFFFFF",
     "icons": [{
             "src": "public/img/icons/favicon-16x16.png",
