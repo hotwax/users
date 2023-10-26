@@ -16,11 +16,11 @@
       <!-- TODO add password validation -->
       <ion-item lines="full">
         <ion-label class="ion-text-wrap" position="fixed">{{ translate("New password") }}</ion-label>
-        <ion-input :placeholder="translate('Enter password')" name="password" v-model="password" id="key" type="password" required />
+        <ion-input :placeholder="translate('Enter password')" name="password" v-model="newPassword" id="key" type="password" required />
       </ion-item>
       <ion-item>
         <ion-label class="ion-text-wrap" position="fixed">{{ translate("Verify new password") }}</ion-label>
-        <ion-input :placeholder="translate('Confirm password')" name="password2" v-model="password2" id="value" type="password" required />
+        <ion-input :placeholder="translate('Confirm password')" name="password2" v-model="confirmPassword" id="value" type="password" required />
       </ion-item>
     </ion-list>
 
@@ -63,7 +63,7 @@ import { defineComponent } from "vue";
 import { closeOutline, lockClosedOutline, mailOutline } from "ionicons/icons";
 import { useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components'
-import { showToast } from "@/utils";
+import { hasError, showToast } from "@/utils";
 import { UserService } from "@/services/UserService";
 
 export default defineComponent({
@@ -85,8 +85,8 @@ export default defineComponent({
   },
   data() {
     return {
-      password: '',
-      password2: ''
+      newPassword: '',
+      confirmPassword: ''
     }
   },
   props: ["email", "userLoginId"],
@@ -96,12 +96,14 @@ export default defineComponent({
     },
     async resetPassword() {
       try {
-        await UserService.resetPassword({
-          newPassword: this.password,
-          newPasswordVerify: this.password2,
+        const resp = await UserService.resetPassword({
+          newPassword: this.newPassword,
+          newPasswordVerify: this.confirmPassword,
           userLoginId: this.userLoginId
         })
-        showToast(translate('Password reset successful.'))
+        if (!hasError(resp)) {
+          showToast(translate('Password reset successful.'))
+        }
       } catch (error) {
         showToast(translate('Failed to reset password.'))
         console.error(error)
@@ -109,8 +111,8 @@ export default defineComponent({
     },
     checkResetButtonStatus() {
       // TODO add check for length and other requirements
-      return (!this.password.length || !this.password2.length) 
-        || (this.password.trim() !== this.password2.trim())
+      return (!this.newPassword.length || !this.confirmPassword.length) 
+        || (this.newPassword.trim() !== this.confirmPassword.trim())
     }
   },
   setup() {

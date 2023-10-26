@@ -137,6 +137,7 @@ import ContactActionsPopover from '@/components/ContactActionsPopover.vue'
 import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
 import { UserService } from "@/services/UserService";
 import { showToast } from "@/utils";
+import { hasError } from "@hotwax/oms-api";
 
 export default defineComponent({
   name: "UserDetails",
@@ -234,6 +235,7 @@ export default defineComponent({
                   partyId: this.selectedUser.partyId,
                   contactMechPurposeTypeId: 'PRIMARY_EMAIL'
                 })
+                if (hasError(resp)) return 
                 selectedUser = {
                   ...selectedUser,
                   emailDetails: {
@@ -247,6 +249,7 @@ export default defineComponent({
                   partyId: this.selectedUser.partyId,
                   contactMechPurposeTypeId: 'PRIMARY_PHONE'
                 })
+                if (hasError(resp)) return
                 selectedUser = {
                   ...selectedUser,
                   phoneNumberDetails: {
@@ -255,22 +258,26 @@ export default defineComponent({
                   }
                 }
               } else {
-                this.selectedUser.partyTypeId === 'PERSON'
-                  ? await UserService.updatePerson({
+                let resp = {}
+                if (this.selectedUser.partyTypeId === 'PERSON') {
+                  resp = await UserService.updatePerson({
                     externalId: input,
                     partyId: this.selectedUser.partyId
                   })
-                  : await UserService.updatePartyGroup({
+                } else {
+                  resp = await UserService.updatePartyGroup({
                     externalId: input,
                     partyId: this.selectedUser.partyId
                   })
+                }
+                if (hasError(resp)) return
                 selectedUser = {
                   ...selectedUser,
                   externalId: input
                 }
               }
               this.store.dispatch('user/updateSelectedUser', selectedUser)
-              showToast(translate(`${type === 'email' ? 'Email' : (type === 'phoneNumber' ? 'Phone number' : 'External ID')} added successfully.`))
+              showToast(translate(`${this.options[type].placeholder} added successfully.`))
             } catch (error) {
               showToast(translate(`Failed to add ${type === 'email' ? 'email' : (type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
               console.error(error)
@@ -309,14 +316,16 @@ export default defineComponent({
           role: 'success',
           handler: async () => {
             try {
-              await UserService.updateUserLoginStatus({
+              const resp = await UserService.updateUserLoginStatus({
                 enabled: isChecked ? 'N' : 'Y',
                 partyId: this.partyId,
                 userLoginId: this.selectedUser.userLoginId
               })
-              showToast(translate('User login status updated successfully.'))
-              // updating toggle state on success
-              event.target.checked = isChecked
+              if (!hasError(resp)) {
+                showToast(translate('User login status updated successfully.'))
+                // updating toggle state on success
+                event.target.checked = isChecked
+              }
             } catch (error) {
               showToast(translate('Failed to update user login status.'))
               console.error(error)

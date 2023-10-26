@@ -5,10 +5,10 @@
       <ion-item button @click="copyInfo(value)">
         {{ translate("Copy") }}
       </ion-item>
-      <ion-item @click="updateContactField(type)" button>
+      <ion-item @click="updateContactField()" button>
         {{ translate("Edit") }}
       </ion-item>
-      <ion-item @click="deleteContactField(type)" button lines="none">
+      <ion-item @click="deleteContactField()" button lines="none">
         {{ translate("Remove") }}
       </ion-item>
     </ion-list>
@@ -27,7 +27,7 @@ import {
 import { defineComponent } from "vue";
 import { translate } from "@hotwax/dxp-components";
 import { mapGetters, useStore } from 'vuex';
-import { copyToClipboard, showToast } from "@/utils";
+import { copyToClipboard, hasError, showToast } from "@/utils";
 import { UserService } from "@/services/UserService";
 
 export default defineComponent({
@@ -73,13 +73,13 @@ export default defineComponent({
       copyToClipboard(info, 'Copied to clipboard')
       this.closePopover();
     },
-    async updateContactField(type: string) {
+    async updateContactField() {
       const contactUpdateAlert = await alertController.create({
-        header: translate(this.options[type].editHeader),
+        header: translate(this.options[this.type].editHeader),
         inputs:  [{
           // TODO add validation for email/phone
           name: "input",
-          placeholder: translate(this.options[type].placeholder),
+          placeholder: translate(this.options[this.type].placeholder),
           value: this.value
         }],
         buttons: [{
@@ -97,12 +97,13 @@ export default defineComponent({
 
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
             try {
-              if (type === 'email') {
-                await UserService.createUpdatePartyEmailAddress({
+              if (this.type === 'email') {
+                const resp = await UserService.createUpdatePartyEmailAddress({
                   contactMechId: this.contactMechId,
                   emailAddress: input,
                   partyId: this.selectedUser.partyId
                 })
+                if (hasError(resp)) return
                 selectedUser = {
                   ...selectedUser,
                   emailDetails: {
@@ -110,12 +111,13 @@ export default defineComponent({
                     contactMechId: this.contactMechId
                   }
                 }
-              } else if (type === 'phoneNumber') {
-                await UserService.createUpdatePartyTelecomNumber({
+              } else if (this.type === 'phoneNumber') {
+                const resp = await UserService.createUpdatePartyTelecomNumber({
                   contactMechId: this.contactMechId,
                   contactNumber: input,
                   partyId: this.selectedUser.partyId
                 })
+                if (hasError(resp)) return
                 selectedUser = {
                   ...selectedUser,
                   phoneNumberDetails: {
@@ -124,24 +126,28 @@ export default defineComponent({
                   }
                 }
               } else {
-                this.selectedUser.partyTypeId === 'PERSON'
-                  ? await UserService.updatePerson({
+                let resp = {}
+                if (this.selectedUser.partyTypeId === 'PERSON') {
+                  resp = await UserService.updatePerson({
                     externalId: input,
                     partyId: this.selectedUser.partyId
                   })
-                  : await UserService.updatePartyGroup({
+                } else {
+                  resp = await UserService.updatePartyGroup({
                     externalId: input,
                     partyId: this.selectedUser.partyId
                   })
+                }
+                if (hasError(resp)) return
                 selectedUser = {
                   ...selectedUser,
                   externalId: input
                 }
+                this.store.dispatch('user/updateSelectedUser', selectedUser)
+                showToast(translate(`${this.options[this.type].placeholder}  updated successfully.`))
               }
-              this.store.dispatch('user/updateSelectedUser', selectedUser)
-              showToast(translate(`${type === 'email' ? 'Email' : (type === 'phoneNumber' ? 'Phone number' : 'External ID')} updated successfully.`))
             } catch (error) {
-              showToast(translate(`Failed to update ${type === 'email' ? 'email' : (type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
+              showToast(translate(`Failed to update ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
               console.error(error)
             }
           }
@@ -150,11 +156,11 @@ export default defineComponent({
       await contactUpdateAlert.present()
       this.closePopover()
     },
-    async deleteContactField(type: string) {
-      const message = `Are you sure you want to remove the ${type === 'email' ? 'email' : (type === 'phoneNumber' ? 'phone number' : 'external ID')}.?`
+    async deleteContactField() {
+      const message = `Are you sure you want to remove the ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.?`
 
       const contactUpdateAlert = await alertController.create({
-        header: translate(this.options[type].removeHeader),
+        header: translate(this.options[this.type].removeHeader),
         message: translate(message),
         buttons: [{
           text: translate('Cancel'),
@@ -165,34 +171,40 @@ export default defineComponent({
           handler: async () => {
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
             try {
-              if (type === 'email') {
-                await UserService.deletePartyContactMech({
+              if (this.type === 'email') {
+                const resp = await UserService.deletePartyContactMech({
                   contactMechId: this.contactMechId,
                   partyId: this.selectedUser.partyId
                 })
+                if (hasError(resp)) return
                 delete selectedUser.emailDetails
-              } else if (type === 'phoneNumber') {
-                await UserService.deletePartyContactMech({
+              } else if (this.type === 'phoneNumber') {
+                const resp = await UserService.deletePartyContactMech({
                   contactMechId: this.contactMechId,
                   partyId: this.selectedUser.partyId
                 })
+                if (hasError(resp)) return
                 delete selectedUser.phoneNumberDetails
               } else {
-                this.selectedUser.partyTypeId === 'PERSON'
-                  ? await UserService.updatePerson({
+                let resp = {}
+                if (this.selectedUser.partyTypeId === 'PERSON') {
+                  resp = await UserService.updatePerson({
                     externalId: '',
                     partyId: this.selectedUser.partyId
                   })
-                  : await UserService.updatePartyGroup({
+                } else {
+                  resp = await UserService.updatePartyGroup({
                     externalId: '',
                     partyId: this.selectedUser.partyId
                   })
+                }
+                if (hasError(resp)) return
                 delete selectedUser.externalId
               }
               this.store.dispatch('user/updateSelectedUser', selectedUser)
-              showToast(translate(`${type === 'email' ? 'Email' : (type === 'phoneNumber' ? 'Phone number' : 'External ID')} removed successfully.`))
+              showToast(translate(`${this.options[this.type].placeholder} removed successfully.`))
             } catch (error) {
-              showToast(translate(`Failed to remove ${type === 'email' ? 'email' : (type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
+              showToast(translate(`Failed to remove ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
               console.error(error)
             }
           }
