@@ -7,7 +7,7 @@ const getPartyViewDetail = async (params: any): Promise<any> => {
     params,
     baseURL: "https://dev-oms.hotwax.io/api/",
     headers: {
-      Authorization:  'Bearer ' + token,
+      Authorization:  'Bearer ' + '',
       'Content-Type': 'application/json'
     }
   })
@@ -20,7 +20,7 @@ const getSecurityGroups = async (params: any): Promise<any> => {
     params,
     baseURL: "https://dev-oms.hotwax.io/api/",
     headers: {
-      Authorization:  'Bearer ' + token,
+      Authorization:  'Bearer ' + '',
       'Content-Type': 'application/json'
     }
   })

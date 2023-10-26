@@ -53,7 +53,7 @@
             </ion-chip>
 
             <div>
-              <ion-button fill="clear" color="medium" @click="openUserPopover($event, user)">
+              <ion-button fill="clear" color="medium">
                 <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
               </ion-button>
             </div>
