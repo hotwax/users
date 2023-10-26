@@ -11,12 +11,12 @@ const actions: ActionTree<UserState, RootState> = {
   async findUsers ({ dispatch, commit, state }) {
     const filters = {} as any
 
-    if(state.query.securityGroup){
+    if(state.query.securityGroup) {
       filters['securityGroupId'] = state.query.securityGroup
       filters['securityGroupId_op'] = 'equals'
     }
 
-    if(state.query.status){
+    if(state.query.status) {
       filters['enabled'] = state.query.status
       filters['enabled_op'] = 'equals'
     }
@@ -45,7 +45,7 @@ const actions: ActionTree<UserState, RootState> = {
       "fieldList": ['createdDate', 'firstName', 'infoString', 'lastName', 'partyId', 'securityGroupId', 'userLoginId'],
     }
 
-    try{
+    try {
       const resp = await UserService.getPartyViewDetail(payload)
 
       if(resp && resp.status === 200 && !hasError(resp) && resp.data.docs?.length) {
@@ -72,24 +72,22 @@ const actions: ActionTree<UserState, RootState> = {
 
     try {
       const resp = await UserService.getSecurityGroups(payload)
-      
-      if(resp && resp.status === 200 && !hasError(resp) && resp.data.docs?.length){
-        const securityGroupOptions = resp.data.docs
 
+      if(resp && resp.status === 200 && !hasError(resp) && resp.data.docs?.length) {
+        const securityGroupOptions = resp.data.docs
         commit(types.USER_SECURITY_GROUPS_LIST_UPDATED, { securityGroupOptions });
       } else {
         commit(types.USER_SECURITY_GROUPS_LIST_UPDATED, { securityGroupOptions: [] });
         showToast(translate("No record found"), false);
       }
     } catch(error) {
-      console.error(error)
+      console.error(error);
       showToast(translate("Something went wrong"), false);
     }
   },
 
   async updateQuery  ( { commit, dispatch, rootState } , query ) {
     commit(types.USER_QUERY_UPDATED, {query})
-
     dispatch('findUsers')
   }
 }

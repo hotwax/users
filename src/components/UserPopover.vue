@@ -8,7 +8,7 @@
     </ion-list>
   </ion-content>
 </template>
-  
+
 <script lang="ts">
 import {
   IonContent,
