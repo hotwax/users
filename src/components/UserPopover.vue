@@ -1,7 +1,7 @@
 <template>
   <ion-content>
     <ion-list>
-      <ion-list-header>username</ion-list-header>
+      <ion-list-header>{{ user.userLoginId }}</ion-list-header>
       <ion-item button>{{ $t("Edit profile") }}</ion-item>
       <ion-item button>{{ $t("Reset password") }}</ion-item>
       <ion-item button lines="none">{{ $t("Deactivate") }}</ion-item>
@@ -26,5 +26,6 @@ export default defineComponent({
     IonList,
     IonListHeader
   },
+  props: ['user']
 });
 </script>

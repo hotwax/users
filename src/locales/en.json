@@ -1,11 +1,17 @@
 {
+  "Active": "Active",
   "Clearance": "Clearance",
   "Click the backdrop to dismiss.": "Click the backdrop to dismiss.",
   "created": "created",
   "Deactivate": "Deactivate",
   "Edit profile": "Edit profile",
+  "Inactive": "Inactive",
+  "No record found": "No record found",
+  "No users found": "No users found",
+  "None": "None",
   "Reset password": "Reset password",
   "Search users": "Search users",
+  "Something went wrong": "Something went wrong",
   "Status": "Status",
   "Users": "Users"
 }
