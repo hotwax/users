@@ -157,6 +157,8 @@ const actions: ActionTree<UserState, RootState> = {
       return
     }
 
+    emitter.emit('presentLoader')
+
     let resp = {} as any, selectedUser = {}, params = {
       inputFields: {
         partyId: payload.partyId,
@@ -216,6 +218,7 @@ const actions: ActionTree<UserState, RootState> = {
     } catch (error) {
       console.error(error)
     }
+    emitter.emit('dismissLoader')
     commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
   },
 

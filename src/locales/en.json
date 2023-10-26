@@ -37,6 +37,7 @@
   "Failed to add email.": "Failed to add email.",
   "Failed to add phone number.": "Failed to add phone number.",
   "Failed to add external ID": "Failed to add external ID",
+  "Failed to fetch user data": "Failed to fetch user data",
   "Failed to remove email.": "Failed to remove email.",
   "Failed to remove phone number.": "Failed to remove phone number.",
   "Failed to remove external ID": "Failed to remove external ID",

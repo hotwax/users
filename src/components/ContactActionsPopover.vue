@@ -2,7 +2,7 @@
   <ion-content>
     <ion-list>
       <ion-list-header>{{ translate(placeholder) }}</ion-list-header>
-      <ion-item button @click="copyInfo(value)">
+      <ion-item button @click="copyInfo()">
         {{ translate("Copy") }}
       </ion-item>
       <ion-item @click="updateContactField()" button>
@@ -69,8 +69,8 @@ export default defineComponent({
     closePopover() {
       popoverController.dismiss();
     },
-    copyInfo(info: string) {
-      copyToClipboard(info, 'Copied to clipboard')
+    copyInfo() {
+      copyToClipboard(this.value, 'Copied to clipboard')
       this.closePopover();
     },
     async updateContactField() {
@@ -103,7 +103,7 @@ export default defineComponent({
                   emailAddress: input,
                   partyId: this.selectedUser.partyId
                 })
-                if (hasError(resp)) return
+                if (!hasError(resp)) throw resp.data
                 selectedUser = {
                   ...selectedUser,
                   emailDetails: {
@@ -117,7 +117,7 @@ export default defineComponent({
                   contactNumber: input,
                   partyId: this.selectedUser.partyId
                 })
-                if (hasError(resp)) return
+                if (hasError(resp)) throw resp.data
                 selectedUser = {
                   ...selectedUser,
                   phoneNumberDetails: {
@@ -126,7 +126,7 @@ export default defineComponent({
                   }
                 }
               } else {
-                let resp = {}
+                let resp = {} as any
                 if (this.selectedUser.partyTypeId === 'PERSON') {
                   resp = await UserService.updatePerson({
                     externalId: input,
@@ -138,14 +138,14 @@ export default defineComponent({
                     partyId: this.selectedUser.partyId
                   })
                 }
-                if (hasError(resp)) return
+                if (hasError(resp)) throw resp.data
                 selectedUser = {
                   ...selectedUser,
                   externalId: input
                 }
-                this.store.dispatch('user/updateSelectedUser', selectedUser)
-                showToast(translate(`${this.options[this.type].placeholder}  updated successfully.`))
               }
+              this.store.dispatch('user/updateSelectedUser', selectedUser)
+              showToast(translate(`${this.options[this.type].placeholder} updated successfully.`))
             } catch (error) {
               showToast(translate(`Failed to update ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
               console.error(error)
@@ -176,17 +176,17 @@ export default defineComponent({
                   contactMechId: this.contactMechId,
                   partyId: this.selectedUser.partyId
                 })
-                if (hasError(resp)) return
+                if (hasError(resp)) throw resp.data
                 delete selectedUser.emailDetails
               } else if (this.type === 'phoneNumber') {
                 const resp = await UserService.deletePartyContactMech({
                   contactMechId: this.contactMechId,
                   partyId: this.selectedUser.partyId
                 })
-                if (hasError(resp)) return
+                if (hasError(resp)) throw resp.data
                 delete selectedUser.phoneNumberDetails
               } else {
-                let resp = {}
+                let resp = {} as any
                 if (this.selectedUser.partyTypeId === 'PERSON') {
                   resp = await UserService.updatePerson({
                     externalId: '',
@@ -198,7 +198,7 @@ export default defineComponent({
                     partyId: this.selectedUser.partyId
                   })
                 }
-                if (hasError(resp)) return
+                if (hasError(resp)) throw resp.data
                 delete selectedUser.externalId
               }
               this.store.dispatch('user/updateSelectedUser', selectedUser)

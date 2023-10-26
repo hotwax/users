@@ -9,90 +9,95 @@
 
     <ion-content>
       <main>
-        <section>
-          <ion-item lines="none">
-            <!-- TODO fetch and show image only if available -->
-            <ion-avatar slot="start">
-              <Image />
-            </ion-avatar>
-            <ion-label>
-              <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
-              <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
-              <p>{{ selectedUser.userLoginId }}</p>
-            </ion-label>
-          </ion-item>
-        </section>
+        <div v-if="!Object.keys(selectedUser).length" class="ion-text-center ion-padding-top">
+          {{ translate("Failed to fetch user data") }}
+        </div>
+        <div v-else>
+          <section>
+            <ion-item lines="none">
+              <!-- TODO fetch and show image only if available -->
+              <ion-avatar slot="start">
+                <Image />
+              </ion-avatar>
+              <ion-label>
+                <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
+                <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
+                <p>{{ selectedUser.userLoginId }}</p>
+              </ion-label>
+            </ion-item>
+          </section>
 
-        <section class="user-details">
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title>
-                {{ translate('Login details') }}
-              </ion-card-title>
-            </ion-card-header>
-            <ion-list>
-              <!-- TODO verify disable message -->
-              <!-- <ion-item v-if="selectedUser.enabled === 'N'" color="light" lines="none">
-                <ion-label class="ion-text-wrap">
-                  <p class="overline">{{ translate("User disabled") }}</p>
-                  <p>{{ translate('This user was disabled due to repeated failed password attempts') }}</p>
-                </ion-label>
-                <ion-icon slot="end" color="danger" :icon="warningOutline" />
-              </ion-item> -->
-              <ion-item>
-                <ion-label>{{ translate('Username') }}</ion-label>        
-                <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>        
-              </ion-item>
-              <ion-item>
-                <ion-label>{{ translate("Block login") }}</ion-label>
-                <ion-toggle slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
-              </ion-item>
-            </ion-list>
-            <ion-button @click="resetPassword()" fill="outline" color="warning" expand="block">
-              {{ translate('Reset password') }}
-            </ion-button>
-          </ion-card>
-  
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title>
-                {{ translate('Contact details') }}
-              </ion-card-title>
-            </ion-card-header>
-            <ion-list>
-              <ion-item>
-                <ion-icon :icon="mailOutline" slot="start" />
-                <ion-label>{{ selectedUser?.emailDetails ? selectedUser.emailDetails.email : translate('Email') }}</ion-label>
-                <ion-button v-if="selectedUser?.emailDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'email', selectedUser.emailDetails.email)">
-                  <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
-                </ion-button>
-                <ion-button v-else @click="addContactField('email')" slot="end" fill="clear">
-                  <ion-icon slot="icon-only" :icon="addCircleOutline" />
-                </ion-button>
-              </ion-item>
-              <ion-item>
-                <ion-icon :icon="callOutline" slot="start" />
-                <ion-label>{{ selectedUser?.phoneNumberDetails ? selectedUser.phoneNumberDetails.contactNumber : translate('Phone number') }}</ion-label>
-                <ion-button v-if="selectedUser?.phoneNumberDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'phoneNumber', selectedUser.phoneNumberDetails.contactNumber)">
-                  <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
-                </ion-button>
-                <ion-button v-else @click="addContactField('phoneNumber')" slot="end" fill="clear">
-                  <ion-icon slot="icon-only" :icon="addCircleOutline" />
-                </ion-button>
-              </ion-item>
-              <ion-item lines="none">
-                <ion-icon :icon="businessOutline" slot="start" />
-                <ion-label>{{ selectedUser.externalId ? selectedUser.externalId : translate('External ID') }}</ion-label>
-                <ion-button v-if="selectedUser.externalId" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'externalId', selectedUser.externalId)">
-                  <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
-                </ion-button>
-                <ion-button v-else @click="addContactField('externalId')" slot="end" fill="clear">
-                  <ion-icon slot="icon-only" :icon="addCircleOutline" />
-                </ion-button>
-              </ion-item>
-            </ion-list>
-          </ion-card>
-        </section>
+          <section class="user-details">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>
+                  {{ translate('Login details') }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-list>
+                <!-- TODO verify disable message -->
+                <!-- <ion-item v-if="selectedUser.enabled === 'N'" color="light" lines="none">
+                  <ion-label class="ion-text-wrap">
+                    <p class="overline">{{ translate("User disabled") }}</p>
+                    <p>{{ translate('This user was disabled due to repeated failed password attempts') }}</p>
+                  </ion-label>
+                  <ion-icon slot="end" color="danger" :icon="warningOutline" />
+                </ion-item> -->
+                <ion-item>
+                  <ion-label>{{ translate('Username') }}</ion-label>        
+                  <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>        
+                </ion-item>
+                <ion-item>
+                  <ion-label>{{ translate("Block login") }}</ion-label>
+                  <ion-toggle slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
+                </ion-item>
+              </ion-list>
+              <ion-button @click="resetPassword()" fill="outline" color="warning" expand="block">
+                {{ translate('Reset password') }}
+              </ion-button>
+            </ion-card>
+    
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>
+                  {{ translate('Contact details') }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-list>
+                <ion-item>
+                  <ion-icon :icon="mailOutline" slot="start" />
+                  <ion-label>{{ selectedUser?.emailDetails ? selectedUser.emailDetails.email : translate('Email') }}</ion-label>
+                  <ion-button v-if="selectedUser?.emailDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'email', selectedUser.emailDetails.email)">
+                    <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
+                  </ion-button>
+                  <ion-button v-else @click="addContactField('email')" slot="end" fill="clear">
+                    <ion-icon slot="icon-only" :icon="addCircleOutline" />
+                  </ion-button>
+                </ion-item>
+                <ion-item>
+                  <ion-icon :icon="callOutline" slot="start" />
+                  <ion-label>{{ selectedUser?.phoneNumberDetails ? selectedUser.phoneNumberDetails.contactNumber : translate('Phone number') }}</ion-label>
+                  <ion-button v-if="selectedUser?.phoneNumberDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'phoneNumber', selectedUser.phoneNumberDetails.contactNumber)">
+                    <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
+                  </ion-button>
+                  <ion-button v-else @click="addContactField('phoneNumber')" slot="end" fill="clear">
+                    <ion-icon slot="icon-only" :icon="addCircleOutline" />
+                  </ion-button>
+                </ion-item>
+                <ion-item lines="none">
+                  <ion-icon :icon="businessOutline" slot="start" />
+                  <ion-label>{{ selectedUser.externalId ? selectedUser.externalId : translate('External ID') }}</ion-label>
+                  <ion-button v-if="selectedUser.externalId" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'externalId', selectedUser.externalId)">
+                    <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
+                  </ion-button>
+                  <ion-button v-else @click="addContactField('externalId')" slot="end" fill="clear">
+                    <ion-icon slot="icon-only" :icon="addCircleOutline" />
+                  </ion-button>
+                </ion-item>
+              </ion-list>
+            </ion-card>
+          </section>
+        </div>
       </main>
     </ion-content>
   </ion-page>
@@ -185,7 +190,7 @@ export default defineComponent({
     }
   },
   async ionViewWillEnter() {
-    this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
+    await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
   },
   methods: {
     async openContactActionsPopover(event: Event, type: string, value: string) {
@@ -222,7 +227,6 @@ export default defineComponent({
           text: translate('Save'),
           handler: async (result) => {
             const { input } = result
-            // if initial and new value are same, return
             if (!input) {
               return
             }
@@ -235,7 +239,7 @@ export default defineComponent({
                   partyId: this.selectedUser.partyId,
                   contactMechPurposeTypeId: 'PRIMARY_EMAIL'
                 })
-                if (hasError(resp)) return 
+                if (hasError(resp)) resp.data 
                 selectedUser = {
                   ...selectedUser,
                   emailDetails: {
@@ -249,7 +253,7 @@ export default defineComponent({
                   partyId: this.selectedUser.partyId,
                   contactMechPurposeTypeId: 'PRIMARY_PHONE'
                 })
-                if (hasError(resp)) return
+                if (hasError(resp)) resp.data
                 selectedUser = {
                   ...selectedUser,
                   phoneNumberDetails: {
@@ -258,7 +262,7 @@ export default defineComponent({
                   }
                 }
               } else {
-                let resp = {}
+                let resp = {} as any
                 if (this.selectedUser.partyTypeId === 'PERSON') {
                   resp = await UserService.updatePerson({
                     externalId: input,
@@ -270,7 +274,7 @@ export default defineComponent({
                     partyId: this.selectedUser.partyId
                   })
                 }
-                if (hasError(resp)) return
+                if (hasError(resp)) resp.data
                 selectedUser = {
                   ...selectedUser,
                   externalId: input
