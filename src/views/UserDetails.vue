@@ -80,7 +80,7 @@
                   <ion-icon slot="icon-only" :icon="addCircleOutline" />
                 </ion-button>
               </ion-item>
-              <ion-item>
+              <ion-item lines="none">
                 <ion-icon :icon="businessOutline" slot="start" />
                 <ion-label>{{ selectedUser.externalId ? selectedUser.externalId : translate('External ID') }}</ion-label>
                 <ion-button v-if="selectedUser.externalId" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'externalId', selectedUser.externalId)">
@@ -123,6 +123,7 @@ import { defineComponent } from "vue";
 import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex'
 import {
+  addOutline,
   addCircleOutline,
   businessOutline,
   callOutline,
@@ -230,7 +231,8 @@ export default defineComponent({
               if (type === 'email') {
                 const resp = await UserService.createUpdatePartyEmailAddress({
                   emailAddress: input,
-                  partyId: this.selectedUser.partyId
+                  partyId: this.selectedUser.partyId,
+                  contactMechPurposeTypeId: 'PRIMARY_EMAIL'
                 })
                 selectedUser = {
                   ...selectedUser,
@@ -242,7 +244,8 @@ export default defineComponent({
               } else if (type === 'phoneNumber') {
                 const resp = await UserService.createUpdatePartyTelecomNumber({
                   contactNumber: input,
-                  partyId: this.selectedUser.partyId
+                  partyId: this.selectedUser.partyId,
+                  contactMechPurposeTypeId: 'PRIMARY_PHONE'
                 })
                 selectedUser = {
                   ...selectedUser,
@@ -329,6 +332,7 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     return {
+      addOutline,
       addCircleOutline,
       businessOutline,
       callOutline,

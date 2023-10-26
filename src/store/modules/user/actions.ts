@@ -176,14 +176,14 @@ const actions: ActionTree<UserState, RootState> = {
         params = {
           inputFields: {
             partyId: payload.partyId,
-            contactMechTypeId: ['EMAIL_ADDRESS', 'TELECOM_NUMBER'],
-            contactMechTypeId_op: 'in'
+            contactMechPurposeTypeId: ['PRIMARY_EMAIL', 'PRIMARY_PHONE'],
+            contactMechPurposeTypeId_op: 'in'
           },
           viewSize: 2,
           filterByDate: 'Y',
           entityName: 'PartyContactDetailByPurpose',
           // TODO verify the format of contact number
-          fieldList: ['areaCode', 'countryCode', 'contactNumber', 'infoString', 'externalId', 'contactMechId', 'contactMechTypeId']
+          fieldList: ['areaCode', 'countryCode', 'contactNumber', 'infoString', 'externalId', 'contactMechId', 'contactMechPurposeTypeId']
         } as any
 
         resp = await UserService.getUserContactDetails(params)
@@ -192,7 +192,7 @@ const actions: ActionTree<UserState, RootState> = {
           let emailDetails = {}, phoneNumberDetails = {};
 
           resp.data.docs.map((doc: any) => {
-            if (doc.contactMechTypeId === 'EMAIL_ADDRESS') {
+            if (doc.contactMechPurposeTypeId === 'PRIMARY_EMAIL') {
               emailDetails = {
                 email: doc.infoString,
                 contactMechId: doc.contactMechId
