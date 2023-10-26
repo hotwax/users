@@ -1,6 +1,6 @@
 import { api, client } from '@/adapter'
 
-const getPartyViewDetail = async (params: any): Promise<any> => {
+const getPartyDetailView = async (params: any): Promise<any> => {
   return client({
     url: "performFind",
     method: "get",
@@ -27,7 +27,7 @@ const getSecurityGroups = async (params: any): Promise<any> => {
 }
 
 export const UserService = {
-  getPartyViewDetail,
+  getPartyDetailView,
   getSecurityGroups
 }
   

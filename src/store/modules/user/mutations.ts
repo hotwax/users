@@ -21,10 +21,10 @@ const mutations: MutationTree <UserState> = {
     state.instanceUrl = payload;
   },
   [types.USER_LIST_UPDATED] (state, payload) {
-    state.list.users = payload.users
+    state.users = payload
   },
   [types.USER_SECURITY_GROUPS_LIST_UPDATED] (state, payload) {
-    state.list.securityGroupOptions = payload.securityGroupOptions
+    state.securityGroupOptions = payload
   },
   [types.USER_QUERY_UPDATED] (state, payload) {
     state.query = payload.query

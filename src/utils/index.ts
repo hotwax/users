@@ -5,18 +5,13 @@ const hasError = (response: any) => {
   return typeof response.data != "object" || !!response.data._ERROR_MESSAGE_ || !!response.data._ERROR_MESSAGE_LIST_ || !!response.data.error;
 }
 
-const showToast = async (message: string, isButtonVisible: boolean, configButtons?: any) => {
-  let defaultButtons = [{
+const showToast = async (message: string, configButtons?: any) => {
+  const defaultButtons = [{
     text: 'Dismiss',
     role: 'cancel'
   }]
 
-  if(isButtonVisible){
-    if (configButtons) defaultButtons.push(...configButtons);
-  }else {
-    defaultButtons = []
-  }
-
+  if (configButtons) defaultButtons.push(...configButtons);
   const toast = await toastController
     .create({
       message: message,

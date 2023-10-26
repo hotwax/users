@@ -4,10 +4,10 @@ import RootState from '@/store/RootState'
 
 const getters: GetterTree <UserState, RootState> = {
   getUsers (state) {
-    return state.list.users
+    return state.users
   },
   getSecurityGroupOptions (state) {
-    return state.list.securityGroupOptions
+    return state.securityGroupOptions
   },
   getQuery (state) {
     return state.query

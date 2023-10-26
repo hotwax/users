@@ -45,21 +45,19 @@ const actions: ActionTree<UserState, RootState> = {
       "fieldList": ['createdDate', 'firstName', 'infoString', 'lastName', 'partyId', 'securityGroupId', 'userLoginId'],
     }
 
+    let users = []
+
     try {
-      const resp = await UserService.getPartyViewDetail(payload)
+      const resp = await UserService.getPartyDetailView(payload)
 
-      if(resp && resp.status === 200 && !hasError(resp) && resp.data.docs?.length) {
-        const users = resp.data.docs
-
-        commit(types.USER_LIST_UPDATED, { users });
-      } else {
-        showToast(translate("No record found"), false);
-        commit(types.USER_LIST_UPDATED, { users: [] });
+      if(!hasError(resp)) {
+        users = resp.data.docs
       }
     } catch(error) {
       console.error(error)
-      showToast(translate("Something went wrong"), false);
+      showToast(translate("Something went wrong"));
     }
+    commit(types.USER_LIST_UPDATED, users );
   },
 
   async getSecurityGroupOptions ({ dispatch, commit }) {
@@ -70,20 +68,19 @@ const actions: ActionTree<UserState, RootState> = {
       "noConditionFind": "Y",
     }
 
+    let securityGroupOptions = []
+
     try {
       const resp = await UserService.getSecurityGroups(payload)
 
-      if(resp && resp.status === 200 && !hasError(resp) && resp.data.docs?.length) {
-        const securityGroupOptions = resp.data.docs
-        commit(types.USER_SECURITY_GROUPS_LIST_UPDATED, { securityGroupOptions });
-      } else {
-        commit(types.USER_SECURITY_GROUPS_LIST_UPDATED, { securityGroupOptions: [] });
-        showToast(translate("No record found"), false);
+      if(!hasError(resp)) {
+        securityGroupOptions = resp.data.docs
       }
     } catch(error) {
       console.error(error);
-      showToast(translate("Something went wrong"), false);
+      showToast(translate("Something went wrong"));
     }
+    commit(types.USER_SECURITY_GROUPS_LIST_UPDATED, securityGroupOptions );
   },
 
   async updateQuery  ( { commit, dispatch, rootState } , query ) {

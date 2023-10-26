@@ -12,10 +12,8 @@ const userModule: Module<UserState, RootState> = {
     current: null,
     currentFacility: {},
     instanceUrl: '',
-    list: {
-      users: [],
-      securityGroupOptions: []
-    },
+    users: [],
+    securityGroupOptions: [],
     query: {
       queryString: '',
       securityGroup: '',
