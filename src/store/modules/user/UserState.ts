@@ -3,5 +3,5 @@ export default interface UserState {
     current: any;
     instanceUrl: string;
     permissions: any;
-    selected: any;
+    selectedUser: any;
 }

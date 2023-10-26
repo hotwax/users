@@ -153,12 +153,75 @@ const getUserContactDetails = async (payload: any): Promise<any> => {
   })
 }
 
+const resetPassword = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/resetPassword", 
+    method: "post",
+    data: payload
+  });
+}
+
+const updateUserLoginStatus = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/updateUserLoginStatus", 
+    method: "post",
+    data: payload
+  });
+}
+
+const createUpdatePartyEmailAddress = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/createUpdatePartyEmailAddress", 
+    method: "post",
+    data: payload
+  });
+}
+
+const createUpdatePartyTelecomNumber = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/createUpdatePartyTelecomNumber", 
+    method: "post",
+    data: payload
+  });
+}
+
+const deletePartyContactMech = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/deletePartyContactMech", 
+    method: "post",
+    data: payload
+  });
+}
+
+const updatePartyGroup = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/updatePartyGroup", 
+    method: "post",
+    data: payload
+  });
+}
+
+const updatePerson = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/updatePerson", 
+    method: "post",
+    data: payload
+  });
+} 
+
 export const UserService = {
-  login,
+  createUpdatePartyEmailAddress,
+  createUpdatePartyTelecomNumber,
+  deletePartyContactMech,
   getAvailableTimeZones,
   getUserContactDetails,
   getUserLoginDetails,
   getUserPermissions,
   getUserProfile,
-  setUserTimeZone
+  login,
+  resetPassword,
+  setUserTimeZone,
+  updateUserLoginStatus,
+  updatePartyGroup,
+  updatePerson
 }

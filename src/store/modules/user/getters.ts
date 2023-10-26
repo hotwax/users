@@ -28,7 +28,7 @@ const getters: GetterTree <UserState, RootState> = {
         return state.permissions;
     },
     getSelectedUser (state) {
-        return state.selected;
+        return state.selectedUser;
     }
 }
 export default getters;

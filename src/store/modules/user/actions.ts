@@ -152,19 +152,19 @@ const actions: ActionTree<UserState, RootState> = {
   },
 
   async getSelectedUserDetails({ commit }, payload) {
-    let resp = {} as any, selected = {}, params = {
+    let resp = {} as any, selectedUser = {}, params = {
       inputFields: {
         partyId: payload.partyId,
       },
       viewSize: 1,
       entityName: 'UserLoginAndPartyDetails',
-      fieldList: ['userLoginId', 'enabled', 'firstName', 'lastName', 'partyId']
+      fieldList: ['userLoginId', 'enabled', 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName']
     }
 
     try {
       resp = await UserService.getUserLoginDetails(params)
       if (!hasError(resp)) {
-        selected = {
+        selectedUser = {
           ...resp.data.docs[0]
         }
 
@@ -175,28 +175,47 @@ const actions: ActionTree<UserState, RootState> = {
             contactMechTypeId_op: 'in'
           },
           viewSize: 2,
+          filterByDate: 'Y',
           entityName: 'PartyContactDetailByPurpose',
           // TODO verify the format of contact number
-          fieldList: ['areaCode', 'countryCode', 'contactNumber', 'infoString', 'externalId']
+          fieldList: ['areaCode', 'countryCode', 'contactNumber', 'infoString', 'externalId', 'contactMechId', 'contactMechTypeId']
         } as any
 
         resp = await UserService.getUserContactDetails(params)
         // TODO handle UI if API fail
         if (!hasError(resp)) {
-          selected = {
-            ...selected,
-            ...resp.data.docs[0],
-            // only return those values from docs[0] which are null in docs[1]
-            ...Object.fromEntries(
-              Object.entries(resp.data.docs[1])
-                .filter(([key, value]: any) => resp.data.docs[0][key] === null))
+          let emailDetails = {}, phoneNumberDetails = {};
+
+          resp.data.docs.map((doc: any) => {
+            if (doc.contactMechTypeId === 'EMAIL_ADDRESS') {
+              emailDetails = {
+                email: doc.infoString,
+                contactMechId: doc.contactMechId
+              }
+            } else {
+              phoneNumberDetails = {
+                contactNumber: doc.contactNumber,
+                contactMechId: doc.contactMechId
+              }
+            }
+          })
+
+          selectedUser = {
+            ...selectedUser,
+            externalId: resp.data.docs[0].externalId,
+            ...(Object.keys(emailDetails).length && { emailDetails }),
+            ...(Object.keys(phoneNumberDetails).length && { phoneNumberDetails })
           } 
         }
       }
     } catch (error) {
       console.error(error)
     }
-    commit(types.USER_SELECTED_USER_UPDATED, selected)
+    commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
+  },
+
+  updateSelectedUser({ commit }, user) {
+    commit(types.USER_SELECTED_USER_UPDATED, user)
   }
 }
 export default actions;

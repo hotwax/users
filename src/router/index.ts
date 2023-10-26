@@ -66,6 +66,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'UserDetails',
     component: UserDetails,
     beforeEnter: authGuard,
+    props: true
   }
 ]
 
