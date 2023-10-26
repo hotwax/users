@@ -42,7 +42,7 @@
             </ion-item>
             <ion-item>
               <ion-label>{{ translate("Block login") }}</ion-label>
-              <ion-toggle slot="end" :checked="selected.enabled === 'Y'" />
+              <ion-toggle slot="end" :checked="selected.enabled === 'N'" />
             </ion-item>
             <ion-button fill="outline" color="warning" expand="block">
               {{ translate('Reset password') }}
