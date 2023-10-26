@@ -27,8 +27,6 @@ import '@hotwax/apps-theme';
 
 import store from './store'
 
-import logger from './logger';
-
 import permissionPlugin from '@/authorization';
 import permissionRules from '@/authorization/Rules';
 import permissionActions from '@/authorization/Actions';
@@ -42,9 +40,6 @@ import { getConfig, initialise, setUserLocale } from '@/adapter';
 const app = createApp(App)
   .use(IonicVue, {
     mode: 'md'
-  })
-  .use(logger, {
-    level: process.env.VUE_APP_DEFAULT_LOG_LEVEL
   })
   .use(router)
   .use(store)

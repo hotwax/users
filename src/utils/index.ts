@@ -1,4 +1,6 @@
 import { toastController } from '@ionic/vue';
+import { Plugins } from '@capacitor/core';
+import { translate } from '@hotwax/dxp-components';
 
 // TODO Remove it when HC APIs are fully REST compliant
 const hasError = (response: any) => {
@@ -23,4 +25,15 @@ const showToast = async (message: string, configButtons?: any) => {
   return toast.present();
 }
 
-export { showToast, hasError }
+
+const copyToClipboard = async (value: string, text?: string) => {
+  const { Clipboard } = Plugins;
+
+  await Clipboard.write({
+    string: value,
+  }).then(() => {
+    text ? showToast(translate(text)) : showToast(translate("Copied", { value }));
+  });
+}
+
+export { copyToClipboard, showToast, hasError }

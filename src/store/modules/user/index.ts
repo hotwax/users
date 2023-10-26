@@ -12,6 +12,7 @@ const userModule: Module<UserState, RootState> = {
       current: {},
       instanceUrl: '',
       permissions: [],
+      selected: {}
     },
     getters,
     actions,

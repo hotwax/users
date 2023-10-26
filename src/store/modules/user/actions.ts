@@ -1,7 +1,6 @@
 import { UserService } from '@/services/UserService'
 import { ActionTree } from 'vuex'
 import RootState from '@/store/RootState'
-import store from '@/store';
 import UserState from './UserState'
 import * as types from './mutation-types'
 import { showToast } from '@/utils'
@@ -27,9 +26,9 @@ const actions: ActionTree<UserState, RootState> = {
   /**
  * Login user and return token
  */
-  async login ({ commit, dispatch, getters }, payload) {
+  async login({ commit, dispatch }, payload) {
     try {
-      const {token, oms} = payload;
+      const { token, oms } = payload;
       dispatch("setUserInstanceUrl", oms);
 
       // Getting the permissions list from server
@@ -49,7 +48,7 @@ const actions: ActionTree<UserState, RootState> = {
       if (permissionId) {
         // As the token is not yet set in the state passing token headers explicitly
         // TODO Abstract this out, how token is handled should be part of the method not the callee
-        const hasPermission = appPermissions.some((appPermissionId: any) => appPermissionId === permissionId );
+        const hasPermission = appPermissions.some((appPermissionId: any) => appPermissionId === permissionId);
         // If there are any errors or permission check fails do not allow user to login
         if (hasPermission) {
           const permissionError = 'You do not have permission to access the app.';
@@ -84,7 +83,7 @@ const actions: ActionTree<UserState, RootState> = {
   /**
    * Logout user
    */
-  async logout ({ commit, dispatch }, payload) {
+  async logout({ commit }, payload) {
     // store the url on which we need to redirect the user after logout api completes in case of SSO enabled
     let redirectionUrl = ''
 
@@ -92,7 +91,7 @@ const actions: ActionTree<UserState, RootState> = {
 
     // Calling the logout api to flag the user as logged out, only when user is authorised
     // if the user is already unauthorised then not calling the logout api as it returns 401 again that results in a loop, thus there is no need to call logout api if the user is unauthorised
-    if(!payload?.isUserUnauthorised) {
+    if (!payload?.isUserUnauthorised) {
       let resp;
 
       // wrapping the parsing logic in try catch as in some case the logout api makes redirection, and then we are unable to parse the resp and thus the logout process halts
@@ -101,15 +100,15 @@ const actions: ActionTree<UserState, RootState> = {
 
         // Added logic to remove the `//` from the resp as in case of get request we are having the extra characters and in case of post we are having 403
         resp = JSON.parse(resp.startsWith('//') ? resp.replace('//', '') : resp)
-      } catch(err) {
+      } catch (err) {
         console.error('Error parsing data', err)
       }
 
-      if(resp?.logoutAuthType == 'SAML2SSO') {
+      if (resp?.logoutAuthType == 'SAML2SSO') {
         redirectionUrl = resp.logoutUrl
       }
     }
-    
+
     const authStore = useAuthStore()
     const userStore = useUserStore()
     // TODO add any other tasks if need
@@ -122,7 +121,7 @@ const actions: ActionTree<UserState, RootState> = {
     userStore.$reset()
 
     // If we get any url in logout api resp then we will redirect the user to the url
-    if(redirectionUrl) {
+    if (redirectionUrl) {
       window.location.href = redirectionUrl
     }
 
@@ -133,15 +132,15 @@ const actions: ActionTree<UserState, RootState> = {
   /**
    * Set User Instance Url
    */
-   setUserInstanceUrl ({ commit }, instanceUrl){
+  setUserInstanceUrl({ commit }, instanceUrl) {
     commit(types.USER_INSTANCE_URL_UPDATED, instanceUrl)
     updateInstanceUrl(instanceUrl)
-   },
-  
+  },
+
   /**
    * Update user timeZone
    */
-  async setUserTimeZone ( { state, commit }, payload) {
+  async setUserTimeZone({ state, commit }, payload) {
     const resp = await UserService.setUserTimeZone(payload)
     if (resp.status === 200 && !hasError(resp)) {
       const current: any = state.current;
@@ -150,6 +149,54 @@ const actions: ActionTree<UserState, RootState> = {
       Settings.defaultZone = current.userTimeZone;
       showToast(translate("Time zone updated successfully"));
     }
+  },
+
+  async getSelectedUserDetails({ commit }, payload) {
+    let resp = {} as any, selected = {}, params = {
+      inputFields: {
+        partyId: payload.partyId,
+      },
+      viewSize: 1,
+      entityName: 'UserLoginAndPartyDetails',
+      fieldList: ['userLoginId', 'enabled', 'firstName', 'lastName', 'partyId']
+    }
+
+    try {
+      resp = await UserService.getUserLoginDetails(params)
+      if (!hasError(resp)) {
+        selected = {
+          ...resp.data.docs[0]
+        }
+
+        params = {
+          inputFields: {
+            partyId: payload.partyId,
+            contactMechTypeId: ['EMAIL_ADDRESS', 'TELECOM_NUMBER'],
+            contactMechTypeId_op: 'in'
+          },
+          viewSize: 2,
+          entityName: 'PartyContactDetailByPurpose',
+          // TODO verify the format of contact number
+          fieldList: ['areaCode', 'countryCode', 'contactNumber', 'infoString', 'externalId']
+        } as any
+
+        resp = await UserService.getUserContactDetails(params)
+        // TODO handle UI if API fail
+        if (!hasError(resp)) {
+          selected = {
+            ...selected,
+            ...resp.data.docs[0],
+            // only return those values from docs[0] which are null in docs[1]
+            ...Object.fromEntries(
+              Object.entries(resp.data.docs[1])
+                .filter(([key, value]: any) => resp.data.docs[0][key] === null))
+          } 
+        }
+      }
+    } catch (error) {
+      console.error(error)
+    }
+    commit(types.USER_SELECTED_USER_UPDATED, selected)
   }
 }
 export default actions;

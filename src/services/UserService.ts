@@ -145,9 +145,18 @@ const getUserLoginDetails = async (payload: any): Promise<any> => {
   })
 }
 
+const getUserContactDetails = async (payload: any): Promise<any> => {
+  return api({
+    url: 'performFind',
+    method: 'POST',
+    data: payload
+  })
+}
+
 export const UserService = {
   login,
   getAvailableTimeZones,
+  getUserContactDetails,
   getUserLoginDetails,
   getUserPermissions,
   getUserProfile,
