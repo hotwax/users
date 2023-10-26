@@ -151,7 +151,12 @@ const actions: ActionTree<UserState, RootState> = {
     }
   },
 
-  async getSelectedUserDetails({ commit }, payload) {
+  async getSelectedUserDetails({ commit, state }, payload) {
+    const currentSelectedUser = JSON.parse(JSON.stringify(state.selectedUser))
+    if (currentSelectedUser.partyId === payload.partyId) {
+      return
+    }
+
     let resp = {} as any, selectedUser = {}, params = {
       inputFields: {
         partyId: payload.partyId,
