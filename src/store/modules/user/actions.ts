@@ -240,27 +240,29 @@ const actions: ActionTree<UserState, RootState> = {
       filters['enabled_op'] = 'equals'
     }
 
+    if(state.query.queryString) {
+      filters['groupName_value'] = state.query.queryString
+      filters['groupName_op'] = 'contains'
+      filters['groupName_ic'] = 'Y'
+      filters['groupName_grp'] = '1'
+      filters['firstName_value'] = state.query.queryString
+      filters['firstName_op'] = 'contains'
+      filters['firstName_ic'] = 'Y'
+      filters['firstName_grp'] = '2'
+      filters['lastName_value'] = state.query.queryString
+      filters['lastName_op'] = 'contains'
+      filters['lastName_ic'] = 'Y'
+      filters['lastName_grp'] = '3'
+    }
+
     const payload = {
       "inputFields": {
-        ...filters,
-        "partyId": "10000",
-        groupName_value: state.query.queryString,
-        groupName_op: 'contains',
-        groupName_ic: 'Y',
-        groupName_grp: '1',
-        firstName_value: state.query.queryString,
-        firstName_op: 'contains',
-        firstName_ic: 'Y',
-        firstName_grp: '2',
-        lastName_value: state.query.queryString,
-        lastName_op: 'contains',
-        lastName_ic: 'Y',
-        lastName_grp: '3'
+        ...filters
       },
       "entityName": "PartyDetailView",
       "distinct": "Y",
       "noConditionFind": "Y",
-      "fieldList": ['createdDate', 'firstName', 'infoString', 'lastName', 'partyId', 'securityGroupId', 'userLoginId'],
+      "fieldList": ['createdDate', 'firstName', 'infoString', 'lastName', 'partyId', 'securityGroupId', 'userLoginId']
     }
 
     let users = []
