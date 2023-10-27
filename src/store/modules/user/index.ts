@@ -18,7 +18,10 @@ const userModule: Module<UserState, RootState> = {
         status: ''
       },
       selectedUser: {},
-      users: []
+      users: {
+        list: [],
+        total: 0
+      }
     },
     getters,
     actions,

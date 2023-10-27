@@ -227,7 +227,8 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_SELECTED_USER_UPDATED, user)
   },
 
-  async fetchUsers({ commit, state }) {
+  async fetchUsers({ commit, state }, payload) {
+    if (payload.viewIndex === 0) emitter.emit("presentLoader");
     const filters = {} as any
 
     if(state.query.securityGroup) {
@@ -255,35 +256,41 @@ const actions: ActionTree<UserState, RootState> = {
       filters['lastName_grp'] = '3'
     }
 
-    const payload = {
+    const params = {
       "inputFields": {
         ...filters
       },
-      "entityName": "PartyDetailView",
+      "entityName": "PartyAndUserLoginSecurityGroupDetails",
       "distinct": "Y",
       "noConditionFind": "Y",
-      "fieldList": ['createdDate', 'firstName', 'infoString', 'lastName', 'partyId', 'securityGroupId', 'userLoginId']
+      "fieldList": ['createdDate', 'firstName', 'lastName', 'partyId', 'securityGroupId', 'securityGroupName', 'userLoginId'],
+      ...payload
     }
 
-    let users = []
+    let users = [], total = 0;
 
     try {
-      const resp = await UserService.fetchUsers(payload)
+      const resp = await UserService.fetchUsers(params)
 
-      if(!hasError(resp)) {
+      if(!hasError(resp) && resp.data.count) {
         users = resp.data.docs
+        if(payload.viewIndex && payload.viewIndex > 0) users = JSON.parse(JSON.stringify(state.users.list)).concat(resp.data.docs)
+        total = resp.data.count
       } else {
         throw resp.data
       }
     } catch(error) {
       console.error(error)
     }
-    commit(types.USER_LIST_UPDATED, users);
+
+    console.log('users', users)
+
+    emitter.emit("dismissLoader");
+    commit(types.USER_LIST_UPDATED, { users, total });
   },
 
-  async updateQuery({ commit, dispatch }, query) {
+  async updateQuery({ commit }, query) {
     commit(types.USER_QUERY_UPDATED, {query})
-    dispatch('fetchUsers')
   }
 }
 export default actions;

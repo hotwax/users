@@ -4,8 +4,6 @@ import * as types from './mutation-types'
 import { hasError } from '@/utils'
 import UtilState from './UtilState'
 import { UtilService } from '@/services/UtilService'
-import { showToast } from '@/utils'
-import { translate } from '@hotwax/dxp-components'
 
 const actions: ActionTree<UtilState, RootState> = {
   async getSecurityGroups({ commit, state }) {
@@ -35,7 +33,6 @@ const actions: ActionTree<UtilState, RootState> = {
       }
     } catch(error) {
       console.error(error);
-      showToast(translate("Something went wrong"));
     }
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
   },

@@ -26,14 +26,15 @@
               <ion-icon :icon="toggleOutline" slot="start" />
               <ion-label>{{ translate("Status") }}</ion-label>
               <ion-select interface="popover" v-model="query.status" @ionChange="updateQuery()">
-                <ion-select-option value="Y" >{{ translate("Active") }}</ion-select-option>
+                <ion-select-option value="">{{ translate("None") }}</ion-select-option>
+                <ion-select-option value="Y">{{ translate("Active") }}</ion-select-option>
                 <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
               </ion-select>
             </ion-item>
           </ion-list>
         </aside>
 
-        <main v-if="users.length">
+        <main v-if="users?.length">
           <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetail(user.partyId)>
             <ion-item lines="none">
               <ion-label>
@@ -43,9 +44,12 @@
               </ion-label>
             </ion-item>
 
-            <ion-label>
+            <ion-label v-if="user.createdDate">
               {{ getDate(user.createdDate) }}
               <p>{{ translate("created") }}</p>
+            </ion-label>
+            <ion-label v-else>
+              {{ '-' }}
             </ion-label>
 
             <ion-chip outline>
@@ -60,17 +64,26 @@
           </div>
         </main>
         <main v-else>
-          <ion-item>
-            <ion-label>{{ translate("No users found") }}</ion-label>
-          </ion-item>
+          <p class="ion-text-center">{{ translate("No users found") }}</p>
         </main>
       </div>
 
-      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed" @click="router.push('/create-user')">
         <ion-fab-button>
           <ion-icon :icon="addOutline" />
         </ion-fab-button>
       </ion-fab>
+
+      <ion-infinite-scroll
+        @ionInfinite="loadMoreUsers($event)"
+        threshold="100px"
+        :disabled="!isScrollable"
+      >
+        <ion-infinite-scroll-content
+          loading-spinner="crescent"
+          :loading-text="translate('Loading')"
+        />
+      </ion-infinite-scroll>
     </ion-content>
   </ion-page>
 </template>
@@ -84,6 +97,8 @@ import {
   IonFabButton,
   IonHeader,
   IonIcon,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonItem,
   IonLabel,
   IonList,
@@ -118,6 +133,8 @@ export default defineComponent({
     IonFabButton,
     IonHeader,
     IonIcon,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
     IonItem,
     IonLabel,
     IonList,
@@ -132,7 +149,8 @@ export default defineComponent({
     ...mapGetters({
       users: 'user/getUsers',
       securityGroups: 'util/getSecurityGroups',
-      query: 'user/getQuery'
+      query: 'user/getQuery',
+      isScrollable: "user/isScrollable"
     })
   },
   methods: {
@@ -144,17 +162,36 @@ export default defineComponent({
         component: UserPopover,
         componentProps: { user },
         event: ev,
-        translucent: true,
         showBackdrop: false,
       });
       return popover.present();
     },
     async updateQuery() {
       await this.store.dispatch('user/updateQuery', this.query)
+      this.fetchUsers();
+    },
+    async fetchUsers(vSize?: any, vIndex?: any) {
+      const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+      const viewIndex = vIndex ? vIndex : 0;
+      const payload = {
+        viewSize,
+        viewIndex
+      };
+      await this.store.dispatch('user/fetchUsers', payload)
     },
     async viewUserDetail(partyId: string) {
       this.router.push({path: `/user-details/${partyId}` })
-    }
+    },
+    async loadMoreUsers(event: any) {
+      this.fetchUsers(
+        undefined,
+        Math.ceil(
+          this.users?.length / (process.env.VUE_APP_VIEW_SIZE as any)
+        ).toString()
+      ).then(() => {
+        event.target.complete();
+      });
+    },
   },
   setup() {
     const router = useRouter();
@@ -171,7 +208,7 @@ export default defineComponent({
     };
   },
   async mounted() {
-    await this.store.dispatch('user/fetchUsers')
+    await this.fetchUsers();
     await this.store.dispatch('util/getSecurityGroups')
   }
 });

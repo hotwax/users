@@ -9,5 +9,5 @@ export default interface UserState {
       status: String
     };
     selectedUser: any;
-    users: any[];
+    users: any;
 }
