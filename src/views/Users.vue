@@ -2,32 +2,32 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>{{ $t("Users") }}</ion-title>
+        <ion-title>{{ translate("Users") }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content>
       <div class="find">
         <section class="search">
-          <ion-searchbar :placeholder="$t('Search users')" v-model="query.queryString" @keyup.enter="updateQuery()" />
+          <ion-searchbar :placeholder="translate('Search users')" v-model="query.queryString" @keyup.enter="updateQuery()" />
         </section>
 
         <aside class="filters">
           <ion-list>
             <ion-item lines="none">
               <ion-icon :icon="idCardOutline" slot="start" />
-              <ion-label>{{ $t("Clearance") }}</ion-label>
+              <ion-label>{{ translate("Clearance") }}</ion-label>
               <ion-select interface="popover" v-model="query.securityGroup" @ionChange="updateQuery()">
-                <ion-select-option value="">{{ $t("None") }}</ion-select-option>
+                <ion-select-option value="">{{ translate("None") }}</ion-select-option>
                 <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName }}</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item lines="none">
               <ion-icon :icon="toggleOutline" slot="start" />
-              <ion-label>{{ $t("Status") }}</ion-label>
+              <ion-label>{{ translate("Status") }}</ion-label>
               <ion-select interface="popover" v-model="query.status" @ionChange="updateQuery()">
-                <ion-select-option value="Y" >{{ $t("Active") }}</ion-select-option>
-                <ion-select-option value="N">{{ $t("Inactive") }}</ion-select-option>
+                <ion-select-option value="Y" >{{ translate("Active") }}</ion-select-option>
+                <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
               </ion-select>
             </ion-item>
           </ion-list>
@@ -45,7 +45,7 @@
 
             <ion-label>
               {{ getDate(user.createdDate) }}
-              <p>{{ $t("created") }}</p>
+              <p>{{ translate("created") }}</p>
             </ion-label>
 
             <ion-chip outline>
@@ -61,7 +61,7 @@
         </main>
         <main v-else>
           <ion-item>
-            <ion-label>{{ $t("No users found") }}</ion-label>
+            <ion-label>{{ translate("No users found") }}</ion-label>
           </ion-item>
         </main>
       </div>
@@ -106,6 +106,7 @@ import { useRouter } from 'vue-router';
 import { mapGetters, useStore } from 'vuex';
 import { DateTime } from 'luxon';
 import UserPopover from '@/components/UserPopover.vue';
+import { translate } from '@hotwax/dxp-components'
 
 export default defineComponent({
   name: 'Users',
@@ -164,6 +165,7 @@ export default defineComponent({
       ellipsisVerticalOutline,
       idCardOutline,
       toggleOutline,
+      translate,
       router,
       store
     };

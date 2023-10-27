@@ -2,14 +2,15 @@
   <ion-content>
     <ion-list>
       <ion-list-header>{{ user.userLoginId }}</ion-list-header>
-      <ion-item button>{{ $t("Edit profile") }}</ion-item>
-      <ion-item button>{{ $t("Reset password") }}</ion-item>
-      <ion-item button lines="none">{{ $t("Deactivate") }}</ion-item>
+      <ion-item button>{{ translate("Edit profile") }}</ion-item>
+      <ion-item button>{{ translate("Reset password") }}</ion-item>
+      <ion-item button lines="none">{{ translate("Deactivate") }}</ion-item>
     </ion-list>
   </ion-content>
 </template>
 
 <script lang="ts">
+import { translate } from '@hotwax/dxp-components';
 import {
   IonContent,
   IonItem,
@@ -26,6 +27,11 @@ export default defineComponent({
     IonList,
     IonListHeader
   },
-  props: ['user']
+  props: ['user'],
+  setup() {
+    return {
+      translate
+    }
+  }
 });
 </script>
