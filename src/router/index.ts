@@ -37,6 +37,10 @@ const loginGuard = (to: any, from: any, next: any) => {
 
 const routes: Array<RouteRecordRaw> = [
   {
+    path: '/',
+    redirect: '/tabs/users'
+  },
+  {
     path: '/login',
     name: 'Login',
     component: Login,
@@ -47,14 +51,9 @@ const routes: Array<RouteRecordRaw> = [
     component: Tabs,
     children: [
       {
-        path: '',
-        redirect: 'users'
-      },
-      // {
-      //   path: 'users',
-      //   component: () => import('@/views/Users.vue'),
-      // },
-      {
+        path: 'users',
+        component: () => import('@/views/Users.vue'),
+      },{
         path: 'settings',
         component: () => import('@/views/Settings.vue')
       },

@@ -113,6 +113,7 @@ const actions: ActionTree<UserState, RootState> = {
     const userStore = useUserStore()
     // TODO add any other tasks if need
     commit(types.USER_END_SESSION)
+    this.dispatch('util/updateSecurityGroups', {})
     resetPermissions();
     resetConfig();
 
@@ -224,6 +225,70 @@ const actions: ActionTree<UserState, RootState> = {
 
   updateSelectedUser({ commit }, user) {
     commit(types.USER_SELECTED_USER_UPDATED, user)
+  },
+
+  async fetchUsers({ commit, state }, payload) {
+    if (payload.viewIndex === 0) emitter.emit("presentLoader");
+    const filters = {} as any
+
+    if(state.query.securityGroup) {
+      filters['securityGroupId'] = state.query.securityGroup
+      filters['securityGroupId_op'] = 'equals'
+    }
+
+    if(state.query.status) {
+      filters['enabled'] = state.query.status
+      filters['enabled_op'] = 'equals'
+    }
+
+    if(state.query.queryString) {
+      filters['groupName_value'] = state.query.queryString
+      filters['groupName_op'] = 'contains'
+      filters['groupName_ic'] = 'Y'
+      filters['groupName_grp'] = '1'
+      filters['firstName_value'] = state.query.queryString
+      filters['firstName_op'] = 'contains'
+      filters['firstName_ic'] = 'Y'
+      filters['firstName_grp'] = '2'
+      filters['lastName_value'] = state.query.queryString
+      filters['lastName_op'] = 'contains'
+      filters['lastName_ic'] = 'Y'
+      filters['lastName_grp'] = '3'
+    }
+
+    const params = {
+      "inputFields": {
+        ...filters
+      },
+      "entityName": "PartyAndUserLoginSecurityGroupDetails",
+      "distinct": "Y",
+      "noConditionFind": "Y",
+      "fieldList": ['createdDate', 'firstName', 'lastName', 'partyId', 'securityGroupId', 'securityGroupName', 'userLoginId'],
+      ...payload
+    }
+
+    let users = [], total = 0;
+
+    try {
+      const resp = await UserService.fetchUsers(params)
+
+      if(!hasError(resp) && resp.data.count) {
+        users = resp.data.docs
+        if(payload.viewIndex && payload.viewIndex > 0) users = JSON.parse(JSON.stringify(state.users.list)).concat(resp.data.docs)
+        total = resp.data.count
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      console.error(error)
+    }
+
+    emitter.emit("dismissLoader");
+    commit(types.USER_LIST_UPDATED, { users, total });
+  },
+
+  async updateQuery({ commit }, query) {
+    commit(types.USER_QUERY_UPDATED, {query})
   }
 }
 export default actions;

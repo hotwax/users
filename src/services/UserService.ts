@@ -40,6 +40,14 @@ const getAvailableTimeZones = async (): Promise<any> => {
   });
 }
 
+const fetchUsers = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "post",
+    data: payload
+  })
+}
+
 const setUserTimeZone = async (payload: any): Promise<any> => {
   return api({
     url: "setUserTimeZone",
@@ -214,6 +222,7 @@ export const UserService = {
   createUpdatePartyTelecomNumber,
   deletePartyContactMech,
   getAvailableTimeZones,
+  fetchUsers,
   getUserContactDetails,
   getUserLoginDetails,
   getUserPermissions,
