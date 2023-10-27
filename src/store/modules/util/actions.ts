@@ -8,13 +8,19 @@ import { showToast } from '@/utils'
 import { translate } from '@hotwax/dxp-components'
 
 const actions: ActionTree<UtilState, RootState> = {
+  async getSecurityGroups({ commit, state }) {
+    // don't fetch security group information if we already have security groups available in state
+    // Added condition as security group information will not be changed frequently
+    if(state.securityGroups.length) {
+      return;
+    }
 
-  async getSecurityGroups({ commit }) {
     const payload = {
       "entityName": "SecurityGroup",
       "viewSize": 200,
       "distinct": "Y",
       "noConditionFind": "Y",
+      "fieldList": ["groupId", "groupName"]
     }
 
     let securityGroups = []
@@ -31,7 +37,7 @@ const actions: ActionTree<UtilState, RootState> = {
       console.error(error);
       showToast(translate("Something went wrong"));
     }
-    commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups );
+    commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
   },
 }
 

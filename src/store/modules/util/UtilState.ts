@@ -1,3 +1,3 @@
 export default interface UtilState {
-    securityGroups: any[];
+  securityGroups: any[];
 }

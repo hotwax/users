@@ -6,13 +6,13 @@ import RootState from '@/store/RootState'
 import UtilState from './UtilState'
 
 const utilModule: Module<UtilState, RootState> = {
-    namespaced: true,
-    state: {
-      securityGroups: [],
-    },
-    getters,
-    actions,
-    mutations,
+  namespaced: true,
+  state: {
+    securityGroups: [],
+  },
+  getters,
+  actions,
+  mutations,
 }
 
 export default utilModule;
