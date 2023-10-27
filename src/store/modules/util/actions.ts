@@ -39,6 +39,10 @@ const actions: ActionTree<UtilState, RootState> = {
     }
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
   },
+
+  updateSecurityGroups({ commit }, securityGroups) {
+    commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
+  }
 }
 
 export default actions;

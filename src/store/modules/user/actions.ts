@@ -113,6 +113,7 @@ const actions: ActionTree<UserState, RootState> = {
     const userStore = useUserStore()
     // TODO add any other tasks if need
     commit(types.USER_END_SESSION)
+    this.dispatch('util/updateSecurityGroups', {})
     resetPermissions();
     resetConfig();
 
