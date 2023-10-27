@@ -283,8 +283,6 @@ const actions: ActionTree<UserState, RootState> = {
       console.error(error)
     }
 
-    console.log('users', users)
-
     emitter.emit("dismissLoader");
     commit(types.USER_LIST_UPDATED, { users, total });
   },
