@@ -278,29 +278,6 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_LIST_UPDATED, users );
   },
 
-  async getSecurityGroupOptions ({ dispatch, commit }) {
-    const payload = {
-      "entityName": "SecurityGroup",
-      "viewSize": 200,
-      "distinct": "Y",
-      "noConditionFind": "Y",
-    }
-
-    let securityGroupOptions = []
-
-    try {
-      const resp = await UserService.getSecurityGroups(payload)
-
-      if(!hasError(resp)) {
-        securityGroupOptions = resp.data.docs
-      }
-    } catch(error) {
-      console.error(error);
-      showToast(translate("Something went wrong"));
-    }
-    commit(types.USER_SECURITY_GROUPS_LIST_UPDATED, securityGroupOptions );
-  },
-
   async updateQuery  ( { commit, dispatch, rootState } , query ) {
     commit(types.USER_QUERY_UPDATED, {query})
     dispatch('findUsers')

@@ -130,7 +130,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       users: 'user/getUsers',
-      securityGroupOptions: 'user/getSecurityGroupOptions',
+      securityGroupOptions: 'util/getSecurityGroupOptions',
       query: 'user/getQuery'
     })
   },
@@ -167,7 +167,7 @@ export default defineComponent({
   },
   async mounted() {
     await this.store.dispatch('user/findUsers')
-    await this.store.dispatch('user/getSecurityGroupOptions')
+    await this.store.dispatch('util/getSecurityGroupOptions')
   }
 });
 </script>

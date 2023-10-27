@@ -33,9 +33,6 @@ const getters: GetterTree <UserState, RootState> = {
     getUsers (state) {
         return state.users
     },
-    getSecurityGroupOptions (state) {
-        return state.securityGroupOptions
-    },
     getQuery (state) {
         return state.query
     },

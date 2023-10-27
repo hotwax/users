@@ -26,9 +26,6 @@ const mutations: MutationTree <UserState> = {
     [types.USER_LIST_UPDATED] (state, payload) {
       state.users = payload
     },
-    [types.USER_SECURITY_GROUPS_LIST_UPDATED] (state, payload) {
-      state.securityGroupOptions = payload
-    },
     [types.USER_QUERY_UPDATED] (state, payload) {
       state.query = payload.query
     },
