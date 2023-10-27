@@ -34,7 +34,7 @@
         </aside>
 
         <main v-if="users.length">
-          <div class="list-item" v-for="(user, index) in users" :key="index">
+          <div class="list-item" v-for="(user, index) in users" :key="index" @click=getUserDetail(user.partyId)>
             <ion-item lines="none">
               <ion-label>
                 {{ user.groupName ? user.groupName : `${user.firstName} ${user.lastName}` }}
@@ -130,7 +130,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       users: 'user/getUsers',
-      securityGroupOptions: 'util/getSecurityGroupOptions',
+      securityGroupOptions: 'util/getSecurityGroups',
       query: 'user/getQuery'
     })
   },
@@ -150,6 +150,9 @@ export default defineComponent({
     },
     async updateQuery() {
       await this.store.dispatch('user/updateQuery', this.query)
+    },
+    async getUserDetail(partyId: any) {
+      this.router.push({path: `/user-details/${partyId}` })
     }
   },
   setup() {
@@ -167,7 +170,7 @@ export default defineComponent({
   },
   async mounted() {
     await this.store.dispatch('user/findUsers')
-    await this.store.dispatch('util/getSecurityGroupOptions')
+    await this.store.dispatch('util/getSecurityGroups')
   }
 });
 </script>

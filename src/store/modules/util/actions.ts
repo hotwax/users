@@ -9,7 +9,7 @@ import { translate } from '@hotwax/dxp-components'
 
 const actions: ActionTree<UtilState, RootState> = {
 
-  async getSecurityGroupOptions ({ dispatch, commit }) {
+  async getSecurityGroups ({ dispatch, commit }) {
     const payload = {
       "entityName": "SecurityGroup",
       "viewSize": 200,

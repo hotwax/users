@@ -48,14 +48,6 @@ const getPartyDetailView = async (payload: any): Promise<any> => {
   })
 }
 
-const getSecurityGroups = async (payload: any): Promise<any> => {
-  return api({
-    url: "performFind",
-    method: "POST",
-    data: payload
-  })
-}
-
 const setUserTimeZone = async (payload: any): Promise<any> => {
   return api({
     url: "setUserTimeZone",
@@ -231,7 +223,6 @@ export const UserService = {
   deletePartyContactMech,
   getAvailableTimeZones,
   getPartyDetailView,
-  getSecurityGroups,
   getUserContactDetails,
   getUserLoginDetails,
   getUserPermissions,
