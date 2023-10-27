@@ -25,39 +25,39 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 import '@hotwax/apps-theme';
 
-import i18n from './i18n'
 import store from './store'
-import { DateTime } from 'luxon';
 
-import logger from './logger';
+import permissionPlugin from '@/authorization';
+import permissionRules from '@/authorization/Rules';
+import permissionActions from '@/authorization/Actions';
+
+import { dxpComponents } from '@hotwax/dxp-components'
+import { login, logout, loader } from '@/utils/user';
+import localeMessages from '@/locales';
+import { getConfig, initialise, setUserLocale } from '@/adapter';
+
 
 const app = createApp(App)
   .use(IonicVue, {
     mode: 'md'
   })
-  .use(logger, {
-    level: process.env.VUE_APP_DEFAULT_LOG_LEVEL
-  })
   .use(router)
-  .use(i18n)
-  .use(store);
-
-// Filters are removed in Vue 3 and global filter introduced https://v3.vuejs.org/guide/migration/filters.html#global-filters
-app.config.globalProperties.$filters = {
-  formatDate(value: any, inFormat?: string, outFormat?: string) {
-    // TODO Make default format configurable and from environment variables
-    if(inFormat){
-      return DateTime.fromFormat(value, inFormat).toFormat(outFormat ? outFormat : 'MM-dd-yyyy');
-    }
-    return DateTime.fromISO(value).toFormat(outFormat ? outFormat : 'MM-dd-yyyy');
-  },
-  formatUtcDate(value: any, inFormat?: any, outFormat?: string) {
-    // TODO Make default format configurable and from environment variables
-    const userProfile = store.getters['user/getUserProfile'];
-    // TODO Fix this setDefault should set the default timezone instead of getting it everytiem and setting the tz
-    return DateTime.fromISO(value, { zone: 'utc' }).setZone(userProfile.userTimeZone).toFormat(outFormat ? outFormat : 'MM-dd-yyyy')  
-  }
-}
+  .use(store)
+  .use(permissionPlugin, {
+    rules: permissionRules,
+    actions: permissionActions
+  })
+  .use(dxpComponents, {
+    appLoginUrl: process.env.VUE_APP_LOGIN_URL as string,
+    defaultImgUrl: require("@/assets/images/defaultImage.png"),
+    getConfig,
+    initialise,
+    loader,
+    login,
+    logout,
+    localeMessages,
+    setUserLocale,
+  });
 
 router.isReady().then(() => {
   app.mount('#app');
