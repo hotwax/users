@@ -25,23 +25,39 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 import '@hotwax/apps-theme';
 
-import i18n from './i18n'
 import store from './store'
 
-import logger from './logger';
+import permissionPlugin from '@/authorization';
+import permissionRules from '@/authorization/Rules';
+import permissionActions from '@/authorization/Actions';
+
+import { dxpComponents } from '@hotwax/dxp-components'
+import { login, logout, loader } from '@/utils/user';
+import localeMessages from '@/locales';
+import { getConfig, initialise, setUserLocale } from '@/adapter';
+
 
 const app = createApp(App)
   .use(IonicVue, {
     mode: 'md'
   })
-  .use(logger, {
-    level: process.env.VUE_APP_DEFAULT_LOG_LEVEL
-  })
   .use(router)
-  .use(i18n)
-  .use(store);
-
-
+  .use(store)
+  .use(permissionPlugin, {
+    rules: permissionRules,
+    actions: permissionActions
+  })
+  .use(dxpComponents, {
+    appLoginUrl: process.env.VUE_APP_LOGIN_URL as string,
+    defaultImgUrl: require("@/assets/images/defaultImage.png"),
+    getConfig,
+    initialise,
+    loader,
+    login,
+    logout,
+    localeMessages,
+    setUserLocale,
+  });
 
 router.isReady().then(() => {
   app.mount('#app');

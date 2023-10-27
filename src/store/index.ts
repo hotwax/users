@@ -27,7 +27,7 @@ const store = createStore<RootState>({
   getters,
   plugins: [persistState],
   modules: {
-    'user': userModule
+    'user': userModule,
   },
 })
 
