@@ -52,9 +52,12 @@
               {{ '-' }}
             </ion-label>
 
-            <ion-chip outline>
+            <ion-chip outline v-if="user.securityGroupId">
               <ion-label>{{ user.securityGroupId }}</ion-label>
             </ion-chip>
+            <ion-label v-else>
+              {{ '-' }}
+            </ion-label>
 
             <div>
               <ion-button fill="clear" color="medium">
