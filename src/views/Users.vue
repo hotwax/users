@@ -108,7 +108,7 @@ import { DateTime } from 'luxon';
 import UserPopover from '@/components/UserPopover.vue';
 
 export default defineComponent({
-  name: 'Home',
+  name: 'Users',
   components: {
     IonButton,
     IonChip,
