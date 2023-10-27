@@ -226,7 +226,7 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_SELECTED_USER_UPDATED, user)
   },
 
-  async findUsers ({ dispatch, commit, state }) {
+  async fetchUsers({ commit, state }) {
     const filters = {} as any
 
     if(state.query.securityGroup) {
@@ -265,7 +265,7 @@ const actions: ActionTree<UserState, RootState> = {
     let users = []
 
     try {
-      const resp = await UserService.getPartyDetailView(payload)
+      const resp = await UserService.fetchUsers(payload)
 
       if(!hasError(resp)) {
         users = resp.data.docs
@@ -275,12 +275,12 @@ const actions: ActionTree<UserState, RootState> = {
     } catch(error) {
       console.error(error)
     }
-    commit(types.USER_LIST_UPDATED, users );
+    commit(types.USER_LIST_UPDATED, users);
   },
 
-  async updateQuery  ( { commit, dispatch, rootState } , query ) {
+  async updateQuery({ commit, dispatch }, query) {
     commit(types.USER_QUERY_UPDATED, {query})
-    dispatch('findUsers')
+    dispatch('fetchUsers')
   }
 }
 export default actions;

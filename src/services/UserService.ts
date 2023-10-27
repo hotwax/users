@@ -40,7 +40,7 @@ const getAvailableTimeZones = async (): Promise<any> => {
   });
 }
 
-const getPartyDetailView = async (payload: any): Promise<any> => {
+const fetchUsers = async (payload: any): Promise<any> => {
   return api({
     url: "performFind",
     method: "post",
@@ -222,7 +222,7 @@ export const UserService = {
   createUpdatePartyTelecomNumber,
   deletePartyContactMech,
   getAvailableTimeZones,
-  getPartyDetailView,
+  fetchUsers,
   getUserContactDetails,
   getUserLoginDetails,
   getUserPermissions,

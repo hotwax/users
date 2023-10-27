@@ -34,7 +34,7 @@
         </aside>
 
         <main v-if="users.length">
-          <div class="list-item" v-for="(user, index) in users" :key="index" @click=getUserDetail(user.partyId)>
+          <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetail(user.partyId)>
             <ion-item lines="none">
               <ion-label>
                 {{ user.groupName ? user.groupName : `${user.firstName} ${user.lastName}` }}
@@ -152,7 +152,7 @@ export default defineComponent({
     async updateQuery() {
       await this.store.dispatch('user/updateQuery', this.query)
     },
-    async getUserDetail(partyId: any) {
+    async viewUserDetail(partyId: string) {
       this.router.push({path: `/user-details/${partyId}` })
     }
   },
@@ -171,7 +171,7 @@ export default defineComponent({
     };
   },
   async mounted() {
-    await this.store.dispatch('user/findUsers')
+    await this.store.dispatch('user/fetchUsers')
     await this.store.dispatch('util/getSecurityGroups')
   }
 });
