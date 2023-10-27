@@ -165,8 +165,9 @@ const actions: ActionTree<UserState, RootState> = {
         partyId: payload.partyId,
       },
       viewSize: 1,
-      entityName: 'UserLoginAndPartyDetails',
-      fieldList: ['userLoginId', 'enabled', 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName']
+      entityName: 'PartyAndUserLoginSecurityGroupDetails',
+      fieldList: ['userLoginId', 'enabled', 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName'],
+      distinct: "Y"
     }
 
     try {
