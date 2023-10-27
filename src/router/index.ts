@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import UserDetails from '@/views/UserDetails.vue'
-import Users from '@/views/Users.vue';
 import { Login, useAuthStore } from '@hotwax/dxp-components';
 import { loader } from '@/utils/user';
 import store from '@/store'
@@ -39,13 +38,7 @@ const loginGuard = (to: any, from: any, next: any) => {
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/users'
-  },
-  {
-    path: '/users',
-    name: 'Users',
-    component: Users,
-    beforeEnter: authGuard
+    redirect: '/tabs/users'
   },
   {
     path: '/login',
@@ -58,14 +51,9 @@ const routes: Array<RouteRecordRaw> = [
     component: Tabs,
     children: [
       {
-        path: '',
-        redirect: 'users'
-      },
-      // {
-      //   path: 'users',
-      //   component: () => import('@/views/Users.vue'),
-      // },
-      {
+        path: 'users',
+        component: () => import('@/views/Users.vue'),
+      },{
         path: 'settings',
         component: () => import('@/views/Settings.vue')
       },
