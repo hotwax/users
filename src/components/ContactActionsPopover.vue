@@ -103,7 +103,7 @@ export default defineComponent({
                   emailAddress: input,
                   partyId: this.selectedUser.partyId
                 })
-                if (!hasError(resp)) throw resp.data
+                if (hasError(resp)) throw resp.data
                 selectedUser = {
                   ...selectedUser,
                   emailDetails: {

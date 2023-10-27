@@ -12,13 +12,13 @@ const userModule: Module<UserState, RootState> = {
       current: {},
       instanceUrl: '',
       permissions: [],
-      selectedUser: {},
-      users: [],
       query: {
         queryString: '',
         securityGroup: '',
         status: ''
-      }
+      },
+      selectedUser: {},
+      users: []
     },
     getters,
     actions,

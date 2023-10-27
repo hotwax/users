@@ -51,7 +51,7 @@ const getPartyDetailView = async (payload: any): Promise<any> => {
 const setUserTimeZone = async (payload: any): Promise<any> => {
   return api({
     url: "setUserTimeZone",
-    method: "POST",
+    method: "post",
     data: payload
   });
 }
@@ -232,5 +232,5 @@ export const UserService = {
   setUserTimeZone,
   updateUserLoginStatus,
   updatePartyGroup,
-  updatePerson,
+  updatePerson
 }

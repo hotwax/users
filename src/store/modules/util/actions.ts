@@ -17,19 +17,21 @@ const actions: ActionTree<UtilState, RootState> = {
       "noConditionFind": "Y",
     }
 
-    let securityGroupOptions = []
+    let securityGroups = []
 
     try {
       const resp = await UtilService.getSecurityGroups(payload)
 
       if(!hasError(resp)) {
-        securityGroupOptions = resp.data.docs
+        securityGroups = resp.data.docs
+      } else {
+        throw resp.data
       }
     } catch(error) {
       console.error(error);
       showToast(translate("Something went wrong"));
     }
-    commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroupOptions );
+    commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups );
   },
 }
 

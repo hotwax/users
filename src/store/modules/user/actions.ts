@@ -243,21 +243,20 @@ const actions: ActionTree<UserState, RootState> = {
       "inputFields": {
         ...filters,
         "partyId": "10000",
-        firstName_value: state.query.queryString,
-        firstName_op: 'contains',
-        firstName_ic: 'Y',
-        firstName_grp: '1',
-        lastName_value: state.query.queryString,
-        lastName_op: 'contains',
-        lastName_ic: 'Y',
-        lastName_grp: '2',
         groupName_value: state.query.queryString,
         groupName_op: 'contains',
         groupName_ic: 'Y',
-        groupName_grp: '3'
+        groupName_grp: '1',
+        firstName_value: state.query.queryString,
+        firstName_op: 'contains',
+        firstName_ic: 'Y',
+        firstName_grp: '2',
+        lastName_value: state.query.queryString,
+        lastName_op: 'contains',
+        lastName_ic: 'Y',
+        lastName_grp: '3'
       },
       "entityName": "PartyDetailView",
-      "viewSize": 200,
       "distinct": "Y",
       "noConditionFind": "Y",
       "fieldList": ['createdDate', 'firstName', 'infoString', 'lastName', 'partyId', 'securityGroupId', 'userLoginId'],
@@ -270,10 +269,11 @@ const actions: ActionTree<UserState, RootState> = {
 
       if(!hasError(resp)) {
         users = resp.data.docs
+      } else {
+        throw resp.data
       }
     } catch(error) {
       console.error(error)
-      showToast(translate("Something went wrong"));
     }
     commit(types.USER_LIST_UPDATED, users );
   },

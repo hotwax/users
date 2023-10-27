@@ -14,6 +14,7 @@ const showToast = async (message: string, configButtons?: any) => {
   }]
 
   if (configButtons) defaultButtons.push(...configButtons);
+
   const toast = await toastController
     .create({
       message: message,

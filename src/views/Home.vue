@@ -19,7 +19,7 @@
               <ion-label>{{ $t("Clearance") }}</ion-label>
               <ion-select interface="popover" v-model="query.securityGroup" @ionChange="updateQuery()">
                 <ion-select-option value="">{{ $t("None") }}</ion-select-option>
-                <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroupOptions">{{ securityGroup.groupName }}</ion-select-option>
+                <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName }}</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item lines="none">
@@ -130,7 +130,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       users: 'user/getUsers',
-      securityGroupOptions: 'util/getSecurityGroups',
+      securityGroups: 'util/getSecurityGroups',
       query: 'user/getQuery'
     })
   },
