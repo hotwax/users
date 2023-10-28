@@ -8,6 +8,7 @@ import { showToast } from '@/utils'
 import { translate } from '@hotwax/dxp-components'
 import { hasPermission } from '@/authorization';
 import Tabs from '@/components/Tabs.vue'
+import CreateUser from '@/views/CreateUser.vue'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -66,6 +67,12 @@ const routes: Array<RouteRecordRaw> = [
     component: UserDetails,
     beforeEnter: authGuard,
     props: true
+  },
+  {
+    path: '/create-user',
+    name: 'CreateUser',
+    component: CreateUser,
+    beforeEnter: authGuard
   }
 ]
 

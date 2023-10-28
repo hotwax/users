@@ -215,7 +215,15 @@ const updatePerson = async (payload: any): Promise <any> => {
     method: "post",
     data: payload
   });
-} 
+}
+
+const createUser = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/createRelationship", 
+    method: "post",
+    data: payload
+  });
+}
 
 export const UserService = {
   createUpdatePartyEmailAddress,
@@ -232,5 +240,6 @@ export const UserService = {
   setUserTimeZone,
   updateUserLoginStatus,
   updatePartyGroup,
-  updatePerson
+  updatePerson,
+  createUser
 }

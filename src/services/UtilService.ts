@@ -8,7 +8,17 @@ const getSecurityGroups = async (payload: any): Promise<any> => {
   })
 }
 
+const fetchFacilities = async(query: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "get",
+    params: query,
+    cache: true
+  })
+}
+
 export const UtilService = {
-  getSecurityGroups
+  getSecurityGroups,
+  fetchFacilities
 }
   
