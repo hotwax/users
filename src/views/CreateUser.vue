@@ -95,7 +95,7 @@ import {
   arrowForwardOutline
 } from 'ionicons/icons';
 import { translate } from "@hotwax/dxp-components";
-import { showToast } from '@/utils'
+import { showToast, isEmailValid } from '@/utils'
 import { UserService } from '@/services/UserService'
 import { hasError } from '@/adapter'
 
@@ -123,7 +123,6 @@ export default defineComponent({
   },
   data() {
     return {
-      validationErrors: [] as any,
       isFacilityLogin: false,
       formData: {
         firstName: '',
@@ -147,49 +146,49 @@ export default defineComponent({
       const selectedFacility = this.facilities.find((facility: any) => facility.facilityId === selectedFacilityId);
       this.formData.groupName = selectedFacility?.facilityName ? selectedFacility?.facilityName : selectedFacilityId;
     },
-    async validateCreateUserDetail (payload: any) {
-      if (payload.partyTypeId == 'PARTY_GROUP') {
-        if (!this.formData.firstName) {
-          this.validationErrors.push(translate('First name is required.'));
+    validateCreateUserDetail (data: any) {
+      const validationErrors = [];
+      if (data.partyTypeId === 'PARTY_GROUP') {
+        if (!data.groupName) {
+          validationErrors.push(translate('Name is required.'));
         }
-        if (!this.formData.lastName) {
-          this.validationErrors.push(translate('Last name is required.'));
+        if (this.isFacilityLogin && !data.externalId) {
+          validationErrors.push(translate('Facility is required.'));
         }
       } else {
-        if (!this.formData.groupName) {
-          this.validationErrors.push(translate('Name is required.'));
+        if (!data.firstName) {
+          validationErrors.push(translate('First name is required.'));
         }
-        if (this.isFacilityLogin && !this.formData.externalId) {
-          this.validationErrors.push(translate('Facility is required.'));
+        if (!data.lastName) {
+          validationErrors.push(translate('Last name is required.'));
         }
       }
+      if (data.emailAddress && !isEmailValid(data.emailAddress)) {
+        validationErrors.push(translate('Invalid email address.'));
+      }
+      return validationErrors; 
     },
     async createUser() {
-      let partyTypeId = "PERSON"
-      if (this.isFacilityLogin) {
-        partyTypeId = "PARTY_GROUP"
-      }
-      const payload = {
-        "partyIdFrom": "Company",
-        "roleTypeIdFrom": "INTERNAL_ORGANIZATIO",
-        "roleTypeIdTo": "APPLICATION_USER",
-        "partyRelationshipTypeId": "EMPLOYMENT",
-        "firstName": this.formData.firstName,
-        "lastName": this.formData.lastName,
-        "groupName": this.formData.groupName,
-        "externalId": this.formData.externalId,
-        "emailAddress": this.formData.emailAddress,
-        "contactNumber": this.formData.contactNumber,
-        partyTypeId
-      }
+      let partyTypeId = this.isFacilityLogin ? "PARTY_GROUP" : "PERSON";
       
       try {
-        await this.validateCreateUserDetail(payload);
-        if (this.validationErrors.length > 0) {
-          const errorMessages = this.validationErrors.join(" ");
-          console.log();
-          showToast(translate(errorMessages))
+        const validationErrors = this.validateCreateUserDetail({...this.formData, partyTypeId});
+        if (validationErrors.length > 0) {
+          const errorMessages = validationErrors.join(" ");
+          console.log(errorMessages);
+          showToast(translate(errorMessages));
+          return;
         }
+
+        const payload = {
+          ...this.formData,
+          partyTypeId,
+          "partyIdFrom": "Company",
+          "roleTypeIdFrom": "INTERNAL_ORGANIZATIO",
+          "roleTypeIdTo": "APPLICATION_USER",
+          "partyRelationshipTypeId": "EMPLOYMENT",
+        }
+
         const resp = await UserService.createUser(payload);
         if (resp.status === 200 && !hasError(resp) && resp.data.partyId) {
           const partyId = resp.data.partyId;

@@ -36,4 +36,10 @@ const copyToClipboard = async (value: string, text?: string) => {
   });
 }
 
-export { copyToClipboard, showToast, hasError }
+const isEmailValid = (email : string) => {
+  // Regular expression pattern for a valid email address
+  const emailPattern = /^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/;
+  return emailPattern.test(email);
+}
+
+export { copyToClipboard, showToast, hasError, isEmailValid }
