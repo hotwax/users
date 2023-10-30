@@ -4,28 +4,28 @@ import RootState from '@/store/RootState'
 
 const getters: GetterTree<UtilState, RootState> = {
 	getRoles(state) {
-			return state.roles;
+		return state.roles;
 	},
 	getProductStores(state) {
-			return state.productStores;
+		return state.productStores;
 	},
 	getUserProductStores(state) {
-			return state.userProductStores;
+		return state.userProductStores;
 	},
 	getUserProductStoreName: (state) => (productStoreId: string) => {
-			return state.productStores.find((store: any) => store.productStoreId === productStoreId).storeName
+		return state.productStores.find((store: any) => store.productStoreId === productStoreId).storeName
 	},
 	getRoleTypeDesc: (state) => (roleTypeId: string) => {
-			return state.roles.find((role: any) => role.roleTypeId === roleTypeId).description
+		return state.roles.find((role: any) => role.roleTypeId === roleTypeId).description
 	},
 	getProductStoreRoleType: (state) => (productStoreId: string) => {
-			return state.userProductStores.find((store: any) => store.productStoreId === productStoreId)?.roleTypeId || 'none'
+		return state.userProductStores.find((store: any) => store.productStoreId === productStoreId)?.roleTypeId
 	},
 	getSecurityGroups(state) {
-			return state.securityGroups
+		return state.securityGroups
 	},
 	getFacilities(state) {
-			return state.facilities
+		return state.facilities
 	}
 }
 export default getters;
