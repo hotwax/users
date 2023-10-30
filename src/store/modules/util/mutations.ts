@@ -6,5 +6,8 @@ const mutations: MutationTree <UtilState> = {
   [types.UTIL_SECURITY_GROUPS_UPDATED] (state, payload) {
     state.securityGroups = payload
   },
+  [types.UTIL_FACILITIES_UPDATED] (state, payload) {
+    state.facilities = payload
+  }
 }
 export default mutations;
