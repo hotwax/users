@@ -27,7 +27,7 @@
     <!-- TODO check API for reset password email -->
     <ion-item v-if="email?.length" class="ion-padding-top">
       <ion-icon :icon="mailOutline" slot="start" />
-      <ion-button fill="clear">
+      <ion-button fill="clear" @click="sendResetPasswordEmail()">
         {{ translate('Send reset password email instead') }}
       </ion-button>
       <ion-label slot="end">{{ email }}</ion-label>
@@ -63,7 +63,8 @@ import { defineComponent } from "vue";
 import { closeOutline, lockClosedOutline, mailOutline } from "ionicons/icons";
 import { useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components'
-import { hasError, showToast } from "@/utils";
+import { showToast } from "@/utils";
+import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
 
 export default defineComponent({
@@ -103,16 +104,36 @@ export default defineComponent({
         })
         if (!hasError(resp)) {
           showToast(translate('Password reset successful.'))
+        } else {
+          throw resp.data
         }
       } catch (error) {
         showToast(translate('Failed to reset password.'))
         console.error(error)
       }
+      this.closeModal()
     },
     checkResetButtonStatus() {
       // TODO add check for length and other requirements
       return (!this.newPassword.length || !this.confirmPassword.length) 
         || (this.newPassword.trim() !== this.confirmPassword.trim())
+    },
+    async sendResetPasswordEmail() {
+      try {
+        const resp = await UserService.sendResetPasswordEmail({
+          emailAddress: this.email,
+          userName: this.userLoginId
+        })
+        if (!hasError(resp)) {
+          showToast(translate('Password reset email sent successfully.'))
+        } else {
+          throw resp.data
+        }
+      } catch (error) {
+        showToast(translate('Failed to send password reset email.'))
+        console.error(error)
+      }
+      this.closeModal()
     }
   },
   setup() {

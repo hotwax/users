@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-menu-button slot="start" />
+        <ion-back-button slot="start" default-href="/tabs/users" />
         <ion-title>{{ translate("User details") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -97,6 +97,71 @@
               </ion-list>
             </ion-card>
           </section>
+
+          <div class="section-header">
+            <h1>{{ translate('Permissions') }}</h1>
+          </div>
+
+          <section class="user-details">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>
+                  {{ translate('Clearance') }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-list>
+                <ion-item>
+                  <ion-icon :icon="businessOutline" slot="start" />
+                  <ion-label>{{ translate('Security Group') }}</ion-label>        
+                  <ion-select interface="popover">
+                    <ion-select-option v-for="securityGroup in securityGroups" :key="securityGroup.groupId" :value="securityGroup.groupId">
+                      {{ securityGroup.groupName }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+                <div v-if="!userProductStores.length">
+                  <ion-button @click="selectProductStore()" fill="outline" expand="block">
+                    <ion-icon :icon="addOutline" slot='start' />
+                    {{ translate('Add to a product store') }}
+                  </ion-button>
+                </div>
+                <div v-else>
+                  <ion-list-header color="light">
+                    <ion-label>{{ translate('Product stores') }}</ion-label>
+                    <ion-button @click="selectProductStore()">
+                      <ion-icon slot="start" :icon="addCircleOutline" />
+                      {{ translate('Add') }}
+                    </ion-button>
+                  </ion-list-header>
+                  <ion-item v-for="store in userProductStores" :key="store.productStoreId">
+                    <ion-label>
+                      <h2>{{ getUserProductStoreName(store.productStoreId) }}</h2>
+                      <p>{{ getRoleTypeDesc(store.roleTypeId) }}</p>
+                    </ion-label>
+                    <ion-button slot="end" fill="clear" color="medium" @click="openProductStoreActionsPopover($event, store)">
+                      <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
+                    </ion-button>
+                  </ion-item>
+                </div>
+              </ion-list>
+            </ion-card>
+            <!-- <ion-card>
+              <ion-card-header>
+                <ion-card-title>
+                  {{ translate('Fulfillment') }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-list>
+                <ion-item>
+                  <ion-label>{{ translate("Show as picker") }}</ion-label>
+                  <ion-toggle slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
+                </ion-item>
+                <ion-item lines="none" button detail @click="selectFacility()">
+                  <ion-label>{{ 'added to 5 facilities' }}</ion-label>
+                </ion-item>
+              </ion-list>
+            </ion-card> -->
+          </section>
         </div>
       </main>
     </ion-content>
@@ -115,9 +180,12 @@ import {
   IonIcon,
   IonItem,
   IonList,
+  IonListHeader,
   IonLabel,
-  IonMenuButton,
+  IonBackButton,
   IonPage,
+  IonSelect,
+  IonSelectOption,
   IonTitle,
   IonToggle,
   IonToolbar,
@@ -139,10 +207,13 @@ import {
 import Image from '@/components/Image.vue'
 import { translate } from '@hotwax/dxp-components';
 import ContactActionsPopover from '@/components/ContactActionsPopover.vue'
+import ProductStoreActionsPopover from '@/components/ProductStoreActionsPopover.vue'
 import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
+import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
+import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
 import { UserService } from "@/services/UserService";
 import { showToast } from "@/utils";
-import { hasError } from "@hotwax/oms-api";
+import { hasError } from '@/adapter';
 
 export default defineComponent({
   name: "UserDetails",
@@ -159,15 +230,23 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
-    IonMenuButton,
+    IonListHeader,
+    IonBackButton,
     IonPage,
+    IonSelect,
+    IonSelectOption,
     IonTitle,
     IonToggle,
     IonToolbar,
   },
   computed: {
     ...mapGetters({
-      selectedUser: 'user/getSelectedUser'
+      selectedUser: 'user/getSelectedUser',
+      userProductStores: 'util/getUserProductStores',
+      getUserProductStoreName: 'util/getUserProductStoreName',
+      getRoleTypeDesc: 'util/getRoleTypeDesc',
+      securityGroups: 'util/getSecurityGroups',
+      getProductStoreRoleType: 'util/getProductStoreRoleType',
     })
   },
   props: ['partyId'],
@@ -191,6 +270,8 @@ export default defineComponent({
   },
   async ionViewWillEnter() {
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
+    await this.store.dispatch('util/getUserProductStores', this.partyId)
+    await this.store.dispatch('util/getSecurityGroups')
   },
   methods: {
     async openContactActionsPopover(event: Event, type: string, value: string) {
@@ -205,7 +286,6 @@ export default defineComponent({
             ? this.selectedUser.emailDetails.contactMechId
             : this.selectedUser.phoneNumberDetails.contactMechId
         },
-        translucent: true,
         showBackdrop: false,
       });
       return contactActionsPopover.present();
@@ -329,6 +409,8 @@ export default defineComponent({
                 showToast(translate('User login status updated successfully.'))
                 // updating toggle state on success
                 event.target.checked = isChecked
+              } else {
+                throw resp.data
               }
             } catch (error) {
               showToast(translate('Failed to update user login status.'))
@@ -339,7 +421,36 @@ export default defineComponent({
       });
 
       await alert.present();
-    }
+    },
+    async openProductStoreActionsPopover(event: Event, store: any) {
+      const productStoreActionsPopover = await popoverController.create({
+        component: ProductStoreActionsPopover,
+        componentProps: {
+          productStore: store
+        },
+        event,
+        showBackdrop: false,
+      });
+      return productStoreActionsPopover.present();
+    },
+    async selectFacility() {
+      const selectFacilityModal = await modalController.create({
+        component: SelectFacilityModal,
+        componentProps: {
+          email: this.selectedUser.emailDetails?.email,
+          userLoginId: this.selectedUser.userLoginId
+        }
+      });
+
+      return selectFacilityModal.present();
+    },
+    async selectProductStore() {
+      const selectProductStoreModal = await modalController.create({
+        component: SelectProductStoreModal,
+      });
+
+      return selectProductStoreModal.present();
+    },
   },
   setup() {
     const router = useRouter();
@@ -364,5 +475,12 @@ export default defineComponent({
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   align-items: start;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacer-xs) 10px 0px;
 }
 </style>

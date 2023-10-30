@@ -5,14 +5,13 @@ import actions from './actions'
 import RootState from './RootState'
 import createPersistedState from "vuex-persistedstate";
 import userModule from './modules/user';
+import utilModule from './modules/util';
 
 // TODO check how to register it from the components only
 // Handle same module registering multiple time on page refresh
 //store.registerModule('user', userModule);
 
-const state: any = {
-
-}
+const state: any = {}
 
 const persistState = createPersistedState({
   paths: ['user'],
@@ -28,6 +27,7 @@ const store = createStore<RootState>({
   plugins: [persistState],
   modules: {
     'user': userModule,
+    'util': utilModule,
   },
 })
 

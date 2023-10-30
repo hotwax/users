@@ -213,9 +213,14 @@ const actions: ActionTree<UserState, RootState> = {
             ...(Object.keys(emailDetails).length && { emailDetails }),
             ...(Object.keys(phoneNumberDetails).length && { phoneNumberDetails })
           } 
+        } else {
+          throw resp.data
         }
+      } else {
+        throw resp.data
       }
     } catch (error) {
+      showToast(translate('Something went wrong.'));
       console.error(error)
     }
     emitter.emit('dismissLoader')

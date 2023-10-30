@@ -27,7 +27,8 @@ import {
 import { defineComponent } from "vue";
 import { translate } from "@hotwax/dxp-components";
 import { mapGetters, useStore } from 'vuex';
-import { copyToClipboard, hasError, showToast } from "@/utils";
+import { hasError } from "@/adapter";
+import { copyToClipboard, showToast } from "@/utils";
 import { UserService } from "@/services/UserService";
 
 export default defineComponent({
@@ -103,7 +104,7 @@ export default defineComponent({
                   emailAddress: input,
                   partyId: this.selectedUser.partyId
                 })
-                if (!hasError(resp)) throw resp.data
+                if (hasError(resp)) throw resp.data
                 selectedUser = {
                   ...selectedUser,
                   emailDetails: {

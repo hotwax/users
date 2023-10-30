@@ -2,11 +2,6 @@ import { toastController } from '@ionic/vue';
 import { Plugins } from '@capacitor/core';
 import { translate } from '@hotwax/dxp-components';
 
-// TODO Remove it when HC APIs are fully REST compliant
-const hasError = (response: any) => {
-  return typeof response.data != "object" || !!response.data._ERROR_MESSAGE_ || !!response.data._ERROR_MESSAGE_LIST_ || !!response.data.error;
-}
-
 const showToast = async (message: string, configButtons?: any) => {
   const defaultButtons = [{
     text: 'Dismiss',
@@ -36,4 +31,4 @@ const copyToClipboard = async (value: string, text?: string) => {
   });
 }
 
-export { copyToClipboard, showToast, hasError }
+export { copyToClipboard, showToast }

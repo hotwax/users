@@ -209,6 +209,14 @@ const updatePerson = async (payload: any): Promise <any> => {
   });
 } 
 
+const sendResetPasswordEmail = async (payload: any): Promise <any> => {
+  return api({
+    url: "sendResetPassword", 
+    method: "post",
+    data: payload
+  });
+} 
+
 export const UserService = {
   createUpdatePartyEmailAddress,
   createUpdatePartyTelecomNumber,
@@ -220,6 +228,7 @@ export const UserService = {
   getUserProfile,
   login,
   resetPassword,
+  sendResetPasswordEmail,
   setUserTimeZone,
   updateUserLoginStatus,
   updatePartyGroup,
