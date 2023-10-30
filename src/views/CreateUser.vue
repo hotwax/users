@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-back-button default-href="/users" slot="start"></ion-back-button>
+        <ion-back-button default-href="/tabs/users" slot="start"></ion-back-button>
         <ion-title>{{ translate("Create user") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -134,7 +134,7 @@ export default defineComponent({
       }
     }
   },
-  async ionViewDidEnter() {
+  async ionViewWillEnter() {
     this.store.dispatch('util/fetchFacilities')
   },
   methods: {
@@ -192,7 +192,7 @@ export default defineComponent({
         const resp = await UserService.createUser(payload);
         if (resp.status === 200 && !hasError(resp) && resp.data.partyId) {
           const partyId = resp.data.partyId;
-          this.$router.push({ path: `/user-details/${partyId}` })
+          this.$router.push({ path: `/user-confirmation/${partyId}` })
         } else {
           throw resp.data;
         }

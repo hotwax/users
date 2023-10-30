@@ -9,6 +9,7 @@ import { translate } from '@hotwax/dxp-components'
 import { hasPermission } from '@/authorization';
 import Tabs from '@/components/Tabs.vue'
 import CreateUser from '@/views/CreateUser.vue'
+import UserConfirmation from '@/views/UserConfirmation.vue'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -73,6 +74,13 @@ const routes: Array<RouteRecordRaw> = [
     name: 'CreateUser',
     component: CreateUser,
     beforeEnter: authGuard
+  },
+  {
+    path: '/user-confirmation/:partyId',
+    name: 'UserConfirmation',
+    component: UserConfirmation,
+    beforeEnter: authGuard,
+    props: true
   }
 ]
 
