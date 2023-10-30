@@ -12,6 +12,7 @@ const userModule: Module<UtilState, RootState> = {
       productStores: [],
       userProductStores: [],
       securityGroups: [],
+      facilities: [],
     },
     getters,
     actions,

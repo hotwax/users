@@ -29,6 +29,17 @@ const getters: GetterTree <UserState, RootState> = {
     },
     getSelectedUser (state) {
         return state.selectedUser;
-    }
+    },
+    getUsers (state) {
+        return state.users.list
+    },
+    getQuery (state) {
+        return state.query
+    },
+    isScrollable(state) {
+        return (
+            state.users.list?.length > 0 && state.users.list?.length < state.users.total
+        );
+    },
 }
 export default getters;

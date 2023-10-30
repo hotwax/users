@@ -102,27 +102,34 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_USER_PRODUCT_STORES_UPDATED, userProductStores)
   },
 
+  updateSecurityGroups({ commit }, securityGroups) {
+    commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
+  },
+
   async getSecurityGroups({ commit }) {
     const payload = {
       entityName: "SecurityGroup",
       viewSize: 200,
       distinct: "Y",
       noConditionFind: "Y",
-    }
+      fieldList: ["groupId", "groupName"]
 
+    }
     let securityGroups = []
+
     try {
       const resp = await UtilService.getSecurityGroups(payload)
-      if (!hasError(resp)) {
+
+      if(!hasError(resp)) {
         securityGroups = resp.data.docs
       } else {
         throw resp.data
       }
-    } catch (error) {
+    } catch(error) {
       console.error(error);
-      showToast(translate("Something went wrong"));
     }
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
-  },
+  }
 }
+
 export default actions;

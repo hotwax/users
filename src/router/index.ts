@@ -8,6 +8,7 @@ import { showToast } from '@/utils'
 import { translate } from '@hotwax/dxp-components'
 import { hasPermission } from '@/authorization';
 import Tabs from '@/components/Tabs.vue'
+import CreateUser from '@/views/CreateUser.vue'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -37,6 +38,10 @@ const loginGuard = (to: any, from: any, next: any) => {
 
 const routes: Array<RouteRecordRaw> = [
   {
+    path: '/',
+    redirect: '/tabs/users'
+  },
+  {
     path: '/login',
     name: 'Login',
     component: Login,
@@ -47,14 +52,9 @@ const routes: Array<RouteRecordRaw> = [
     component: Tabs,
     children: [
       {
-        path: '',
-        redirect: 'users'
-      },
-      // {
-      //   path: 'users',
-      //   component: () => import('@/views/Users.vue'),
-      // },
-      {
+        path: 'users',
+        component: () => import('@/views/Users.vue'),
+      },{
         path: 'settings',
         component: () => import('@/views/Settings.vue')
       },
@@ -67,6 +67,12 @@ const routes: Array<RouteRecordRaw> = [
     component: UserDetails,
     beforeEnter: authGuard,
     props: true
+  },
+  {
+    path: '/create-user',
+    name: 'CreateUser',
+    component: CreateUser,
+    beforeEnter: authGuard
   }
 ]
 

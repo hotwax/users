@@ -24,6 +24,14 @@ const getAssociatedProductStores = async (payload: any): Promise<any> => {
   })
 }
 
+const getSecurityGroups = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "POST",
+    data: payload
+  })
+}
+
 const createProductStoreRole = async (payload: any): Promise <any> => {
   return api({
     url: "service/createProductStoreRole", 
@@ -40,11 +48,12 @@ const updateProductStoreRole = async (payload: any): Promise <any> => {
   });
 }
 
-const getSecurityGroups = async (payload: any): Promise<any> => {
+const fetchFacilities = async(query: any): Promise<any> => {
   return api({
     url: "performFind",
-    method: "POST",
-    data: payload
+    method: "get",
+    params: query,
+    cache: true
   })
 }
 
@@ -55,4 +64,5 @@ export const UtilService = {
   getProductStores,
   getRoles,
   updateProductStoreRole,
+  fetchFacilities
 }

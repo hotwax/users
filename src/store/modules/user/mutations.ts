@@ -10,6 +10,16 @@ const mutations: MutationTree <UserState> = {
       state.token = ''
       state.current = {}
       state.permissions = []
+      state.users = {
+        list: [],
+        total: 0
+      },
+      state.query = {
+        queryString: '',
+        securityGroup: '',
+        status: ''
+      }
+      state.selectedUser = {}
     },
     [types.USER_INFO_UPDATED] (state, payload) {
         state.current = payload
@@ -22,6 +32,13 @@ const mutations: MutationTree <UserState> = {
     },
     [types.USER_SELECTED_USER_UPDATED] (state, payload) {
         state.selectedUser = payload
+    },
+    [types.USER_LIST_UPDATED] (state, payload) {
+      state.users.list = payload.users
+      state.users.total = payload.total
+    },
+    [types.USER_QUERY_UPDATED] (state, payload) {
+      state.query = payload.query
     },
 }
 export default mutations;

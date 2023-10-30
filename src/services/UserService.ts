@@ -40,6 +40,14 @@ const getAvailableTimeZones = async (): Promise<any> => {
   });
 }
 
+const fetchUsers = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "post",
+    data: payload
+  })
+}
+
 const setUserTimeZone = async (payload: any): Promise<any> => {
   return api({
     url: "setUserTimeZone",
@@ -207,7 +215,15 @@ const updatePerson = async (payload: any): Promise <any> => {
     method: "post",
     data: payload
   });
-} 
+}
+
+const createUser = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/createRelationship", 
+    method: "post",
+    data: payload
+  });
+}
 
 const sendResetPasswordEmail = async (payload: any): Promise <any> => {
   return api({
@@ -222,6 +238,7 @@ export const UserService = {
   createUpdatePartyTelecomNumber,
   deletePartyContactMech,
   getAvailableTimeZones,
+  fetchUsers,
   getUserContactDetails,
   getUserLoginDetails,
   getUserPermissions,
@@ -232,5 +249,6 @@ export const UserService = {
   setUserTimeZone,
   updateUserLoginStatus,
   updatePartyGroup,
-  updatePerson
+  updatePerson,
+  createUser
 }
