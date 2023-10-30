@@ -46,7 +46,7 @@ const actions: ActionTree<UtilState, RootState> = {
 
   async getProductStores({ commit }) {
     let productStores = []
-    // TODO verify filtering condition
+    // TODO verify filtering condition for store type
     const params = {
       viewSize: 100,
       noConditionFind: 'Y',
@@ -61,7 +61,6 @@ const actions: ActionTree<UtilState, RootState> = {
       } else {
         throw resp.data
       }
-      console.log(resp.data.docs)
     } catch (error) {
       showToast(translate('Something went wrong.'));
       console.error(error)
@@ -73,10 +72,9 @@ const actions: ActionTree<UtilState, RootState> = {
     let userProductStores = []
     const params = {
       inputFields: {
-        partyId: partyId,
+        partyId,
       },
       viewSize: 100,
-      noConditionFind: 'Y',
       entityName: 'ProductStoreRole',
       filterByDate: 'Y',
       fieldList: ['partyId', 'roleTypeId', 'productStoreId', 'fromDate']
@@ -88,7 +86,7 @@ const actions: ActionTree<UtilState, RootState> = {
       await dispatch('getProductStores')
       await dispatch('getRoles')
 
-      const resp = await UtilService.getProductStores(params)
+      const resp = await UtilService.getUserAssociatedProductStores(params)
       if (!hasError(resp) || resp.data.error === 'No record found') {
         userProductStores = resp.data.docs ? resp.data.docs : []
       } else {
@@ -98,7 +96,6 @@ const actions: ActionTree<UtilState, RootState> = {
       showToast(translate('Something went wrong.'));
       console.error(error)
     }
-    console.log(userProductStores)
     commit(types.UTIL_USER_PRODUCT_STORES_UPDATED, userProductStores)
   },
 
@@ -122,6 +119,10 @@ const actions: ActionTree<UtilState, RootState> = {
 
       if(!hasError(resp)) {
         securityGroups = resp.data.docs
+        securityGroups.push({
+          groupId: 'none',
+          groupName: 'None',
+        })
       } else {
         throw resp.data
       }
@@ -129,7 +130,61 @@ const actions: ActionTree<UtilState, RootState> = {
       console.error(error);
     }
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
+  },
+
+  async getUserSecurityGroups({ state }, userLoginId) {
+    let userSecurityGroup = {} as any
+    const payload = {
+      inputFields: {
+        userLoginId,
+      },
+      entityName: "UserLoginSecurityGroup",
+      filterByDate: "Y",
+      viewSize: 10,
+      fieldList: ["groupId", "userLoginId", "fromDate"]
+    }
+
+    try {
+      const resp = await UtilService.getUserSecurityGroup(payload)
+      if (!hasError(resp) || resp.data.error === 'No record found') {
+        userSecurityGroup = {
+          groupId: resp.data.docs ? resp.data.docs[0].groupId : 'none',
+          fromDate: resp.data.docs && resp.data.docs[0].fromDate
+        }
+      } else {
+        throw resp.data
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    return userSecurityGroup
+  },
+
+  async getUserAssociatedFacilities({ state }, partyId) {
+    let facilities = [] as any
+    const payload = {
+      inputFields: {
+        partyId,
+      },
+      noConditionFind: "Y",
+      entityName: "FacilityParty",
+      viewSize: 100,
+      fieldList: ["facilityId", "roleTypeId", "partyId"]
+    }
+
+    try {
+      const resp = await UtilService.getUserAssociatedFacilities(payload)
+      if (!hasError(resp) || resp.data.error === 'No record found') {
+        facilities = resp.data.docs ? resp.data.docs : []
+      } else {
+        throw resp.data
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    return facilities
   }
+  
 }
 
 export default actions;

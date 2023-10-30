@@ -161,6 +161,14 @@ const getUserContactDetails = async (payload: any): Promise<any> => {
   })
 }
 
+const getPartyRole = async (payload: any): Promise<any> => {
+  return api({
+    url: 'performFind',
+    method: 'POST',
+    data: payload
+  })
+}
+
 const resetPassword = async (payload: any): Promise <any> => {
   return api({
     url: "service/resetPassword", 
@@ -239,6 +247,7 @@ export const UserService = {
   deletePartyContactMech,
   getAvailableTimeZones,
   fetchUsers,
+  getPartyRole,
   getUserContactDetails,
   getUserLoginDetails,
   getUserPermissions,

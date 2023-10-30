@@ -175,7 +175,7 @@ export default defineComponent({
         const validationErrors = this.validateCreateUserDetail({...this.formData, partyTypeId});
         if (validationErrors.length > 0) {
           const errorMessages = validationErrors.join(" ");
-          console.log(errorMessages);
+          console.error(errorMessages);
           showToast(translate(errorMessages));
           return;
         }

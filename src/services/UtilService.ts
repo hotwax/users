@@ -4,7 +4,8 @@ const getRoles = async (payload: any): Promise<any> => {
   return api({
     url: 'performFind',
     method: 'POST',
-    data: payload
+    data: payload,
+    cache: true
   })
 }
 
@@ -12,11 +13,12 @@ const getProductStores = async (payload: any): Promise<any> => {
   return api({
     url: 'performFind',
     method: 'POST',
-    data: payload
+    data: payload,
+    cache: true
   })
 }
 
-const getAssociatedProductStores = async (payload: any): Promise<any> => {
+const getUserAssociatedProductStores = async (payload: any): Promise<any> => {
   return api({
     url: 'performFind',
     method: 'POST',
@@ -28,7 +30,8 @@ const getSecurityGroups = async (payload: any): Promise<any> => {
   return api({
     url: "performFind",
     method: "POST",
-    data: payload
+    data: payload,
+    cache: true
   })
 }
 
@@ -57,12 +60,57 @@ const fetchFacilities = async(query: any): Promise<any> => {
   })
 }
 
+const getUserSecurityGroup = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "POST",
+    data: payload
+  })
+}
+
+const updateSecurityGroup = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/updateUserLoginToSecurityGroup", 
+    method: "post",
+    data: payload
+  });
+}
+
+const createSecurityGroup = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/addUserLoginToSecurityGroup", 
+    method: "post",
+    data: payload
+  });
+}
+
+const updatePickerRoleStatus = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/ensurePartyRole", 
+    method: "post",
+    data: payload
+  });
+}
+
+const getUserAssociatedFacilities = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "POST",
+    data: payload
+  })
+}
+
 export const UtilService = {
   createProductStoreRole,
-  getAssociatedProductStores,
+  createSecurityGroup,
   getSecurityGroups,
   getProductStores,
   getRoles,
+  getUserAssociatedProductStores,
+  getUserAssociatedFacilities,
+  getUserSecurityGroup,
   updateProductStoreRole,
+  updateSecurityGroup,
+  updatePickerRoleStatus,
   fetchFacilities
 }

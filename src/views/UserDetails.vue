@@ -113,7 +113,7 @@
                 <ion-item>
                   <ion-icon :icon="businessOutline" slot="start" />
                   <ion-label>{{ translate('Security Group') }}</ion-label>        
-                  <ion-select interface="popover">
+                  <ion-select interface="popover" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
                     <ion-select-option v-for="securityGroup in securityGroups" :key="securityGroup.groupId" :value="securityGroup.groupId">
                       {{ securityGroup.groupName }}
                     </ion-select-option>
@@ -145,7 +145,7 @@
                 </div>
               </ion-list>
             </ion-card>
-            <!-- <ion-card>
+            <ion-card>
               <ion-card-header>
                 <ion-card-title>
                   {{ translate('Fulfillment') }}
@@ -154,13 +154,13 @@
               <ion-list>
                 <ion-item>
                   <ion-label>{{ translate("Show as picker") }}</ion-label>
-                  <ion-toggle slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
+                  <ion-toggle slot="end" @click="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true" />
                 </ion-item>
                 <ion-item lines="none" button detail @click="selectFacility()">
-                  <ion-label>{{ 'added to 5 facilities' }}</ion-label>
+                    <ion-label>{{ selectedUser.facilities.length === 1 ? translate('added to 1 facility') : translate('added to facilities', { count: selectedUser.facilities.length }) }}</ion-label>
                 </ion-item>
               </ion-list>
-            </ion-card> -->
+            </ion-card>
           </section>
         </div>
       </main>
@@ -214,6 +214,8 @@ import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
 import { UserService } from "@/services/UserService";
 import { showToast } from "@/utils";
 import { hasError } from '@/adapter';
+import { UtilService } from "@/services/UtilService";
+import { DateTime } from "luxon";
 
 export default defineComponent({
   name: "UserDetails",
@@ -245,8 +247,7 @@ export default defineComponent({
       userProductStores: 'util/getUserProductStores',
       getUserProductStoreName: 'util/getUserProductStoreName',
       getRoleTypeDesc: 'util/getRoleTypeDesc',
-      securityGroups: 'util/getSecurityGroups',
-      getProductStoreRoleType: 'util/getProductStoreRoleType',
+      securityGroups: 'util/getSecurityGroups'
     })
   },
   props: ['partyId'],
@@ -437,8 +438,6 @@ export default defineComponent({
       const selectFacilityModal = await modalController.create({
         component: SelectFacilityModal,
         componentProps: {
-          email: this.selectedUser.emailDetails?.email,
-          userLoginId: this.selectedUser.userLoginId
         }
       });
 
@@ -450,6 +449,85 @@ export default defineComponent({
       });
 
       return selectProductStoreModal.present();
+    },
+    async updateSecurityGroup(event: CustomEvent) {
+      const groupId = event.detail.value
+      let resp = {} as any
+      try {
+        if (groupId !== 'none') {
+          resp = await UtilService.updateSecurityGroup({
+            fromDate: this.selectedUser.securityGroup.fromDate,
+            thruDate: DateTime.now().toMillis(),
+            groupId: this.selectedUser.securityGroup.groupId,
+            userLoginId: this.selectedUser.userLoginId
+          })
+          if (!hasError(resp)) {
+            resp = await UtilService.createSecurityGroup({
+              groupId,
+              userLoginId: this.selectedUser.userLoginId
+            })
+            if (hasError(resp)) throw resp.data
+            showToast(translate('Security group updated successfully.'))
+            const userSecurityGroup = this.store.dispatch('util/getUserSecurityGroups', this.selectedUser.userLoginId)
+            this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, userSecurityGroup })
+          } else {
+            throw resp.data
+          }
+        } else {
+          resp = await UtilService.createSecurityGroup({
+            groupId,
+            userLoginId: this.selectedUser.userLoginId
+          })
+          if (!hasError(resp)) {
+            showToast(translate('Security group updated successfully.'))
+            const userSecurityGroup = this.store.dispatch('util/getUserSecurityGroups', this.selectedUser.userLoginId)
+            this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, userSecurityGroup })
+          } else {
+            throw resp.data
+          }
+        }
+      } catch (error) {
+        showToast(translate('Something went wrong.'))
+        console.error(error)
+      }
+    },
+    async updatePickerRoleStatus(event: any) {
+      event.stopImmediatePropagation();
+
+      const isChecked = !event.target.checked;
+      const message = 'Are you sure you want to perform this action?'
+
+      const alert = await alertController.create({
+        header: translate('Show as picker'),
+        message: translate(message),
+        buttons: [{
+          text: translate('No'),
+          role: ''
+        }, {
+          text: translate('Yes'),
+          role: 'success',
+          handler: async () => {
+            try {
+              const resp = await UtilService.updatePickerRoleStatus({
+                partyId: this.partyId,
+                roleTypeId: 'WAREHOUSE_PICKER'
+              })
+              if (!hasError(resp)) {
+                showToast(translate('User picker role updated successfully.'))
+                // updating toggle state on success
+                event.target.checked = isChecked
+              } else {
+                throw resp.data
+              }
+            } catch (error) {
+              showToast(translate('Failed to update user role.'))
+              console.error(error)
+            }
+          }
+        }],
+      });
+
+      await alert.present();
     },
   },
   setup() {
