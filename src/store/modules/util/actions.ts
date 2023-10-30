@@ -36,6 +36,31 @@ const actions: ActionTree<UtilState, RootState> = {
     }
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
   },
+  async fetchFacilities({ commit }) {
+    let facilities  = [];
+    try {
+      const payload = {
+        "inputFields": {
+          "parentTypeId": "VIRTUAL_FACILITY",
+          "parentTypeId_op": "notEqual"
+        },
+        "entityName": "FacilityAndType",
+        "viewSize": 100 // keeping view size 100 as considering that we will have max 100 facilities
+      }
+
+      const resp = await UtilService.fetchFacilities(payload)
+
+      if (!hasError(resp) && resp.data.count > 0) {
+        facilities = resp.data.docs
+      } else {
+        throw resp.data
+      }
+    } catch (err) {
+      console.error('Failed to fetch facilities', err)
+    }
+    console.log("======action===facilities=", facilities);
+    commit(types.UTIL_FACILITIES_UPDATED, facilities)
+  },
 
   updateSecurityGroups({ commit }, securityGroups) {
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
