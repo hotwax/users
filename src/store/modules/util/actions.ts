@@ -58,7 +58,6 @@ const actions: ActionTree<UtilState, RootState> = {
     } catch (err) {
       console.error('Failed to fetch facilities', err)
     }
-    console.log("======action===facilities=", facilities);
     commit(types.UTIL_FACILITIES_UPDATED, facilities)
   },
 
