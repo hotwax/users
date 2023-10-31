@@ -17,8 +17,18 @@ const fetchFacilities = async(query: any): Promise<any> => {
   })
 }
 
+const fetchProductStores = async(query: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "get",
+    params: query,
+    cache: true
+  })
+}
+
 export const UtilService = {
   getSecurityGroups,
-  fetchFacilities
+  fetchFacilities,
+  fetchProductStores
 }
   

@@ -8,6 +8,9 @@ const getters: GetterTree <UtilState, RootState> = {
   },
   getFacilities(state) {
     return state.facilities
+  },
+  getProductStores(state) {
+    return state.productStores
   }
 }
 export default getters;
