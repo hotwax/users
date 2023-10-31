@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-menu-button slot="start" />
+        <ion-back-button slot="start" default-href="/tabs/users" />
         <ion-title>{{ translate("User details") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -16,9 +16,10 @@
           <section>
             <ion-item lines="none">
               <!-- TODO fetch and show image only if available -->
-              <ion-avatar slot="start">
+              <!-- <ion-avatar slot="start">
                 <Image />
-              </ion-avatar>
+              </ion-avatar> -->
+              <!-- TODO return available name instead of if-else -->
               <ion-label>
                 <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
                 <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
@@ -34,27 +35,45 @@
                   {{ translate('Login details') }}
                 </ion-card-title>
               </ion-card-header>
-              <ion-list>
-                <!-- TODO verify disable message -->
-                <!-- <ion-item v-if="selectedUser.enabled === 'N'" color="light" lines="none">
-                  <ion-label class="ion-text-wrap">
-                    <p class="overline">{{ translate("User disabled") }}</p>
-                    <p>{{ translate('This user was disabled due to repeated failed password attempts') }}</p>
-                  </ion-label>
-                  <ion-icon slot="end" color="danger" :icon="warningOutline" />
-                </ion-item> -->
-                <ion-item>
-                  <ion-label>{{ translate('Username') }}</ion-label>        
-                  <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>        
-                </ion-item>
-                <ion-item>
-                  <ion-label>{{ translate("Block login") }}</ion-label>
-                  <ion-toggle slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
-                </ion-item>
-              </ion-list>
-              <ion-button @click="resetPassword()" fill="outline" color="warning" expand="block">
-                {{ translate('Reset password') }}
-              </ion-button>
+              <div v-if="selectedUser.userLoginId">
+                <ion-list>
+                  <!-- TODO verify disable message -->
+                  <!-- <ion-item v-if="selectedUser.enabled === 'N'" color="light" lines="none">
+                    <ion-label class="ion-text-wrap">
+                      <p class="overline">{{ translate("User disabled") }}</p>
+                      <p>{{ translate('This user was disabled due to repeated failed password attempts') }}</p>
+                    </ion-label>
+                    <ion-icon slot="end" color="danger" :icon="warningOutline" />
+                  </ion-item> -->
+                  <ion-item>
+                    <ion-label>{{ translate('Username') }}</ion-label>
+                    <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label>{{ translate("Block login") }}</ion-label>
+                    <ion-toggle slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
+                  </ion-item>
+                </ion-list>
+                <ion-button @click="resetPassword()" fill="outline" color="warning" expand="block">
+                  {{ translate('Reset password') }}
+                </ion-button>
+              </div>
+              <div v-else>
+                <ion-list>
+                  <ion-item lines="full">
+                    <ion-label class="ion-text-wrap" position="fixed">{{ translate("Username") }}</ion-label>
+                    <ion-input :placeholder="translate('user.name')" name="username" v-model="username" id="username" required />
+                  </ion-item>
+                  <ion-item>
+                    <ion-label class="ion-text-wrap" position="fixed">{{ translate("Password") }}</ion-label>
+                    <ion-input :placeholder="translate('Default password')" name="password" v-model="password" id="password" type="password" required />
+                    <ion-note slot="helper">{{ translate('will be asked to reset their password when they login', { name: selectedUser.firstName }) }}</ion-note>
+                  </ion-item>
+                </ion-list>
+                <ion-button @click="createNewUserLogin()" fill="outline" expand="block">
+                  {{ translate('Add credentials') }}
+                </ion-button>
+              </div>
             </ion-card>
     
             <ion-card>
@@ -97,6 +116,71 @@
               </ion-list>
             </ion-card>
           </section>
+
+          <div class="section-header">
+            <h1>{{ translate('Permissions') }}</h1>
+          </div>
+
+          <section class="user-details">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>
+                  {{ translate('Clearance') }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-list>
+                <ion-item>
+                  <ion-icon :icon="businessOutline" slot="start" />
+                  <ion-label>{{ translate('Security Group') }}</ion-label>        
+                  <ion-select interface="popover" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
+                    <ion-select-option v-for="securityGroup in securityGroups" :key="securityGroup.groupId" :value="securityGroup.groupId">
+                      {{ securityGroup.groupName }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+                <div v-if="!userProductStores.length">
+                  <ion-button @click="selectProductStore()" fill="outline" expand="block">
+                    <ion-icon :icon="addOutline" slot='start' />
+                    {{ translate('Add to a product store') }}
+                  </ion-button>
+                </div>
+                <div v-else>
+                  <ion-list-header color="light">
+                    <ion-label>{{ translate('Product stores') }}</ion-label>
+                    <ion-button @click="selectProductStore()">
+                      <ion-icon slot="start" :icon="addCircleOutline" />
+                      {{ translate('Add') }}
+                    </ion-button>
+                  </ion-list-header>
+                  <ion-item v-for="store in userProductStores" :key="store.productStoreId">
+                    <ion-label>
+                      <h2>{{ store.storeName }}</h2>
+                      <p>{{ getRoleTypeDesc(store.roleTypeId) }}</p>
+                    </ion-label>
+                    <ion-button slot="end" fill="clear" color="medium" @click="openProductStoreActionsPopover($event, store)">
+                      <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
+                    </ion-button>
+                  </ion-item>
+                </div>
+              </ion-list>
+            </ion-card>
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>
+                  {{ translate('Fulfillment') }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-list>
+                <ion-item>
+                  <ion-label>{{ translate("Show as picker") }}</ion-label>
+                  <ion-toggle slot="end" @click="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true" />
+                </ion-item>
+                <ion-item lines="none" button detail @click="selectFacility()">
+                    <ion-label>{{ selectedUser.facilities.length === 1 ? translate('added to 1 facility') : translate('added to facilities', { count: selectedUser.facilities.length }) }}</ion-label>
+                </ion-item>
+              </ion-list>
+            </ion-card>
+          </section>
         </div>
       </main>
     </ion-content>
@@ -105,7 +189,7 @@
 <script lang="ts">
 import {
   alertController,
-  IonAvatar,
+  IonBackButton,
   IonButton,
   IonCard,
   IonCardHeader,
@@ -113,11 +197,15 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
+  IonInput,
   IonItem,
   IonList,
+  IonListHeader,
   IonLabel,
-  IonMenuButton,
+  IonNote,
   IonPage,
+  IonSelect,
+  IonSelectOption,
   IonTitle,
   IonToggle,
   IonToolbar,
@@ -136,19 +224,22 @@ import {
   mailOutline,
   warningOutline
 } from 'ionicons/icons';
-import Image from '@/components/Image.vue'
 import { translate } from '@hotwax/dxp-components';
 import ContactActionsPopover from '@/components/ContactActionsPopover.vue'
+import ProductStoreActionsPopover from '@/components/ProductStoreActionsPopover.vue'
 import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
+import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
+import ProductStoreRoleModal from '@/components/ProductStoreRoleModal.vue'
 import { UserService } from "@/services/UserService";
-import { showToast } from "@/utils";
-import { hasError } from "@hotwax/oms-api";
+import { isValidEmail, showToast } from "@/utils";
+import { hasError } from '@/adapter';
+import { UtilService } from "@/services/UtilService";
+import { DateTime } from "luxon";
 
 export default defineComponent({
   name: "UserDetails",
   components: {
-    Image,
-    IonAvatar,
+    IonBackButton,
     IonButton,
     IonCard,
     IonCardHeader,
@@ -156,24 +247,31 @@ export default defineComponent({
     IonContent,
     IonHeader,
     IonIcon,
+    IonInput,
     IonItem,
     IonLabel,
     IonList,
-    IonMenuButton,
+    IonListHeader,
+    IonNote,
     IonPage,
+    IonSelect,
+    IonSelectOption,
     IonTitle,
     IonToggle,
     IonToolbar,
   },
   computed: {
     ...mapGetters({
-      selectedUser: 'user/getSelectedUser'
+      selectedUser: 'user/getSelectedUser',
+      userProductStores: 'util/getUserProductStores',
+      getRoleTypeDesc: 'util/getRoleTypeDesc',
+      securityGroups: 'util/getSecurityGroups'
     })
   },
   props: ['partyId'],
   data() {
     return {
-      options: {
+      OPTIONS: {
         email: {
           header: 'Add email',
           placeholder: 'Email'
@@ -186,11 +284,15 @@ export default defineComponent({
           header: 'Add external ID',
           placeholder: 'External ID'
         }
-      } as any
+      } as any,
+      username: "",
+      password: ""
     }
   },
   async ionViewWillEnter() {
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
+    await this.store.dispatch('util/fetchUserProductStores', this.partyId)
+    await this.store.dispatch('util/getSecurityGroups')
   },
   methods: {
     async openContactActionsPopover(event: Event, type: string, value: string) {
@@ -199,25 +301,23 @@ export default defineComponent({
         event,
         componentProps: {
           type,
-          placeholder: this.options[type].placeholder,
+          placeholder: this.OPTIONS[type].placeholder,
           value,
           contactMechId: type === 'email' 
             ? this.selectedUser.emailDetails.contactMechId
             : this.selectedUser.phoneNumberDetails.contactMechId
         },
-        translucent: true,
         showBackdrop: false,
       });
       return contactActionsPopover.present();
     },
     async addContactField(type: string) {
-      // handling alert header and placeholder
       const contactUpdateAlert = await alertController.create({
-        header: translate(this.options[type].header),
+        header: translate(this.OPTIONS[type].header),
         inputs:  [{
-          // TODO add validation for email/phone
+          // TODO add validation for phone
           name: "input",
-          placeholder: translate(this.options[type].placeholder),
+          placeholder: translate(this.OPTIONS[type].placeholder),
         }],
         buttons: [{
           text: translate('Cancel'),
@@ -226,14 +326,20 @@ export default defineComponent({
         {
           text: translate('Save'),
           handler: async (result) => {
-            const { input } = result
+            const input = result.input.trim()
             if (!input) {
+              showToast(translate('Please enter a value'))
               return
             }
 
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
             try {
               if (type === 'email') {
+                if (!isValidEmail(input)) {
+                  showToast(translate('Invalid email address.'))
+                  return
+                }
+
                 const resp = await UserService.createUpdatePartyEmailAddress({
                   emailAddress: input,
                   partyId: this.selectedUser.partyId,
@@ -281,7 +387,7 @@ export default defineComponent({
                 }
               }
               this.store.dispatch('user/updateSelectedUser', selectedUser)
-              showToast(translate(`${this.options[type].placeholder} added successfully.`))
+              showToast(translate(`${this.OPTIONS[type].placeholder} added successfully.`))
             } catch (error) {
               showToast(translate(`Failed to add ${type === 'email' ? 'email' : (type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
               console.error(error)
@@ -290,6 +396,32 @@ export default defineComponent({
         }]
       })
       await contactUpdateAlert.present()
+    },
+    async createNewUserLogin() {
+      this.username = this.username.trim()
+
+      if (!this.password || !this.username) {
+        translate('Username or password cannot be empty.')
+        return
+      }
+
+      try {
+        const resp = await UserService.createNewUserLogin({
+          currentPassword: this.password,
+          currentPasswordVerify: this.password,
+          userLoginId: this.username,
+          userPrefTypeId: 'ORGANIZATION_PARTY',
+          userPrefValue: 'COMPANY',
+        })
+        if (!hasError(resp)) {
+          await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
+        } else {
+          throw resp.data
+        }
+      } catch (error) {
+        showToast(translate('Something went wrong.'));
+        console.error(error)
+      }
     },
     async resetPassword() {
       const resetPasswordModal = await modalController.create({
@@ -329,6 +461,8 @@ export default defineComponent({
                 showToast(translate('User login status updated successfully.'))
                 // updating toggle state on success
                 event.target.checked = isChecked
+              } else {
+                throw resp.data
               }
             } catch (error) {
               showToast(translate('Failed to update user login status.'))
@@ -339,7 +473,162 @@ export default defineComponent({
       });
 
       await alert.present();
-    }
+    },
+    async openProductStoreActionsPopover(event: Event, store: any) {
+      const productStoreActionsPopover = await popoverController.create({
+        component: ProductStoreActionsPopover,
+        componentProps: {
+          productStore: store
+        },
+        event,
+        showBackdrop: false,
+      });
+      return productStoreActionsPopover.present();
+    },
+    async selectFacility() {
+      const selectFacilityModal = await modalController.create({
+        component: SelectFacilityModal,
+        componentProps: { selectedFacilities: this.selectedUser.facilities }
+      });
+
+      selectFacilityModal.onDidDismiss().then( async (result) => {
+        if (result.data && result.data.value) {
+          const facilitiesToAdd = result.data.value.facilitiesToAdd
+          const facilitiesToRemove = result.data.value.facilitiesToRemove
+
+          const removeResponses = await Promise.allSettled(facilitiesToRemove
+            .map(async (payload: any) => await UtilService.removePartyFromFacility({
+              partyId: this.selectedUser.partyId,
+              facilityId: payload.facilityId,
+              roleTypeId: payload.roleTypeId,
+              fromDate: payload.fromDate,
+            }))
+          )
+    
+          const createResponses = await Promise.allSettled(facilitiesToAdd
+            .map(async (payload: any) => await UtilService.addPartyToFacility({
+              partyId: this.selectedUser.partyId,
+              facilityId: payload.facilityId,
+              roleTypeId: 'WAREHOUSE_MANAGER',
+            }))
+          )
+    
+          const hasError = [...removeResponses, ...createResponses].some((response: any) => response.status === 'rejected')
+          if (hasError) {
+            showToast(translate('Failed to update some association(s).'))
+          } else {
+            showToast(translate('Facility associations updated successfully.'))
+          }
+          // refetching updated associated facilities
+          const userFacilities = await this.store.dispatch('util/getUserAssociatedFacilities', this.selectedUser.partyId)
+          this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, facilities: userFacilities })
+        }
+      })
+      return selectFacilityModal.present();
+    },
+    async selectProductStore() {
+      const selectProductStoreModal = await modalController.create({
+        component: ProductStoreRoleModal,
+      });
+
+      return selectProductStoreModal.present();
+    },
+    async updateSecurityGroup(event: CustomEvent) {
+      const groupId = event.detail.value
+      let resp = {} as any
+      try {
+        // delete if none (empty groupId) selected 
+        if (!groupId) {
+          resp = await UtilService.updateUserSecurityGroup({
+            fromDate: this.selectedUser.securityGroup.fromDate,
+            thruDate: DateTime.now().toMillis(),
+            groupId: this.selectedUser.securityGroup.groupId,
+            userLoginId: this.selectedUser.userLoginId
+          })
+          if (!hasError(resp)) {
+            showToast(translate('Security group updated successfully.'))
+            const userSecurityGroup = await this.store.dispatch('util/getUserSecurityGroups', this.selectedUser.userLoginId)
+            this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, userSecurityGroup })
+          } else {
+            throw resp.data
+          }
+        } else if (this.selectedUser.securityGroup.groupId) {
+          // update if already associated
+          resp = await UtilService.updateUserSecurityGroup({
+            fromDate: this.selectedUser.securityGroup.fromDate,
+            thruDate: DateTime.now().toMillis(),
+            groupId: this.selectedUser.securityGroup.groupId,
+            userLoginId: this.selectedUser.userLoginId
+          })
+          if (!hasError(resp)) {
+            resp = await UtilService.addUserToSecurityGroup({
+              groupId,
+              userLoginId: this.selectedUser.userLoginId
+            })
+            if (hasError(resp)) throw resp.data
+            showToast(translate('Security group updated successfully.'))
+            const userSecurityGroup = await this.store.dispatch('util/getUserSecurityGroups', this.selectedUser.userLoginId)
+            this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, userSecurityGroup })
+          } else {
+            throw resp.data
+          }
+        } else {
+          // create if not associated
+          resp = await UtilService.addUserToSecurityGroup({
+            groupId,
+            userLoginId: this.selectedUser.userLoginId
+          })
+          if (!hasError(resp)) {
+            showToast(translate('Security group updated successfully.'))
+            const userSecurityGroup = await this.store.dispatch('util/getUserSecurityGroups', this.selectedUser.userLoginId)
+            this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, userSecurityGroup })
+          } else {
+            throw resp.data
+          }
+        }
+      } catch (error) {
+        showToast(translate('Something went wrong.'))
+        console.error(error)
+      }
+    },
+    async updatePickerRoleStatus(event: any) {
+      event.stopImmediatePropagation();
+
+      const isChecked = !event.target.checked;
+      const message = 'Are you sure you want to perform this action?'
+
+      const alert = await alertController.create({
+        header: translate('Show as picker'),
+        message: translate(message),
+        buttons: [{
+          text: translate('No'),
+          role: ''
+        }, {
+          text: translate('Yes'),
+          role: 'success',
+          handler: async () => {
+            try {
+              const resp = await UtilService.createPartyRole({
+                partyId: this.partyId,
+                roleTypeId: 'WAREHOUSE_PICKER'
+              })
+              if (!hasError(resp)) {
+                showToast(translate('User picker role updated successfully.'))
+                // updating toggle state on success
+                event.target.checked = isChecked
+              } else {
+                throw resp.data
+              }
+            } catch (error) {
+              showToast(translate('Failed to update user role.'))
+              console.error(error)
+            }
+          }
+        }],
+      });
+
+      await alert.present();
+    },
   },
   setup() {
     const router = useRouter();
@@ -364,5 +653,12 @@ export default defineComponent({
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   align-items: start;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacer-xs) 10px 0px;
 }
 </style>

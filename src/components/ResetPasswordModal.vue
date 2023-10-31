@@ -11,23 +11,33 @@
   </ion-header>
 
   <ion-content>
-    <!-- TODO add password requirements -->
     <ion-list>
-      <!-- TODO add password validation -->
-      <ion-item lines="full">
-        <ion-label class="ion-text-wrap" position="fixed">{{ translate("New password") }}</ion-label>
-        <ion-input :placeholder="translate('Enter password')" name="password" v-model="newPassword" id="key" type="password" required />
+      <ion-item lines="none">
+        <ion-note>
+          {{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}
+        </ion-note>
       </ion-item>
-      <ion-item>
+      <ion-item lines="full" ref="password">
+        <ion-label class="ion-text-wrap" position="fixed">{{ translate("New password") }}</ion-label>
+        <ion-input @keyup="validatePassword" @ionBlur="markPasswordTouched" :placeholder="translate('Enter password')" name="password" v-model="newPassword" id="newPassword" :type="showNewPassword ? 'text' : 'password'" required />
+        <ion-button fill="clear" @click="showNewPassword = !showNewPassword">
+          <ion-icon :icon="showNewPassword ? eyeOutline : eyeOffOutline"/>
+        </ion-button>
+        <ion-note slot="error">{{ translate('Password requirements not fulfilled.') }}</ion-note>
+      </ion-item>
+      <ion-item ref="confirmPassword">
         <ion-label class="ion-text-wrap" position="fixed">{{ translate("Verify new password") }}</ion-label>
-        <ion-input :placeholder="translate('Confirm password')" name="password2" v-model="confirmPassword" id="value" type="password" required />
+        <ion-input @keyup="validateConfirmPassword()" @ionBlur="markConfirmPasswordTouched" :placeholder="translate('Confirm password')" name="confirmPassword" v-model="confirmPassword" id="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" required />
+        <ion-button fill="clear" @click="showConfirmPassword = !showConfirmPassword">
+          <ion-icon :icon="showConfirmPassword ? eyeOutline : eyeOffOutline"/>
+        </ion-button>
+        <ion-note slot="error">{{ translate('Passwords do not match.') }}</ion-note>
       </ion-item>
     </ion-list>
 
-    <!-- TODO check API for reset password email -->
     <ion-item v-if="email?.length" class="ion-padding-top">
       <ion-icon :icon="mailOutline" slot="start" />
-      <ion-button fill="clear">
+      <ion-button fill="clear" @click="sendResetPasswordEmail()">
         {{ translate('Send reset password email instead') }}
       </ion-button>
       <ion-label slot="end">{{ email }}</ion-label>
@@ -55,15 +65,23 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonNote,
   IonTitle,
   IonToolbar,
   modalController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
-import { closeOutline, lockClosedOutline, mailOutline } from "ionicons/icons";
+import {
+  closeOutline,
+  eyeOutline,
+  eyeOffOutline,
+  lockClosedOutline,
+  mailOutline
+} from "ionicons/icons";
 import { useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components'
-import { hasError, showToast } from "@/utils";
+import { isValidPassword, showToast } from "@/utils";
+import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
 
 export default defineComponent({
@@ -80,13 +98,16 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
+    IonNote,
     IonTitle,
     IonToolbar,
   },
   data() {
     return {
       newPassword: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      showConfirmPassword: false,
+      showNewPassword: false,
     }
   },
   props: ["email", "userLoginId"],
@@ -103,23 +124,71 @@ export default defineComponent({
         })
         if (!hasError(resp)) {
           showToast(translate('Password reset successful.'))
+        } else {
+          throw resp.data
         }
       } catch (error) {
         showToast(translate('Failed to reset password.'))
         console.error(error)
       }
+      this.closeModal()
     },
     checkResetButtonStatus() {
-      // TODO add check for length and other requirements
-      return (!this.newPassword.length || !this.confirmPassword.length) 
-        || (this.newPassword.trim() !== this.confirmPassword.trim())
-    }
+      // TODO add check for length and other requirements(
+      return ((!this.newPassword.length || !this.confirmPassword.length)
+        || (this.newPassword !== this.confirmPassword)
+        || (!isValidPassword(this.newPassword) || !isValidPassword(this.confirmPassword)))
+    },
+    validatePassword(event: any) {
+      const value = event.target.value;
+      (this as any).$refs.password.$el.classList.remove('ion-valid');
+      (this as any).$refs.password.$el.classList.remove('ion-invalid');
+
+      if (value === '') return;
+
+      isValidPassword(value)
+        ? (this as any).$refs.password.$el.classList.add('ion-valid')
+        : (this as any).$refs.password.$el.classList.add('ion-invalid');
+    },
+    validateConfirmPassword() {
+      (this as any).$refs.confirmPassword.$el.classList.remove('ion-valid');
+      (this as any).$refs.confirmPassword.$el.classList.remove('ion-invalid');
+      
+      (this.newPassword === this.confirmPassword)
+      ? (this as any).$refs.confirmPassword.$el.classList.add('ion-valid')
+      : (this as any).$refs.confirmPassword.$el.classList.add('ion-invalid');
+    },
+    async sendResetPasswordEmail() {
+      try {
+        const resp = await UserService.sendResetPasswordEmail({
+          emailAddress: this.email,
+          userName: this.userLoginId
+        })
+        if (!hasError(resp)) {
+          showToast(translate('Password reset email sent successfully.'))
+        } else {
+          throw resp.data
+        }
+      } catch (error) {
+        showToast(translate('Failed to send password reset email.'))
+        console.error(error)
+      }
+      this.closeModal()
+    },
+    markPasswordTouched() {
+      (this as any).$refs.password.$el.classList.add('ion-touched');
+    },
+    markConfirmPasswordTouched() {
+      (this as any).$refs.confirmPassword.$el.classList.add('ion-touched');
+    },
   },
   setup() {
     const store = useStore();
 
     return {
       closeOutline,
+      eyeOutline,
+      eyeOffOutline,
       lockClosedOutline,
       mailOutline,
       store,

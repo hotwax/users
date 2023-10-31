@@ -137,7 +137,7 @@ export default defineComponent({
     }
   },
   async ionViewWillEnter() {
-    this.store.dispatch('util/fetchFacilities')
+    await this.store.dispatch('util/fetchFacilities')
   },
   methods: {
     updateFacilityLogin(event: CustomEvent) {
@@ -177,7 +177,7 @@ export default defineComponent({
         const validationErrors = this.validateCreateUserDetail({...this.formData, partyTypeId});
         if (validationErrors.length > 0) {
           const errorMessages = validationErrors.join(" ");
-          console.log(errorMessages);
+          console.error(errorMessages);
           showToast(translate(errorMessages));
           return;
         }

@@ -161,6 +161,14 @@ const getUserContactDetails = async (payload: any): Promise<any> => {
   })
 }
 
+const getPartyRole = async (payload: any): Promise<any> => {
+  return api({
+    url: 'performFind',
+    method: 'POST',
+    data: payload
+  })
+}
+
 const resetPassword = async (payload: any): Promise <any> => {
   return api({
     url: "service/resetPassword", 
@@ -225,18 +233,37 @@ const createUser = async (payload: any): Promise <any> => {
   });
 }
 
+const createNewUserLogin = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/createNewUserLoginAndSetUserPreference", 
+    method: "post",
+    data: payload
+  });
+}
+
+const sendResetPasswordEmail = async (payload: any): Promise <any> => {
+  return api({
+    url: "sendResetPassword", 
+    method: "post",
+    data: payload
+  });
+} 
+
 export const UserService = {
+  createNewUserLogin,
   createUpdatePartyEmailAddress,
   createUpdatePartyTelecomNumber,
   deletePartyContactMech,
   getAvailableTimeZones,
   fetchUsers,
+  getPartyRole,
   getUserContactDetails,
   getUserLoginDetails,
   getUserPermissions,
   getUserProfile,
   login,
   resetPassword,
+  sendResetPasswordEmail,
   setUserTimeZone,
   updateUserLoginStatus,
   updatePartyGroup,

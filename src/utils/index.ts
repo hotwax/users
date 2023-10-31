@@ -2,11 +2,6 @@ import { toastController } from '@ionic/vue';
 import { Plugins } from '@capacitor/core';
 import { translate } from '@hotwax/dxp-components';
 
-// TODO Remove it when HC APIs are fully REST compliant
-const hasError = (response: any) => {
-  return typeof response.data != "object" || !!response.data._ERROR_MESSAGE_ || !!response.data._ERROR_MESSAGE_LIST_ || !!response.data.error;
-}
-
 const showToast = async (message: string, configButtons?: any) => {
   const defaultButtons = [{
     text: 'Dismiss',
@@ -42,10 +37,9 @@ const isValidEmail = (email : string) => {
   return emailPattern.test(email);
 }
 const isValidPassword = (password : string) => {
-  // Regular expression pattern for a valid email address
+  // Regular expression pattern for a valid password
   const passwordPattern = /^.*(?=.{5,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$/;
   return passwordPattern.test(password);
 }
 
-
-export { copyToClipboard, showToast, hasError, isValidEmail, isValidPassword }
+export { copyToClipboard, showToast, isValidEmail, isValidPassword }

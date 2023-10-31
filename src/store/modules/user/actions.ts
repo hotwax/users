@@ -154,13 +154,13 @@ const actions: ActionTree<UserState, RootState> = {
 
   async getSelectedUserDetails({ commit, state }, payload) {
     const currentSelectedUser = JSON.parse(JSON.stringify(state.selectedUser))
-    if (currentSelectedUser.partyId === payload.partyId) {
+    if (currentSelectedUser.partyId === payload.partyId && !payload.isFetchRequired) {
       return
     }
 
     emitter.emit('presentLoader')
 
-    let resp = {} as any, selectedUser = {}, params = {
+    let resp = {} as any, selectedUser = {} as any, params = {
       inputFields: {
         partyId: payload.partyId,
       },
@@ -214,18 +214,42 @@ const actions: ActionTree<UserState, RootState> = {
             externalId: resp.data.docs[0].externalId,
             ...(Object.keys(emailDetails).length && { emailDetails }),
             ...(Object.keys(phoneNumberDetails).length && { phoneNumberDetails })
-          } 
+          }
+        } else {
+          throw resp.data
         }
+      } else {
+        throw resp.data
       }
     } catch (error) {
+      showToast(translate('Something went wrong.'));
       console.error(error)
     }
-    emitter.emit('dismissLoader')
+
+    if (!hasError(resp)) {
+      selectedUser.securityGroup = await this.dispatch('util/getUserSecurityGroups', selectedUser.userLoginId)
+      selectedUser.facilities = await this.dispatch('util/getUserAssociatedFacilities', selectedUser.partyId)
+      resp = await UserService.getPartyRole({
+        inputFields: {
+          partyId: selectedUser.partyId,
+          roleTypeId: 'WAREHOUSE_PICKER',
+          roleTypeId_op: 'equals'
+        },
+        viewSize: 1,
+        entityName: 'PartyRole',
+        fieldList: ['partyId', 'roleTypeId']
+      })
+
+      if (!hasError(resp)) {
+        selectedUser.isWarehousePicker = true
+      }
+    }
     commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
+    emitter.emit('dismissLoader')
   },
 
-  updateSelectedUser({ commit }, user) {
-    commit(types.USER_SELECTED_USER_UPDATED, user)
+  updateSelectedUser({ commit }, selectedUser) {
+    commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
   },
 
   async fetchUsers({ commit, state }, payload) {

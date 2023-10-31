@@ -27,7 +27,8 @@ import {
 import { defineComponent } from "vue";
 import { translate } from "@hotwax/dxp-components";
 import { mapGetters, useStore } from 'vuex';
-import { copyToClipboard, hasError, showToast } from "@/utils";
+import { hasError } from "@/adapter";
+import { copyToClipboard, isValidEmail, showToast } from "@/utils";
 import { UserService } from "@/services/UserService";
 
 export default defineComponent({
@@ -46,7 +47,7 @@ export default defineComponent({
   },
   data() {
     return {
-      options: {
+      OPTIONS: {
         email: {
           removeHeader: 'Remove email',
           editHeader: 'Edit email',
@@ -75,11 +76,11 @@ export default defineComponent({
     },
     async updateContactField() {
       const contactUpdateAlert = await alertController.create({
-        header: translate(this.options[this.type].editHeader),
+        header: translate(this.OPTIONS[this.type].editHeader),
         inputs:  [{
-          // TODO add validation for email/phone
+          // TODO add validation for phone
           name: "input",
-          placeholder: translate(this.options[this.type].placeholder),
+          placeholder: translate(this.OPTIONS[this.type].placeholder),
           value: this.value
         }],
         buttons: [{
@@ -89,15 +90,23 @@ export default defineComponent({
         {
           text: translate('Save'),
           handler: async (result) => {
-            const { input } = result
+            const input = result.input.trim()
             // if initial and new value are same, return
             if (!input || input === this.value) {
+              if (!input) {
+                showToast(translate('Please enter a value'))
+              }
               return
             }
 
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
             try {
               if (this.type === 'email') {
+                if (!isValidEmail(input)) {
+                  showToast(translate('Invalid email address.'))
+                  return
+                }
+
                 const resp = await UserService.createUpdatePartyEmailAddress({
                   contactMechId: this.contactMechId,
                   emailAddress: input,
@@ -145,7 +154,7 @@ export default defineComponent({
                 }
               }
               this.store.dispatch('user/updateSelectedUser', selectedUser)
-              showToast(translate(`${this.options[this.type].placeholder} updated successfully.`))
+              showToast(translate(`${this.OPTIONS[this.type].placeholder} updated successfully.`))
             } catch (error) {
               showToast(translate(`Failed to update ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
               console.error(error)
@@ -160,7 +169,7 @@ export default defineComponent({
       const message = `Are you sure you want to remove the ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.?`
 
       const contactUpdateAlert = await alertController.create({
-        header: translate(this.options[this.type].removeHeader),
+        header: translate(this.OPTIONS[this.type].removeHeader),
         message: translate(message),
         buttons: [{
           text: translate('Cancel'),
@@ -202,7 +211,7 @@ export default defineComponent({
                 delete selectedUser.externalId
               }
               this.store.dispatch('user/updateSelectedUser', selectedUser)
-              showToast(translate(`${this.options[this.type].placeholder} removed successfully.`))
+              showToast(translate(`${this.OPTIONS[this.type].placeholder} removed successfully.`))
             } catch (error) {
               showToast(translate(`Failed to remove ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
               console.error(error)

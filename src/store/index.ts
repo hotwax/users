@@ -11,9 +11,7 @@ import utilModule from "./modules/util"
 // Handle same module registering multiple time on page refresh
 //store.registerModule('user', userModule);
 
-const state: any = {
-
-}
+const state: any = {}
 
 const persistState = createPersistedState({
   paths: ['user', 'util'],
