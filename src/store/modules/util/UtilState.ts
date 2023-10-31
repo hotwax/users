@@ -4,5 +4,4 @@ export default interface UtilState {
   userProductStores: any[];
   securityGroups: any[];
   facilities: any[];
-  productStores: any[];
 }

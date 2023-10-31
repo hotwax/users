@@ -154,7 +154,7 @@
                   </ion-list-header>
                   <ion-item v-for="store in userProductStores" :key="store.productStoreId">
                     <ion-label>
-                      <h2>{{ getUserProductStoreName(store.productStoreId) }}</h2>
+                      <h2>{{ store.storeName }}</h2>
                       <p>{{ getRoleTypeDesc(store.roleTypeId) }}</p>
                     </ion-label>
                     <ion-button slot="end" fill="clear" color="medium" @click="openProductStoreActionsPopover($event, store)">
@@ -229,7 +229,7 @@ import ContactActionsPopover from '@/components/ContactActionsPopover.vue'
 import ProductStoreActionsPopover from '@/components/ProductStoreActionsPopover.vue'
 import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
-import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
+import ProductStoreRoleModal from '@/components/ProductStoreRoleModal.vue'
 import { UserService } from "@/services/UserService";
 import { isValidEmail, showToast } from "@/utils";
 import { hasError } from '@/adapter';
@@ -264,7 +264,6 @@ export default defineComponent({
     ...mapGetters({
       selectedUser: 'user/getSelectedUser',
       userProductStores: 'util/getUserProductStores',
-      getUserProductStoreName: 'util/getUserProductStoreName',
       getRoleTypeDesc: 'util/getRoleTypeDesc',
       securityGroups: 'util/getSecurityGroups'
     })
@@ -292,7 +291,7 @@ export default defineComponent({
   },
   async ionViewWillEnter() {
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
-    await this.store.dispatch('util/getUserProductStores', this.partyId)
+    await this.store.dispatch('util/fetchUserProductStores', this.partyId)
     await this.store.dispatch('util/getSecurityGroups')
   },
   methods: {
@@ -489,15 +488,47 @@ export default defineComponent({
     async selectFacility() {
       const selectFacilityModal = await modalController.create({
         component: SelectFacilityModal,
-        componentProps: {
-        }
+        componentProps: { selectedFacilities: this.selectedUser.facilities }
       });
 
+      selectFacilityModal.onDidDismiss().then( async (result) => {
+        if (result.data && result.data.value) {
+          const facilitiesToAdd = result.data.value.facilitiesToAdd
+          const facilitiesToRemove = result.data.value.facilitiesToRemove
+
+          const removeResponses = await Promise.allSettled(facilitiesToRemove
+            .map(async (payload: any) => await UtilService.removePartyFromFacility({
+              partyId: this.selectedUser.partyId,
+              facilityId: payload.facilityId,
+              roleTypeId: payload.roleTypeId,
+              fromDate: payload.fromDate,
+            }))
+          )
+    
+          const createResponses = await Promise.allSettled(facilitiesToAdd
+            .map(async (payload: any) => await UtilService.addPartyToFacility({
+              partyId: this.selectedUser.partyId,
+              facilityId: payload.facilityId,
+              roleTypeId: 'WAREHOUSE_MANAGER',
+            }))
+          )
+    
+          const hasError = [...removeResponses, ...createResponses].some((response: any) => response.status === 'rejected')
+          if (hasError) {
+            showToast(translate('Failed to update some association(s).'))
+          } else {
+            showToast(translate('Facility associations updated successfully.'))
+          }
+          // refetching updated associated facilities
+          const userFacilities = await this.store.dispatch('util/getUserAssociatedFacilities', this.selectedUser.partyId)
+          this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, facilities: userFacilities })
+        }
+      })
       return selectFacilityModal.present();
     },
     async selectProductStore() {
       const selectProductStoreModal = await modalController.create({
-        component: SelectProductStoreModal,
+        component: ProductStoreRoleModal,
       });
 
       return selectProductStoreModal.present();
@@ -506,15 +537,31 @@ export default defineComponent({
       const groupId = event.detail.value
       let resp = {} as any
       try {
-        if (groupId !== 'none') {
-          resp = await UtilService.updateSecurityGroup({
+        // delete if none (empty groupId) selected 
+        if (!groupId) {
+          resp = await UtilService.updateUserSecurityGroup({
             fromDate: this.selectedUser.securityGroup.fromDate,
             thruDate: DateTime.now().toMillis(),
             groupId: this.selectedUser.securityGroup.groupId,
             userLoginId: this.selectedUser.userLoginId
           })
           if (!hasError(resp)) {
-            resp = await UtilService.createSecurityGroup({
+            showToast(translate('Security group updated successfully.'))
+            const userSecurityGroup = await this.store.dispatch('util/getUserSecurityGroups', this.selectedUser.userLoginId)
+            this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, userSecurityGroup })
+          } else {
+            throw resp.data
+          }
+        } else if (this.selectedUser.securityGroup.groupId) {
+          // update if already associated
+          resp = await UtilService.updateUserSecurityGroup({
+            fromDate: this.selectedUser.securityGroup.fromDate,
+            thruDate: DateTime.now().toMillis(),
+            groupId: this.selectedUser.securityGroup.groupId,
+            userLoginId: this.selectedUser.userLoginId
+          })
+          if (!hasError(resp)) {
+            resp = await UtilService.addUserToSecurityGroup({
               groupId,
               userLoginId: this.selectedUser.userLoginId
             })
@@ -526,7 +573,8 @@ export default defineComponent({
             throw resp.data
           }
         } else {
-          resp = await UtilService.createSecurityGroup({
+          // create if not associated
+          resp = await UtilService.addUserToSecurityGroup({
             groupId,
             userLoginId: this.selectedUser.userLoginId
           })
@@ -560,7 +608,7 @@ export default defineComponent({
           role: 'success',
           handler: async () => {
             try {
-              const resp = await UtilService.updatePickerRoleStatus({
+              const resp = await UtilService.createPartyRole({
                 partyId: this.partyId,
                 roleTypeId: 'WAREHOUSE_PICKER'
               })

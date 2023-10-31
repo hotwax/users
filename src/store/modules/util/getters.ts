@@ -12,9 +12,6 @@ const getters: GetterTree<UtilState, RootState> = {
 	getUserProductStores(state) {
 		return state.userProductStores;
 	},
-	getUserProductStoreName: (state) => (productStoreId: string) => {
-		return state.productStores.find((store: any) => store.productStoreId === productStoreId).storeName
-	},
 	getRoleTypeDesc: (state) => (roleTypeId: string) => {
 		return state.roles.find((role: any) => role.roleTypeId === roleTypeId).description
 	},

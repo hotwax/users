@@ -1,8 +1,8 @@
 <template>
   <ion-content>
     <ion-list>
-      <ion-list-header>{{ getUserProductStoreName(productStore.productStoreId) }}</ion-list-header>
-      <ion-item button @click="selectProductStore()">
+      <ion-list-header>{{ productStore.storeName }}</ion-list-header>
+      <ion-item button @click="selectProductStoreRole()">
         {{ translate("Edit role") }}
       </ion-item>
       <!-- <ion-item button>
@@ -28,11 +28,11 @@ import {
 import { defineComponent } from "vue";
 import { translate } from "@hotwax/dxp-components";
 import { mapGetters, useStore } from 'vuex';
-import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
+import ProductStoreRoleModal from '@/components/ProductStoreRoleModal.vue'
 import { UtilService } from "@/services/UtilService";
 import { DateTime } from "luxon";
 import { showToast } from "@/utils";
-import { hasError } from "@hotwax/oms-api";
+import { hasError } from "@/adapter";
 
 export default defineComponent({
   name: "ProductStoreActionsPopover",
@@ -46,7 +46,6 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       selectedUser: 'user/getSelectedUser',
-      getUserProductStoreName: 'util/getUserProductStoreName',
       getProductStoreRoleType: 'util/getProductStoreRoleType',
       userProductStores: 'util/getUserProductStores',
     })
@@ -55,17 +54,13 @@ export default defineComponent({
     closePopover() {
       popoverController.dismiss();
     },
-    async selectProductStore() {
-      const selectProductStoreModal = await modalController.create({
-        component: SelectProductStoreModal,
-        componentProps: {
-          email: this.selectedUser.emailDetails?.email,
-          userLoginId: this.selectedUser.userLoginId
-        }
+    async selectProductStoreRole() {
+      const selectProductStoreRoleModal = await modalController.create({
+        component: ProductStoreRoleModal,
       });
 
       this.closePopover()
-      return selectProductStoreModal.present();
+      return selectProductStoreRoleModal.present();
     },
     async removeProductStoreRole() {
       try {
@@ -83,7 +78,7 @@ export default defineComponent({
         console.error(error)
       }
       // refetching product stores with updated roles
-      await this.store.dispatch('util/getUserProductStores', this.selectedUser.partyId)
+      await this.store.dispatch('util/fetchUserProductStores', this.selectedUser.partyId)
       this.closePopover()
     },
     async confirmRemove() {

@@ -20,7 +20,6 @@ import {
 } from '@/authorization'
 import { translate, useAuthStore, useUserStore } from '@hotwax/dxp-components'
 import emitter from '@/event-bus'
-import { UtilService } from '@/services/UtilService'
 
 const actions: ActionTree<UserState, RootState> = {
 

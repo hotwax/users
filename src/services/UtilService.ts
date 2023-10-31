@@ -1,6 +1,6 @@
 import { api } from '@/adapter';
 
-const getRoles = async (payload: any): Promise<any> => {
+const fetchRoles = async (payload: any): Promise<any> => {
   return api({
     url: 'performFind',
     method: 'POST',
@@ -59,7 +59,7 @@ const getUserSecurityGroup = async (payload: any): Promise<any> => {
   })
 }
 
-const updateSecurityGroup = async (payload: any): Promise <any> => {
+const updateUserSecurityGroup = async (payload: any): Promise <any> => {
   return api({
     url: "service/updateUserLoginToSecurityGroup", 
     method: "post",
@@ -67,7 +67,7 @@ const updateSecurityGroup = async (payload: any): Promise <any> => {
   });
 }
 
-const createSecurityGroup = async (payload: any): Promise <any> => {
+const addUserToSecurityGroup = async (payload: any): Promise <any> => {
   return api({
     url: "service/addUserLoginToSecurityGroup", 
     method: "post",
@@ -75,7 +75,7 @@ const createSecurityGroup = async (payload: any): Promise <any> => {
   });
 }
 
-const updatePickerRoleStatus = async (payload: any): Promise <any> => {
+const createPartyRole = async (payload: any): Promise <any> => {
   return api({
     url: "service/ensurePartyRole", 
     method: "post",
@@ -119,17 +119,17 @@ const fetchProductStores = async(query: any): Promise<any> => {
 export const UtilService = {
   addPartyToFacility,
   createProductStoreRole,
-  createSecurityGroup,
+  addUserToSecurityGroup,
   fetchFacilities,
   fetchProductStores,
   getSecurityGroups,
-  getRoles,
+  fetchRoles,
   getUserAssociatedProductStores,
   getUserAssociatedFacilities,
   getUserSecurityGroup,
   removePartyFromFacility,
   updateProductStoreRole,
-  updateSecurityGroup,
-  updatePickerRoleStatus,
+  updateUserSecurityGroup,
+  createPartyRole,
 }
   

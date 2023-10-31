@@ -8,16 +8,20 @@ import { hasError } from '@/adapter'
 import { translate } from '@hotwax/dxp-components'
 
 const actions: ActionTree<UtilState, RootState> = {
-  async getRoles({ commit }) {
+  async fetchRoles({ commit, state }) {
+    if (state.roles.length) {
+      return
+    }
+
     let roles = []
     const params = {
       inputFields: {
-        parentTypeId_fld0_value: 'APPLICATION_USER',
-        parentTypeId_fld0_op: 'equals',
-        parentTypeId_fld0_grp: '1',
-        roleTypeId_fld0_value: 'APPLICATION_USER',
-        roleTypeId_fld0_op: 'equals',
-        roleTypeId_fld0_grp: '2',
+        parentTypeId_value: 'APPLICATION_USER',
+        parentTypeId_op: 'equals',
+        parentTypeId_grp: '1',
+        roleTypeId_value: 'APPLICATION_USER',
+        roleTypeId_op: 'equals',
+        roleTypeId_grp: '2',
       },
       viewSize: 100,
       entityName: 'RoleType',
@@ -25,7 +29,7 @@ const actions: ActionTree<UtilState, RootState> = {
     }
 
     try {
-      const resp = await UtilService.getRoles(params)
+      const resp = await UtilService.fetchRoles(params)
       if (!hasError(resp)) {
         roles = resp.data.docs
         // pushing none explicitly to show on UI
@@ -46,7 +50,6 @@ const actions: ActionTree<UtilState, RootState> = {
 
   async getProductStores({ commit }) {
     let productStores = []
-    // TODO verify filtering condition for store type
     const params = {
       viewSize: 100,
       noConditionFind: 'Y',
@@ -68,25 +71,25 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_PRODUCT_STORES_UPDATED, productStores)
   },
 
-  async getUserProductStores({ commit, dispatch }, partyId) {
+  async fetchUserProductStores({ commit, dispatch, state }, partyId) {
     let userProductStores = []
     const params = {
       inputFields: {
         partyId,
       },
       viewSize: 100,
-      entityName: 'ProductStoreRole',
+      entityName: 'ProductStoreAndRole',
       filterByDate: 'Y',
-      fieldList: ['partyId', 'roleTypeId', 'productStoreId', 'fromDate']
+      fieldList: ['partyId', 'storeName', 'roleTypeId', 'productStoreId', 'fromDate']
     }
 
     try {
       // fetching stores and roles first as storeName and role description
       // are required in the UI
-      await dispatch('getProductStores')
-      await dispatch('getRoles')
-
+      Promise.allSettled([dispatch('getProductStores'), dispatch('fetchRoles')])
+      
       const resp = await UtilService.getUserAssociatedProductStores(params)
+      console.log(resp)
       if (!hasError(resp) || resp.data.error === 'No record found') {
         userProductStores = resp.data.docs ? resp.data.docs : []
       } else {
@@ -120,7 +123,7 @@ const actions: ActionTree<UtilState, RootState> = {
       if(!hasError(resp)) {
         securityGroups = resp.data.docs
         securityGroups.push({
-          groupId: 'none',
+          groupId: '',
           groupName: 'None',
         })
       } else {
@@ -193,7 +196,7 @@ const actions: ActionTree<UtilState, RootState> = {
       const resp = await UtilService.getUserSecurityGroup(payload)
       if (!hasError(resp) || resp.data.error === 'No record found') {
         userSecurityGroup = {
-          groupId: resp.data.docs ? resp.data.docs[0].groupId : 'none',
+          groupId: resp.data.docs ? resp.data.docs[0].groupId : '',
           fromDate: resp.data.docs && resp.data.docs[0].fromDate
         }
       } else {
