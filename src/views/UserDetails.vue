@@ -233,7 +233,6 @@ import ProductStoreRoleModal from '@/components/ProductStoreRoleModal.vue'
 import { UserService } from "@/services/UserService";
 import { isValidEmail, showToast } from "@/utils";
 import { hasError } from '@/adapter';
-import { UtilService } from "@/services/UtilService";
 import { DateTime } from "luxon";
 
 export default defineComponent({
@@ -497,7 +496,7 @@ export default defineComponent({
           const facilitiesToRemove = result.data.value.facilitiesToRemove
 
           const removeResponses = await Promise.allSettled(facilitiesToRemove
-            .map(async (payload: any) => await UtilService.removePartyFromFacility({
+            .map(async (payload: any) => await UserService.removePartyFromFacility({
               partyId: this.selectedUser.partyId,
               facilityId: payload.facilityId,
               roleTypeId: payload.roleTypeId,
@@ -506,7 +505,7 @@ export default defineComponent({
           )
     
           const createResponses = await Promise.allSettled(facilitiesToAdd
-            .map(async (payload: any) => await UtilService.addPartyToFacility({
+            .map(async (payload: any) => await UserService.addPartyToFacility({
               partyId: this.selectedUser.partyId,
               facilityId: payload.facilityId,
               roleTypeId: 'WAREHOUSE_MANAGER',
@@ -539,7 +538,7 @@ export default defineComponent({
       try {
         // delete if none (empty groupId) selected 
         if (!groupId) {
-          resp = await UtilService.updateUserSecurityGroup({
+          resp = await UserService.updateUserSecurityGroup({
             fromDate: this.selectedUser.securityGroup.fromDate,
             thruDate: DateTime.now().toMillis(),
             groupId: this.selectedUser.securityGroup.groupId,
@@ -554,14 +553,14 @@ export default defineComponent({
           }
         } else if (this.selectedUser.securityGroup.groupId) {
           // update if already associated
-          resp = await UtilService.updateUserSecurityGroup({
+          resp = await UserService.updateUserSecurityGroup({
             fromDate: this.selectedUser.securityGroup.fromDate,
             thruDate: DateTime.now().toMillis(),
             groupId: this.selectedUser.securityGroup.groupId,
             userLoginId: this.selectedUser.userLoginId
           })
           if (!hasError(resp)) {
-            resp = await UtilService.addUserToSecurityGroup({
+            resp = await UserService.addUserToSecurityGroup({
               groupId,
               userLoginId: this.selectedUser.userLoginId
             })
@@ -574,7 +573,7 @@ export default defineComponent({
           }
         } else {
           // create if not associated
-          resp = await UtilService.addUserToSecurityGroup({
+          resp = await UserService.addUserToSecurityGroup({
             groupId,
             userLoginId: this.selectedUser.userLoginId
           })
@@ -608,7 +607,7 @@ export default defineComponent({
           role: 'success',
           handler: async () => {
             try {
-              const resp = await UtilService.createPartyRole({
+              const resp = await UserService.createPartyRole({
                 partyId: this.partyId,
                 roleTypeId: 'WAREHOUSE_PICKER'
               })

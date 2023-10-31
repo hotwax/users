@@ -29,7 +29,7 @@ import { defineComponent } from "vue";
 import { translate } from "@hotwax/dxp-components";
 import { mapGetters, useStore } from 'vuex';
 import ProductStoreRoleModal from '@/components/ProductStoreRoleModal.vue'
-import { UtilService } from "@/services/UtilService";
+import { UserService } from "@/services/UserService";
 import { DateTime } from "luxon";
 import { showToast } from "@/utils";
 import { hasError } from "@/adapter";
@@ -64,7 +64,7 @@ export default defineComponent({
     },
     async removeProductStoreRole() {
       try {
-        const resp = await UtilService.updateProductStoreRole({
+        const resp = await UserService.updateProductStoreRole({
           partyId: this.selectedUser.partyId,
           productStoreId: this.productStore.productStoreId,
           roleTypeId: this.getProductStoreRoleType(this.productStore.productStoreId),

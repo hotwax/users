@@ -249,10 +249,96 @@ const sendResetPasswordEmail = async (payload: any): Promise <any> => {
   });
 } 
 
+
+const getUserSecurityGroup = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "POST",
+    data: payload
+  })
+}
+
+const updateUserSecurityGroup = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/updateUserLoginToSecurityGroup", 
+    method: "post",
+    data: payload
+  });
+}
+
+const addUserToSecurityGroup = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/addUserLoginToSecurityGroup", 
+    method: "post",
+    data: payload
+  });
+}
+
+const createPartyRole = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/ensurePartyRole", 
+    method: "post",
+    data: payload
+  });
+}
+
+const getUserAssociatedFacilities = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "POST",
+    data: payload
+  })
+}
+
+const addPartyToFacility = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/addPartyToFacility", 
+    method: "post",
+    data: payload
+  });
+}
+
+const removePartyFromFacility = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/removePartyFromFacility", 
+    method: "post",
+    data: payload
+  });
+}
+
+const getUserAssociatedProductStores = async (payload: any): Promise<any> => {
+  return api({
+    url: 'performFind',
+    method: 'POST',
+    data: payload
+  })
+}
+
+const createProductStoreRole = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/createProductStoreRole", 
+    method: "post",
+    data: payload
+  });
+}
+
+const updateProductStoreRole = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/updateProductStoreRole", 
+    method: "post",
+    data: payload
+  });
+}
+
 export const UserService = {
+  addPartyToFacility,
+  addUserToSecurityGroup,
+  createUser,
+  createPartyRole,
   createNewUserLogin,
   createUpdatePartyEmailAddress,
   createUpdatePartyTelecomNumber,
+  createProductStoreRole,
   deletePartyContactMech,
   getAvailableTimeZones,
   fetchUsers,
@@ -261,12 +347,17 @@ export const UserService = {
   getUserLoginDetails,
   getUserPermissions,
   getUserProfile,
+  getUserAssociatedFacilities,
+  getUserAssociatedProductStores,
+  getUserSecurityGroup,
   login,
+  removePartyFromFacility,
   resetPassword,
   sendResetPasswordEmail,
   setUserTimeZone,
   updateUserLoginStatus,
   updatePartyGroup,
   updatePerson,
-  createUser
+  updateProductStoreRole,
+  updateUserSecurityGroup
 }

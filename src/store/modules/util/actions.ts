@@ -6,6 +6,7 @@ import * as types from './mutation-types'
 import { showToast } from '@/utils'
 import { hasError } from '@/adapter'
 import { translate } from '@hotwax/dxp-components'
+import { UserService } from '@/services/UserService'
 
 const actions: ActionTree<UtilState, RootState> = {
   async fetchRoles({ commit, state }) {
@@ -88,7 +89,7 @@ const actions: ActionTree<UtilState, RootState> = {
       // are required in the UI
       Promise.allSettled([dispatch('getProductStores'), dispatch('fetchRoles')])
       
-      const resp = await UtilService.getUserAssociatedProductStores(params)
+      const resp = await UserService.getUserAssociatedProductStores(params)
       console.log(resp)
       if (!hasError(resp) || resp.data.error === 'No record found') {
         userProductStores = resp.data.docs ? resp.data.docs : []
@@ -159,6 +160,7 @@ const actions: ActionTree<UtilState, RootState> = {
     }
     commit(types.UTIL_FACILITIES_UPDATED, facilities)
   },
+
   async fetchProductStores({ commit }) {
     let stores  = [];
     try {
@@ -193,7 +195,7 @@ const actions: ActionTree<UtilState, RootState> = {
     }
 
     try {
-      const resp = await UtilService.getUserSecurityGroup(payload)
+      const resp = await UserService.getUserSecurityGroup(payload)
       if (!hasError(resp) || resp.data.error === 'No record found') {
         userSecurityGroup = {
           groupId: resp.data.docs ? resp.data.docs[0].groupId : '',
@@ -220,7 +222,7 @@ const actions: ActionTree<UtilState, RootState> = {
     }
 
     try {
-      const resp = await UtilService.getUserAssociatedFacilities(payload)
+      const resp = await UserService.getUserAssociatedFacilities(payload)
       if (!hasError(resp) || resp.data.error === 'No record found') {
         facilities = resp.data.docs ? resp.data.docs : []
       } else {
