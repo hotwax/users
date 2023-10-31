@@ -233,6 +233,14 @@ const createUser = async (payload: any): Promise <any> => {
   });
 }
 
+const createNewUserLogin = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/createNewUserLoginAndSetUserPreference", 
+    method: "post",
+    data: payload
+  });
+}
+
 const sendResetPasswordEmail = async (payload: any): Promise <any> => {
   return api({
     url: "sendResetPassword", 
@@ -242,6 +250,7 @@ const sendResetPasswordEmail = async (payload: any): Promise <any> => {
 } 
 
 export const UserService = {
+  createNewUserLogin,
   createUpdatePartyEmailAddress,
   createUpdatePartyTelecomNumber,
   deletePartyContactMech,

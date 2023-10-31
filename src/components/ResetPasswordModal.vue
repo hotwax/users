@@ -11,20 +11,29 @@
   </ion-header>
 
   <ion-content>
-    <!-- TODO add password requirements -->
     <ion-list>
       <!-- TODO add password validation -->
+      <ion-item lines="none">
+        <ion-note>
+          {{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}
+        </ion-note>
+      </ion-item>
       <ion-item lines="full">
         <ion-label class="ion-text-wrap" position="fixed">{{ translate("New password") }}</ion-label>
-        <ion-input :placeholder="translate('Enter password')" name="password" v-model="newPassword" id="key" type="password" required />
+        <ion-input :placeholder="translate('Enter password')" name="password" v-model="newPassword" id="newPassword" :type="showNewPassword ? 'text' : 'password'" required />
+        <ion-button fill="clear" @click="showNewPassword = !showNewPassword">
+          <ion-icon :icon="showNewPassword ? eyeOutline : eyeOffOutline"/>
+        </ion-button>
       </ion-item>
       <ion-item>
         <ion-label class="ion-text-wrap" position="fixed">{{ translate("Verify new password") }}</ion-label>
-        <ion-input :placeholder="translate('Confirm password')" name="password2" v-model="confirmPassword" id="value" type="password" required />
+        <ion-input :placeholder="translate('Confirm password')" name="confirmPassword\" v-model="confirmPassword" id="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" required />
+        <ion-button fill="clear" @click="showConfirmPassword = !showConfirmPassword">
+          <ion-icon :icon="showConfirmPassword ? eyeOutline : eyeOffOutline"/>
+        </ion-button>
       </ion-item>
     </ion-list>
 
-    <!-- TODO check API for reset password email -->
     <ion-item v-if="email?.length" class="ion-padding-top">
       <ion-icon :icon="mailOutline" slot="start" />
       <ion-button fill="clear" @click="sendResetPasswordEmail()">
@@ -55,15 +64,22 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonNote,
   IonTitle,
   IonToolbar,
   modalController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
-import { closeOutline, lockClosedOutline, mailOutline } from "ionicons/icons";
+import {
+  closeOutline,
+  eyeOutline,
+  eyeOffOutline,
+  lockClosedOutline,
+  mailOutline
+} from "ionicons/icons";
 import { useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components'
-import { showToast } from "@/utils";
+import { isPasswordValid, showToast } from "@/utils";
 import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
 
@@ -81,13 +97,16 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
+    IonNote,
     IonTitle,
     IonToolbar,
   },
   data() {
     return {
       newPassword: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      showConfirmPassword: false,
+      showNewPassword: false,
     }
   },
   props: ["email", "userLoginId"],
@@ -96,6 +115,9 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true});
     },
     async resetPassword() {
+      this.newPassword = this.newPassword.trim()
+      this.confirmPassword = this.confirmPassword.trim()
+
       try {
         const resp = await UserService.resetPassword({
           newPassword: this.newPassword,
@@ -116,7 +138,8 @@ export default defineComponent({
     checkResetButtonStatus() {
       // TODO add check for length and other requirements
       return (!this.newPassword.length || !this.confirmPassword.length) 
-        || (this.newPassword.trim() !== this.confirmPassword.trim())
+        || (this.newPassword.trim() !== this.confirmPassword.trim()
+        || (!isPasswordValid(this.newPassword) || !isPasswordValid(this.confirmPassword)))
     },
     async sendResetPasswordEmail() {
       try {
@@ -141,6 +164,8 @@ export default defineComponent({
 
     return {
       closeOutline,
+      eyeOutline,
+      eyeOffOutline,
       lockClosedOutline,
       mailOutline,
       store,

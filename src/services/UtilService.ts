@@ -100,7 +100,24 @@ const getUserAssociatedFacilities = async (payload: any): Promise<any> => {
   })
 }
 
+const addPartyToFacility = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/addPartyToFacility", 
+    method: "post",
+    data: payload
+  });
+}
+
+const removePartyFromFacility = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/removePartyFromFacility", 
+    method: "post",
+    data: payload
+  });
+}
+
 export const UtilService = {
+  addPartyToFacility,
   createProductStoreRole,
   createSecurityGroup,
   getSecurityGroups,
@@ -109,6 +126,7 @@ export const UtilService = {
   getUserAssociatedProductStores,
   getUserAssociatedFacilities,
   getUserSecurityGroup,
+  removePartyFromFacility,
   updateProductStoreRole,
   updateSecurityGroup,
   updatePickerRoleStatus,

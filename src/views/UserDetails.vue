@@ -16,9 +16,10 @@
           <section>
             <ion-item lines="none">
               <!-- TODO fetch and show image only if available -->
-              <ion-avatar slot="start">
+              <!-- <ion-avatar slot="start">
                 <Image />
-              </ion-avatar>
+              </ion-avatar> -->
+              <!-- TODO return available name instead of if-else -->
               <ion-label>
                 <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
                 <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
@@ -34,27 +35,45 @@
                   {{ translate('Login details') }}
                 </ion-card-title>
               </ion-card-header>
-              <ion-list>
-                <!-- TODO verify disable message -->
-                <!-- <ion-item v-if="selectedUser.enabled === 'N'" color="light" lines="none">
-                  <ion-label class="ion-text-wrap">
-                    <p class="overline">{{ translate("User disabled") }}</p>
-                    <p>{{ translate('This user was disabled due to repeated failed password attempts') }}</p>
-                  </ion-label>
-                  <ion-icon slot="end" color="danger" :icon="warningOutline" />
-                </ion-item> -->
-                <ion-item>
-                  <ion-label>{{ translate('Username') }}</ion-label>        
-                  <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>        
-                </ion-item>
-                <ion-item>
-                  <ion-label>{{ translate("Block login") }}</ion-label>
-                  <ion-toggle slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
-                </ion-item>
-              </ion-list>
-              <ion-button @click="resetPassword()" fill="outline" color="warning" expand="block">
-                {{ translate('Reset password') }}
-              </ion-button>
+              <div v-if="selectedUser.userLoginId">
+                <ion-list>
+                  <!-- TODO verify disable message -->
+                  <!-- <ion-item v-if="selectedUser.enabled === 'N'" color="light" lines="none">
+                    <ion-label class="ion-text-wrap">
+                      <p class="overline">{{ translate("User disabled") }}</p>
+                      <p>{{ translate('This user was disabled due to repeated failed password attempts') }}</p>
+                    </ion-label>
+                    <ion-icon slot="end" color="danger" :icon="warningOutline" />
+                  </ion-item> -->
+                  <ion-item>
+                    <ion-label>{{ translate('Username') }}</ion-label>
+                    <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label>{{ translate("Block login") }}</ion-label>
+                    <ion-toggle slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
+                  </ion-item>
+                </ion-list>
+                <ion-button @click="resetPassword()" fill="outline" color="warning" expand="block">
+                  {{ translate('Reset password') }}
+                </ion-button>
+              </div>
+              <div v-else>
+                <ion-list>
+                  <ion-item lines="full">
+                    <ion-label class="ion-text-wrap" position="fixed">{{ translate("Username") }}</ion-label>
+                    <ion-input :placeholder="translate('user.name')" name="username" v-model="username" id="username" required />
+                  </ion-item>
+                  <ion-item>
+                    <ion-label class="ion-text-wrap" position="fixed">{{ translate("Password") }}</ion-label>
+                    <ion-input :placeholder="translate('Default password')" name="password" v-model="password" id="password" type="password" required />
+                    <ion-note slot="helper">{{ translate('will be asked to reset their password when they login', { name: selectedUser.firstName }) }}</ion-note>
+                  </ion-item>
+                </ion-list>
+                <ion-button @click="createNewUserLogin()" fill="outline" expand="block">
+                  {{ translate('Add credentials') }}
+                </ion-button>
+              </div>
             </ion-card>
     
             <ion-card>
@@ -170,7 +189,7 @@
 <script lang="ts">
 import {
   alertController,
-  IonAvatar,
+  IonBackButton,
   IonButton,
   IonCard,
   IonCardHeader,
@@ -178,11 +197,12 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
+  IonInput,
   IonItem,
   IonList,
   IonListHeader,
   IonLabel,
-  IonBackButton,
+  IonNote,
   IonPage,
   IonSelect,
   IonSelectOption,
@@ -204,7 +224,6 @@ import {
   mailOutline,
   warningOutline
 } from 'ionicons/icons';
-import Image from '@/components/Image.vue'
 import { translate } from '@hotwax/dxp-components';
 import ContactActionsPopover from '@/components/ContactActionsPopover.vue'
 import ProductStoreActionsPopover from '@/components/ProductStoreActionsPopover.vue'
@@ -212,7 +231,7 @@ import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
 import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
 import { UserService } from "@/services/UserService";
-import { showToast } from "@/utils";
+import { isEmailValid, showToast } from "@/utils";
 import { hasError } from '@/adapter';
 import { UtilService } from "@/services/UtilService";
 import { DateTime } from "luxon";
@@ -220,8 +239,7 @@ import { DateTime } from "luxon";
 export default defineComponent({
   name: "UserDetails",
   components: {
-    Image,
-    IonAvatar,
+    IonBackButton,
     IonButton,
     IonCard,
     IonCardHeader,
@@ -229,11 +247,12 @@ export default defineComponent({
     IonContent,
     IonHeader,
     IonIcon,
+    IonInput,
     IonItem,
     IonLabel,
     IonList,
     IonListHeader,
-    IonBackButton,
+    IonNote,
     IonPage,
     IonSelect,
     IonSelectOption,
@@ -253,7 +272,7 @@ export default defineComponent({
   props: ['partyId'],
   data() {
     return {
-      options: {
+      OPTIONS: {
         email: {
           header: 'Add email',
           placeholder: 'Email'
@@ -266,7 +285,9 @@ export default defineComponent({
           header: 'Add external ID',
           placeholder: 'External ID'
         }
-      } as any
+      } as any,
+      username: "",
+      password: ""
     }
   },
   async ionViewWillEnter() {
@@ -281,7 +302,7 @@ export default defineComponent({
         event,
         componentProps: {
           type,
-          placeholder: this.options[type].placeholder,
+          placeholder: this.OPTIONS[type].placeholder,
           value,
           contactMechId: type === 'email' 
             ? this.selectedUser.emailDetails.contactMechId
@@ -292,13 +313,12 @@ export default defineComponent({
       return contactActionsPopover.present();
     },
     async addContactField(type: string) {
-      // handling alert header and placeholder
       const contactUpdateAlert = await alertController.create({
-        header: translate(this.options[type].header),
+        header: translate(this.OPTIONS[type].header),
         inputs:  [{
-          // TODO add validation for email/phone
+          // TODO add validation for phone
           name: "input",
-          placeholder: translate(this.options[type].placeholder),
+          placeholder: translate(this.OPTIONS[type].placeholder),
         }],
         buttons: [{
           text: translate('Cancel'),
@@ -307,14 +327,20 @@ export default defineComponent({
         {
           text: translate('Save'),
           handler: async (result) => {
-            const { input } = result
+            const input = result.input.trim()
             if (!input) {
+              showToast(translate('Please enter a value'))
               return
             }
 
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
             try {
               if (type === 'email') {
+                if (!isEmailValid(input)) {
+                  showToast(translate('Invalid email address.'))
+                  return
+                }
+
                 const resp = await UserService.createUpdatePartyEmailAddress({
                   emailAddress: input,
                   partyId: this.selectedUser.partyId,
@@ -362,7 +388,7 @@ export default defineComponent({
                 }
               }
               this.store.dispatch('user/updateSelectedUser', selectedUser)
-              showToast(translate(`${this.options[type].placeholder} added successfully.`))
+              showToast(translate(`${this.OPTIONS[type].placeholder} added successfully.`))
             } catch (error) {
               showToast(translate(`Failed to add ${type === 'email' ? 'email' : (type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
               console.error(error)
@@ -371,6 +397,33 @@ export default defineComponent({
         }]
       })
       await contactUpdateAlert.present()
+    },
+    async createNewUserLogin() {
+      this.password = this.password.trim()
+      this.username = this.username.trim()
+
+      if (!this.password || !this.username) {
+        translate('Username or password cannot be empty.')
+        return
+      }
+
+      try {
+        const resp = await UserService.createNewUserLogin({
+          currentPassword: this.password,
+          currentPasswordVerify: this.password,
+          userLoginId: this.username,
+          userPrefTypeId: 'ORGANIZATION_PARTY',
+          userPrefValue: 'COMPANY',
+        })
+        if (!hasError(resp)) {
+          await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
+        } else {
+          throw resp.data
+        }
+      } catch (error) {
+        showToast(translate('Something went wrong.'));
+        console.error(error)
+      }
     },
     async resetPassword() {
       const resetPasswordModal = await modalController.create({
@@ -468,7 +521,7 @@ export default defineComponent({
             })
             if (hasError(resp)) throw resp.data
             showToast(translate('Security group updated successfully.'))
-            const userSecurityGroup = this.store.dispatch('util/getUserSecurityGroups', this.selectedUser.userLoginId)
+            const userSecurityGroup = await this.store.dispatch('util/getUserSecurityGroups', this.selectedUser.userLoginId)
             this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, userSecurityGroup })
           } else {
             throw resp.data
@@ -480,7 +533,7 @@ export default defineComponent({
           })
           if (!hasError(resp)) {
             showToast(translate('Security group updated successfully.'))
-            const userSecurityGroup = this.store.dispatch('util/getUserSecurityGroups', this.selectedUser.userLoginId)
+            const userSecurityGroup = await this.store.dispatch('util/getUserSecurityGroups', this.selectedUser.userLoginId)
             this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, userSecurityGroup })
           } else {
             throw resp.data

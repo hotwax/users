@@ -37,4 +37,15 @@ const isEmailValid = (email : string) => {
   return emailPattern.test(email);
 }
 
-export { copyToClipboard, showToast, isEmailValid }
+const isPasswordValid = (password : string) => {
+  // Regular expression pattern for a valid password
+  const passwordPattern = /^.*(?=.{5,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$/;
+  return passwordPattern.test(password);
+}
+
+export {
+  copyToClipboard,
+  showToast,
+  isEmailValid,
+  isPasswordValid
+}

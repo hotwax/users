@@ -131,6 +131,7 @@ const actions: ActionTree<UtilState, RootState> = {
     }
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
   },
+
   async fetchFacilities({ commit }) {
     let facilities  = [];
     try {
@@ -193,7 +194,6 @@ const actions: ActionTree<UtilState, RootState> = {
       noConditionFind: "Y",
       entityName: "FacilityParty",
       viewSize: 100,
-      fieldList: ["facilityId", "roleTypeId", "partyId"]
     }
 
     try {

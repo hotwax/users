@@ -135,7 +135,7 @@ export default defineComponent({
     }
   },
   async ionViewWillEnter() {
-    this.store.dispatch('util/fetchFacilities')
+    await this.store.dispatch('util/fetchFacilities')
   },
   methods: {
     updateFacilityLogin(event: CustomEvent) {
