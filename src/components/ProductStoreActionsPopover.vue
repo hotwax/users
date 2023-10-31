@@ -51,11 +51,6 @@ export default defineComponent({
       userProductStores: 'util/getUserProductStores',
     })
   },
-  data() {
-    return {
-      
-    }
-  },
   methods: {
     closePopover() {
       popoverController.dismiss();

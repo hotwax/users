@@ -50,7 +50,6 @@ import { defineComponent } from "vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
 import { showToast } from "@/utils";
-import { hasError } from "@/adapter";
 import { translate } from '@hotwax/dxp-components'
 import { UtilService } from "@/services/UtilService";
 
