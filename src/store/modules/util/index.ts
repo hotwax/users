@@ -10,6 +10,7 @@ const utilModule: Module<UtilState, RootState> = {
   state: {
     securityGroups: [],
     facilities: [],
+    productStores: [],
   },
   getters,
   actions,
