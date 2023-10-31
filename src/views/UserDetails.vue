@@ -399,7 +399,6 @@ export default defineComponent({
       await contactUpdateAlert.present()
     },
     async createNewUserLogin() {
-      this.password = this.password.trim()
       this.username = this.username.trim()
 
       if (!this.password || !this.username) {

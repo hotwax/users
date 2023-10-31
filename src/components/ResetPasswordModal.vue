@@ -12,25 +12,26 @@
 
   <ion-content>
     <ion-list>
-      <!-- TODO add password validation -->
       <ion-item lines="none">
         <ion-note>
           {{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}
         </ion-note>
       </ion-item>
-      <ion-item lines="full">
+      <ion-item lines="full" ref="password">
         <ion-label class="ion-text-wrap" position="fixed">{{ translate("New password") }}</ion-label>
-        <ion-input :placeholder="translate('Enter password')" name="password" v-model="newPassword" id="newPassword" :type="showNewPassword ? 'text' : 'password'" required />
+        <ion-input @keyup="validateRequirements" @ionBlur="markPasswordTouched" :placeholder="translate('Enter password')" name="password" v-model="newPassword" id="newPassword" :type="showNewPassword ? 'text' : 'password'" required />
         <ion-button fill="clear" @click="showNewPassword = !showNewPassword">
           <ion-icon :icon="showNewPassword ? eyeOutline : eyeOffOutline"/>
         </ion-button>
+        <ion-note slot="error">{{ translate('Password requirements not fulfilled.') }}</ion-note>
       </ion-item>
-      <ion-item>
+      <ion-item ref="confirmPassword">
         <ion-label class="ion-text-wrap" position="fixed">{{ translate("Verify new password") }}</ion-label>
-        <ion-input :placeholder="translate('Confirm password')" name="confirmPassword\" v-model="confirmPassword" id="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" required />
+        <ion-input @keyup="validatePasswordMatching()" @ionBlur="markConfirmPasswordTouched" :placeholder="translate('Confirm password')" name="confirmPassword" v-model="confirmPassword" id="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" required />
         <ion-button fill="clear" @click="showConfirmPassword = !showConfirmPassword">
           <ion-icon :icon="showConfirmPassword ? eyeOutline : eyeOffOutline"/>
         </ion-button>
+        <ion-note slot="error">{{ translate('Passwords do not match.') }}</ion-note>
       </ion-item>
     </ion-list>
 
@@ -115,9 +116,6 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true});
     },
     async resetPassword() {
-      this.newPassword = this.newPassword.trim()
-      this.confirmPassword = this.confirmPassword.trim()
-
       try {
         const resp = await UserService.resetPassword({
           newPassword: this.newPassword,
@@ -136,10 +134,29 @@ export default defineComponent({
       this.closeModal()
     },
     checkResetButtonStatus() {
-      // TODO add check for length and other requirements
-      return (!this.newPassword.length || !this.confirmPassword.length) 
-        || (this.newPassword.trim() !== this.confirmPassword.trim()
+      // TODO add check for length and other requirements(
+      return ((!this.newPassword.length || !this.confirmPassword.length)
+        || (this.newPassword !== this.confirmPassword)
         || (!isPasswordValid(this.newPassword) || !isPasswordValid(this.confirmPassword)))
+    },
+    validateRequirements(event: any) {
+      const value = event.target.value;
+      (this as any).$refs.password.$el.classList.remove('ion-valid');
+      (this as any).$refs.password.$el.classList.remove('ion-invalid');
+
+      if (value === '') return;
+
+      isPasswordValid(value)
+        ? (this as any).$refs.password.$el.classList.add('ion-valid')
+        : (this as any).$refs.password.$el.classList.add('ion-invalid');
+    },
+    validatePasswordMatching() {
+      (this as any).$refs.confirmPassword.$el.classList.remove('ion-valid');
+      (this as any).$refs.confirmPassword.$el.classList.remove('ion-invalid');
+      
+      (this.newPassword === this.confirmPassword)
+      ? (this as any).$refs.confirmPassword.$el.classList.add('ion-valid')
+      : (this as any).$refs.confirmPassword.$el.classList.add('ion-invalid');
     },
     async sendResetPasswordEmail() {
       try {
@@ -157,7 +174,13 @@ export default defineComponent({
         console.error(error)
       }
       this.closeModal()
-    }
+    },
+    markPasswordTouched() {
+      (this as any).$refs.password.$el.classList.add('ion-touched');
+    },
+    markConfirmPasswordTouched() {
+      (this as any).$refs.confirmPassword.$el.classList.add('ion-touched');
+    },
   },
   setup() {
     const store = useStore();
