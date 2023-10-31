@@ -80,7 +80,7 @@ import {
 } from "ionicons/icons";
 import { useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components'
-import { isPasswordValid, showToast } from "@/utils";
+import { isValidPassword, showToast } from "@/utils";
 import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
 
@@ -137,7 +137,7 @@ export default defineComponent({
       // TODO add check for length and other requirements(
       return ((!this.newPassword.length || !this.confirmPassword.length)
         || (this.newPassword !== this.confirmPassword)
-        || (!isPasswordValid(this.newPassword) || !isPasswordValid(this.confirmPassword)))
+        || (!isValidPassword(this.newPassword) || !isValidPassword(this.confirmPassword)))
     },
     validateRequirements(event: any) {
       const value = event.target.value;
@@ -146,7 +146,7 @@ export default defineComponent({
 
       if (value === '') return;
 
-      isPasswordValid(value)
+      isValidPassword(value)
         ? (this as any).$refs.password.$el.classList.add('ion-valid')
         : (this as any).$refs.password.$el.classList.add('ion-invalid');
     },

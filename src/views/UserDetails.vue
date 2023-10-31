@@ -231,7 +231,7 @@ import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
 import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
 import { UserService } from "@/services/UserService";
-import { isEmailValid, showToast } from "@/utils";
+import { isValidEmail, showToast } from "@/utils";
 import { hasError } from '@/adapter';
 import { UtilService } from "@/services/UtilService";
 import { DateTime } from "luxon";
@@ -336,7 +336,7 @@ export default defineComponent({
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
             try {
               if (type === 'email') {
-                if (!isEmailValid(input)) {
+                if (!isValidEmail(input)) {
                   showToast(translate('Invalid email address.'))
                   return
                 }

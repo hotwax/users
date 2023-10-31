@@ -10,6 +10,7 @@ import { hasPermission } from '@/authorization';
 import Tabs from '@/components/Tabs.vue'
 import CreateUser from '@/views/CreateUser.vue'
 import UserConfirmation from '@/views/UserConfirmation.vue'
+import UserQuickSetup from '@/views/UserQuickSetup.vue'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -79,6 +80,13 @@ const routes: Array<RouteRecordRaw> = [
     path: '/user-confirmation/:partyId',
     name: 'UserConfirmation',
     component: UserConfirmation,
+    beforeEnter: authGuard,
+    props: true
+  },
+  {
+    path: '/user-quick-setup/:partyId',
+    name: 'UserQuickSetup',
+    component: UserQuickSetup,
     beforeEnter: authGuard,
     props: true
   }

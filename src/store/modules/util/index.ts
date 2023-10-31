@@ -6,17 +6,17 @@ import UtilState from './UtilState'
 import RootState from '@/store/RootState'
 
 const userModule: Module<UtilState, RootState> = {
-    namespaced: true,
-    state: {
-      roles: [],
-      productStores: [],
-      userProductStores: [],
-      securityGroups: [],
-      facilities: [],
-    },
-    getters,
-    actions,
-    mutations,
+  namespaced: true,
+  state: {
+    roles: [],
+    productStores: [],
+    userProductStores: [],
+    securityGroups: [],
+    facilities: [],
+  },
+  getters,
+  actions,
+  mutations,
 }
 
 export default userModule;

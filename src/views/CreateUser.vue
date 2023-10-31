@@ -31,11 +31,11 @@
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Reset password email') }}</ion-label>
-          <ion-input v-model="formData.emailAddress"></ion-input>
+          <ion-input v-model="formData.emailAddress" type="email"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Facility contact number') }}</ion-label>
-          <ion-input v-model="formData.contactNumber"></ion-input>
+          <ion-input v-model="formData.contactNumber" type="tel"></ion-input>
         </ion-item>
       </div>
       <div v-else>
@@ -53,11 +53,11 @@
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Email') }}</ion-label>
-          <ion-input v-model="formData.emailAddress"></ion-input>
+          <ion-input v-model="formData.emailAddress" type="email"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Phone number') }}</ion-label>
-          <ion-input v-model="formData.contactNumber"></ion-input>
+          <ion-input v-model="formData.contactNumber" type="tel"></ion-input>
         </ion-item>
       </div>
       <div class="ion-padding-top">
@@ -84,7 +84,8 @@ import {
   IonToolbar,
   IonToggle,
   IonInput,
-  IonSelect
+  IonSelect,
+  IonSelectOption
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 import { mapGetters, useStore } from "vuex";
@@ -95,7 +96,7 @@ import {
   arrowForwardOutline
 } from 'ionicons/icons';
 import { translate } from "@hotwax/dxp-components";
-import { showToast, isEmailValid } from '@/utils'
+import { showToast, isValidPassword } from '@/utils'
 import { UserService } from '@/services/UserService'
 import { hasError } from '@/adapter'
 
@@ -114,7 +115,8 @@ export default defineComponent({
     IonToolbar,
     IonToggle,
     IonInput,
-    IonSelect
+    IonSelect,
+    IonSelectOption
   },
   computed: {
     ...mapGetters({
@@ -163,7 +165,7 @@ export default defineComponent({
           validationErrors.push(translate('Last name is required.'));
         }
       }
-      if (data.emailAddress && !isEmailValid(data.emailAddress)) {
+      if (data.emailAddress && !isValidPassword(data.emailAddress)) {
         validationErrors.push(translate('Invalid email address.'));
       }
       return validationErrors; 

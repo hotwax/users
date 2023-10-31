@@ -55,7 +55,7 @@ const actions: ActionTree<UtilState, RootState> = {
     }
 
     try {
-      const resp = await UtilService.getProductStores(params)
+      const resp = await UtilService.fetchProductStores(params)
       if (!hasError(resp)) {
         productStores = resp.data.docs
       } else {
@@ -155,6 +155,26 @@ const actions: ActionTree<UtilState, RootState> = {
       console.error('Failed to fetch facilities', err)
     }
     commit(types.UTIL_FACILITIES_UPDATED, facilities)
+  },
+  async fetchProductStores({ commit }) {
+    let stores  = [];
+    try {
+      const payload = {
+        "entityName": "ProductStore",
+        "noConditionFind": "Y",
+        "viewSize": 100 // keeping view size 100 as considering that we will have max 100 product stores
+      }
+
+      const resp = await UtilService.fetchProductStores(payload)
+      if (!hasError(resp) && resp.data.count > 0) {
+        stores = resp.data.docs
+      } else {
+        throw resp.data
+      }
+    } catch (err) {
+      console.error('Failed to fetch product stores', err)
+    }
+    commit(types.UTIL_PRODUCT_STORES_UPDATED, stores)
   },
 
   async getUserSecurityGroups({ state }, userLoginId) {

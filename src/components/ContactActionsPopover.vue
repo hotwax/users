@@ -28,7 +28,7 @@ import { defineComponent } from "vue";
 import { translate } from "@hotwax/dxp-components";
 import { mapGetters, useStore } from 'vuex';
 import { hasError } from "@/adapter";
-import { copyToClipboard, isEmailValid, showToast } from "@/utils";
+import { copyToClipboard, isValidEmail, showToast } from "@/utils";
 import { UserService } from "@/services/UserService";
 
 export default defineComponent({
@@ -102,7 +102,7 @@ export default defineComponent({
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
             try {
               if (this.type === 'email') {
-                if (!isEmailValid(input)) {
+                if (!isValidEmail(input)) {
                   showToast(translate('Invalid email address.'))
                   return
                 }
