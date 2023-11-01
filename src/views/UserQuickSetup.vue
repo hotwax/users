@@ -330,7 +330,7 @@ export default defineComponent({
         const dataToCopy = `username: ${this.formData.userLoginId}, password: ${this.formData.currentPassword}`
         copyToClipboard(dataToCopy, 'Copied to clipboard')
       }
-      this.$router.replace({ path: `/user-details/${this.partyId}` });
+      this.$router.push({ path: `/user-details/${this.partyId}` });
     },
     async confirmSetupManually() {
       const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?'
