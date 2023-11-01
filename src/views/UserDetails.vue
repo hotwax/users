@@ -405,6 +405,7 @@ export default defineComponent({
 
       try {
         const resp = await UserService.createNewUserLogin({
+          partyId: this.partyId,
           currentPassword: this.password,
           currentPasswordVerify: this.password,
           userLoginId: this.username,

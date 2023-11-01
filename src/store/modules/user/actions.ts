@@ -113,7 +113,8 @@ const actions: ActionTree<UserState, RootState> = {
     const userStore = useUserStore()
     // TODO add any other tasks if need
     commit(types.USER_END_SESSION)
-    this.dispatch('util/updateSecurityGroups', {})
+    this.dispatch('util/clearUtilState')
+
     resetPermissions();
     resetConfig();
 
@@ -320,8 +321,8 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_LIST_UPDATED, { users, total });
   },
 
-  async updateQuery({ commit }, query) {
-    commit(types.USER_QUERY_UPDATED, {query})
+  updateQuery({ commit }, query) {
+    commit(types.USER_QUERY_UPDATED, { query })
   }
 }
 export default actions;

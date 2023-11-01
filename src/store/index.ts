@@ -14,7 +14,7 @@ import utilModule from "./modules/util"
 const state: any = {}
 
 const persistState = createPersistedState({
-  paths: ['user', 'util'],
+  paths: ['user.current', 'user.token', 'user.instanceUrl', 'user.permissions', 'util'],
   fetchBeforeUse: true
 })
 
