@@ -155,19 +155,22 @@ const actions: ActionTree<UserState, RootState> = {
   async getSelectedUserDetails({ commit, state, dispatch }, payload) {
     const currentSelectedUser = JSON.parse(JSON.stringify(state.selectedUser))
     if (currentSelectedUser.partyId === payload.partyId && !payload.isFetchRequired) {
-      return
+      //return
     }
 
     emitter.emit('presentLoader')
 
     let resp = {} as any, selectedUser = {} as any, params = {
       inputFields: {
+        "roleTypeIdTo": "APPLICATION_USER",
         partyId: payload.partyId,
       },
+      fromDateName: "relationshipFromDate",
+      thruDateName: "relationshipThruDate",
+      filterByDate: "Y",
       viewSize: 1,
       entityName: 'PartyAndUserLoginSecurityGroupDetails',
-      fieldList: ['userLoginId', 'enabled', 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName'],
-      distinct: "Y"
+      fieldList: ['userLoginId', 'enabled', 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName', 'externalId'],
     }
 
     try {
@@ -187,7 +190,7 @@ const actions: ActionTree<UserState, RootState> = {
           filterByDate: 'Y',
           entityName: 'PartyContactDetailByPurpose',
           // TODO verify the format of contact number
-          fieldList: ['areaCode', 'countryCode', 'contactNumber', 'infoString', 'externalId', 'contactMechId', 'contactMechPurposeTypeId']
+          fieldList: ['areaCode', 'countryCode', 'contactNumber', 'infoString', 'contactMechId', 'contactMechPurposeTypeId']
         } as any
 
         resp = await UserService.getUserContactDetails(params)
@@ -211,7 +214,6 @@ const actions: ActionTree<UserState, RootState> = {
 
           selectedUser = {
             ...selectedUser,
-            externalId: resp.data.docs[0].externalId,
             ...(Object.keys(emailDetails).length && { emailDetails }),
             ...(Object.keys(phoneNumberDetails).length && { phoneNumberDetails })
           }
@@ -284,12 +286,16 @@ const actions: ActionTree<UserState, RootState> = {
 
     const params = {
       "inputFields": {
+        "roleTypeIdTo": "APPLICATION_USER", 
         ...filters
       },
+      "fromDateName": "relationshipFromDate",
+      "thruDateName": "relationshipThruDate",
+      "filterByDate": "Y",
       "entityName": "PartyAndUserLoginSecurityGroupDetails",
-      "distinct": "Y",
       "noConditionFind": "Y",
-      "fieldList": ['createdDate', 'firstName', 'lastName', 'partyId', 'securityGroupId', 'securityGroupName', 'userLoginId'],
+      "distinct": "Y",
+      "fieldList": ['createdDate', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'userLoginId'],
       ...payload
     }
 
