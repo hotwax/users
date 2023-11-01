@@ -27,37 +27,37 @@
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Name') }}</ion-label>
-          <ion-input v-model="formData.groupName"></ion-input>
+          <ion-input v-model="formData.groupName" :clear-input="true"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Reset password email') }}</ion-label>
-          <ion-input v-model="formData.emailAddress" type="email"></ion-input>
+          <ion-input v-model="formData.emailAddress" type="email" :clear-input="true"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Facility contact number') }}</ion-label>
-          <ion-input v-model="formData.contactNumber" type="tel"></ion-input>
+          <ion-input v-model="formData.contactNumber" type="tel" :clear-input="true"></ion-input>
         </ion-item>
       </div>
       <div v-else>
         <ion-item>
           <ion-label position="floating">{{ translate('First name') }}</ion-label>
-          <ion-input v-model="formData.firstName"></ion-input>
+          <ion-input v-model="formData.firstName" :clear-input="true"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Last name') }}</ion-label>
-          <ion-input v-model="formData.lastName"></ion-input>
+          <ion-input v-model="formData.lastName" :clear-input="true"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Employee ID') }}</ion-label>
-          <ion-input v-model="formData.externalId"></ion-input>
+          <ion-input v-model="formData.externalId" :clear-input="true"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Email') }}</ion-label>
-          <ion-input v-model="formData.emailAddress" type="email"></ion-input>
+          <ion-input v-model="formData.emailAddress" type="email" :clear-input="true"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Phone number') }}</ion-label>
-          <ion-input v-model="formData.contactNumber" type="tel"></ion-input>
+          <ion-input v-model="formData.contactNumber" type="tel" :clear-input="true"></ion-input>
         </ion-item>
       </div>
       <div class="ion-padding-top">
@@ -96,7 +96,7 @@ import {
   arrowForwardOutline
 } from 'ionicons/icons';
 import { translate } from "@hotwax/dxp-components";
-import { showToast, isValidPassword } from '@/utils'
+import { showToast, isValidEmail } from '@/utils'
 import { UserService } from '@/services/UserService'
 import { hasError } from '@/adapter'
 
@@ -165,7 +165,7 @@ export default defineComponent({
           validationErrors.push(translate('Last name is required.'));
         }
       }
-      if (data.emailAddress && !isValidPassword(data.emailAddress)) {
+      if (data.emailAddress && !isValidEmail(data.emailAddress)) {
         validationErrors.push(translate('Invalid email address.'));
       }
       return validationErrors; 

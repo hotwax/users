@@ -1,4 +1,5 @@
 import { api, client, hasError } from '@/adapter';
+import { DateTime } from "luxon";
 
 import store from '@/store';
 
@@ -406,6 +407,105 @@ const updateProductStoreRole = async (payload: any): Promise <any> => {
   });
 }
 
+const finishSetup = async (payload: any): Promise <any> => {
+  try {
+    const selectedUser = payload.selectedUser;
+    const selectedTemplate = payload.selectedTemplate;
+    const partyId = selectedUser.partyId;
+    const promises = [];
+    
+    if (selectedTemplate.isUserLoginRequired) {
+      const resp = await createNewUserLogin({
+        "partyId": partyId,
+        "userLoginId": payload.formData.userLoginId,
+        "currentPassword": payload.formData.currentPassword,
+        "currentPasswordVerify": payload.formData.currentPassword,
+        "requirePasswordChange": payload.formData.requirePasswordChange ? "Y" : "N",
+        "userPrefTypeId": "ORGANIZATION_PARTY",
+        "userPrefValue": "COMPANY"
+      });
+      if (!hasError(resp)) {
+        addUserToSecurityGroup({
+          "userLoginId": payload.formData.userLoginId,
+          "groupId": payload.selectedTemplate.securityGroupId ?? "STORE_MANAGER",
+          "fromDate" : DateTime.now().toMillis()
+        });
+      } else {
+        throw resp.data;
+      }
+    }
+    
+    if (selectedTemplate.isEmployeeIdRequired) {
+      if (selectedUser.partyTypeId === "PARTY_GROUP") {
+        promises.push(updatePartyGroup({
+          "partyId": partyId,
+          "groupName": selectedUser.groupName,
+          "externalId": payload.formData.externalId
+        }));
+      } else {
+        promises.push(updatePerson({
+          "firstName": selectedUser.firstName,
+          "lastName": selectedUser.lastName,
+          "partyId": partyId,
+          "externalId": payload.formData.externalId
+        }));
+      }
+    }
+        
+    
+    if (payload.formData.emailAddress) {
+      promises.push(createUpdatePartyEmailAddress({
+        "partyId": partyId,
+        "emailAddress": payload.formData.emailAddress
+      }));
+    }
+    if (payload.formData.contactNumber) {
+      promises.push(createUpdatePartyTelecomNumber({
+        "partyId": partyId,
+        "contactNumber": payload.formData.contactNumber
+      }));
+    }
+    if (payload.selectedTemplate.roleTypeId) {
+      promises.push(createPartyRole({
+        "partyId": partyId,
+        "roleTypeId": payload.selectedTemplate.roleTypeId
+      }));
+    }
+
+    if (payload.productStores && selectedTemplate.isProductStoreRequired) {
+      payload.productStores?.forEach((store : any) => {
+        promises.push(createProductStoreRole({
+          "partyId": partyId,
+          "productStoreId": store.productStoreId,
+          "roleTypeId": payload.selectedTemplate.productStoreRoleTypeId,
+          "fromDate" : DateTime.now().toMillis()
+        }));
+      });
+    }
+
+    if (payload.facilities) {
+      payload.facilities?.forEach((facility : any) => {
+        promises.push(addPartyToFacility({
+          "partyId": partyId,
+          "facilityId": facility.facilityId,
+          "roleTypeId" : payload.selectedTemplate.facilityRoleTypeId ?? "WAREHOUSE_MANAGER",
+        }));
+      });
+    }
+
+    Promise.all(promises).then(responses => {
+      responses.forEach(response => {
+        if (hasError(response)) {
+          throw response.data;
+        }
+      });
+    })
+    
+  } catch (error: any) {
+    return Promise.reject(error)
+  }
+}
+
 export const UserService = {
   addPartyToFacility,
   addUserToSecurityGroup,
@@ -435,5 +535,6 @@ export const UserService = {
   updatePartyGroup,
   updatePerson,
   updateProductStoreRole,
-  updateUserSecurityGroup
+  updateUserSecurityGroup,
+  finishSetup
 }

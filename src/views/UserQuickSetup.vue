@@ -7,7 +7,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <ion-item>
+      <ion-item v-if="!isFacilityLogin()">
         <ion-icon slot="start" :icon="documentTextOutline"/>
         <ion-label>
           {{ translate("Select template") }}
@@ -16,14 +16,14 @@
           <ion-select-option v-for="userTemplate in userTemplates" :key="userTemplate.templateId" :value="userTemplate.templateId">{{ userTemplate.templateName }}</ion-select-option>
         </ion-select>
       </ion-item>
-      <div v-if="selectedUserTemplate && selectedUserTemplate.templateId && selectedUserTemplate.templateId !== 'FULFILLMENT'">
+      <div v-if="(selectedUserTemplate && selectedUserTemplate.isUserLoginRequired || isFacilityLogin())">
         <ion-item>
           <ion-label position="floating">{{ translate('Username') }}</ion-label>
-          <ion-input v-model="formData.username"></ion-input>
+          <ion-input v-model="formData.userLoginId" :clear-input="true"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label position="floating">{{ translate('Password') }}</ion-label>
-          <ion-input v-model="formData.password" type="password"></ion-input>
+          <ion-input v-model="formData.currentPassword" type="password" :clear-input="true"></ion-input>
           <ion-note slot="helper">{{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}</ion-note>
         </ion-item>
         <ion-item>
@@ -33,12 +33,12 @@
           <ion-toggle :checked="formData.requirePasswordChange" slot="end" />
         </ion-item>
       </div>
-      <ion-item v-if="selectedUserTemplate && ['FULFILLMENT', 'FULFILLMENT_MANAGER'].includes(selectedUserTemplate.templateId)">
+      <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isEmployeeIdRequired && !isFacilityLogin()">
         <ion-label position="floating">{{ translate('Employee ID') }}</ion-label>
         <ion-input v-model="formData.externalId"></ion-input>
       </ion-item>
 
-      <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isProductStoreRequied">
+      <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isProductStoreRequired && !isFacilityLogin()">
         <ion-label>
           {{ translate("Product stores") }}
         </ion-label>
@@ -48,7 +48,7 @@
         </ion-label>
       </ion-item>
 
-      <ion-list v-if="selectedUserTemplate && selectedUserTemplate.isFacilityRequired">
+      <ion-list v-if="(selectedUserTemplate && selectedUserTemplate.isFacilityRequired) || isFacilityLogin()">
         <ion-item>
           <ion-label>{{ translate('Select Facilities') }}</ion-label>
           <ion-button fill="clear" @click="addFacilities()" slot="end">
@@ -70,7 +70,7 @@
           <ion-icon slot="end" :icon="arrowForwardOutline"/>
           {{ translate("Finish setup") }}
         </ion-button>
-        <ion-button fill="outline" @click="setupManually()">
+        <ion-button fill="outline" @click="confirmSetupManually()">
           {{ translate("Setup manually") }}
         </ion-button>
         <ion-button color="medium" fill="outline" @click="finishAndCreateNewUser()">
@@ -100,6 +100,7 @@ import {
   IonTitle,
   IonToggle,
   IonToolbar,
+  alertController,
   modalController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
@@ -111,8 +112,9 @@ import {
   caretDownOutline,
   documentTextOutline
 } from 'ionicons/icons';
-import { showToast, isValidPassword } from '@/utils'
+import { copyToClipboard, showToast, isValidPassword } from '@/utils'
 import { translate } from "@hotwax/dxp-components";
+import { UserService } from '@/services/UserService'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
 import SelectProductStoreModal from "@/components/SelectProductStoreModal.vue";
 
@@ -152,10 +154,10 @@ export default defineComponent({
       selectedFacilities: [] as any,
       selectedProductStores: [] as any,
       formData: {
-        username: '',
-        password: '',
+        userLoginId: '',
+        currentPassword: '',
         externalId: '',
-        requirePasswordChange: true
+        requirePasswordChange: true,
       },
       userTemplates: [
         {
@@ -163,17 +165,21 @@ export default defineComponent({
           "templateName": "Admin",
           "securityGroupId": "COMMERCE_SUPER",
           "roleTypeId": "",
+          "isUserLoginRequired": true,
           "isFacilityRequired": false,
-          "isProductStoreRequied": true,
+          "facilityRoleTypeId": "",
+          "isProductStoreRequired": true,
           "productStoreRoleTypeId": "APPLICATION_USER",
         },
         {
           "templateId": "MERCHANDISING_MANAGER",
           "templateName": "Merchandising manager",
-          "securityGroupId": "MERCHANDISING_MANAGER",
+          "securityGroupId": "MERCHANDISE_MGR",
           "roleTypeId": "",
+          "isUserLoginRequired": true,
           "isFacilityRequired": false,
-          "isProductStoreRequied": true,
+          "facilityRoleTypeId": "",
+          "isProductStoreRequired": true,
           "productStoreRoleTypeId": "APPLICATION_USER",
         },
         {
@@ -181,7 +187,9 @@ export default defineComponent({
           "templateName": "CSR",
           "securityGroupId": "CSR",
           "roleTypeId": "",
+          "isUserLoginRequired": true,
           "isFacilityRequired": false,
+          "facilityRoleTypeId": "",
           "isProductStoreRequied": false,
           "productStoreRoleTypeId": "",
         },
@@ -190,7 +198,10 @@ export default defineComponent({
           "templateName": "Fulfillment manager",
           "securityGroupId": "STORE_MANAGER",
           "roleTypeId": "WAREHOUSE_PICKER",
+          "isUserLoginRequired": true,
+          "isEmployeeIdRequired": true,
           "isFacilityRequired": true,
+          "facilityRoleTypeId": "WAREHOUSE_MANAGER",
           "isProductStoreRequied": false,
           "productStoreRoleTypeId": ""
         },
@@ -199,8 +210,11 @@ export default defineComponent({
           "templateName": "Fulfillment",
           "securityGroupId": "",
           "roleTypeId": "WAREHOUSE_PICKER",
+          "isEmployeeIdRequired": true,
           "isFacilityRequired": false,
-          "isProductStoreRequied": false
+          "facilityRoleTypeId": "",
+          "isProductStoreRequied": false,
+          "productStoreRoleTypeId": ""
         }
       ]
     }
@@ -209,8 +223,10 @@ export default defineComponent({
     //Initially all product store comes selected
     this.selectedProductStores = this.productStores;
 
-    // Set selectedUserTemplate to the default value "FULFILLMENT" on component creation
-    this.selectedUserTemplate = this.userTemplates.find(template => template.templateId === this.userTemplateId);
+    if (!this.isFacilityLogin()) {
+      // Set selectedUserTemplate to the default value "FULFILLMENT" on component creation
+      this.selectedUserTemplate = this.userTemplates.find(template => template.templateId === this.userTemplateId);
+    }
 
   },
   async ionViewWillEnter() {
@@ -219,10 +235,23 @@ export default defineComponent({
     await this.store.dispatch('util/fetchProductStores');
   },
   methods: {
+    isFacilityLogin() {
+      if (this.selectedUser) {
+        this.formData.externalId = this.selectedUser.externalId
+        if (this.selectedUser.partyTypeId === "PARTY_GROUP") {
+          this.formData.requirePasswordChange = false;
+          this.formData.userLoginId = this.selectedUser.externalId;
+          return true;
+        } else {
+          this.formData.userLoginId = `${this.selectedUser.firstName}.${this.selectedUser.lastName}`;
+          return false;
+        }
+      }
+    },
     clearFormData() {
       this.formData = {
-        username: '',
-        password: '',
+        userLoginId: '',
+        currentPassword: '',
         externalId: '',
         requirePasswordChange: true
       }
@@ -234,10 +263,13 @@ export default defineComponent({
     },
     validateUserDetail(data: any) {
       const validationErrors = [];
-      if (data.password && !data.username) {
+      if (data.currentPassword && !data.userLoginId) {
         validationErrors.push(translate('username is required.'));
       }
-      if (data.password && !isValidPassword(data.emailAddress)) {
+      if (data.userLoginId && !data.currentPassword) {
+        validationErrors.push(translate('password is required.'));
+      }
+      if (data.currentPassword && !isValidPassword(data.currentPassword)) {
         validationErrors.push(translate('Invalid passowrd. Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.'));
       }
       return validationErrors;
@@ -251,34 +283,72 @@ export default defineComponent({
           showToast(translate(errorMessages));
           return;
         }
-        const selectedTemplate = this.selectedUserTemplate;
-
-        if (selectedTemplate.templateId !== 'FULFILLMENT' && this.formData.username) {
-          //Create user login
-        }
-        if (['FULFILLMENT', 'FULFILLMENT_MANAGER'].includes(selectedTemplate.templateId) && this.formData.externalId) {
-          //update party
-        }
-        if (selectedTemplate.isProductStoreRequied && this.selectedProductStores) {
-          //Create product store role
-        }
-        if (selectedTemplate.isFacilityRequired && this.selectedFacilities) {
-          //Create facility party
-        }
-        if (selectedTemplate.securityGroupId) {
-          //Create user login security group
-        }
-        if (selectedTemplate.productStoreRoleTypeId) {
-          //Create product store role
-        }
-        if (selectedTemplate.roleTypeId) {
-          //Create party role
+        await UserService.finishSetup({
+          selectedUser: this.selectedUser,
+          selectedTemplate: this.selectedUserTemplate,
+          formData: this.formData,
+          productStores: this.selectedProductStores,
+          facilities : this.selectedFacilities
+        });
+        if (this.selectedUserTemplate.isUserLoginRequired) {
+          await this.finishSetupAlert(this.formData.userLoginId);
+        } else {
+          this.$router.push({ path: `/user-details/${this.partyId}` });
         }
       } catch (err) {
         console.error('error', err)
         showToast(translate('Failed to quick setup user.'))
       }
-      //await this.$router.push({ path: `/user-details/${this.partyId}` })
+    },
+    async finishSetupAlert(userLoginId:  any) {
+      const message = 'is ready to login'
+      const alert = await alertController.create({
+        header: translate("Finish setup"),
+        message: translate(message, {userLoginId: userLoginId}),
+        buttons: [
+          {
+            text: translate("Proceed"),
+            handler: (data :any) => {
+              this.copyCredentials(data);
+            }
+          }
+        ],
+        inputs: [
+          {
+            name: "copyCredentials",
+            label: 'Copy credentials',
+            type: 'checkbox',
+            value: 'Y',
+          }
+        ]
+      });
+      return alert.present();
+    },
+    copyCredentials(data: any) {
+      if (data.length > 0) {
+        const dataToCopy = `username: ${this.formData.userLoginId}, password: ${this.formData.currentPassword}`
+        copyToClipboard(dataToCopy, 'Copied to clipboard')
+        this.$router.push({ path: `/user-details/${this.partyId}` });
+      }
+    },
+    async confirmSetupManually() {
+      const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?'
+      const alert = await alertController.create({
+        header: translate("Setup manually"),
+        message: translate(message),
+        buttons: [
+          {
+            text: translate("Cancel"),
+          },
+          {
+            text: translate("Setup manually"),
+            handler: async () => {
+              await this.setupManually();
+            }
+          }
+        ],
+      });
+      return alert.present();
     },
     async setupManually() {
       await this.$router.push({ path: `/user-details/${this.partyId}` })

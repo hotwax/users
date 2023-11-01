@@ -31,7 +31,7 @@
           <ion-icon slot="end" :icon="arrowForwardOutline"/>
           {{ translate("Quick Setup") }}
         </ion-button>
-        <ion-button color="medium" fill="outline" @click="setupManually()">
+        <ion-button color="medium" fill="outline" @click="confirmSetupManually()">
           <ion-icon slot="end" :icon="arrowForwardOutline"/>
           {{ translate("Setup Manually") }}
         </ion-button>
@@ -43,6 +43,7 @@
 <script lang="ts">
   import {
     IonBackButton,
+    IonButton,
     IonCard,
     IonContent,
     IonHeader,
@@ -52,7 +53,8 @@
     IonNote,
     IonPage,
     IonTitle,
-    IonToolbar
+    IonToolbar,
+    alertController
   } from "@ionic/vue";
   import { defineComponent } from "vue";
   import { mapGetters, useStore } from "vuex";
@@ -69,6 +71,7 @@
     name: "UserConfirmation",
     components: {
       IonBackButton,
+      IonButton,
       IonCard,
       IonContent,
       IonHeader,
@@ -95,6 +98,25 @@
       },
       async setupManually() {
         await this.$router.push({ path: `/user-details/${this.partyId}` })
+      },
+      async confirmSetupManually() {
+        const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?'
+        const alert = await alertController.create({
+          header: translate("Setup manually"),
+          message: translate(message),
+          buttons: [
+            {
+              text: translate("Cancel"),
+            },
+            {
+              text: translate("Setup manually"),
+              handler: async () => {
+                await this.setupManually();
+              }
+            }
+          ],
+        });
+        return alert.present();
       }
     },
     setup() {
