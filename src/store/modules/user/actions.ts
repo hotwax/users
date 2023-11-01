@@ -153,10 +153,10 @@ const actions: ActionTree<UserState, RootState> = {
   },
 
   async getSelectedUserDetails({ commit, state, dispatch }, payload) {
-    // const currentSelectedUser = JSON.parse(JSON.stringify(state.selectedUser))
-    // if (currentSelectedUser.partyId === payload.partyId && !payload.isFetchRequired) {
-    //   return
-    // }
+    const currentSelectedUser = JSON.parse(JSON.stringify(state.selectedUser))
+    if (currentSelectedUser.partyId === payload.partyId && !payload.isFetchRequired) {
+      return
+    }
 
     emitter.emit('presentLoader')
 
