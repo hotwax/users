@@ -85,7 +85,7 @@ export default defineComponent({
       roles: 'util/getRoles',
       selectedUser: 'user/getSelectedUser',
       productStores: 'util/getProductStores',
-      userProductStores: 'util/getUserProductStores',
+      userProductStores: 'user/getUserProductStores',
       getProductStoreRoleType: 'util/getProductStoreRoleType',
     })
   },
@@ -165,7 +165,8 @@ export default defineComponent({
         showToast(translate('Role(s) updated successfully.'))
       }
       // refetching product stores with updated roles
-      await this.store.dispatch('util/fetchUserProductStores', this.selectedUser.partyId)
+      const userProductStores = await this.store.dispatch('user/getUserProductStores', this.selectedUser.partyId)
+      this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, productStores: userProductStores })
       this.closeModal();
     },
     async confirmSave() {

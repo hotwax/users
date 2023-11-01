@@ -72,37 +72,6 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_PRODUCT_STORES_UPDATED, productStores)
   },
 
-  async fetchUserProductStores({ commit, dispatch, state }, partyId) {
-    let userProductStores = []
-    const params = {
-      inputFields: {
-        partyId,
-      },
-      viewSize: 100,
-      entityName: 'ProductStoreAndRole',
-      filterByDate: 'Y',
-      fieldList: ['partyId', 'storeName', 'roleTypeId', 'productStoreId', 'fromDate']
-    }
-
-    try {
-      // fetching stores and roles first as storeName and role description
-      // are required in the UI
-      Promise.allSettled([dispatch('getProductStores'), dispatch('fetchRoles')])
-      
-      const resp = await UserService.getUserAssociatedProductStores(params)
-      console.log(resp)
-      if (!hasError(resp) || resp.data.error === 'No record found') {
-        userProductStores = resp.data.docs ? resp.data.docs : []
-      } else {
-        throw resp.data
-      }
-    } catch (error) {
-      showToast(translate('Something went wrong.'));
-      console.error(error)
-    }
-    commit(types.UTIL_USER_PRODUCT_STORES_UPDATED, userProductStores)
-  },
-
   updateSecurityGroups({ commit }, securityGroups) {
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
   },
@@ -180,60 +149,7 @@ const actions: ActionTree<UtilState, RootState> = {
       console.error('Failed to fetch product stores', err)
     }
     commit(types.UTIL_PRODUCT_STORES_UPDATED, stores)
-  },
-
-  async getUserSecurityGroups({ state }, userLoginId) {
-    let userSecurityGroup = {} as any
-    const payload = {
-      inputFields: {
-        userLoginId,
-      },
-      entityName: "UserLoginSecurityGroup",
-      filterByDate: "Y",
-      viewSize: 10,
-      fieldList: ["groupId", "userLoginId", "fromDate"]
-    }
-
-    try {
-      const resp = await UserService.getUserSecurityGroup(payload)
-      if (!hasError(resp) || resp.data.error === 'No record found') {
-        userSecurityGroup = {
-          groupId: resp.data.docs ? resp.data.docs[0].groupId : '',
-          fromDate: resp.data.docs && resp.data.docs[0].fromDate
-        }
-      } else {
-        throw resp.data
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    return userSecurityGroup
-  },
-
-  async getUserAssociatedFacilities({ state }, partyId) {
-    let facilities = [] as any
-    const payload = {
-      inputFields: {
-        partyId,
-      },
-      noConditionFind: "Y",
-      entityName: "FacilityParty",
-      viewSize: 100,
-    }
-
-    try {
-      const resp = await UserService.getUserAssociatedFacilities(payload)
-      if (!hasError(resp) || resp.data.error === 'No record found') {
-        facilities = resp.data.docs ? resp.data.docs : []
-      } else {
-        throw resp.data
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    return facilities
   }
-  
 }
 
 export default actions;

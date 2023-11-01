@@ -47,7 +47,7 @@ export default defineComponent({
     ...mapGetters({
       selectedUser: 'user/getSelectedUser',
       getProductStoreRoleType: 'util/getProductStoreRoleType',
-      userProductStores: 'util/getUserProductStores',
+      userProductStores: 'user/getUserProductStores',
     })
   },
   methods: {
@@ -78,7 +78,8 @@ export default defineComponent({
         console.error(error)
       }
       // refetching product stores with updated roles
-      await this.store.dispatch('util/fetchUserProductStores', this.selectedUser.partyId)
+      const userProductStores = await this.store.dispatch('user/getUserProductStores', this.selectedUser.partyId)
+      this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, productStores: userProductStores })
       this.closePopover()
     },
     async confirmRemove() {
