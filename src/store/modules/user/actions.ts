@@ -152,7 +152,7 @@ const actions: ActionTree<UserState, RootState> = {
     }
   },
 
-  async getSelectedUserDetails({ commit, state }, payload) {
+  async getSelectedUserDetails({ commit, state, dispatch }, payload) {
     const currentSelectedUser = JSON.parse(JSON.stringify(state.selectedUser))
     if (currentSelectedUser.partyId === payload.partyId && !payload.isFetchRequired) {
       return
@@ -227,8 +227,9 @@ const actions: ActionTree<UserState, RootState> = {
     }
 
     if (!hasError(resp)) {
-      selectedUser.securityGroup = await this.dispatch('util/getUserSecurityGroups', selectedUser.userLoginId)
-      selectedUser.facilities = await this.dispatch('util/getUserAssociatedFacilities', selectedUser.partyId)
+      selectedUser.facilities = await UserService.getUserFacilities(selectedUser.partyId)
+      selectedUser.securityGroup = await UserService.getUserSecurityGroup(selectedUser.userLoginId)
+      selectedUser.productStores = await UserService.getUserProductStores(selectedUser.partyId)
       resp = await UserService.getPartyRole({
         inputFields: {
           partyId: selectedUser.partyId,

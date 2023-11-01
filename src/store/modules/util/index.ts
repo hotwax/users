@@ -10,7 +10,6 @@ const userModule: Module<UtilState, RootState> = {
   state: {
     roles: [],
     productStores: [],
-    userProductStores: [],
     securityGroups: [],
     facilities: [],
   },

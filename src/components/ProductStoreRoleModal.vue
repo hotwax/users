@@ -59,8 +59,8 @@ import { closeOutline, saveOutline } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
 import { showToast } from "@/utils";
 import { translate } from '@hotwax/dxp-components'
-import { UtilService } from "@/services/UtilService";
 import { DateTime } from "luxon";
+import { UserService } from "@/services/UserService";
 
 export default defineComponent({
   name: "ProductStoreRoleModal",
@@ -85,7 +85,7 @@ export default defineComponent({
       roles: 'util/getRoles',
       selectedUser: 'user/getSelectedUser',
       productStores: 'util/getProductStores',
-      userProductStores: 'util/getUserProductStores',
+      userProductStores: 'user/getUserProductStores',
       getProductStoreRoleType: 'util/getProductStoreRoleType',
     })
   },
@@ -143,7 +143,7 @@ export default defineComponent({
     },
     async updateProductStoresRole() {
       const updateResponses = await Promise.allSettled(this.productStoresToCreateUpdate.update
-        .map(async (payload: any) => await UtilService.updateProductStoreRole({
+        .map(async (payload: any) => await UserService.updateProductStoreRole({
           partyId: payload.partyId,
           productStoreId: payload.productStoreId,
           roleTypeId: payload.currentRoleTypeId,
@@ -155,7 +155,7 @@ export default defineComponent({
         [...this.productStoresToCreateUpdate.create, ...this.productStoresToCreateUpdate.update]
           .map(async (payload: any) => {
             delete payload.currentRoleTypeId // removing currentRoleTypeId as its not required for 'create' call
-            await UtilService.createProductStoreRole(payload)
+            await UserService.createProductStoreRole(payload)
           })
       )
       const hasError = [...updateResponses, ...createResponses].some((response: any) => response.status === 'rejected')
@@ -165,7 +165,8 @@ export default defineComponent({
         showToast(translate('Role(s) updated successfully.'))
       }
       // refetching product stores with updated roles
-      await this.store.dispatch('util/fetchUserProductStores', this.selectedUser.partyId)
+      const userProductStores = await UserService.getUserProductStores(this.selectedUser.partyId)
+      this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, productStores: userProductStores })
       this.closeModal();
     },
     async confirmSave() {
