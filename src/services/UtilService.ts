@@ -18,20 +18,20 @@ const getSecurityGroups = async (payload: any): Promise<any> => {
   })
 }
 
-const fetchFacilities = async (query: any): Promise<any> => {
+const fetchFacilities = async (payload: any): Promise<any> => {
   return api({
     url: "performFind",
-    method: "get",
-    params: query,
+    method: "POST",
+    data: payload,
     cache: true
   })
 }
 
-const fetchProductStores = async (query: any): Promise<any> => {
+const fetchProductStores = async (payload: any): Promise<any> => {
   return api({
     url: "performFind",
-    method: "get",
-    params: query,
+    method: "POST",
+    data: payload,
     cache: true
   })
 }
