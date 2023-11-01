@@ -165,7 +165,7 @@ export default defineComponent({
         showToast(translate('Role(s) updated successfully.'))
       }
       // refetching product stores with updated roles
-      const userProductStores = await this.store.dispatch('user/getUserProductStores', this.selectedUser.partyId)
+      const userProductStores = await UserService.getUserProductStores(this.selectedUser.partyId)
       this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, productStores: userProductStores })
       this.closeModal();
     },

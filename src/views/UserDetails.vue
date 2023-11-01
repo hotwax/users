@@ -518,7 +518,7 @@ export default defineComponent({
             showToast(translate('Facility associations updated successfully.'))
           }
           // refetching updated associated facilities
-          const userFacilities = await this.store.dispatch('user/getUserFacilities', this.selectedUser.partyId)
+          const userFacilities = await UserService.getUserFacilities(this.selectedUser.partyId)
           this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, facilities: userFacilities })
         }
       })
@@ -533,6 +533,11 @@ export default defineComponent({
     },
     async updateSecurityGroup(event: CustomEvent) {
       const groupId = event.detail.value
+      // stop programmatic update as ion-change is triggered on page mount automatically
+      if (groupId === this.selectedUser.securityGroup.groupId) {
+        return
+      }
+
       let resp = {} as any
       try {
         // delete if none (empty groupId) selected 
@@ -545,7 +550,7 @@ export default defineComponent({
           })
           if (!hasError(resp)) {
             showToast(translate('Security group updated successfully.'))
-            const userSecurityGroup = await this.store.dispatch('user/getUserSecurityGroup', this.selectedUser.userLoginId)
+            const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
             this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
           } else {
             throw resp.data
@@ -565,7 +570,7 @@ export default defineComponent({
             })
             if (hasError(resp)) throw resp.data
             showToast(translate('Security group updated successfully.'))
-            const userSecurityGroup = await this.store.dispatch('user/getUserSecurityGroup', this.selectedUser.userLoginId)
+            const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
             this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
           } else {
             throw resp.data
@@ -578,7 +583,7 @@ export default defineComponent({
           })
           if (!hasError(resp)) {
             showToast(translate('Security group updated successfully.'))
-            const userSecurityGroup = await this.store.dispatch('user/getUserSecurityGroup', this.selectedUser.userLoginId)
+            const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
             this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
           } else {
             throw resp.data

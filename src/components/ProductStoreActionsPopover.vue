@@ -78,7 +78,7 @@ export default defineComponent({
         console.error(error)
       }
       // refetching product stores with updated roles
-      const userProductStores = await this.store.dispatch('user/getUserProductStores', this.selectedUser.partyId)
+      const userProductStores = await UserService.getUserProductStores(this.selectedUser.partyId)
       this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, productStores: userProductStores })
       this.closePopover()
     },

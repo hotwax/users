@@ -250,12 +250,39 @@ const sendResetPasswordEmail = async (payload: any): Promise <any> => {
 } 
 
 
-const getUserSecurityGroup = async (payload: any): Promise<any> => {
-  return api({
-    url: "performFind",
-    method: "POST",
-    data: payload
-  })
+const getUserSecurityGroup = async (userLoginId: string): Promise<any> => {
+  let userSecurityGroup = {} as any
+  const payload = {
+    inputFields: {
+      userLoginId,
+    },
+    entityName: "UserLoginSecurityGroup",
+    filterByDate: "Y",
+    viewSize: 10,
+    fieldList: ["groupId", "userLoginId", "fromDate"]
+  }
+
+  try {
+    const resp = await api({
+      url: "performFind",
+      method: "POST",
+      data: payload
+    }) as any
+
+
+    if (!hasError(resp) || resp.data.error === 'No record found') {
+      userSecurityGroup = {
+        groupId: resp.data.docs ? resp.data.docs[0].groupId : '',
+        fromDate: resp.data.docs && resp.data.docs[0].fromDate
+      }
+    } else {
+      throw resp.data
+    }
+  } catch (error) {
+    console.error('Failed to fetch user associated security group.', error)
+  }
+
+  return userSecurityGroup
 }
 
 const updateUserSecurityGroup = async (payload: any): Promise <any> => {
@@ -282,12 +309,35 @@ const createPartyRole = async (payload: any): Promise <any> => {
   });
 }
 
-const getUserAssociatedFacilities = async (payload: any): Promise<any> => {
-  return api({
-    url: "performFind",
-    method: "POST",
-    data: payload
-  })
+const getUserFacilities = async (partyId: string): Promise<any> => {
+  let facilities = []
+  const payload = {
+    inputFields: {
+      partyId,
+    },
+    noConditionFind: "Y",
+    entityName: "FacilityParty",
+    viewSize: 100,
+  }
+
+  try {
+    const resp = await api({
+      url: "performFind",
+      method: "POST",
+      data: payload
+    }) as any
+
+
+    if (!hasError(resp) || resp.data.error === 'No record found') {
+      facilities = resp.data.docs ? resp.data.docs : []
+    } else {
+      throw resp.data;
+    }
+  } catch (error) {
+    console.error('Failed to fetch user associated facilities.', error)
+  }
+
+  return facilities
 }
 
 const addPartyToFacility = async (payload: any): Promise <any> => {
@@ -306,12 +356,38 @@ const removePartyFromFacility = async (payload: any): Promise <any> => {
   });
 }
 
-const getUserAssociatedProductStores = async (payload: any): Promise<any> => {
-  return api({
-    url: 'performFind',
-    method: 'POST',
-    data: payload
-  })
+const getUserProductStores = async (partyId: string): Promise<any> => {
+  let productStores = []
+  const payload = {
+    inputFields: {
+      partyId,
+    },
+    viewSize: 100,
+    entityName: 'ProductStoreAndRole',
+    filterByDate: 'Y',
+    fieldList: ['partyId', 'storeName', 'roleTypeId', 'productStoreId', 'fromDate']
+  }
+
+  try {
+    const resp = await api({
+      url: "performFind",
+      method: "POST",
+      data: payload
+    }) as any
+
+    // fetching stores and roles first as storeName and role description
+    // are required in the UI
+    Promise.allSettled([store.dispatch('util/getProductStores'), store.dispatch('util/fetchRoles')])
+
+    if (!hasError(resp) || resp.data.error === 'No record found') {
+      productStores = resp.data.docs ? resp.data.docs : []
+    } else {
+      throw resp.data
+    }
+  } catch (error) {
+    console.error('Failed to fetch user associated product stores.', error)
+  }
+  return productStores
 }
 
 const createProductStoreRole = async (payload: any): Promise <any> => {
@@ -347,8 +423,8 @@ export const UserService = {
   getUserLoginDetails,
   getUserPermissions,
   getUserProfile,
-  getUserAssociatedFacilities,
-  getUserAssociatedProductStores,
+  getUserFacilities,
+  getUserProductStores,
   getUserSecurityGroup,
   login,
   removePartyFromFacility,
