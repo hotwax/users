@@ -185,7 +185,7 @@ export default defineComponent({
         const payload = {
           ...this.formData,
           partyTypeId,
-          "partyIdFrom": "Company",
+          "partyIdFrom": "COMPANY",
           "roleTypeIdFrom": "INTERNAL_ORGANIZATIO",
           "roleTypeIdTo": "APPLICATION_USER",
           "partyRelationshipTypeId": "EMPLOYMENT",

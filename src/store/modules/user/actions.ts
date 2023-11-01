@@ -155,7 +155,7 @@ const actions: ActionTree<UserState, RootState> = {
   async getSelectedUserDetails({ commit, state, dispatch }, payload) {
     const currentSelectedUser = JSON.parse(JSON.stringify(state.selectedUser))
     if (currentSelectedUser.partyId === payload.partyId && !payload.isFetchRequired) {
-      //return
+      return
     }
 
     emitter.emit('presentLoader')
@@ -228,7 +228,7 @@ const actions: ActionTree<UserState, RootState> = {
       console.error(error)
     }
 
-    if (!hasError(resp)) {
+    if (Object.keys(selectedUser).length) {
       selectedUser.facilities = await UserService.getUserFacilities(selectedUser.partyId)
       selectedUser.securityGroup = await UserService.getUserSecurityGroup(selectedUser.userLoginId)
       selectedUser.productStores = await UserService.getUserProductStores(selectedUser.partyId)
