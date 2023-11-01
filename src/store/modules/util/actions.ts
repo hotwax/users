@@ -72,9 +72,6 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_PRODUCT_STORES_UPDATED, productStores)
   },
 
-  updateSecurityGroups({ commit }, securityGroups) {
-    commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
-  },
 
   async getSecurityGroups({ commit }) {
     const payload = {
@@ -149,7 +146,13 @@ const actions: ActionTree<UtilState, RootState> = {
       console.error('Failed to fetch product stores', err)
     }
     commit(types.UTIL_PRODUCT_STORES_UPDATED, stores)
-  }
+  },
+
+  clearUtilState({ commit }) {
+    commit(types.UTIL_FACILITIES_UPDATED, [])
+    commit(types.UTIL_SECURITY_GROUPS_UPDATED, []);
+    commit(types.UTIL_PRODUCT_STORES_UPDATED, [])
+  },
 }
 
 export default actions;

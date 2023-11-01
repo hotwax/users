@@ -137,9 +137,20 @@ export default defineComponent({
     }
   },
   async ionViewWillEnter() {
+    this.clearFormData()
     await this.store.dispatch('util/fetchFacilities')
   },
   methods: {
+    clearFormData() {
+      this.formData = {
+        firstName: '',
+        lastName: '',
+        groupName: '',
+        externalId: '',
+        emailAddress: '',
+        contactNumber: '',
+      }
+    },
     updateFacilityLogin(event: CustomEvent) {
       this.isFacilityLogin = event.detail.checked;
     },
@@ -185,7 +196,7 @@ export default defineComponent({
         const payload = {
           ...this.formData,
           partyTypeId,
-          "partyIdFrom": "Company",
+          "partyIdFrom": "COMPANY",
           "roleTypeIdFrom": "INTERNAL_ORGANIZATIO",
           "roleTypeIdTo": "APPLICATION_USER",
           "partyRelationshipTypeId": "EMPLOYMENT",

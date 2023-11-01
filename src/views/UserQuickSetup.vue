@@ -230,6 +230,7 @@ export default defineComponent({
 
   },
   async ionViewWillEnter() {
+    this.clearFormData()
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
     await this.store.dispatch('util/fetchFacilities');
     await this.store.dispatch('util/fetchProductStores');
@@ -243,7 +244,7 @@ export default defineComponent({
           this.formData.userLoginId = this.selectedUser.externalId;
           return true;
         } else {
-          this.formData.userLoginId = `${this.selectedUser.firstName}.${this.selectedUser.lastName}`;
+          this.formData.userLoginId = this.selectedUserTemplate.isUserLoginRequired ? `${this.selectedUser.firstName.toLowerCase()}.${this.selectedUser.lastName.toLowerCase()}` : '';
           return false;
         }
       }
@@ -328,8 +329,8 @@ export default defineComponent({
       if (data.length > 0) {
         const dataToCopy = `username: ${this.formData.userLoginId}, password: ${this.formData.currentPassword}`
         copyToClipboard(dataToCopy, 'Copied to clipboard')
-        this.$router.push({ path: `/user-details/${this.partyId}` });
       }
+      this.$router.push({ path: `/user-details/${this.partyId}` });
     },
     async confirmSetupManually() {
       const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?'

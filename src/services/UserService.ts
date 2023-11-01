@@ -244,7 +244,7 @@ const createNewUserLogin = async (payload: any): Promise <any> => {
 
 const sendResetPasswordEmail = async (payload: any): Promise <any> => {
   return api({
-    url: "sendResetPassword", 
+    url: "sendResetPasswordMail", 
     method: "post",
     data: payload
   });

@@ -113,7 +113,8 @@ const actions: ActionTree<UserState, RootState> = {
     const userStore = useUserStore()
     // TODO add any other tasks if need
     commit(types.USER_END_SESSION)
-    this.dispatch('util/updateSecurityGroups', {})
+    this.dispatch('util/clearUtilState')
+
     resetPermissions();
     resetConfig();
 
@@ -155,12 +156,12 @@ const actions: ActionTree<UserState, RootState> = {
   async getSelectedUserDetails({ commit, state, dispatch }, payload) {
     const currentSelectedUser = JSON.parse(JSON.stringify(state.selectedUser))
     if (currentSelectedUser.partyId === payload.partyId && !payload.isFetchRequired) {
-      //return
+      return
     }
 
     emitter.emit('presentLoader')
 
-    let resp = {} as any, selectedUser = {} as any, params = {
+    let userResp = {} as any, selectedUser = {} as any, params = {
       inputFields: {
         "roleTypeIdTo": "APPLICATION_USER",
         partyId: payload.partyId,
@@ -174,10 +175,10 @@ const actions: ActionTree<UserState, RootState> = {
     }
 
     try {
-      resp = await UserService.getUserLoginDetails(params)
-      if (!hasError(resp)) {
+      userResp = await UserService.getUserLoginDetails(params)
+      if (!hasError(userResp)) {
         selectedUser = {
-          ...resp.data.docs[0]
+          ...userResp.data.docs[0]
         }
 
         params = {
@@ -193,12 +194,11 @@ const actions: ActionTree<UserState, RootState> = {
           fieldList: ['areaCode', 'countryCode', 'contactNumber', 'infoString', 'contactMechId', 'contactMechPurposeTypeId']
         } as any
 
-        resp = await UserService.getUserContactDetails(params)
-        // TODO handle UI if API fail
-        if (!hasError(resp)) {
+        const contactResp = await UserService.getUserContactDetails(params)
+        if (!hasError(contactResp)) {
           let emailDetails = {}, phoneNumberDetails = {};
 
-          resp.data.docs.map((doc: any) => {
+          contactResp.data.docs.map((doc: any) => {
             if (doc.contactMechPurposeTypeId === 'PRIMARY_EMAIL') {
               emailDetails = {
                 email: doc.infoString,
@@ -218,21 +218,23 @@ const actions: ActionTree<UserState, RootState> = {
             ...(Object.keys(phoneNumberDetails).length && { phoneNumberDetails })
           }
         } else {
-          throw resp.data
+          throw contactResp.data
         }
       } else {
-        throw resp.data
+        throw userResp.data
       }
     } catch (error) {
-      showToast(translate('Something went wrong.'));
+      if (hasError(userResp)) {
+        showToast(translate('Something went wrong.'));
+      }
       console.error(error)
     }
 
-    if (!hasError(resp)) {
+    if (Object.keys(selectedUser).length) {
       selectedUser.facilities = await UserService.getUserFacilities(selectedUser.partyId)
       selectedUser.securityGroup = await UserService.getUserSecurityGroup(selectedUser.userLoginId)
       selectedUser.productStores = await UserService.getUserProductStores(selectedUser.partyId)
-      resp = await UserService.getPartyRole({
+      const resp = await UserService.getPartyRole({
         inputFields: {
           partyId: selectedUser.partyId,
           roleTypeId: 'WAREHOUSE_PICKER',
@@ -319,8 +321,8 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_LIST_UPDATED, { users, total });
   },
 
-  async updateQuery({ commit }, query) {
-    commit(types.USER_QUERY_UPDATED, {query})
+  updateQuery({ commit }, query) {
+    commit(types.USER_QUERY_UPDATED, { query })
   }
 }
 export default actions;
