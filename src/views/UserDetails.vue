@@ -176,7 +176,7 @@
                   <ion-toggle slot="end" @click="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true" />
                 </ion-item>
                 <ion-item lines="none" button detail @click="selectFacility()">
-                    <ion-label>{{ selectedUser.facilities.length === 1 ? translate('added to 1 facility') : translate('added to facilities', { count: selectedUser.facilities.length }) }}</ion-label>
+                  <ion-label>{{ selectedUser.facilities.length === 1 ? translate('added to 1 facility') : translate('added to facilities', { count: selectedUser.facilities.length }) }}</ion-label>
                 </ion-item>
               </ion-list>
             </ion-card>
