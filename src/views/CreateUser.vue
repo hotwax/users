@@ -205,7 +205,7 @@ export default defineComponent({
         const resp = await UserService.createUser(payload);
         if (resp.status === 200 && !hasError(resp) && resp.data.partyId) {
           const partyId = resp.data.partyId;
-          this.$router.push({ path: `/user-confirmation/${partyId}` })
+          this.$router.replace({ path: `/user-confirmation/${partyId}` })
         } else {
           throw resp.data;
         }
