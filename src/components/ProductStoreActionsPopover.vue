@@ -63,23 +63,6 @@ export default defineComponent({
         if (result.data && result.data.value) {
           const productStoresToCreate = result.data.value.productStoresToCreate
           const productStoresToRemove = result.data.value.productStoresToRemove
-          // explicitly calling createPartyRole (ensurePartyRole) as addToPartyTole
-          // and removeFromPartyRole are running in parallel on the server causing issues
-          if (productStoresToRemove.length) {
-            try {
-              const resp = await UserService.createPartyRole({
-                partyId: this.selectedUser.partyId,
-                roleTypeId: productStoresToRemove[0].roleTypeId,
-              })
-              if (hasError(resp)) {
-                showToast(translate('Something went wrong.'));
-                throw resp.data
-              }
-            } catch (error) {
-              console.error(error)
-              return
-            }
-          }
 
           const updateResponses = await Promise.allSettled(productStoresToRemove
             .map(async (payload: any) => await UserService.updateProductStoreRole({
@@ -90,6 +73,24 @@ export default defineComponent({
               thruDate: DateTime.now().toMillis()
             }))
           )
+
+          // explicitly calling ensurePartyRole (ensurePartyRole) as addToPartyTole
+          // and removeFromPartyRole are running in parallel on the server causing issues
+          if (productStoresToCreate.length) {
+            try {
+              const resp = await UserService.ensurePartyRole({
+                partyId: this.selectedUser.partyId,
+                roleTypeId: "APPLICATION_USER",
+              })
+              if (hasError(resp)) {
+                showToast(translate('Something went wrong.'));
+                throw resp.data
+              }
+            } catch (error) {
+              console.error(error)
+              return
+            }
+          }
 
           const createResponses = await Promise.allSettled(productStoresToCreate
             .map(async (payload: any) => await UserService.createProductStoreRole({

@@ -508,20 +508,22 @@ export default defineComponent({
             }))
           )
     
-          // explicitly calling createPartyRole (ensurePartyRole) as addToPartyTole 
+          // explicitly calling ensurePartyRole (ensurePartyRole) as addToPartyTole 
           // and removeFromPartyRole are running in parallel on the server causing issues
-          try {
-            const resp = await UserService.createPartyRole({
-              partyId: this.partyId,
-              roleTypeId: 'WAREHOUSE_MANAGER',
-            })
-            if (hasError(resp)) {
-              showToast(translate('Something went wrong.'));
-              throw resp.data
+          if (facilitiesToAdd.length) {
+            try {
+              const resp = await UserService.ensurePartyRole({
+                partyId: this.partyId,
+                roleTypeId: 'WAREHOUSE_MANAGER',
+              })
+              if (hasError(resp)) {
+                showToast(translate('Something went wrong.'));
+                throw resp.data
+              }
+            } catch (error) {
+              console.error(error)
+              return
             }
-          } catch (error) {
-            console.error(error)
-            return
           }
 
           const createResponses = await Promise.allSettled(facilitiesToAdd
@@ -555,11 +557,11 @@ export default defineComponent({
         if (result.data && result.data.value) {
           const productStoresToCreate = result.data.value.productStoresToCreate
           const productStoresToRemove = result.data.value.productStoresToRemove
-          // explicitly calling createPartyRole (ensurePartyRole) as addToPartyTole
+          // explicitly calling ensurePartyRole (ensurePartyRole) as addToPartyTole
           // and removeFromPartyRole are running in parallel on the server causing issues
           if (productStoresToRemove.length) {
             try {
-              const resp = await UserService.createPartyRole({
+              const resp = await UserService.ensurePartyRole({
                 partyId: this.selectedUser.partyId,
                 roleTypeId: productStoresToRemove[0].roleTypeId,
               })
@@ -685,7 +687,7 @@ export default defineComponent({
           role: 'success',
           handler: async () => {
             try {
-              const resp = await UserService.createPartyRole({
+              const resp = await UserService.ensurePartyRole({
                 partyId: this.partyId,
                 roleTypeId: 'WAREHOUSE_PICKER'
               })

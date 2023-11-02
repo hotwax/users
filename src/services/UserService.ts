@@ -302,7 +302,7 @@ const addUserToSecurityGroup = async (payload: any): Promise <any> => {
   });
 }
 
-const createPartyRole = async (payload: any): Promise <any> => {
+const ensurePartyRole = async (payload: any): Promise <any> => {
   return api({
     url: "service/ensurePartyRole", 
     method: "post",
@@ -467,7 +467,7 @@ const finishSetup = async (payload: any): Promise <any> => {
       }));
     }
     if (payload.selectedTemplate.roleTypeId) {
-      promises.push(createPartyRole({
+      promises.push(ensurePartyRole({
         "partyId": partyId,
         "roleTypeId": payload.selectedTemplate.roleTypeId
       }));
@@ -511,7 +511,7 @@ export const UserService = {
   addPartyToFacility,
   addUserToSecurityGroup,
   createUser,
-  createPartyRole,
+  ensurePartyRole,
   createNewUserLogin,
   createUpdatePartyEmailAddress,
   createUpdatePartyTelecomNumber,
