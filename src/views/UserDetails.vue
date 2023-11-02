@@ -570,7 +570,7 @@ export default defineComponent({
 
           // explicitly calling ensurePartyRole (ensurePartyRole) as addToPartyTole
           // and removeFromPartyRole are running in parallel on the server causing issues
-          if (productStoresToRemove.length) {
+          if (productStoresToCreate.length) {
             try {
               const resp = await UserService.ensurePartyRole({
                 partyId: this.selectedUser.partyId,
