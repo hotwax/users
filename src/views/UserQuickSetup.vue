@@ -190,7 +190,7 @@ export default defineComponent({
           "isUserLoginRequired": true,
           "isFacilityRequired": false,
           "facilityRoleTypeId": "",
-          "isProductStoreRequied": false,
+          "isProductStoreRequired": false,
           "productStoreRoleTypeId": "",
         },
         {
@@ -202,7 +202,7 @@ export default defineComponent({
           "isEmployeeIdRequired": true,
           "isFacilityRequired": true,
           "facilityRoleTypeId": "WAREHOUSE_MANAGER",
-          "isProductStoreRequied": false,
+          "isProductStoreRequired": false,
           "productStoreRoleTypeId": ""
         },
         {
@@ -213,7 +213,7 @@ export default defineComponent({
           "isEmployeeIdRequired": true,
           "isFacilityRequired": false,
           "facilityRoleTypeId": "",
-          "isProductStoreRequied": false,
+          "isProductStoreRequired": false,
           "productStoreRoleTypeId": ""
         }
       ]

@@ -474,6 +474,11 @@ const finishSetup = async (payload: any): Promise <any> => {
     }
 
     if (payload.productStores && selectedTemplate.isProductStoreRequired) {
+      promises.push(ensurePartyRole({
+        "partyId": partyId,
+        "roleTypeId": payload.selectedTemplate.productStoreRoleTypeId
+      }));
+
       payload.productStores?.forEach((store : any) => {
         promises.push(createProductStoreRole({
           "partyId": partyId,
@@ -485,6 +490,11 @@ const finishSetup = async (payload: any): Promise <any> => {
     }
 
     if (payload.facilities) {
+      promises.push(ensurePartyRole({
+        "partyId": partyId,
+        "roleTypeId": payload.selectedTemplate.facilityRoleTypeId ?? "WAREHOUSE_MANAGER"
+      }));
+
       payload.facilities?.forEach((facility : any) => {
         promises.push(addPartyToFacility({
           "partyId": partyId,
