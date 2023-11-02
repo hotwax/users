@@ -3,9 +3,9 @@
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button tab="users" href="/tabs/users">
+        <ion-tab-button tab="users" href="/tabs/find-users">
           <ion-icon :icon="personOutline" />
-          <ion-label>{{ translate("Users") }}</ion-label>
+          <ion-label>{{ translate("Find Users") }}</ion-label>
         </ion-tab-button>
         <ion-tab-button tab="more" href="/tabs/settings">
           <ion-icon :icon="settingsOutline" />

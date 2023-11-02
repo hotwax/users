@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>{{ translate("Users") }}</ion-title>
+        <ion-title>{{ translate("Find Users") }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -126,7 +126,7 @@ import UserPopover from '@/components/UserPopover.vue';
 import { translate } from '@hotwax/dxp-components'
 
 export default defineComponent({
-  name: 'Users',
+  name: 'FindUsers',
   components: {
     IonButton,
     IonChip,
