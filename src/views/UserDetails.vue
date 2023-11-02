@@ -327,7 +327,7 @@ export default defineComponent({
             const input = result.input.trim()
             if (!input) {
               showToast(translate('Please enter a value'))
-              return
+              return false // returning false will not close the input
             }
 
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
@@ -335,7 +335,7 @@ export default defineComponent({
               if (type === 'email') {
                 if (!isValidEmail(input)) {
                   showToast(translate('Invalid email address.'))
-                  return
+                  return false
                 }
 
                 const resp = await UserService.createUpdatePartyEmailAddress({
@@ -390,6 +390,7 @@ export default defineComponent({
               showToast(translate(`Failed to add ${type === 'email' ? 'email' : (type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
               console.error(error)
             }
+            return true
           }
         }]
       })
