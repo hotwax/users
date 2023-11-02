@@ -25,9 +25,9 @@
               <ion-icon :icon="toggleOutline" slot="start" />
               <ion-label>{{ translate("Status") }}</ion-label>
               <ion-select interface="popover" v-model="query.status" @ionChange="updateQuery()">
-                <ion-select-option value="">{{ translate("None") }}</ion-select-option>
                 <ion-select-option value="Y">{{ translate("Active") }}</ion-select-option>
                 <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
+                <ion-select-option value="">{{ translate("None") }}</ion-select-option>
               </ion-select>
             </ion-item>
           </ion-list>
@@ -155,6 +155,10 @@ export default defineComponent({
       isScrollable: "user/isScrollable"
     })
   },
+  async mounted() {
+    await this.fetchUsers();
+    await this.store.dispatch('util/getSecurityGroups')
+  },
   methods: {
     getDate(date: any) {
       return DateTime.fromMillis(date).toFormat('dd LLL yyyy')
@@ -208,10 +212,6 @@ export default defineComponent({
       router,
       store
     };
-  },
-  async mounted() {
-    await this.fetchUsers();
-    await this.store.dispatch('util/getSecurityGroups')
   }
 });
 </script>
