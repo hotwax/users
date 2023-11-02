@@ -152,6 +152,7 @@ export default defineComponent({
       }
     },
     updateFacilityLogin(event: CustomEvent) {
+      this.clearFormData()
       this.isFacilityLogin = event.detail.checked;
     },
     updateGroupName(event: CustomEvent) {
