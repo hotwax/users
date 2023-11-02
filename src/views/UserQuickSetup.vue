@@ -73,7 +73,7 @@
         <ion-button fill="outline" @click="confirmSetupManually()">
           {{ translate("Setup manually") }}
         </ion-button>
-        <ion-button color="medium" fill="outline" @click="finishAndCreateNewUser()">
+        <ion-button fill="clear" @click="finishAndCreateNewUser()">
           {{ translate("Finish and create new user") }}
         </ion-button>
       </div>

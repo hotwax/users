@@ -301,9 +301,11 @@ export default defineComponent({
           type,
           placeholder: this.OPTIONS[type].placeholder,
           value,
-          contactMechId: type === 'email' 
+          contactMechId: type === 'email'
             ? this.selectedUser.emailDetails.contactMechId
-            : this.selectedUser.phoneNumberDetails.contactMechId
+            : (type === 'phoneNumber'
+              ? this.selectedUser.phoneNumberDetails.contactMechId
+              : '')
         },
         showBackdrop: false,
       });
