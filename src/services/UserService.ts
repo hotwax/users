@@ -379,7 +379,7 @@ const getUserProductStores = async (partyId: string): Promise<any> => {
 
     // fetching stores and roles first as storeName and role description
     // are required in the UI
-    await store.dispatch('util/getProductStores')
+    Promise.allSettled([store.dispatch('util/getProductStores'), store.dispatch('util/fetchRoles')])
 
     if (!hasError(resp) || resp.data.error === 'No record found') {
       productStores = resp.data.docs ? resp.data.docs : []
