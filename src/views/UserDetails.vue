@@ -85,7 +85,7 @@
               <ion-list>
                 <ion-item>
                   <ion-icon :icon="mailOutline" slot="start" />
-                  <ion-label>{{ selectedUser?.emailDetails ? selectedUser.emailDetails.email : translate('Email') }}</ion-label>
+                  <ion-label class="ion-text-wrap">{{ selectedUser?.emailDetails ? selectedUser.emailDetails.email : translate('Email') }}</ion-label>
                   <ion-button v-if="selectedUser?.emailDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'email', selectedUser.emailDetails.email)">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
@@ -95,7 +95,7 @@
                 </ion-item>
                 <ion-item>
                   <ion-icon :icon="callOutline" slot="start" />
-                  <ion-label>{{ selectedUser?.phoneNumberDetails ? selectedUser.phoneNumberDetails.contactNumber : translate('Phone number') }}</ion-label>
+                  <ion-label class="ion-text-wrap">{{ selectedUser?.phoneNumberDetails ? selectedUser.phoneNumberDetails.contactNumber : translate('Phone number') }}</ion-label>
                   <ion-button v-if="selectedUser?.phoneNumberDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'phoneNumber', selectedUser.phoneNumberDetails.contactNumber)">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
@@ -105,7 +105,7 @@
                 </ion-item>
                 <ion-item lines="none">
                   <ion-icon :icon="businessOutline" slot="start" />
-                  <ion-label>{{ selectedUser.externalId ? selectedUser.externalId : translate('External ID') }}</ion-label>
+                  <ion-label class="ion-text-wrap">{{ selectedUser.externalId ? selectedUser.externalId : translate('External ID') }}</ion-label>
                   <ion-button v-if="selectedUser.externalId" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'externalId', selectedUser.externalId)">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
