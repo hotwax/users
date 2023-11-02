@@ -19,7 +19,6 @@
 <script lang="ts">
 import { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs, IonRouterOutlet } from "@ionic/vue";
 import {
-  infiniteOutline,
   settingsOutline,
   personOutline,
 } from "ionicons/icons";
@@ -30,7 +29,6 @@ export default {
   components: { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs, IonRouterOutlet },
   setup() {
     return {
-      infiniteOutline,
       settingsOutline,
       personOutline,
       translate

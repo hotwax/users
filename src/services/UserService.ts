@@ -317,6 +317,7 @@ const getUserFacilities = async (partyId: string): Promise<any> => {
       partyId,
     },
     noConditionFind: "Y",
+    filterByDate: "Y",
     entityName: "FacilityParty",
     viewSize: 100,
   }
@@ -378,7 +379,7 @@ const getUserProductStores = async (partyId: string): Promise<any> => {
 
     // fetching stores and roles first as storeName and role description
     // are required in the UI
-    Promise.allSettled([store.dispatch('util/getProductStores'), store.dispatch('util/fetchRoles')])
+    await store.dispatch('util/getProductStores')
 
     if (!hasError(resp) || resp.data.error === 'No record found') {
       productStores = resp.data.docs ? resp.data.docs : []

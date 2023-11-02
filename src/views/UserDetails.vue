@@ -229,7 +229,7 @@ import ContactActionsPopover from '@/components/ContactActionsPopover.vue'
 import ProductStoreActionsPopover from '@/components/ProductStoreActionsPopover.vue'
 import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
-import ProductStoreRoleModal from '@/components/ProductStoreRoleModal.vue'
+import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
 import { UserService } from "@/services/UserService";
 import { isValidEmail, showToast } from "@/utils";
 import { hasError } from '@/adapter';
@@ -504,9 +504,26 @@ export default defineComponent({
               facilityId: payload.facilityId,
               roleTypeId: payload.roleTypeId,
               fromDate: payload.fromDate,
+              thruDate: DateTime.now().toMillis()
             }))
           )
     
+          // explicitly calling createPartyRole (ensurePartyRole) as addToPartyTole 
+          // and removeFromPartyRole are running in parallel on the server causing issues
+          try {
+            const resp = await UserService.createPartyRole({
+              partyId: this.partyId,
+              roleTypeId: 'WAREHOUSE_MANAGER',
+            })
+            if (hasError(resp)) {
+              showToast(translate('Something went wrong.'));
+              throw resp.data
+            }
+          } catch (error) {
+            console.error(error)
+            return
+          }
+
           const createResponses = await Promise.allSettled(facilitiesToAdd
             .map(async (payload: any) => await UserService.addPartyToFacility({
               partyId: this.selectedUser.partyId,
@@ -515,8 +532,8 @@ export default defineComponent({
             }))
           )
     
-          const hasError = [...removeResponses, ...createResponses].some((response: any) => response.status === 'rejected')
-          if (hasError) {
+          const hasFailedResponse = [...removeResponses, ...createResponses].some((response: any) => response.status === 'rejected')
+          if (hasFailedResponse) {
             showToast(translate('Failed to update some association(s).'))
           } else {
             showToast(translate('Facility associations updated successfully.'))
@@ -530,8 +547,61 @@ export default defineComponent({
     },
     async selectProductStore() {
       const selectProductStoreModal = await modalController.create({
-        component: ProductStoreRoleModal,
+        component: SelectProductStoreModal,
+        componentProps: { selectedProductStores: this.userProductStores }
       });
+
+      selectProductStoreModal.onDidDismiss().then(async (result) => {
+        if (result.data && result.data.value) {
+          const productStoresToCreate = result.data.value.productStoresToCreate
+          const productStoresToRemove = result.data.value.productStoresToRemove
+          // explicitly calling createPartyRole (ensurePartyRole) as addToPartyTole
+          // and removeFromPartyRole are running in parallel on the server causing issues
+          if (productStoresToRemove.length) {
+            try {
+              const resp = await UserService.createPartyRole({
+                partyId: this.selectedUser.partyId,
+                roleTypeId: productStoresToRemove[0].roleTypeId,
+              })
+              if (hasError(resp)) {
+                showToast(translate('Something went wrong.'));
+                throw resp.data
+              }
+            } catch (error) {
+              console.error(error)
+              return
+            }
+          }
+
+          const updateResponses = await Promise.allSettled(productStoresToRemove
+            .map(async (payload: any) => await UserService.updateProductStoreRole({
+              partyId: this.selectedUser.partyId,
+              productStoreId: payload.productStoreId,
+              roleTypeId: payload.roleTypeId,
+              fromDate: this.userProductStores.find((store: any) => payload.productStoreId === store.productStoreId).fromDate,
+              thruDate: DateTime.now().toMillis()
+            }))
+          )
+
+          const createResponses = await Promise.allSettled(productStoresToCreate
+            .map(async (payload: any) => await UserService.createProductStoreRole({
+              productStoreId: payload.productStoreId,
+              partyId: this.selectedUser.partyId,
+              roleTypeId: "APPLICATION_USER",
+            }))
+          )
+
+          const hasFailedResponse = [...updateResponses, ...createResponses].some((response: any) => response.status === 'rejected')
+          if (hasFailedResponse) {
+            showToast(translate('Failed to update some role(s).'))
+          } else {
+            showToast(translate('Role(s) updated successfully.'))
+          }
+          // refetching product stores with updated roles
+          const userProductStores = await UserService.getUserProductStores(this.selectedUser.partyId)
+          this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, productStores: userProductStores })
+        }
+      })
 
       return selectProductStoreModal.present();
     },
