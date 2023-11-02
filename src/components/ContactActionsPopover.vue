@@ -97,6 +97,7 @@ export default defineComponent({
                 showToast(translate('Please enter a value'))
                 return false
               }
+              return true
             }
 
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
