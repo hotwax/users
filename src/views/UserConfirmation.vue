@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-back-button default-href="/create-user" slot="start"></ion-back-button>
+        <ion-back-button default-href="/tabs/users" slot="start"></ion-back-button>
         <ion-title>{{ translate("Create user") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -97,7 +97,7 @@
         await this.$router.push({ path: `/user-quick-setup/${this.partyId}` })
       },
       async setupManually() {
-        await this.$router.push({ path: `/user-details/${this.partyId}` })
+        await this.$router.replace({ path: `/user-details/${this.partyId}` })
       },
       async confirmSetupManually() {
         const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?'
