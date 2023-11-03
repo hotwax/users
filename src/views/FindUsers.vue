@@ -224,9 +224,4 @@ export default defineComponent({
 .list-item {
   --columns-desktop: 4;
 }
-
-.list-item > *:last-child {
-  display: flex;
-  gap: var(--spacer-xs);
-}
 </style>
