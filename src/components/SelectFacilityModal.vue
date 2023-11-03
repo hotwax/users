@@ -9,6 +9,7 @@
       <ion-title>{{ translate("Select facilities") }}</ion-title>
     </ion-toolbar>
   </ion-header>
+
   <ion-content>
     <ion-list>
       <ion-item v-for="facility in facilities" :key="facility.facilityId">
