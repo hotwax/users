@@ -43,7 +43,7 @@
               </ion-label>
             </ion-item>
 
-            <ion-label v-if="user.createdDate">
+            <ion-label class="tablet" v-if="user.createdDate">
               {{ getDate(user.createdDate) }}
               <p>{{ translate("created") }}</p>
             </ion-label>
@@ -51,7 +51,7 @@
               {{ '-' }}
             </ion-label>
 
-            <ion-chip outline v-if="user.securityGroupId">
+            <ion-chip class="tablet" outline v-if="user.securityGroupId">
               <ion-label>{{ user.securityGroupName }}</ion-label>
             </ion-chip>
             <ion-label v-else>
@@ -218,7 +218,7 @@ export default defineComponent({
 
 <style scoped>
 .list-item {
-  --columns-desktop: 5;
+  --columns-desktop: 4;
 }
 
 .list-item > *:last-child {
