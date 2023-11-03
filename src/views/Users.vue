@@ -43,20 +43,24 @@
               </ion-label>
             </ion-item>
 
-            <ion-label class="tablet" v-if="user.createdDate">
-              {{ getDate(user.createdDate) }}
-              <p>{{ translate("created") }}</p>
-            </ion-label>
-            <ion-label v-else>
-              {{ '-' }}
-            </ion-label>
+            <div class="tablet">
+              <ion-label v-if="user.createdDate">
+                {{ getDate(user.createdDate) }}
+                <p>{{ translate("created") }}</p>
+              </ion-label>
+              <ion-label v-else>
+                {{ '-' }}
+              </ion-label>
+            </div>
 
-            <ion-chip class="tablet" outline v-if="user.securityGroupId">
-              <ion-label>{{ user.securityGroupName }}</ion-label>
-            </ion-chip>
-            <ion-label v-else>
-              {{ '-' }}
-            </ion-label>
+            <div class="tablet">
+              <ion-chip outline v-if="user.securityGroupId">
+                <ion-label>{{ user.securityGroupName }}</ion-label>
+              </ion-chip>
+              <ion-label v-else>
+                {{ '-' }}
+              </ion-label>
+            </div>
 
             <div>
               <ion-button fill="clear" color="medium">
