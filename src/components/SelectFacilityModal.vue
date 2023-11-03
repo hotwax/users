@@ -9,7 +9,6 @@
       <ion-title>{{ translate("Select facilities") }}</ion-title>
     </ion-toolbar>
   </ion-header>
-  
   <ion-content>
     <ion-list>
       <ion-item v-for="facility in facilities" :key="facility.facilityId">
@@ -124,4 +123,9 @@ export default defineComponent({
   },
 });
 </script>
-  
+
+<style scoped>
+ion-content {
+  --padding-bottom: 80px;
+}
+</style>
