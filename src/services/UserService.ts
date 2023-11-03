@@ -415,7 +415,7 @@ const finishSetup = async (payload: any): Promise <any> => {
     const partyId = selectedUser.partyId;
     const promises = [];
     
-    if (selectedTemplate.isUserLoginRequired) {
+    if (selectedTemplate.isUserLoginRequired || selectedUser.partyTypeId === "PARTY_GROUP") {
       const resp = await createNewUserLogin({
         "partyId": partyId,
         "userLoginId": payload.formData.userLoginId,
@@ -428,7 +428,7 @@ const finishSetup = async (payload: any): Promise <any> => {
       if (!hasError(resp)) {
         addUserToSecurityGroup({
           "userLoginId": payload.formData.userLoginId,
-          "groupId": payload.selectedTemplate.securityGroupId ?? "STORE_MANAGER",
+          "groupId": payload.selectedTemplate.securityGroupId ? payload.selectedTemplate.securityGroupId : "STORE_MANAGER",
           "fromDate" : DateTime.now().toMillis()
         });
       } else {
@@ -490,21 +490,35 @@ const finishSetup = async (payload: any): Promise <any> => {
     }
 
     if (payload.facilities) {
+      const selectedFacilityIds = new Set(payload.facilities.map((facility: any) => facility.facilityId));
+      const facilitiesToAdd = payload.facilities.filter((facility: any) => !selectedUser.facilities?.some((fac: any) => fac.facilityId === facility.facilityId));
+      const facilitiestoDelete = selectedUser.facilities?.filter((facility: any) => !selectedFacilityIds.has(facility.facilityId));
+
       promises.push(ensurePartyRole({
         "partyId": partyId,
-        "roleTypeId": payload.selectedTemplate.facilityRoleTypeId ?? "WAREHOUSE_MANAGER"
+        "roleTypeId": payload.selectedTemplate.facilityRoleTypeId ? payload.selectedTemplate.facilityRoleTypeId : "WAREHOUSE_MANAGER"
       }));
 
-      payload.facilities?.forEach((facility : any) => {
+      facilitiestoDelete?.forEach((facility : any) => {
+        promises.push(removePartyFromFacility({
+          partyId: partyId,
+          facilityId: facility.facilityId,
+          roleTypeId: facility.roleTypeId,
+          fromDate: facility.fromDate,
+          thruDate: DateTime.now().toMillis()
+        }));
+      });
+
+      facilitiesToAdd?.forEach((facility : any) => {
         promises.push(addPartyToFacility({
           "partyId": partyId,
           "facilityId": facility.facilityId,
-          "roleTypeId" : payload.selectedTemplate.facilityRoleTypeId ?? "WAREHOUSE_MANAGER",
+          "roleTypeId" : payload.selectedTemplate.facilityRoleTypeId ? payload.selectedTemplate.facilityRoleTypeId :  "WAREHOUSE_MANAGER",
         }));
       });
     }
 
-    Promise.all(promises).then(responses => {
+    await Promise.all(promises).then(responses => {
       responses.forEach(response => {
         if (hasError(response)) {
           throw response.data;
