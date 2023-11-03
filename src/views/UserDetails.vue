@@ -742,4 +742,14 @@ ion-card>ion-button[expand="block"] {
   margin-inline: var(--spacer-sm);
   margin-bottom: var(--spacer-sm);
 }
+
+@media (min-width: 700px) {
+  main {
+    margin: var(--spacer-xl);
+  }
+
+  .user-details {
+    gap: var(--spacer-base);
+  }
+}
 </style>
