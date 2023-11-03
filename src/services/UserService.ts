@@ -473,11 +473,12 @@ const finishSetup = async (payload: any): Promise <any> => {
       }));
     }
 
-    if (payload.productStores && selectedTemplate.isProductStoreRequired) {
-      promises.push(ensurePartyRole({
+    if (payload.productStores.length > 0 && selectedTemplate.isProductStoreRequired) {
+      //This is ensure that party have required role before associating it in ProductStoreRole. Because below logic is executing in parallel.
+      await ensurePartyRole({
         "partyId": partyId,
         "roleTypeId": payload.selectedTemplate.productStoreRoleTypeId
-      }));
+      })
 
       payload.productStores?.forEach((store : any) => {
         promises.push(createProductStoreRole({
@@ -489,15 +490,16 @@ const finishSetup = async (payload: any): Promise <any> => {
       });
     }
 
-    if (payload.facilities) {
+    if (payload.facilities.length > 0) {
       const selectedFacilityIds = new Set(payload.facilities.map((facility: any) => facility.facilityId));
       const facilitiesToAdd = payload.facilities.filter((facility: any) => !selectedUser.facilities?.some((fac: any) => fac.facilityId === facility.facilityId));
       const facilitiestoDelete = selectedUser.facilities?.filter((facility: any) => !selectedFacilityIds.has(facility.facilityId));
 
-      promises.push(ensurePartyRole({
+      //This is ensure that party have required role before associating it in FacilityParty. Because below logic is executing in parallel.
+      await ensurePartyRole({
         "partyId": partyId,
         "roleTypeId": payload.selectedTemplate.facilityRoleTypeId ? payload.selectedTemplate.facilityRoleTypeId : "WAREHOUSE_MANAGER"
-      }));
+      });
 
       facilitiestoDelete?.forEach((facility : any) => {
         promises.push(removePartyFromFacility({
