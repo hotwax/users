@@ -44,7 +44,7 @@
             </ion-item>
 
             <div class="tablet">
-              <ion-label v-if="user.createdDate">
+              <ion-label class="ion-text-center" v-if="user.createdDate">
                 {{ getDate(user.createdDate) }}
                 <p>{{ translate("created") }}</p>
               </ion-label>
