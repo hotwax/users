@@ -13,9 +13,9 @@
   <ion-content>
     <ion-list>
       <ion-item lines="none">
-        <ion-note>
+        <p>
           {{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}
-        </ion-note>
+        </p>
       </ion-item>
       <ion-item lines="full" ref="password">
         <ion-label class="ion-text-wrap" position="fixed">{{ translate("New password") }}</ion-label>
@@ -36,11 +36,11 @@
     </ion-list>
 
     <ion-item v-if="email?.length" class="ion-padding-top">
-      <ion-icon :icon="mailOutline" slot="start" />
-      <ion-button fill="clear" @click="sendResetPasswordEmail()">
-        {{ translate('Send reset password email instead') }}
+      <ion-label>{{ email }}</ion-label>
+      <ion-button slot="end" fill="clear" @click="sendResetPasswordEmail()">
+        {{ translate('Reset password email') }}
+        <ion-icon :icon="mailOutline" slot="end" />
       </ion-button>
-      <ion-label slot="end">{{ email }}</ion-label>
     </ion-item>
 
     <!-- TODO improve disable button logic -->
