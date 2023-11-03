@@ -28,7 +28,7 @@ import {
 import { defineComponent } from "vue";
 import { translate } from "@hotwax/dxp-components";
 import { mapGetters, useStore } from 'vuex';
-import ProductStoreRoleModal from '@/components/ProductStoreRoleModal.vue'
+import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
 import { UserService } from "@/services/UserService";
 import { DateTime } from "luxon";
 import { showToast } from "@/utils";
@@ -46,7 +46,6 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       selectedUser: 'user/getSelectedUser',
-      getProductStoreRoleType: 'util/getProductStoreRoleType',
       userProductStores: 'user/getUserProductStores',
     })
   },
@@ -55,19 +54,73 @@ export default defineComponent({
       popoverController.dismiss();
     },
     async selectProductStoreRole() {
-      const selectProductStoreRoleModal = await modalController.create({
-        component: ProductStoreRoleModal,
+      const selectProductStoreModal = await modalController.create({
+        component: SelectProductStoreModal,
+        componentProps: { selectedProductStores: this.userProductStores }
       });
 
+      selectProductStoreModal.onDidDismiss().then(async (result) => {
+        if (result.data && result.data.value) {
+          const productStoresToCreate = result.data.value.productStoresToCreate
+          const productStoresToRemove = result.data.value.productStoresToRemove
+
+          const updateResponses = await Promise.allSettled(productStoresToRemove
+            .map(async (payload: any) => await UserService.updateProductStoreRole({
+              partyId: this.selectedUser.partyId,
+              productStoreId: payload.productStoreId,
+              roleTypeId: payload.roleTypeId,
+              fromDate: this.userProductStores.find((store: any) => payload.productStoreId === store.productStoreId).fromDate,
+              thruDate: DateTime.now().toMillis()
+            }))
+          )
+
+          // explicitly calling ensurePartyRole (ensurePartyRole) as addToPartyTole
+          // and removeFromPartyRole are running in parallel on the server causing issues
+          if (productStoresToCreate.length) {
+            try {
+              const resp = await UserService.ensurePartyRole({
+                partyId: this.selectedUser.partyId,
+                roleTypeId: "APPLICATION_USER",
+              })
+              if (hasError(resp)) {
+                showToast(translate('Something went wrong.'));
+                throw resp.data
+              }
+            } catch (error) {
+              console.error(error)
+              return
+            }
+          }
+
+          const createResponses = await Promise.allSettled(productStoresToCreate
+            .map(async (payload: any) => await UserService.createProductStoreRole({
+              productStoreId: payload.productStoreId,
+              partyId: this.selectedUser.partyId,
+              roleTypeId: "APPLICATION_USER",
+            }))
+          )
+
+          const hasFailedResponse = [...updateResponses, ...createResponses].some((response: any) => response.status === 'rejected')
+          if (hasFailedResponse) {
+            showToast(translate('Failed to update some role(s).'))
+          } else {
+            showToast(translate('Role(s) updated successfully.'))
+          }
+          // refetching product stores with updated roles
+          const userProductStores = await UserService.getUserProductStores(this.selectedUser.partyId)
+          this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, productStores: userProductStores })
+        }
+      })
+
       this.closePopover()
-      return selectProductStoreRoleModal.present();
+      return selectProductStoreModal.present();
     },
     async removeProductStoreRole() {
       try {
         const resp = await UserService.updateProductStoreRole({
           partyId: this.selectedUser.partyId,
           productStoreId: this.productStore.productStoreId,
-          roleTypeId: this.getProductStoreRoleType(this.productStore.productStoreId),
+          roleTypeId: this.productStore.roleTypeId,
           fromDate: this.userProductStores.find((store: any) => this.productStore.productStoreId === store.productStoreId).fromDate,
           thruDate: DateTime.now().toMillis()
         })

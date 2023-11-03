@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-back-button slot="start" default-href="/tabs/users" />
+        <ion-back-button slot="start" default-href="/tabs/find-users" />
         <ion-title>{{ translate("User details") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -85,7 +85,7 @@
               <ion-list>
                 <ion-item>
                   <ion-icon :icon="mailOutline" slot="start" />
-                  <ion-label>{{ selectedUser?.emailDetails ? selectedUser.emailDetails.email : translate('Email') }}</ion-label>
+                  <ion-label class="ion-text-wrap">{{ selectedUser?.emailDetails ? selectedUser.emailDetails.email : translate('Email') }}</ion-label>
                   <ion-button v-if="selectedUser?.emailDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'email', selectedUser.emailDetails.email)">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
@@ -95,7 +95,7 @@
                 </ion-item>
                 <ion-item>
                   <ion-icon :icon="callOutline" slot="start" />
-                  <ion-label>{{ selectedUser?.phoneNumberDetails ? selectedUser.phoneNumberDetails.contactNumber : translate('Phone number') }}</ion-label>
+                  <ion-label class="ion-text-wrap">{{ selectedUser?.phoneNumberDetails ? selectedUser.phoneNumberDetails.contactNumber : translate('Phone number') }}</ion-label>
                   <ion-button v-if="selectedUser?.phoneNumberDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'phoneNumber', selectedUser.phoneNumberDetails.contactNumber)">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
@@ -105,7 +105,7 @@
                 </ion-item>
                 <ion-item lines="none">
                   <ion-icon :icon="businessOutline" slot="start" />
-                  <ion-label>{{ selectedUser.externalId ? selectedUser.externalId : translate('External ID') }}</ion-label>
+                  <ion-label class="ion-text-wrap">{{ selectedUser.externalId ? selectedUser.externalId : translate('External ID') }}</ion-label>
                   <ion-button v-if="selectedUser.externalId" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'externalId', selectedUser.externalId)">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
@@ -229,7 +229,7 @@ import ContactActionsPopover from '@/components/ContactActionsPopover.vue'
 import ProductStoreActionsPopover from '@/components/ProductStoreActionsPopover.vue'
 import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
-import ProductStoreRoleModal from '@/components/ProductStoreRoleModal.vue'
+import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
 import { UserService } from "@/services/UserService";
 import { isValidEmail, showToast } from "@/utils";
 import { hasError } from '@/adapter';
@@ -301,9 +301,11 @@ export default defineComponent({
           type,
           placeholder: this.OPTIONS[type].placeholder,
           value,
-          contactMechId: type === 'email' 
+          contactMechId: type === 'email'
             ? this.selectedUser.emailDetails.contactMechId
-            : this.selectedUser.phoneNumberDetails.contactMechId
+            : (type === 'phoneNumber'
+              ? this.selectedUser.phoneNumberDetails.contactMechId
+              : '')
         },
         showBackdrop: false,
       });
@@ -327,7 +329,7 @@ export default defineComponent({
             const input = result.input.trim()
             if (!input) {
               showToast(translate('Please enter a value'))
-              return
+              return false // returning false will not close the input
             }
 
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
@@ -335,7 +337,7 @@ export default defineComponent({
               if (type === 'email') {
                 if (!isValidEmail(input)) {
                   showToast(translate('Invalid email address.'))
-                  return
+                  return false
                 }
 
                 const resp = await UserService.createUpdatePartyEmailAddress({
@@ -390,6 +392,7 @@ export default defineComponent({
               showToast(translate(`Failed to add ${type === 'email' ? 'email' : (type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
               console.error(error)
             }
+            return true
           }
         }]
       })
@@ -501,9 +504,28 @@ export default defineComponent({
               facilityId: payload.facilityId,
               roleTypeId: payload.roleTypeId,
               fromDate: payload.fromDate,
+              thruDate: DateTime.now().toMillis()
             }))
           )
     
+          // explicitly calling ensurePartyRole (ensurePartyRole) as addToPartyTole 
+          // and removeFromPartyRole are running in parallel on the server causing issues
+          if (facilitiesToAdd.length) {
+            try {
+              const resp = await UserService.ensurePartyRole({
+                partyId: this.partyId,
+                roleTypeId: 'WAREHOUSE_MANAGER',
+              })
+              if (hasError(resp)) {
+                showToast(translate('Something went wrong.'));
+                throw resp.data
+              }
+            } catch (error) {
+              console.error(error)
+              return
+            }
+          }
+
           const createResponses = await Promise.allSettled(facilitiesToAdd
             .map(async (payload: any) => await UserService.addPartyToFacility({
               partyId: this.selectedUser.partyId,
@@ -512,8 +534,8 @@ export default defineComponent({
             }))
           )
     
-          const hasError = [...removeResponses, ...createResponses].some((response: any) => response.status === 'rejected')
-          if (hasError) {
+          const hasFailedResponse = [...removeResponses, ...createResponses].some((response: any) => response.status === 'rejected')
+          if (hasFailedResponse) {
             showToast(translate('Failed to update some association(s).'))
           } else {
             showToast(translate('Facility associations updated successfully.'))
@@ -527,8 +549,62 @@ export default defineComponent({
     },
     async selectProductStore() {
       const selectProductStoreModal = await modalController.create({
-        component: ProductStoreRoleModal,
+        component: SelectProductStoreModal,
+        componentProps: { selectedProductStores: this.userProductStores }
       });
+
+      selectProductStoreModal.onDidDismiss().then(async (result) => {
+        if (result.data && result.data.value) {
+          const productStoresToCreate = result.data.value.productStoresToCreate
+          const productStoresToRemove = result.data.value.productStoresToRemove
+
+          const updateResponses = await Promise.allSettled(productStoresToRemove
+            .map(async (payload: any) => await UserService.updateProductStoreRole({
+              partyId: this.selectedUser.partyId,
+              productStoreId: payload.productStoreId,
+              roleTypeId: payload.roleTypeId,
+              fromDate: this.userProductStores.find((store: any) => payload.productStoreId === store.productStoreId).fromDate,
+              thruDate: DateTime.now().toMillis()
+            }))
+          )
+
+          // explicitly calling ensurePartyRole (ensurePartyRole) as addToPartyTole
+          // and removeFromPartyRole are running in parallel on the server causing issues
+          if (productStoresToCreate.length) {
+            try {
+              const resp = await UserService.ensurePartyRole({
+                partyId: this.selectedUser.partyId,
+                roleTypeId: "APPLICATION_USER",
+              })
+              if (hasError(resp)) {
+                showToast(translate('Something went wrong.'));
+                throw resp.data
+              }
+            } catch (error) {
+              console.error(error)
+              return
+            }
+          }
+
+          const createResponses = await Promise.allSettled(productStoresToCreate
+            .map(async (payload: any) => await UserService.createProductStoreRole({
+              productStoreId: payload.productStoreId,
+              partyId: this.selectedUser.partyId,
+              roleTypeId: "APPLICATION_USER",
+            }))
+          )
+
+          const hasFailedResponse = [...updateResponses, ...createResponses].some((response: any) => response.status === 'rejected')
+          if (hasFailedResponse) {
+            showToast(translate('Failed to update some role(s).'))
+          } else {
+            showToast(translate('Role(s) updated successfully.'))
+          }
+          // refetching product stores with updated roles
+          const userProductStores = await UserService.getUserProductStores(this.selectedUser.partyId)
+          this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, productStores: userProductStores })
+        }
+      })
 
       return selectProductStoreModal.present();
     },
@@ -612,7 +688,7 @@ export default defineComponent({
           role: 'success',
           handler: async () => {
             try {
-              const resp = await UserService.createPartyRole({
+              const resp = await UserService.ensurePartyRole({
                 partyId: this.partyId,
                 roleTypeId: 'WAREHOUSE_PICKER'
               })

@@ -48,7 +48,7 @@ import {
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { useStore } from "vuex";
+import { mapGetters, useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components'
 
 export default defineComponent({
@@ -68,20 +68,35 @@ export default defineComponent({
     IonTitle,
     IonToolbar,
   },
-  props: ["productStores", "selectedProductStores"],
+  props: ["selectedProductStores"],
   data() {
     return {
-    selectedProductStoreValues: this.selectedProductStores,
+      selectedProductStoreValues: JSON.parse(JSON.stringify(this.selectedProductStores)),
     }
+  },
+  computed: {
+    ...mapGetters({
+      productStores: 'util/getProductStores'
+    })
   },
   methods: {
     closeModal() {
       modalController.dismiss({ dismissed: true});
     },
     saveProductStores() {
-      modalController.dismiss({ dismissed: true, value: { selectedProductStores: this.selectedProductStoreValues } });
+      const productStoresToCreate = this.selectedProductStoreValues.filter((selectedFacility: any) => !this.selectedProductStores.some((facility: any) => facility.facilityId === selectedFacility.facilityId))
+      const productStoresToRemove = this.selectedProductStores.filter((facility: any) => !this.selectedProductStoreValues.some((selectedFacility: any) => facility.facilityId === selectedFacility.facilityId))
+
+      modalController.dismiss({
+        dismissed: true,
+        value: {
+          selectedProductStores: this.selectedProductStoreValues,
+          productStoresToCreate,
+          productStoresToRemove
+        }
+      });
     },
-    toggleProductStoreSelection(updatedStore : any) {
+    toggleProductStoreSelection(updatedStore: any) {
       let selectedStore = this.selectedProductStoreValues.some((store :any) => store.productStoreId === updatedStore.productStoreId);
       if (selectedStore) {
         this.selectedProductStoreValues = this.selectedProductStoreValues.filter((store :any) => store.productStoreId !== updatedStore.productStoreId);

@@ -73,7 +73,7 @@
         <ion-button fill="outline" @click="confirmSetupManually()">
           {{ translate("Setup manually") }}
         </ion-button>
-        <ion-button color="medium" fill="outline" @click="finishAndCreateNewUser()">
+        <ion-button fill="clear" @click="finishAndCreateNewUser()">
           {{ translate("Finish and create new user") }}
         </ion-button>
       </div>
@@ -190,7 +190,7 @@ export default defineComponent({
           "isUserLoginRequired": true,
           "isFacilityRequired": false,
           "facilityRoleTypeId": "",
-          "isProductStoreRequied": false,
+          "isProductStoreRequired": false,
           "productStoreRoleTypeId": "",
         },
         {
@@ -202,7 +202,7 @@ export default defineComponent({
           "isEmployeeIdRequired": true,
           "isFacilityRequired": true,
           "facilityRoleTypeId": "WAREHOUSE_MANAGER",
-          "isProductStoreRequied": false,
+          "isProductStoreRequired": false,
           "productStoreRoleTypeId": ""
         },
         {
@@ -213,7 +213,7 @@ export default defineComponent({
           "isEmployeeIdRequired": true,
           "isFacilityRequired": false,
           "facilityRoleTypeId": "",
-          "isProductStoreRequied": false,
+          "isProductStoreRequired": false,
           "productStoreRoleTypeId": ""
         }
       ]
@@ -382,7 +382,7 @@ export default defineComponent({
     async addProductStores() {
       const selectProductStoreModal = await modalController.create({
         component: SelectProductStoreModal,
-        componentProps: { productStores: this.productStores, selectedProductStores: this.selectedProductStores }
+        componentProps: { selectedProductStores: this.selectedProductStores }
       });
 
       selectProductStoreModal.onDidDismiss().then((result) => {

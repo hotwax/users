@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-back-button default-href="/tabs/users" slot="start"></ion-back-button>
+        <ion-back-button default-href="/tabs/find-users" slot="start"></ion-back-button>
         <ion-title>{{ translate("Create user") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -152,6 +152,7 @@ export default defineComponent({
       }
     },
     updateFacilityLogin(event: CustomEvent) {
+      this.clearFormData()
       this.isFacilityLogin = event.detail.checked;
     },
     updateGroupName(event: CustomEvent) {

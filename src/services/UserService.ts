@@ -302,7 +302,7 @@ const addUserToSecurityGroup = async (payload: any): Promise <any> => {
   });
 }
 
-const createPartyRole = async (payload: any): Promise <any> => {
+const ensurePartyRole = async (payload: any): Promise <any> => {
   return api({
     url: "service/ensurePartyRole", 
     method: "post",
@@ -317,6 +317,7 @@ const getUserFacilities = async (partyId: string): Promise<any> => {
       partyId,
     },
     noConditionFind: "Y",
+    filterByDate: "Y",
     entityName: "FacilityParty",
     viewSize: 100,
   }
@@ -466,13 +467,18 @@ const finishSetup = async (payload: any): Promise <any> => {
       }));
     }
     if (payload.selectedTemplate.roleTypeId) {
-      promises.push(createPartyRole({
+      promises.push(ensurePartyRole({
         "partyId": partyId,
         "roleTypeId": payload.selectedTemplate.roleTypeId
       }));
     }
 
     if (payload.productStores && selectedTemplate.isProductStoreRequired) {
+      promises.push(ensurePartyRole({
+        "partyId": partyId,
+        "roleTypeId": payload.selectedTemplate.productStoreRoleTypeId
+      }));
+
       payload.productStores?.forEach((store : any) => {
         promises.push(createProductStoreRole({
           "partyId": partyId,
@@ -484,6 +490,11 @@ const finishSetup = async (payload: any): Promise <any> => {
     }
 
     if (payload.facilities) {
+      promises.push(ensurePartyRole({
+        "partyId": partyId,
+        "roleTypeId": payload.selectedTemplate.facilityRoleTypeId ?? "WAREHOUSE_MANAGER"
+      }));
+
       payload.facilities?.forEach((facility : any) => {
         promises.push(addPartyToFacility({
           "partyId": partyId,
@@ -510,7 +521,7 @@ export const UserService = {
   addPartyToFacility,
   addUserToSecurityGroup,
   createUser,
-  createPartyRole,
+  ensurePartyRole,
   createNewUserLogin,
   createUpdatePartyEmailAddress,
   createUpdatePartyTelecomNumber,

@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>{{ translate("Users") }}</ion-title>
+        <ion-title>{{ translate("Find Users") }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -25,16 +25,16 @@
               <ion-icon :icon="toggleOutline" slot="start" />
               <ion-label>{{ translate("Status") }}</ion-label>
               <ion-select interface="popover" v-model="query.status" @ionChange="updateQuery()">
-                <ion-select-option value="">{{ translate("None") }}</ion-select-option>
                 <ion-select-option value="Y">{{ translate("Active") }}</ion-select-option>
                 <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
+                <ion-select-option value="">{{ translate("None") }}</ion-select-option>
               </ion-select>
             </ion-item>
           </ion-list>
         </aside>
 
         <main v-if="users?.length">
-          <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetail(user.partyId)>
+          <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user.partyId)>
             <ion-item lines="none">
               <ion-label>
                 {{ user.groupName ? user.groupName : `${user.firstName} ${user.lastName}` }}
@@ -130,7 +130,7 @@ import UserPopover from '@/components/UserPopover.vue';
 import { translate } from '@hotwax/dxp-components'
 
 export default defineComponent({
-  name: 'Users',
+  name: 'FindUsers',
   components: {
     IonButton,
     IonChip,
@@ -159,6 +159,10 @@ export default defineComponent({
       isScrollable: "user/isScrollable"
     })
   },
+  async mounted() {
+    await this.fetchUsers();
+    await this.store.dispatch('util/getSecurityGroups')
+  },
   methods: {
     getDate(date: any) {
       return DateTime.fromMillis(date).toFormat('dd LLL yyyy')
@@ -185,8 +189,8 @@ export default defineComponent({
       };
       await this.store.dispatch('user/fetchUsers', payload)
     },
-    async viewUserDetail(partyId: string) {
-      this.router.push({path: `/user-details/${partyId}` })
+    async viewUserDetails(partyId: string) {
+      this.router.push({ path: `/user-details/${partyId}` })
     },
     async loadMoreUsers(event: any) {
       this.fetchUsers(
@@ -212,10 +216,6 @@ export default defineComponent({
       router,
       store
     };
-  },
-  async mounted() {
-    await this.fetchUsers();
-    await this.store.dispatch('util/getSecurityGroups')
   }
 });
 </script>
