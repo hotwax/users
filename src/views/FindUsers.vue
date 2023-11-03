@@ -61,12 +61,6 @@
                 {{ '-' }}
               </ion-label>
             </div>
-
-            <div>
-              <ion-button fill="clear" color="medium">
-                <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
-              </ion-button>
-            </div>
           </div>
         </main>
         <main v-else>
@@ -96,7 +90,6 @@
 
 <script lang="ts">
 import {
-  IonButton,
   IonChip,
   IonContent,
   IonFab,
@@ -132,7 +125,6 @@ import { translate } from '@hotwax/dxp-components'
 export default defineComponent({
   name: 'FindUsers',
   components: {
-    IonButton,
     IonChip,
     IonContent,
     IonFab,

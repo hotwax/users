@@ -12,7 +12,7 @@
         <div v-if="!Object.keys(selectedUser).length" class="ion-text-center ion-padding-top">
           {{ translate("Failed to fetch user data") }}
         </div>
-        <div v-else>
+        <template v-else>
           <section>
             <ion-item lines="none">
               <!-- TODO fetch and show image only if available -->
@@ -35,7 +35,7 @@
                   {{ translate('Login details') }}
                 </ion-card-title>
               </ion-card-header>
-              <div v-if="selectedUser.userLoginId">
+              <template v-if="selectedUser.userLoginId">
                 <ion-list>
                   <!-- TODO verify disable message -->
                   <!-- <ion-item v-if="selectedUser.enabled === 'N'" color="light" lines="none">
@@ -57,8 +57,8 @@
                 <ion-button @click="resetPassword()" fill="outline" color="warning" expand="block">
                   {{ translate('Reset password') }}
                 </ion-button>
-              </div>
-              <div v-else>
+              </template>
+              <template v-else>
                 <ion-list>
                   <ion-item lines="full">
                     <ion-label class="ion-text-wrap" position="fixed">{{ translate("Username") }}</ion-label>
@@ -73,7 +73,7 @@
                 <ion-button @click="createNewUserLogin()" fill="outline" expand="block">
                   {{ translate('Add credentials') }}
                 </ion-button>
-              </div>
+              </template>
             </ion-card>
     
             <ion-card>
@@ -177,7 +177,7 @@
               </ion-list>
             </ion-card>
           </section>
-        </div>
+        </template>
       </main>
     </ion-content>
   </ion-page>

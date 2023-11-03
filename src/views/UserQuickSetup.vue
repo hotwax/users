@@ -16,7 +16,7 @@
           <ion-select-option v-for="userTemplate in userTemplates" :key="userTemplate.templateId" :value="userTemplate.templateId">{{ userTemplate.templateName }}</ion-select-option>
         </ion-select>
       </ion-item>
-      <div v-if="(selectedUserTemplate && selectedUserTemplate.isUserLoginRequired || isFacilityLogin())">
+      <template v-if="(selectedUserTemplate && selectedUserTemplate.isUserLoginRequired || isFacilityLogin())">
         <ion-item>
           <ion-label position="floating">{{ translate('Username') }}</ion-label>
           <ion-input v-model="formData.userLoginId" :clear-input="true"></ion-input>
@@ -32,7 +32,7 @@
           </ion-label>
           <ion-toggle :checked="formData.requirePasswordChange" slot="end" />
         </ion-item>
-      </div>
+      </template>
       <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isEmployeeIdRequired && !isFacilityLogin()">
         <ion-label position="floating">{{ translate('Employee ID') }}</ion-label>
         <ion-input v-model="formData.externalId"></ion-input>
@@ -73,7 +73,7 @@
         <ion-button fill="outline" @click="confirmSetupManually()">
           {{ translate("Setup manually") }}
         </ion-button>
-        <ion-button fill="clear" @click="finishAndCreateNewUser()">
+        <ion-button color="medium" fill="outline" @click="finishAndCreateNewUser()">
           {{ translate("Finish and create new user") }}
         </ion-button>
       </div>
@@ -142,7 +142,8 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       selectedUser: 'user/getSelectedUser',
-      productStores: 'util/getProductStores'
+      productStores: 'util/getProductStores',
+      allFacilities: 'util/getFacilities'
     })
   },
   props: ['partyId'],
@@ -234,6 +235,12 @@ export default defineComponent({
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
     await this.store.dispatch('util/fetchFacilities');
     await this.store.dispatch('util/fetchProductStores');
+    if (this.isFacilityLogin()) {
+      const addedFacilityIds = this.selectedUser.facilities.map((facility: any) => facility.facilityId);
+      const addedFacilities = this.allFacilities.filter((facility: any) =>  addedFacilityIds.includes(facility.facilityId));
+      this.facilities = addedFacilities;
+      this.selectedFacilities = addedFacilities;
+    }
   },
   methods: {
     isFacilityLogin() {
@@ -241,7 +248,7 @@ export default defineComponent({
         this.formData.externalId = this.selectedUser.externalId
         if (this.selectedUser.partyTypeId === "PARTY_GROUP") {
           this.formData.requirePasswordChange = false;
-          this.formData.userLoginId = this.selectedUser.externalId;
+          this.formData.userLoginId = this.selectedUser.facilities?.[0].facilityId;
           return true;
         } else {
           this.formData.userLoginId = this.selectedUserTemplate.isUserLoginRequired ? `${this.selectedUser.firstName.toLowerCase()}.${this.selectedUser.lastName.toLowerCase()}` : '';
@@ -265,10 +272,10 @@ export default defineComponent({
     validateUserDetail(data: any) {
       const validationErrors = [];
       if (data.currentPassword && !data.userLoginId) {
-        validationErrors.push(translate('username is required.'));
+        validationErrors.push(translate('Username is required.'));
       }
       if (data.userLoginId && !data.currentPassword) {
-        validationErrors.push(translate('password is required.'));
+        validationErrors.push(translate('Password is required.'));
       }
       if (data.currentPassword && !isValidPassword(data.currentPassword)) {
         validationErrors.push(translate('Invalid passowrd. Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.'));

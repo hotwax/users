@@ -32,7 +32,6 @@
           {{ translate("Quick Setup") }}
         </ion-button>
         <ion-button color="medium" fill="outline" @click="confirmSetupManually()">
-          <ion-icon slot="end" :icon="arrowForwardOutline"/>
           {{ translate("Setup Manually") }}
         </ion-button>
       </div>

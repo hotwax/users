@@ -7,7 +7,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <h2>{{ translate('Create a new user') }}</h2>
+      <h2 class="ion-margin-start">{{ translate('Create a new user') }}</h2>
       <ion-item>
         <ion-icon slot="start" :icon="desktopOutline"/>
         <ion-label>
@@ -15,13 +15,13 @@
         </ion-label>
         <ion-toggle :checked="isFacilityLogin" @ionChange="updateFacilityLogin" slot="end" />
       </ion-item>
-      <div v-if="isFacilityLogin">
+      <template v-if="isFacilityLogin">
         <ion-item>
           <ion-icon slot="start" :icon="businessOutline"/>
           <ion-label>
             {{ translate("Select facility") }}
           </ion-label>
-          <ion-select interface="popover" v-model="formData.externalId" @ionChange="updateGroupName">
+          <ion-select interface="popover" v-model="formData.facilityId" @ionChange="updateGroupName">
             <ion-select-option v-for="facility in (facilities ? facilities : [])" :key="facility.facilityId" :value="facility.facilityId">{{ facility.facilityName }}</ion-select-option>
           </ion-select>
         </ion-item>
@@ -37,8 +37,8 @@
           <ion-label position="floating">{{ translate('Facility contact number') }}</ion-label>
           <ion-input v-model="formData.contactNumber" type="tel" :clear-input="true"></ion-input>
         </ion-item>
-      </div>
-      <div v-else>
+      </template>
+      <template v-else>
         <ion-item>
           <ion-label position="floating">{{ translate('First name') }}</ion-label>
           <ion-input v-model="formData.firstName" :clear-input="true"></ion-input>
@@ -59,7 +59,7 @@
           <ion-label position="floating">{{ translate('Phone number') }}</ion-label>
           <ion-input v-model="formData.contactNumber" type="tel" :clear-input="true"></ion-input>
         </ion-item>
-      </div>
+      </template>
       <div class="ion-padding-top">
         <ion-button @click="createUser()">
           <ion-icon slot="end" :icon="arrowForwardOutline"/>
@@ -130,6 +130,7 @@ export default defineComponent({
         firstName: '',
         lastName: '',
         groupName: '',
+        facilityId: '',
         externalId: '',
         emailAddress: '',
         contactNumber: '',
@@ -146,6 +147,7 @@ export default defineComponent({
         firstName: '',
         lastName: '',
         groupName: '',
+        facilityId: '',
         externalId: '',
         emailAddress: '',
         contactNumber: '',
@@ -166,7 +168,7 @@ export default defineComponent({
         if (!data.groupName) {
           validationErrors.push(translate('Name is required.'));
         }
-        if (this.isFacilityLogin && !data.externalId) {
+        if (this.isFacilityLogin && !data.facilityId) {
           validationErrors.push(translate('Facility is required.'));
         }
       } else {
@@ -206,6 +208,9 @@ export default defineComponent({
         const resp = await UserService.createUser(payload);
         if (resp.status === 200 && !hasError(resp) && resp.data.partyId) {
           const partyId = resp.data.partyId;
+          if (partyTypeId === "PARTY_GROUP" ) {
+            await UserService.addPartyToFacility({"partyId": partyId, "facilityId": payload.facilityId, "roleTypeId": "WAREHOUSE_MANAGER"});
+          }
           this.$router.replace({ path: `/user-confirmation/${partyId}` })
         } else {
           throw resp.data;
