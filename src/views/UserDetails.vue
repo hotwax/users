@@ -128,40 +128,36 @@
                   {{ translate('Clearance') }}
                 </ion-card-title>
               </ion-card-header>
-              <ion-list>
-                <ion-item>
-                  <ion-icon :icon="businessOutline" slot="start" />
-                  <ion-label>{{ translate('Security Group') }}</ion-label>        
-                  <ion-select interface="popover" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
-                    <ion-select-option v-for="securityGroup in securityGroups" :key="securityGroup.groupId" :value="securityGroup.groupId">
-                      {{ securityGroup.groupName }}
-                    </ion-select-option>
-                  </ion-select>
-                </ion-item>
-                <div v-if="!userProductStores.length">
-                  <ion-button @click="selectProductStore()" fill="outline" expand="block">
-                    <ion-icon :icon="addOutline" slot='start' />
-                    {{ translate('Add to a product store') }}
+              <ion-item>
+                <ion-icon :icon="businessOutline" slot="start" />
+                <ion-label>{{ translate('Security Group') }}</ion-label>        
+                <ion-select interface="popover" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
+                  <ion-select-option v-for="securityGroup in securityGroups" :key="securityGroup.groupId" :value="securityGroup.groupId">
+                    {{ securityGroup.groupName }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-button v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block">
+                <ion-icon :icon="addOutline" slot='start' />
+                {{ translate('Add to a product store') }}
+              </ion-button>
+              <ion-list v-else>
+                <ion-list-header color="light">
+                  <ion-label>{{ translate('Product stores') }}</ion-label>
+                  <ion-button @click="selectProductStore()">
+                    <ion-icon slot="start" :icon="addCircleOutline" />
+                    {{ translate('Add') }}
                   </ion-button>
-                </div>
-                <div v-else>
-                  <ion-list-header color="light">
-                    <ion-label>{{ translate('Product stores') }}</ion-label>
-                    <ion-button @click="selectProductStore()">
-                      <ion-icon slot="start" :icon="addCircleOutline" />
-                      {{ translate('Add') }}
-                    </ion-button>
-                  </ion-list-header>
-                  <ion-item v-for="store in userProductStores" :key="store.productStoreId">
-                    <ion-label>
-                      <h2>{{ store.storeName }}</h2>
-                      <p>{{ getRoleTypeDesc(store.roleTypeId) }}</p>
-                    </ion-label>
-                    <ion-button slot="end" fill="clear" color="medium" @click="openProductStoreActionsPopover($event, store)">
-                      <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
-                    </ion-button>
-                  </ion-item>
-                </div>
+                </ion-list-header>
+                <ion-item v-for="store in userProductStores" :key="store.productStoreId">
+                  <ion-label>
+                    <h2>{{ store.storeName }}</h2>
+                    <p>{{ getRoleTypeDesc(store.roleTypeId) }}</p>
+                  </ion-label>
+                  <ion-button slot="end" fill="clear" color="medium" @click="openProductStoreActionsPopover($event, store)">
+                    <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
+                  </ion-button>
+                </ion-item>
               </ion-list>
             </ion-card>
             <ion-card>
@@ -740,5 +736,10 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   padding: var(--spacer-xs) 10px 0px;
+}
+
+ion-card>ion-button[expand="block"] {
+  margin-inline: var(--spacer-sm);
+  margin-bottom: var(--spacer-sm);
 }
 </style>
