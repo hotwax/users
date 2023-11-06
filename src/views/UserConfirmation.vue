@@ -97,7 +97,7 @@
     },
     methods: {
       async quickSetup() {
-        await this.$router.push({ path: `/user-quick-setup/${this.partyId}` })
+        await this.$router.replace({ path: `/user-quick-setup/${this.partyId}` })
       },
       async setupManually() {
         await this.$router.replace({ path: `/user-details/${this.partyId}` })
