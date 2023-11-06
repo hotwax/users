@@ -61,13 +61,15 @@
               <template v-else>
                 <ion-list>
                   <ion-item lines="full">
-                    <ion-label class="ion-text-wrap" position="fixed">{{ translate("Username") }}</ion-label>
-                    <ion-input :placeholder="translate('user.name')" name="username" v-model="username" id="username" required />
+                    <ion-label class="ion-text-wrap" position="fixed">{{ translate("Username") }} <ion-text color="danger">*</ion-text></ion-label>
+                    <ion-input :placeholder="selectedUser.groupName ? (selectedUser.groupName)?.toLowerCase() : (`${selectedUser.firstName}.${selectedUser.lastName}`?.toLowerCase())" 
+                        name="username" v-model="username" id="username" required />
                   </ion-item>
-                  <ion-item>
-                    <ion-label class="ion-text-wrap" position="fixed">{{ translate("Password") }}</ion-label>
-                    <ion-input :placeholder="translate('Default password')" name="password" v-model="password" id="password" type="password" required />
+                  <ion-item ref="password">
+                    <ion-label class="ion-text-wrap" position="fixed">{{ translate("Password") }} <ion-text color="danger">*</ion-text></ion-label>
+                    <ion-input :placeholder="translate('Default password')" name="password" v-model="password" id="password" type="password" @ionInput="validatePassword" @ionBlur="markPasswordTouched" required />
                     <ion-note slot="helper">{{ translate('will be asked to reset their password when they login', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName }) }}</ion-note>
+                    <ion-note slot="error">{{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}</ion-note>
                   </ion-item>
                 </ion-list>
                 <ion-button @click="createNewUserLogin()" fill="outline" expand="block">
@@ -228,7 +230,7 @@ import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
 import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
 import { UserService } from "@/services/UserService";
-import { isValidEmail, showToast } from "@/utils";
+import { isValidEmail, isValidPassword, showToast } from "@/utils";
 import { hasError } from '@/adapter';
 import { DateTime } from "luxon";
 
@@ -394,6 +396,20 @@ export default defineComponent({
         }]
       })
       await contactUpdateAlert.present()
+    },
+    validatePassword(event: any) {
+      const value = event.target.value;
+      (this as any).$refs.password.$el.classList.remove('ion-valid');
+      (this as any).$refs.password.$el.classList.remove('ion-invalid');
+
+      if (value === '') return;
+
+      isValidPassword(value)
+        ? (this as any).$refs.password.$el.classList.add('ion-valid')
+        : (this as any).$refs.password.$el.classList.add('ion-invalid');
+    },
+    markPasswordTouched() {
+      (this as any).$refs.password.$el.classList.add('ion-touched');
     },
     async createNewUserLogin() {
       this.username = this.username.trim()
@@ -670,41 +686,32 @@ export default defineComponent({
     },
     async updatePickerRoleStatus(event: any) {
       event.stopImmediatePropagation();
-
       const isChecked = !event.target.checked;
-      const message = 'Are you sure you want to perform this action?'
 
-      const alert = await alertController.create({
-        header: translate('Show as picker'),
-        message: translate(message),
-        buttons: [{
-          text: translate('No'),
-          role: ''
-        }, {
-          text: translate('Yes'),
-          role: 'success',
-          handler: async () => {
-            try {
-              const resp = await UserService.ensurePartyRole({
-                partyId: this.partyId,
-                roleTypeId: 'WAREHOUSE_PICKER'
-              })
-              if (!hasError(resp)) {
-                showToast(translate('User picker role updated successfully.'))
-                // updating toggle state on success
-                event.target.checked = isChecked
-              } else {
-                throw resp.data
-              }
-            } catch (error) {
-              showToast(translate('Failed to update user role.'))
-              console.error(error)
-            }
-          }
-        }],
-      });
-
-      await alert.present();
+      try {
+        let resp;
+        if (isChecked) {
+          resp = await UserService.ensurePartyRole({
+            partyId: this.partyId,
+            roleTypeId: 'WAREHOUSE_PICKER'
+          })
+        } else {
+          resp = await UserService.deletePartyRole({
+            partyId: this.partyId,
+            roleTypeId: 'WAREHOUSE_PICKER'
+          })
+        }
+        if (!hasError(resp)) {
+          showToast(translate('User picker role updated successfully.'))
+          // updating toggle state on success
+          event.target.checked = isChecked
+        } else {
+          throw resp.data
+        }
+      } catch (error) {
+        showToast(translate('Failed to update user role.'))
+        console.error(error)
+      }
     },
   },
   setup() {
