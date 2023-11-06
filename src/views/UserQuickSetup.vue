@@ -341,7 +341,7 @@ export default defineComponent({
         if (this.selectedUserTemplate.isUserLoginRequired) {
           await this.finishSetupAlert(this.formData.userLoginId);
         } else {
-          this.$router.push({ path: `/user-details/${this.partyId}` });
+          this.$router.replace({ path: `/user-details/${this.partyId}` });
         }
       } catch (err) {
         console.error('error', err)
@@ -377,7 +377,7 @@ export default defineComponent({
         const dataToCopy = `username: ${this.formData.userLoginId}, password: ${this.formData.currentPassword}`
         copyToClipboard(dataToCopy, 'Copied to clipboard')
       }
-      this.$router.push({ path: `/user-details/${this.partyId}` });
+      this.$router.replace({ path: `/user-details/${this.partyId}` });
     },
     async confirmSetupManually() {
       const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?'
@@ -399,10 +399,29 @@ export default defineComponent({
       return alert.present();
     },
     async setupManually() {
-      await this.$router.push({ path: `/user-details/${this.partyId}` })
+      await this.$router.replace({ path: `/user-details/${this.partyId}` })
     },
     async finishAndCreateNewUser() {
-      await this.$router.replace({ path: `/create-user` })
+      try {
+        const validationErrors = this.validateUserDetail(this.formData);
+        if (validationErrors.length > 0) {
+          const errorMessages = validationErrors.join(" ");
+          console.error(errorMessages);
+          showToast(translate(errorMessages));
+          return;
+        }
+        await UserService.finishSetup({
+          selectedUser: this.selectedUser,
+          selectedTemplate: this.selectedUserTemplate,
+          formData: this.formData,
+          productStores: this.selectedProductStores,
+          facilities : this.selectedFacilities
+        });
+        await this.$router.replace({ path: `/create-user` })
+      } catch (err) {
+        console.error('error', err)
+        showToast(translate('Failed to quick setup user.'))
+      }
     },
     async addFacilities() {
       const selectFacilityModal = await modalController.create({
