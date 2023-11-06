@@ -267,6 +267,7 @@ const actions: ActionTree<UserState, RootState> = {
     }
 
     if(state.query.status) {
+      filters['userLoginId_op'] = 'not-empty'
       if (state.query.status === "N") {
         filters['enabled'] = state.query.status
         filters['enabled_op'] = 'equals'
