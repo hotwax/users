@@ -19,6 +19,7 @@
               <ion-label>{{ translate("Clearance") }}</ion-label>
               <ion-select interface="popover" v-model="query.securityGroup" @ionChange="updateQuery()">
                 <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName }}</ion-select-option>
+                <ion-select-option value="">{{ translate("All") }}</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item lines="none">
@@ -27,7 +28,7 @@
               <ion-select interface="popover" v-model="query.status" @ionChange="updateQuery()">
                 <ion-select-option value="Y">{{ translate("Active") }}</ion-select-option>
                 <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
-                <ion-select-option value="">{{ translate("None") }}</ion-select-option>
+                <ion-select-option value="">{{ translate("All") }}</ion-select-option>
               </ion-select>
             </ion-item>
           </ion-list>
