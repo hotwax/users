@@ -7,65 +7,66 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <h2 class="ion-margin-start">{{ translate('Create a new user') }}</h2>
-      <ion-item>
-        <ion-icon slot="start" :icon="desktopOutline"/>
-        <ion-label>
-          {{ translate("Facility login") }}
-        </ion-label>
-        <ion-toggle :checked="isFacilityLogin" @ionChange="updateFacilityLogin" slot="end" />
-      </ion-item>
-      <template v-if="isFacilityLogin">
+      <main>
+        <h1 class="ion-margin-start">{{ translate('Create a new user') }}</h1>
         <ion-item>
-          <ion-icon slot="start" :icon="businessOutline"/>
+          <ion-icon slot="start" :icon="desktopOutline"/>
           <ion-label>
-            {{ translate("Select facility") }}
+            {{ translate("Facility login") }}
           </ion-label>
-          <ion-select interface="popover" v-model="formData.facilityId" @ionChange="updateGroupName">
-            <ion-select-option v-for="facility in (facilities ? facilities : [])" :key="facility.facilityId" :value="facility.facilityId">{{ facility.facilityName }}</ion-select-option>
-          </ion-select>
+          <ion-toggle :checked="isFacilityLogin" @ionChange="updateFacilityLogin" slot="end" />
         </ion-item>
-        <ion-item>
-          <ion-label position="floating">{{ translate('Name') }}</ion-label>
-          <ion-input v-model="formData.groupName" :clear-input="true"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">{{ translate('Reset password email') }}</ion-label>
-          <ion-input v-model="formData.emailAddress" type="email" :clear-input="true"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">{{ translate('Facility contact number') }}</ion-label>
-          <ion-input v-model="formData.contactNumber" type="tel" :clear-input="true"></ion-input>
-        </ion-item>
-      </template>
-      <template v-else>
-        <ion-item>
-          <ion-label position="floating">{{ translate('First name') }}</ion-label>
-          <ion-input v-model="formData.firstName" :clear-input="true"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">{{ translate('Last name') }}</ion-label>
-          <ion-input v-model="formData.lastName" :clear-input="true"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">{{ translate('Employee ID') }}</ion-label>
-          <ion-input v-model="formData.externalId" :clear-input="true"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">{{ translate('Email') }}</ion-label>
-          <ion-input v-model="formData.emailAddress" type="email" :clear-input="true"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">{{ translate('Phone number') }}</ion-label>
-          <ion-input v-model="formData.contactNumber" type="tel" :clear-input="true"></ion-input>
-        </ion-item>
-      </template>
-      <div class="ion-padding-top">
-        <ion-button @click="createUser()">
-          <ion-icon slot="end" :icon="arrowForwardOutline"/>
+        <template v-if="isFacilityLogin">
+          <ion-item>
+            <ion-icon slot="start" :icon="businessOutline"/>
+            <ion-label>
+              {{ translate("Select facility") }}
+            </ion-label>
+            <ion-select interface="popover" v-model="formData.facilityId" @ionChange="updateGroupName">
+              <ion-select-option v-for="facility in (facilities ? facilities : [])" :key="facility.facilityId" :value="facility.facilityId">{{ facility.facilityName }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">{{ translate('Name') }}</ion-label>
+            <ion-input v-model="formData.groupName" :clear-input="true"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">{{ translate('Reset password email') }}</ion-label>
+            <ion-input v-model="formData.emailAddress" type="email" :clear-input="true"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">{{ translate('Facility contact number') }}</ion-label>
+            <ion-input v-model="formData.contactNumber" type="tel" :clear-input="true"></ion-input>
+          </ion-item>
+        </template>
+        <template v-else>
+          <ion-item>
+            <ion-label position="floating">{{ translate('First name') }}</ion-label>
+            <ion-input v-model="formData.firstName" :clear-input="true"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">{{ translate('Last name') }}</ion-label>
+            <ion-input v-model="formData.lastName" :clear-input="true"></ion-input>
+          </ion-item>
+
+          <ion-item class="ion-margin-top">
+            <ion-label position="floating">{{ translate('Employee ID') }}</ion-label>
+            <ion-input v-model="formData.externalId" :clear-input="true"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">{{ translate('Email') }}</ion-label>
+            <ion-input v-model="formData.emailAddress" type="email" :clear-input="true"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">{{ translate('Phone number') }}</ion-label>
+            <ion-input v-model="formData.contactNumber" type="tel" :clear-input="true"></ion-input>
+          </ion-item>
+        </template>
+        <ion-button class="ion-margin-top" @click="createUser()">
           {{ translate("Create User") }}
+          <ion-icon slot="end" :icon="arrowForwardOutline"/>
         </ion-button>
-      </div>
+      </main>
     </ion-content>
   </ion-page>
 </template>
@@ -236,3 +237,13 @@ export default defineComponent({
   }
 });
 </script>
+
+<style>
+
+  @media (min-width: 700px) {
+    main {
+      max-width: 375px;
+    }
+  }
+
+</style>

@@ -26,10 +26,10 @@
           <ion-label>{{ selectedUser.externalId }}</ion-label> 
         </ion-item>
       </ion-card>
-      <div class="ion-padding-top">
+      <div class="actions ion-margin-top">
         <ion-button @click="quickSetup()">
-          <ion-icon slot="end" :icon="arrowForwardOutline"/>
           {{ translate("Quick Setup") }}
+          <ion-icon slot="end" :icon="arrowForwardOutline"/>
         </ion-button>
         <ion-button color="medium" fill="outline" @click="confirmSetupManually()">
           {{ translate("Setup Manually") }}
@@ -134,3 +134,13 @@
     }
   });
 </script>
+
+<style>
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+  }
+
+</style>
