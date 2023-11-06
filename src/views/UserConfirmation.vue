@@ -139,7 +139,7 @@
   });
 </script>
 
-<style>
+<style scoped>
   .actions {
     display: flex;
     flex-direction: column;

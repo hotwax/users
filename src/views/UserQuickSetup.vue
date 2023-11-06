@@ -419,7 +419,7 @@ export default defineComponent({
 });
 </script>
 
-<style>
+<style scoped>
 
   @media (min-width: 700px) {
     main {
