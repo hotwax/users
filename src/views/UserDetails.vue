@@ -67,7 +67,7 @@
                   <ion-item>
                     <ion-label class="ion-text-wrap" position="fixed">{{ translate("Password") }}</ion-label>
                     <ion-input :placeholder="translate('Default password')" name="password" v-model="password" id="password" type="password" required />
-                    <ion-note slot="helper">{{ translate('will be asked to reset their password when they login', { name: selectedUser.firstName }) }}</ion-note>
+                    <ion-note slot="helper">{{ translate('will be asked to reset their password when they login', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName }) }}</ion-note>
                   </ion-item>
                 </ion-list>
                 <ion-button @click="createNewUserLogin()" fill="outline" expand="block">
