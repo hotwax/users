@@ -288,7 +288,7 @@ export default defineComponent({
     }
   },
   async ionViewWillEnter() {
-    await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
+    await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
     await this.store.dispatch('util/getSecurityGroups')
   },
   methods: {
