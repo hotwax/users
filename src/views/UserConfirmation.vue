@@ -7,34 +7,36 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <ion-card>
-        <ion-item lines="none">
-          <ion-label v-if="selectedUser.groupName">{{ selectedUser.groupName }} </ion-label> 
-          <ion-label v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</ion-label>
-          <ion-note slot="end">{{ selectedUser.partyId }}</ion-note> 
-        </ion-item>
-        <ion-item v-if="selectedUser.emailDetails?.email">
-          <ion-icon :icon="mailOutline" slot="start" />
-          <ion-label>{{ selectedUser.emailDetails?.email}}</ion-label> 
-        </ion-item>
-        <ion-item v-if="selectedUser.phoneNumberDetails?.contactNumber">
-          <ion-icon :icon="callOutline" slot="start"/>
-          <ion-label>{{ selectedUser.phoneNumberDetails?.contactNumber }}</ion-label> 
-        </ion-item>
-        <ion-item v-if="selectedUser.externalId && selectedUser.partyTypeId !== 'PARTY_GROUP'">
-          <ion-icon :icon="businessOutline" slot="start"/>
-          <ion-label>{{ selectedUser.externalId }}</ion-label> 
-        </ion-item>
-      </ion-card>
-      <div class="actions ion-margin-top">
-        <ion-button @click="quickSetup()">
-          {{ translate("Quick Setup") }}
-          <ion-icon slot="end" :icon="arrowForwardOutline"/>
-        </ion-button>
-        <ion-button color="medium" fill="outline" @click="confirmSetupManually()">
-          {{ translate("Setup Manually") }}
-        </ion-button>
-      </div>
+      <main>
+        <ion-card>
+          <ion-card-header>
+            <ion-label v-if="selectedUser.groupName">{{ selectedUser.groupName }} </ion-label> 
+            <ion-label v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</ion-label>
+            <ion-note slot="end">{{ selectedUser.partyId }}</ion-note> 
+          </ion-card-header>
+          <ion-item v-if="selectedUser.emailDetails?.email">
+            <ion-icon :icon="mailOutline" slot="start" />
+            <ion-label>{{ selectedUser.emailDetails?.email}}</ion-label> 
+          </ion-item>
+          <ion-item v-if="selectedUser.phoneNumberDetails?.contactNumber">
+            <ion-icon :icon="callOutline" slot="start"/>
+            <ion-label>{{ selectedUser.phoneNumberDetails?.contactNumber }}</ion-label> 
+          </ion-item>
+          <ion-item v-if="selectedUser.externalId && selectedUser.partyTypeId !== 'PARTY_GROUP'">
+            <ion-icon :icon="businessOutline" slot="start"/>
+            <ion-label>{{ selectedUser.externalId }}</ion-label> 
+          </ion-item>
+        </ion-card>
+        <div class="actions ion-margin-top">
+          <ion-button @click="quickSetup()">
+            {{ translate("Quick Setup") }}
+            <ion-icon slot="end" :icon="arrowForwardOutline"/>
+          </ion-button>
+          <ion-button color="medium" fill="outline" @click="confirmSetupManually()">
+            {{ translate("Setup Manually") }}
+          </ion-button>
+        </div>
+      </main>
     </ion-content>
   </ion-page>
 </template>
@@ -44,6 +46,7 @@
     IonBackButton,
     IonButton,
     IonCard,
+    IonCardHeader,
     IonContent,
     IonHeader,
     IonIcon,
@@ -72,6 +75,7 @@
       IonBackButton,
       IonButton,
       IonCard,
+      IonCardHeader,
       IonContent,
       IonHeader,
       IonIcon,
@@ -136,11 +140,16 @@
 </script>
 
 <style>
-
   .actions {
     display: flex;
     flex-direction: column;
     align-items: start;
   }
 
+  @media (min-width: 700px) {
+    main {
+      max-width: 375px;
+      margin: auto;
+    }
+  }
 </style>
