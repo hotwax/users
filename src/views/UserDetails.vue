@@ -145,8 +145,8 @@
                 <ion-list-header color="light">
                   <ion-label>{{ translate('Product stores') }}</ion-label>
                   <ion-button @click="selectProductStore()">
-                    <ion-icon slot="start" :icon="addCircleOutline" />
                     {{ translate('Add') }}
+                    <ion-icon slot="end" :icon="addCircleOutline" />
                   </ion-button>
                 </ion-list-header>
                 <ion-item v-for="store in userProductStores" :key="store.productStoreId">
