@@ -7,76 +7,78 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <ion-item v-if="!isFacilityLogin()">
-        <ion-icon slot="start" :icon="documentTextOutline"/>
-        <ion-label>
-          {{ translate("Select template") }}
-        </ion-label>
-        <ion-select interface="popover" v-model="userTemplateId" @ionChange="updateUserTemplate">
-          <ion-select-option v-for="userTemplate in userTemplates" :key="userTemplate.templateId" :value="userTemplate.templateId">{{ userTemplate.templateName }}</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <template v-if="(selectedUserTemplate && selectedUserTemplate.isUserLoginRequired || isFacilityLogin())">
-        <ion-item>
-          <ion-label position="floating">{{ translate('Username') }}</ion-label>
-          <ion-input v-model="formData.userLoginId" :clear-input="true"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">{{ translate('Password') }}</ion-label>
-          <ion-input v-model="formData.currentPassword" type="password" :clear-input="true"></ion-input>
-          <ion-note slot="helper">{{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}</ion-note>
-        </ion-item>
-        <ion-item>
+      <main>
+        <ion-item v-if="!isFacilityLogin()">
+          <ion-icon slot="start" :icon="documentTextOutline"/>
           <ion-label>
-            {{ translate("Require password reset on login") }}
+            {{ translate("Select template") }}
           </ion-label>
-          <ion-toggle :checked="formData.requirePasswordChange" slot="end" />
+          <ion-select interface="popover" v-model="userTemplateId" @ionChange="updateUserTemplate">
+            <ion-select-option v-for="userTemplate in userTemplates" :key="userTemplate.templateId" :value="userTemplate.templateId">{{ userTemplate.templateName }}</ion-select-option>
+          </ion-select>
         </ion-item>
-      </template>
-      <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isEmployeeIdRequired && !isFacilityLogin()">
-        <ion-label position="floating">{{ translate('Employee ID') }}</ion-label>
-        <ion-input v-model="formData.externalId"></ion-input>
-      </ion-item>
+        <template v-if="(selectedUserTemplate && selectedUserTemplate.isUserLoginRequired || isFacilityLogin())">
+          <ion-item>
+            <ion-label position="floating">{{ translate('Username') }}</ion-label>
+            <ion-input v-model="formData.userLoginId" :clear-input="true"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">{{ translate('Password') }}</ion-label>
+            <ion-input v-model="formData.currentPassword" type="password" :clear-input="true"></ion-input>
+            <ion-note slot="helper">{{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}</ion-note>
+          </ion-item>
+          <ion-item>
+            <ion-label>
+              {{ translate("Require password reset on login") }}
+            </ion-label>
+            <ion-toggle :checked="formData.requirePasswordChange" slot="end" />
+          </ion-item>
+        </template>
+        <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isEmployeeIdRequired && !isFacilityLogin()">
+          <ion-label position="floating">{{ translate('Employee ID') }}</ion-label>
+          <ion-input v-model="formData.externalId"></ion-input>
+        </ion-item>
 
-      <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isProductStoreRequired && !isFacilityLogin()">
-        <ion-label>
-          {{ translate("Product stores") }}
-        </ion-label>
-        <ion-label slot="end" @click="addProductStores()">
-          {{ translate("selected", {storeCount: selectedProductStores ? selectedProductStores.length : 0}) }}
-          <ion-icon :icon="caretDownOutline"></ion-icon>
-        </ion-label>
-      </ion-item>
+        <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isProductStoreRequired && !isFacilityLogin()">
+          <ion-label>
+            {{ translate("Product stores") }}
+          </ion-label>
+          <ion-label slot="end" @click="addProductStores()">
+            {{ translate("selected", {storeCount: selectedProductStores ? selectedProductStores.length : 0}) }}
+            <ion-icon :icon="caretDownOutline"></ion-icon>
+          </ion-label>
+        </ion-item>
 
-      <ion-list v-if="(selectedUserTemplate && selectedUserTemplate.isFacilityRequired) || isFacilityLogin()">
-        <ion-item>
-          <ion-label>{{ translate('Select Facilities') }}</ion-label>
-          <ion-button fill="clear" @click="addFacilities()" slot="end">
-            {{ translate("Add") }}
-            <ion-icon :icon="addCircleOutline"></ion-icon>
+        <ion-list v-if="(selectedUserTemplate && selectedUserTemplate.isFacilityRequired) || isFacilityLogin()">
+          <ion-item>
+            <ion-label>{{ translate('Select Facilities') }}</ion-label>
+            <ion-button fill="clear" @click="addFacilities()" slot="end">
+              {{ translate("Add") }}
+              <ion-icon :icon="addCircleOutline"></ion-icon>
+            </ion-button>
+          </ion-item>
+          <ion-item v-for="facility in facilities" :key="facility.facilityId">
+            <ion-label>
+              {{ facility.facilityName }}
+              <p>{{ facility.facilityId }}</p>
+            </ion-label>
+            <ion-checkbox slot="end" :checked="true" @ionChange="toggleFacilitySelection(facility)" />
+          </ion-item>
+        </ion-list>
+
+        <div class="actions ion-margin-top">
+          <ion-button @click="finishSetup()">
+            {{ translate("Finish setup") }}
+            <ion-icon slot="end" :icon="arrowForwardOutline"/>
           </ion-button>
-        </ion-item>
-        <ion-item v-for="facility in facilities" :key="facility.facilityId">
-          <ion-label>
-            {{ facility.facilityName }}
-            <p>{{ facility.facilityId }}</p>
-          </ion-label>
-          <ion-checkbox slot="end" :checked="true" @ionChange="toggleFacilitySelection(facility)" />
-        </ion-item>
-      </ion-list>
-
-      <div class="ion-padding-top">
-        <ion-button @click="finishSetup()">
-          <ion-icon slot="end" :icon="arrowForwardOutline"/>
-          {{ translate("Finish setup") }}
-        </ion-button>
-        <ion-button fill="outline" @click="confirmSetupManually()">
-          {{ translate("Setup manually") }}
-        </ion-button>
-        <ion-button color="medium" fill="outline" @click="finishAndCreateNewUser()">
-          {{ translate("Finish and create new user") }}
-        </ion-button>
-      </div>
+          <ion-button fill="outline" size="small" @click="confirmSetupManually()">
+            {{ translate("Setup manually") }}
+          </ion-button>
+          <ion-button color="medium" fill="outline" size="small" @click="finishAndCreateNewUser()">
+            {{ translate("Finish and create new user") }}
+          </ion-button>
+        </div>
+      </main>
     </ion-content>
   </ion-page>
 </template>
@@ -416,3 +418,20 @@ export default defineComponent({
   }
 });
 </script>
+
+<style>
+
+  @media (min-width: 700px) {
+    main {
+      max-width: 375px;
+      margin-inline-start: auto;
+    }
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+  }
+
+</style>
