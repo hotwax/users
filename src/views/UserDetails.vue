@@ -131,10 +131,11 @@
               <ion-item>
                 <ion-icon :icon="businessOutline" slot="start" />
                 <ion-label>{{ translate('Security Group') }}</ion-label>        
-                <ion-select interface="popover" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
+                <ion-select interface="popover" :disabled="!selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
                   <ion-select-option v-for="securityGroup in securityGroups" :key="securityGroup.groupId" :value="securityGroup.groupId">
                     {{ securityGroup.groupName }}
                   </ion-select-option>
+                  <ion-select-option value="">{{ translate("None") }}</ion-select-option>
                 </ion-select>
               </ion-item>
               <ion-button v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block">

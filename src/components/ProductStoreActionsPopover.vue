@@ -3,7 +3,7 @@
     <ion-list>
       <ion-list-header>{{ productStore.storeName }}</ion-list-header>
       <ion-item button @click="selectProductStoreRole()">
-        {{ translate("Edit role") }}
+        {{ translate("Edit") }}
       </ion-item>
       <!-- <ion-item button>
         {{ translate("View product store") }}

@@ -267,8 +267,13 @@ const actions: ActionTree<UserState, RootState> = {
     }
 
     if(state.query.status) {
-      filters['enabled'] = state.query.status
-      filters['enabled_op'] = 'equals'
+      if (state.query.status === "N") {
+        filters['enabled'] = state.query.status
+        filters['enabled_op'] = 'equals'
+      } else {
+        filters['enabled'] = "N"
+        filters['enabled_op'] = 'notEqual'  
+      }
     }
 
     if(state.query.queryString) {

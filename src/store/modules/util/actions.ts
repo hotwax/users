@@ -89,10 +89,6 @@ const actions: ActionTree<UtilState, RootState> = {
 
       if(!hasError(resp)) {
         securityGroups = resp.data.docs
-        securityGroups.push({
-          groupId: '',
-          groupName: 'None',
-        })
       } else {
         throw resp.data
       }
