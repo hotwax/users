@@ -309,6 +309,13 @@ const ensurePartyRole = async (payload: any): Promise <any> => {
     data: payload
   });
 }
+const deletePartyRole = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/deletePartyRole", 
+    method: "post",
+    data: payload
+  });
+}
 
 const getUserFacilities = async (partyId: string): Promise<any> => {
   let facilities = []
@@ -435,7 +442,7 @@ const finishSetup = async (payload: any): Promise <any> => {
         throw resp.data;
       }
     }
-    
+
     if (selectedTemplate.isEmployeeIdRequired) {
       if (selectedUser.partyTypeId === "PARTY_GROUP") {
         promises.push(updatePartyGroup({
@@ -454,18 +461,15 @@ const finishSetup = async (payload: any): Promise <any> => {
     }
         
     
-    if (payload.formData.emailAddress) {
+    if (payload.formData.emailAddress && payload.formData.emailAddress !== selectedUser.emailDetails?.email) {
       promises.push(createUpdatePartyEmailAddress({
         "partyId": partyId,
-        "emailAddress": payload.formData.emailAddress
+        "contactMechId": selectedUser.emailDetails?.contactMechId ? selectedUser.emailDetails?.contactMechId : "",
+        "emailAddress": payload.formData.emailAddress,
+        "contactMechPurposeTypeId": "PRIMARY_EMAIL",
       }));
     }
-    if (payload.formData.contactNumber) {
-      promises.push(createUpdatePartyTelecomNumber({
-        "partyId": partyId,
-        "contactNumber": payload.formData.contactNumber
-      }));
-    }
+
     if (payload.selectedTemplate.roleTypeId) {
       promises.push(ensurePartyRole({
         "partyId": partyId,
@@ -543,6 +547,7 @@ export const UserService = {
   createUpdatePartyTelecomNumber,
   createProductStoreRole,
   deletePartyContactMech,
+  deletePartyRole,
   getAvailableTimeZones,
   fetchUsers,
   getPartyRole,

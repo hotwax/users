@@ -19,13 +19,18 @@
         </ion-item>
         <template v-if="(selectedUserTemplate && selectedUserTemplate.isUserLoginRequired || isFacilityLogin())">
           <ion-item>
-            <ion-label position="floating">{{ translate('Username') }}</ion-label>
+            <ion-label position="floating">{{ translate('Username') }} <ion-text color="danger">*</ion-text></ion-label>
             <ion-input v-model="formData.userLoginId" :clear-input="true"></ion-input>
           </ion-item>
-          <ion-item>
-            <ion-label position="floating">{{ translate('Password') }}</ion-label>
-            <ion-input v-model="formData.currentPassword" type="password" :clear-input="true"></ion-input>
+          <ion-item ref="password">
+            <ion-label position="floating">{{ translate('Password') }} <ion-text color="danger">*</ion-text></ion-label>
+            <ion-input v-model="formData.currentPassword" type="password" :clear-input="true" @ionInput="validatePassword" @ionBlur="markPasswordTouched"></ion-input>
             <ion-note slot="helper">{{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}</ion-note>
+            <ion-note slot="error">{{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}</ion-note>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">{{ isFacilityLogin() ? translate('Reset password email') : translate('Email') }} <ion-text color="danger">*</ion-text></ion-label>
+            <ion-input v-model="formData.emailAddress" :clear-input="true"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label>
@@ -99,6 +104,7 @@ import {
   IonPage,
   IonSelect,
   IonSelectOption,
+  IonText,
   IonTitle,
   IonToggle,
   IonToolbar,
@@ -114,7 +120,7 @@ import {
   caretDownOutline,
   documentTextOutline
 } from 'ionicons/icons';
-import { copyToClipboard, showToast, isValidPassword } from '@/utils'
+import { copyToClipboard, showToast, isValidPassword, isValidEmail } from '@/utils'
 import { translate } from "@hotwax/dxp-components";
 import { UserService } from '@/services/UserService'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
@@ -137,6 +143,7 @@ export default defineComponent({
     IonPage,
     IonSelect,
     IonSelectOption,
+    IonText,
     IonTitle,
     IonToggle,
     IonToolbar
@@ -159,6 +166,7 @@ export default defineComponent({
       formData: {
         userLoginId: '',
         currentPassword: '',
+        emailAddress: '',
         externalId: '',
         requirePasswordChange: true,
       },
@@ -243,25 +251,32 @@ export default defineComponent({
       this.facilities = addedFacilities;
       this.selectedFacilities = addedFacilities;
     }
+    await this.initializeFormData();
   },
   methods: {
     isFacilityLogin() {
+      if (this.selectedUser && this.selectedUser.partyTypeId === "PARTY_GROUP") {
+        return true;
+      }
+      return false;
+    },
+    initializeFormData() {
       if (this.selectedUser) {
         this.formData.externalId = this.selectedUser.externalId
-        if (this.selectedUser.partyTypeId === "PARTY_GROUP") {
+        if (this.isFacilityLogin()) {
           this.formData.requirePasswordChange = false;
           this.formData.userLoginId = this.selectedUser.facilities?.[0].facilityId;
-          return true;
         } else {
           this.formData.userLoginId = this.selectedUserTemplate.isUserLoginRequired ? `${this.selectedUser.firstName.toLowerCase()}.${this.selectedUser.lastName.toLowerCase()}` : '';
-          return false;
         }
+        this.formData.emailAddress = this.selectedUser.emailDetails?.email;
       }
     },
     clearFormData() {
       this.formData = {
         userLoginId: '',
         currentPassword: '',
+        emailAddress: '',
         externalId: '',
         requirePasswordChange: true
       }
@@ -270,14 +285,37 @@ export default defineComponent({
       const selectedTemplateId = event.detail.value;
       this.selectedUserTemplate = this.userTemplates.find((userTemplate: any) => userTemplate.templateId === selectedTemplateId);
       this.clearFormData();
+      this.initializeFormData();
     },
+    validatePassword(event: any) {
+      const value = event.target.value;
+      (this as any).$refs.password.$el.classList.remove('ion-valid');
+      (this as any).$refs.password.$el.classList.remove('ion-invalid');
+
+      if (value === '') return;
+
+      isValidPassword(value)
+        ? (this as any).$refs.password.$el.classList.add('ion-valid')
+        : (this as any).$refs.password.$el.classList.add('ion-invalid');
+    },
+    markPasswordTouched() {
+      (this as any).$refs.password.$el.classList.add('ion-touched');
+     },
     validateUserDetail(data: any) {
       const validationErrors = [];
-      if (data.currentPassword && !data.userLoginId) {
-        validationErrors.push(translate('Username is required.'));
+      if (this.selectedUserTemplate.isUserLoginRequired) {
+        if (!data.userLoginId) {
+          validationErrors.push(translate('Username is required.'));
+        }
+        if (!data.currentPassword) {
+          validationErrors.push(translate('Password is required.'));
+        }
+        if (!data.emailAddress) {
+          validationErrors.push(translate('Email is required.'));
+        }
       }
-      if (data.userLoginId && !data.currentPassword) {
-        validationErrors.push(translate('Password is required.'));
+      if (data.emailAddress && !isValidEmail(data.emailAddress)) {
+        validationErrors.push(translate('Invalid email address.'));
       }
       if (data.currentPassword && !isValidPassword(data.currentPassword)) {
         validationErrors.push(translate('Invalid passowrd. Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.'));
@@ -364,7 +402,7 @@ export default defineComponent({
       await this.$router.push({ path: `/user-details/${this.partyId}` })
     },
     async finishAndCreateNewUser() {
-      await this.$router.push({ path: `/create-user` })
+      await this.$router.replace({ path: `/create-user` })
     },
     async addFacilities() {
       const selectFacilityModal = await modalController.create({

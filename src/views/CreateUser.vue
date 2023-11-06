@@ -20,14 +20,14 @@
           <ion-item>
             <ion-icon slot="start" :icon="businessOutline"/>
             <ion-label>
-              {{ translate("Select facility") }}
+              {{ translate("Select facility") }} <ion-text color="danger">*</ion-text>
             </ion-label>
             <ion-select interface="popover" v-model="formData.facilityId" @ionChange="updateGroupName">
               <ion-select-option v-for="facility in (facilities ? facilities : [])" :key="facility.facilityId" :value="facility.facilityId">{{ facility.facilityName }}</ion-select-option>
             </ion-select>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ translate('Name') }}</ion-label>
+            <ion-label position="floating">{{ translate('Name') }} <ion-text color="danger">*</ion-text></ion-label>
             <ion-input v-model="formData.groupName" :clear-input="true"></ion-input>
           </ion-item>
           <ion-item>
@@ -41,11 +41,11 @@
         </template>
         <template v-else>
           <ion-item>
-            <ion-label position="floating">{{ translate('First name') }}</ion-label>
+            <ion-label position="floating">{{ translate('First name') }} <ion-text color="danger">*</ion-text></ion-label>
             <ion-input v-model="formData.firstName" :clear-input="true"></ion-input>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ translate('Last name') }}</ion-label>
+            <ion-label position="floating">{{ translate('Last name') }} <ion-text color="danger">*</ion-text></ion-label>
             <ion-input v-model="formData.lastName" :clear-input="true"></ion-input>
           </ion-item>
 
@@ -81,6 +81,7 @@ import {
   IonItem,
   IonLabel,
   IonPage,
+  IonText,
   IonTitle,
   IonToolbar,
   IonToggle,
@@ -112,6 +113,7 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonPage,
+    IonText,
     IonTitle,
     IonToolbar,
     IonToggle,
