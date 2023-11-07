@@ -28,38 +28,38 @@
           </ion-item>
           <ion-item>
             <ion-label position="floating">{{ translate('Name') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.groupName" :clear-input="true"></ion-input>
+            <ion-input v-model="formData.groupName"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">{{ translate('Reset password email') }}</ion-label>
-            <ion-input v-model="formData.emailAddress" type="email" :clear-input="true"></ion-input>
+            <ion-input v-model="formData.emailAddress" type="email"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">{{ translate('Facility contact number') }}</ion-label>
-            <ion-input v-model="formData.contactNumber" type="tel" :clear-input="true"></ion-input>
+            <ion-input v-model="formData.contactNumber" type="tel"></ion-input>
           </ion-item>
         </template>
         <template v-else>
           <ion-item>
             <ion-label position="floating">{{ translate('First name') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.firstName" :clear-input="true"></ion-input>
+            <ion-input v-model="formData.firstName"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">{{ translate('Last name') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.lastName" :clear-input="true"></ion-input>
+            <ion-input v-model="formData.lastName"></ion-input>
           </ion-item>
 
           <ion-item class="ion-margin-top">
             <ion-label position="floating">{{ translate('Employee ID') }}</ion-label>
-            <ion-input v-model="formData.externalId" :clear-input="true"></ion-input>
+            <ion-input v-model="formData.externalId"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">{{ translate('Email') }}</ion-label>
-            <ion-input v-model="formData.emailAddress" type="email" :clear-input="true"></ion-input>
+            <ion-input v-model="formData.emailAddress" type="email"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">{{ translate('Phone number') }}</ion-label>
-            <ion-input v-model="formData.contactNumber" type="tel" :clear-input="true"></ion-input>
+            <ion-input v-model="formData.contactNumber" type="tel"></ion-input>
           </ion-item>
         </template>
         <ion-button class="ion-margin-top" @click="createUser()">

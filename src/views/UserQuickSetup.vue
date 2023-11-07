@@ -20,17 +20,17 @@
         <template v-if="(selectedUserTemplate && selectedUserTemplate.isUserLoginRequired || isFacilityLogin())">
           <ion-item>
             <ion-label position="floating">{{ translate('Username') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.userLoginId" :clear-input="true"></ion-input>
+            <ion-input v-model="formData.userLoginId"></ion-input>
           </ion-item>
           <ion-item ref="password">
             <ion-label position="floating">{{ translate('Password') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.currentPassword" type="password" :clear-input="true" @ionInput="validatePassword" @ionBlur="markPasswordTouched"></ion-input>
+            <ion-input v-model="formData.currentPassword" type="password" @ionInput="validatePassword" @ionBlur="markPasswordTouched"></ion-input>
             <ion-note slot="helper">{{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}</ion-note>
             <ion-note slot="error">{{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}</ion-note>
           </ion-item>
           <ion-item>
             <ion-label position="floating">{{ isFacilityLogin() ? translate('Reset password email') : translate('Email') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.emailAddress" :clear-input="true"></ion-input>
+            <ion-input v-model="formData.emailAddress"></ion-input>
           </ion-item>
           <ion-item>
             <ion-label>
