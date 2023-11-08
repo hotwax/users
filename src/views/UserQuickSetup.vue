@@ -24,7 +24,7 @@
           </ion-item>
           <ion-item ref="password">
             <ion-label position="floating">{{ translate('Password') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.currentPassword" type="password" @ionInput="validatePassword" @ionBlur="markPasswordTouched"></ion-input>
+            <ion-input v-model="formData.currentPassword" type="password" autocomplete="new-password" @ionInput="validatePassword" @ionBlur="markPasswordTouched"></ion-input>
             <ion-note slot="helper">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
             <ion-note slot="error">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
           </ion-item>
