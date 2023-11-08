@@ -139,7 +139,7 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
-    IonListH
+    IonListHeader,
     IonNote,
     IonPage,
     IonSelect,
