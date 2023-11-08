@@ -104,7 +104,7 @@
   "Password": "Password",
   "Password reset successful.": "Password reset successful.",
   "Password reset email sent successfully.": "Password reset email sent successfully.",
-  "Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.": "Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.",
+  "Password should be at least 5 characters long and contain at least one number, alphabet and special character.": "Password should be at least 5 characters long and contains at least one number, alphabet and special character.",
   "Passwords do not match.": "Passwords do not match.",
   "Password requirements not fulfilled.": "Password requirements not fulfilled.",
   "Permissions": "Permissions",

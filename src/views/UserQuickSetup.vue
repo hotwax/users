@@ -25,8 +25,8 @@
           <ion-item ref="password">
             <ion-label position="floating">{{ translate('Password') }} <ion-text color="danger">*</ion-text></ion-label>
             <ion-input v-model="formData.currentPassword" type="password" @ionInput="validatePassword" @ionBlur="markPasswordTouched"></ion-input>
-            <ion-note slot="helper">{{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}</ion-note>
-            <ion-note slot="error">{{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}</ion-note>
+            <ion-note slot="helper">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
+            <ion-note slot="error">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
           </ion-item>
           <ion-item>
             <ion-label position="floating">{{ isFacilityLogin() ? translate('Reset password email') : translate('Email') }} <ion-text color="danger">*</ion-text></ion-label>
