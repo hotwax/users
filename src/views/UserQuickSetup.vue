@@ -482,7 +482,7 @@ export default defineComponent({
   @media (min-width: 700px) {
     main {
       max-width: 375px;
-      margin-inline-start: auto;
+      margin: auto;
     }
   }
 
