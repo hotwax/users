@@ -55,13 +55,13 @@
         </ion-item>
 
         <ion-list v-if="(selectedUserTemplate && selectedUserTemplate.isFacilityRequired) || isFacilityLogin()">
-          <ion-item>
+          <ion-list-header>
             <ion-label>{{ translate('Select Facilities') }}</ion-label>
-            <ion-button fill="clear" @click="addFacilities()" slot="end">
+            <ion-button fill="clear" @click="addFacilities()">
               {{ translate("Add") }}
-              <ion-icon :icon="addCircleOutline"></ion-icon>
+              <ion-icon slot="end" :icon="addCircleOutline"></ion-icon>
             </ion-button>
-          </ion-item>
+          </ion-list-header>
           <ion-item v-for="facility in facilities" :key="facility.facilityId">
             <ion-label>
               {{ facility.facilityName }}
@@ -100,6 +100,7 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonListHeader,
   IonNote,
   IonPage,
   IonSelect,
@@ -139,6 +140,7 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
+    IonListHeader,
     IonNote,
     IonPage,
     IonSelect,
