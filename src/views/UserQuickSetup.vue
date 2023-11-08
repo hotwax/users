@@ -8,7 +8,7 @@
     </ion-header>
     <ion-content>
       <main>
-        <ion-item v-if="!isFacilityLogin()">
+        <ion-item class="ion-margin-bottom" v-if="!isFacilityLogin()">
           <ion-icon slot="start" :icon="documentTextOutline"/>
           <ion-label>
             {{ translate("Select template") }}
@@ -32,7 +32,7 @@
             <ion-label position="floating">{{ isFacilityLogin() ? translate('Reset password email') : translate('Email') }} <ion-text color="danger">*</ion-text></ion-label>
             <ion-input v-model="formData.emailAddress"></ion-input>
           </ion-item>
-          <ion-item>
+          <ion-item ion-margin-top>
             <ion-label>
               {{ translate("Require password reset on login") }}
             </ion-label>
@@ -75,7 +75,7 @@
             {{ translate("Finish setup") }}
             <ion-icon slot="end" :icon="arrowForwardOutline"/>
           </ion-button>
-          <ion-button fill="outline" size="small" @click="confirmSetupManually()">
+          <ion-button class="ion-margin-top" fill="outline" size="small" @click="confirmSetupManually()">
             {{ translate("Setup manually") }}
           </ion-button>
           <ion-button color="medium" fill="outline" size="small" @click="finishAndCreateNewUser()">
