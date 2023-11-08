@@ -10,9 +10,9 @@
       <main>
         <ion-card>
           <ion-card-header>
-            <ion-label v-if="selectedUser.groupName">{{ selectedUser.groupName }} </ion-label> 
-            <ion-label v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</ion-label>
-            <ion-note slot="end">{{ selectedUser.partyId }}</ion-note> 
+            <ion-card-title v-if="selectedUser.groupName">{{ selectedUser.groupName }} </ion-card-title> 
+            <ion-card-title v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</ion-card-title>
+            <ion-note>{{ selectedUser.partyId }}</ion-note> 
           </ion-card-header>
           <ion-item v-if="selectedUser.emailDetails?.email">
             <ion-icon :icon="mailOutline" slot="start" />
@@ -47,6 +47,7 @@
     IonButton,
     IonCard,
     IonCardHeader,
+    IonCardTitle,
     IonContent,
     IonHeader,
     IonIcon,
@@ -76,6 +77,7 @@
       IonButton,
       IonCard,
       IonCardHeader,
+      IonCardTitle,
       IonContent,
       IonHeader,
       IonIcon,
@@ -140,6 +142,11 @@
 </script>
 
 <style scoped>
+
+  ion-card-header {
+    display: flex;
+    justify-content: space-between;
+  }
   .actions {
     display: flex;
     flex-direction: column;
