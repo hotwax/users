@@ -48,7 +48,7 @@
           <ion-label>
             {{ translate("Product stores") }}
           </ion-label>
-          <ion-buton slot="end" @click="addProductStores()">
+          <ion-button slot="end" @click="addProductStores()">
             {{ translate("selected", {storeCount: selectedProductStores ? selectedProductStores.length : 0}) }}
           </ion-button>
         </ion-item>
