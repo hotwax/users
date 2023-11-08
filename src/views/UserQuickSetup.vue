@@ -48,10 +48,9 @@
           <ion-label>
             {{ translate("Product stores") }}
           </ion-label>
-          <ion-label slot="end" @click="addProductStores()">
+          <ion-buton slot="end" @click="addProductStores()">
             {{ translate("selected", {storeCount: selectedProductStores ? selectedProductStores.length : 0}) }}
-            <ion-icon :icon="caretDownOutline"></ion-icon>
-          </ion-label>
+          </ion-button>
         </ion-item>
 
         <ion-list v-if="(selectedUserTemplate && selectedUserTemplate.isFacilityRequired) || isFacilityLogin()">
@@ -140,7 +139,7 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
-    IonListHeader,
+    IonListH
     IonNote,
     IonPage,
     IonSelect,
