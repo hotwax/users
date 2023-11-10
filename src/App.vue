@@ -71,8 +71,10 @@ export default defineComponent({
         .play();
     },
     async unauthorized() {
-      this.store.dispatch("user/logout");
-      this.router.push("/login")
+      // Mark the user as unauthorised, this will help in not making the logout api call in actions
+      this.store.dispatch("user/logout", { isUserUnauthorised: true });
+      const redirectUrl = window.location.origin + '/login';
+      window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}`;
     }
   },
   async mounted() {
