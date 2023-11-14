@@ -66,8 +66,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      securityGroups: 'util/getSecurityGroups',
       query: 'user/getQuery',
+      securityGroups: 'util/getSecurityGroups'
     })
   },
   methods: {
@@ -80,8 +80,8 @@ export default defineComponent({
   setup() {
     return {
       idCardOutline,
-      translate,
-      toggleOutline
+      toggleOutline,
+      translate
     };    
   }
 })
