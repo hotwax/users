@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ViewFilterSelector content-id="view-size-selector" />
+    <ViewFilterMenu content-id="view-size-selector" />
 
     <ion-header :translucent="true">
       <ion-toolbar>
@@ -129,7 +129,7 @@ import { mapGetters, useStore } from 'vuex';
 import { DateTime } from 'luxon';
 import UserPopover from '@/components/UserPopover.vue';
 import { translate } from '@hotwax/dxp-components'
-import ViewFilterSelector from '@/components/ViewFilterSelector.vue';
+import ViewFilterMenu from '@/components/ViewFilterMenu.vue';
 
 export default defineComponent({
   name: 'FindUsers',
@@ -152,7 +152,7 @@ export default defineComponent({
     IonSelectOption,
     IonTitle,
     IonToolbar,
-    ViewFilterSelector
+    ViewFilterMenu
 },
   computed: {
     ...mapGetters({
