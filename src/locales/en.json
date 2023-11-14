@@ -72,6 +72,7 @@
   "Failed to update some association(s).": "Failed to update some association(s).",
   "Failed to update user role.": "Failed to update user role.",
   "Fields cannot be empty.": "Fields cannot be empty.",
+  "Filters": "Filters",
   "Finish and create new user": "Finish and create new user",
   "Find Users": "Find Users",
   "Finish setup": "Finish setup",

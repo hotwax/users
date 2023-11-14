@@ -1,12 +1,17 @@
 <template>
   <ion-page>
+    <ViewFilterSelector content-id="view-size-selector" />
+
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-title>{{ translate("Find Users") }}</ion-title>
+        <ion-menu-button slot="end" class="mobile-only">
+          <ion-icon :icon="optionsOutline" />
+        </ion-menu-button>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content>
+    <ion-content id="view-size-selector">
       <div class="find">
         <section class="search">
           <ion-searchbar :placeholder="translate('Search users')" v-model="query.queryString" @keyup.enter="updateQuery()" />
@@ -102,6 +107,7 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonMenuButton,
   IonPage,
   IonSearchbar,
   IonSelect,
@@ -115,6 +121,7 @@ import {
   addOutline,
   ellipsisVerticalOutline,
   idCardOutline,
+  optionsOutline,
   toggleOutline,
 } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
@@ -122,6 +129,7 @@ import { mapGetters, useStore } from 'vuex';
 import { DateTime } from 'luxon';
 import UserPopover from '@/components/UserPopover.vue';
 import { translate } from '@hotwax/dxp-components'
+import ViewFilterSelector from '@/components/ViewFilterSelector.vue';
 
 export default defineComponent({
   name: 'FindUsers',
@@ -137,13 +145,15 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
+    IonMenuButton,
     IonPage,
     IonSearchbar,
     IonSelect,
     IonSelectOption,
     IonTitle,
-    IonToolbar
-  },
+    IonToolbar,
+    ViewFilterSelector
+},
   computed: {
     ...mapGetters({
       users: 'user/getUsers',
@@ -204,6 +214,7 @@ export default defineComponent({
       addOutline,
       ellipsisVerticalOutline,
       idCardOutline,
+      optionsOutline,
       toggleOutline,
       translate,
       router,
