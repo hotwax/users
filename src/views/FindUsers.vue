@@ -153,7 +153,7 @@ export default defineComponent({
     IonSelectOption,
     IonTitle,
     IonToolbar
-},
+  },
   computed: {
     ...mapGetters({
       users: 'user/getUsers',
