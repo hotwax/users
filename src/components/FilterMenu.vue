@@ -50,7 +50,7 @@ import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 import { translate } from '@hotwax/dxp-components'
 export default defineComponent({
-  name: 'ViewFilterMenu',
+  name: 'FilterMenu',
   components: {
     IonContent,
     IonHeader,

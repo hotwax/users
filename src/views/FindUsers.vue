@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ViewFilterMenu content-id="view-size-selector" />
+    <FilterMenu content-id="filter-menu" />
 
     <ion-header :translucent="true">
       <ion-toolbar>
@@ -11,7 +11,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content id="view-size-selector">
+    <ion-content id="filter-menu">
       <div class="find">
         <section class="search">
           <ion-searchbar :placeholder="translate('Search users')" v-model="query.queryString" @keyup.enter="updateQuery()" />
@@ -129,11 +129,12 @@ import { mapGetters, useStore } from 'vuex';
 import { DateTime } from 'luxon';
 import UserPopover from '@/components/UserPopover.vue';
 import { translate } from '@hotwax/dxp-components'
-import ViewFilterMenu from '@/components/ViewFilterMenu.vue';
+import FilterMenu from '@/components/FilterMenu.vue';
 
 export default defineComponent({
   name: 'FindUsers',
   components: {
+    FilterMenu,
     IonChip,
     IonContent,
     IonFab,
@@ -151,8 +152,7 @@ export default defineComponent({
     IonSelect,
     IonSelectOption,
     IonTitle,
-    IonToolbar,
-    ViewFilterMenu
+    IonToolbar
 },
   computed: {
     ...mapGetters({
