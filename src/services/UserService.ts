@@ -286,9 +286,9 @@ const getUserSecurityGroup = async (userLoginId: string): Promise<any> => {
   return userSecurityGroup
 }
 
-const updateUserSecurityGroup = async (payload: any): Promise <any> => {
+const removeUserSecurityGroup = async (payload: any): Promise <any> => {
   return api({
-    url: "service/updateUserLoginToSecurityGroup", 
+    url: "service/removePartyUserPermission", 
     method: "post",
     data: payload
   });
@@ -567,6 +567,6 @@ export const UserService = {
   updatePartyGroup,
   updatePerson,
   updateProductStoreRole,
-  updateUserSecurityGroup,
+  removeUserSecurityGroup,
   finishSetup
 }

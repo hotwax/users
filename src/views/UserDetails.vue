@@ -635,9 +635,7 @@ export default defineComponent({
       try {
         // delete if none (empty groupId) selected 
         if (!groupId) {
-          resp = await UserService.updateUserSecurityGroup({
-            fromDate: this.selectedUser.securityGroup.fromDate,
-            thruDate: DateTime.now().toMillis(),
+          resp = await UserService.removeUserSecurityGroup({
             groupId: this.selectedUser.securityGroup.groupId,
             userLoginId: this.selectedUser.userLoginId
           })
