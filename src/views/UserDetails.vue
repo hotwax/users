@@ -427,6 +427,7 @@ export default defineComponent({
           currentPassword: this.password,
           currentPasswordVerify: this.password,
           userLoginId: this.username,
+          enabled: 'Y',
           userPrefTypeId: 'ORGANIZATION_PARTY',
           userPrefValue: 'COMPANY',
         })
@@ -648,30 +649,21 @@ export default defineComponent({
             throw resp.data
           }
         } else if (this.selectedUser.securityGroup.groupId) {
-          // update if already associated
-          resp = await UserService.updateUserSecurityGroup({
-            fromDate: this.selectedUser.securityGroup.fromDate,
-            thruDate: DateTime.now().toMillis(),
-            groupId: this.selectedUser.securityGroup.groupId,
-            userLoginId: this.selectedUser.userLoginId
-          })
-          if (!hasError(resp)) {
+            //update if already associated, this will expire existing user security groups and associate the new one.
             resp = await UserService.addUserToSecurityGroup({
-              groupId,
-              userLoginId: this.selectedUser.userLoginId
+              securityGroupId: groupId,
+              partyIdTo: this.selectedUser.partyId
             })
             if (hasError(resp)) throw resp.data
             showToast(translate('Security group updated successfully.'))
             const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
             this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
-          } else {
-            throw resp.data
-          }
+          
         } else {
           // create if not associated
           resp = await UserService.addUserToSecurityGroup({
-            groupId,
-            userLoginId: this.selectedUser.userLoginId
+            securityGroupId: groupId,
+            partyIdTo: this.selectedUser.partyId
           })
           if (!hasError(resp)) {
             showToast(translate('Security group updated successfully.'))

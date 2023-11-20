@@ -296,7 +296,7 @@ const updateUserSecurityGroup = async (payload: any): Promise <any> => {
 
 const addUserToSecurityGroup = async (payload: any): Promise <any> => {
   return api({
-    url: "service/addUserLoginToSecurityGroup", 
+    url: "service/addSecurityGroupToUserLogin", 
     method: "post",
     data: payload
   });
@@ -429,14 +429,14 @@ const finishSetup = async (payload: any): Promise <any> => {
         "currentPassword": payload.formData.currentPassword,
         "currentPasswordVerify": payload.formData.currentPassword,
         "requirePasswordChange": payload.formData.requirePasswordChange ? "Y" : "N",
+        "enabled": "Y",
         "userPrefTypeId": "ORGANIZATION_PARTY",
         "userPrefValue": "COMPANY"
       });
       if (!hasError(resp)) {
         addUserToSecurityGroup({
-          "userLoginId": payload.formData.userLoginId,
-          "groupId": payload.selectedTemplate.securityGroupId ? payload.selectedTemplate.securityGroupId : "STORE_MANAGER",
-          "fromDate" : DateTime.now().toMillis()
+          "partyIdTo": partyId,
+          "securityGroupId": payload.selectedTemplate.securityGroupId ? payload.selectedTemplate.securityGroupId : "STORE_MANAGER",
         });
       } else {
         throw resp.data;
