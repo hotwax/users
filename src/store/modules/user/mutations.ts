@@ -41,5 +41,8 @@ const mutations: MutationTree <UserState> = {
     [types.USER_QUERY_UPDATED] (state, payload) {
       state.query = payload.query
     },
+    [types.USER_CLEAR_SELECTED_USER] (state) {
+      state.selectedUser = {}
+    },
 }
 export default mutations;

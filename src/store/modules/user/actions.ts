@@ -334,6 +334,9 @@ const actions: ActionTree<UserState, RootState> = {
 
   updateQuery({ commit }, query) {
     commit(types.USER_QUERY_UPDATED, { query })
+  },
+  async clearSelectedUser({ commit }) {
+    commit(types.USER_CLEAR_SELECTED_USER)
   }
 }
 export default actions;
