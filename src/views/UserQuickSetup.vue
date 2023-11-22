@@ -352,8 +352,9 @@ export default defineComponent({
     async finishSetupAlert(userLoginId:  any) {
       const message = 'is ready to login'
       const alert = await alertController.create({
-        header: translate("Finish setup"),
+        header: translate("Setup complete"),
         message: translate(message, {userLoginId: userLoginId}),
+        backdropDismiss: false,
         buttons: [
           {
             text: translate("Proceed"),

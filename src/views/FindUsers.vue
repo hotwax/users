@@ -24,12 +24,19 @@
             </ion-item>
             <ion-item lines="none">
               <ion-icon :icon="toggleOutline" slot="start" />
-              <ion-label>{{ translate("Status") }}</ion-label>
+              <ion-label>{{ translate("Login") }}</ion-label>
               <ion-select interface="popover" v-model="query.status" @ionChange="updateQuery()">
                 <ion-select-option value="">{{ translate("All") }}</ion-select-option>
                 <ion-select-option value="Y">{{ translate("Active") }}</ion-select-option>
                 <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
               </ion-select>
+            </ion-item>
+            <ion-item>
+              <ion-icon slot="start" :icon="cloudyNightOutline"/>
+              <ion-label>
+                {{ translate("Hide disabled users") }}
+              </ion-label>
+              <ion-toggle v-model="query.hideDisabledUser" @ionChange="updateQuery()" slot="end" />
             </ion-item>
           </ion-list>
         </aside>
@@ -107,12 +114,14 @@ import {
   IonSelect,
   IonSelectOption,
   IonTitle,
+  IonToggle,
   IonToolbar,
   popoverController
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import {
   addOutline,
+  cloudyNightOutline,
   ellipsisVerticalOutline,
   idCardOutline,
   toggleOutline,
@@ -142,6 +151,7 @@ export default defineComponent({
     IonSelect,
     IonSelectOption,
     IonTitle,
+    IonToggle,
     IonToolbar
   },
   computed: {
@@ -202,6 +212,7 @@ export default defineComponent({
 
     return {
       addOutline,
+      cloudyNightOutline,
       ellipsisVerticalOutline,
       idCardOutline,
       toggleOutline,

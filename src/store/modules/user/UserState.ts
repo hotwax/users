@@ -4,9 +4,10 @@ export default interface UserState {
     instanceUrl: string;
     permissions: any;
     query: {
-      queryString: String,
-      securityGroup: String,
-      status: String
+      queryString: string,
+      securityGroup: string,
+      status: string,
+      hideDisabledUser: boolean
     };
     selectedUser: any;
     users: any;

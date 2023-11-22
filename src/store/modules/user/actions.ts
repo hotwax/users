@@ -277,6 +277,11 @@ const actions: ActionTree<UserState, RootState> = {
       }
     }
 
+    if (state.query.hideDisabledUser) {
+      filters['statusId'] = "PARTY_DISABLED"
+      filters['statusId_op'] = 'notEqual'  
+    }
+
     if(state.query.queryString) {
       filters['groupName_value'] = state.query.queryString
       filters['groupName_op'] = 'contains'
