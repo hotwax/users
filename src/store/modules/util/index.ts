@@ -5,7 +5,7 @@ import { Module } from 'vuex'
 import UtilState from './UtilState'
 import RootState from '@/store/RootState'
 
-const userModule: Module<UtilState, RootState> = {
+const utilModule: Module<UtilState, RootState> = {
   namespaced: true,
   state: {
     roles: [],
@@ -18,4 +18,4 @@ const userModule: Module<UtilState, RootState> = {
   mutations,
 }
 
-export default userModule;
+export default utilModule;
