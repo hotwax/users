@@ -203,7 +203,7 @@ export default defineComponent({
           ...this.formData,
           partyTypeId,
           "partyIdFrom": "COMPANY",
-          "roleTypeIdFrom": "INTERNAL_ORGANIZATIO",
+          "roleTypeIdFrom": "INTERNAL_ORGANIZATION",
           "roleTypeIdTo": "APPLICATION_USER",
           "partyRelationshipTypeId": "EMPLOYMENT",
         }
