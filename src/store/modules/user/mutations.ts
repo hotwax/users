@@ -17,7 +17,8 @@ const mutations: MutationTree <UserState> = {
       state.query = {
         queryString: '',
         securityGroup: '',
-        status: ''
+        status: '',
+        hideDisabledUser: true
       }
       state.selectedUser = {}
     },

@@ -15,7 +15,8 @@ const userModule: Module<UserState, RootState> = {
       query: {
         queryString: '',
         securityGroup: '',
-        status: ''
+        status: '',
+        hideDisabledUser: true
       },
       selectedUser: {},
       users: {
