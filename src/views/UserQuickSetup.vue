@@ -419,6 +419,7 @@ export default defineComponent({
           productStores: this.selectedProductStores,
           facilities : this.selectedFacilities
         });
+        await this.store.dispatch('user/clearSelectedUser');
         await this.$router.replace({ path: `/create-user` })
       } catch (err) {
         console.error('error', err)
