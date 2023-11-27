@@ -683,14 +683,14 @@ export default defineComponent({
       try {
         let resp;
         if (isChecked) {
-          resp = await UserService.ensurePartyRole({
-            partyId: this.partyId,
-            roleTypeId: 'WAREHOUSE_PICKER'
+          resp = await UserService.createCommercePartyRelationshipFrom({
+            "partyIdTo": this.partyId,
+            "roleTypeIdTo": "WAREHOUSE_PICKER"
           })
         } else {
-          resp = await UserService.deletePartyRole({
-            partyId: this.partyId,
-            roleTypeId: 'WAREHOUSE_PICKER'
+          resp = await UserService.updatePartyRelationship({
+            ...this.selectedUser?.pickerRelationship,
+            "thruDate": DateTime.now().toMillis()
           })
         }
         if (!hasError(resp)) {
