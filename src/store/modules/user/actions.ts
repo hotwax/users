@@ -234,19 +234,22 @@ const actions: ActionTree<UserState, RootState> = {
       selectedUser.facilities = await UserService.getUserFacilities(selectedUser.partyId)
       selectedUser.securityGroup = await UserService.getUserSecurityGroup(selectedUser.userLoginId)
       selectedUser.productStores = await UserService.getUserProductStores(selectedUser.partyId)
-      const resp = await UserService.getPartyRole({
+      const resp = await UserService.fetchPartyRelationship({
         inputFields: {
-          partyId: selectedUser.partyId,
-          roleTypeId: 'WAREHOUSE_PICKER',
-          roleTypeId_op: 'equals'
+          partyIdTo: selectedUser.partyId,
+          roleTypeIdTo: 'WAREHOUSE_PICKER',
+          roleTypeIdTo_op: 'equals'
         },
+        filterByDate: 'Y',
         viewSize: 1,
-        entityName: 'PartyRole',
-        fieldList: ['partyId', 'roleTypeId']
+        entityName: 'PartyRelationship',
+        fieldList: ['partyIdTo', 'roleTypeIdTo', "partyIdFrom", "roleTypeIdFrom", "fromDate"]
       })
 
       if (!hasError(resp)) {
-        selectedUser.isWarehousePicker = true
+        const pickerRelationship = resp.data.docs[0];
+        selectedUser.isWarehousePicker = pickerRelationship ? true : false,
+        selectedUser.pickerRelationship = pickerRelationship;
       }
     }
     commit(types.USER_SELECTED_USER_UPDATED, selectedUser)

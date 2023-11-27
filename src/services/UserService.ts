@@ -317,6 +317,35 @@ const deletePartyRole = async (payload: any): Promise <any> => {
   });
 }
 
+const createCommercePartyRelationshipFrom = async (payload: any): Promise <any> => {
+  payload = {
+    ...payload,
+    "partyIdFrom": "COMPANY",
+    "roleTypeIdFrom": "INTERNAL_ORGANIZATIO",
+    "partyRelationshipTypeId": "OWNER",
+    "statusId": "ACCOUNT_CREATED",
+  }
+  return api({
+    url: "service/createCommercePartyRelationshipFrom", 
+    method: "post",
+    data: payload
+  });
+}
+const updatePartyRelationship = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/updatePartyRelationship", 
+    method: "post",
+    data: payload
+  });
+}
+const fetchPartyRelationship = async (payload: any): Promise<any> => {
+  return api({
+    url: 'performFind',
+    method: 'POST',
+    data: payload
+  })
+}
+
 const getUserFacilities = async (partyId: string): Promise<any> => {
   let facilities = []
   const payload = {
@@ -471,9 +500,9 @@ const finishSetup = async (payload: any): Promise <any> => {
     }
 
     if (payload.selectedTemplate.roleTypeId) {
-      promises.push(ensurePartyRole({
-        "partyId": partyId,
-        "roleTypeId": payload.selectedTemplate.roleTypeId
+      promises.push(createCommercePartyRelationshipFrom({
+        "partyIdTo": partyId,
+        "roleTypeIdTo": payload.selectedTemplate.roleTypeId
       }));
     }
 
@@ -542,6 +571,7 @@ export const UserService = {
   addUserToSecurityGroup,
   createUser,
   ensurePartyRole,
+  createCommercePartyRelationshipFrom,
   createNewUserLogin,
   createUpdatePartyEmailAddress,
   createUpdatePartyTelecomNumber,
@@ -549,6 +579,7 @@ export const UserService = {
   deletePartyContactMech,
   deletePartyRole,
   getAvailableTimeZones,
+  fetchPartyRelationship,
   fetchUsers,
   getPartyRole,
   getUserContactDetails,
@@ -563,6 +594,7 @@ export const UserService = {
   resetPassword,
   sendResetPasswordEmail,
   setUserTimeZone,
+  updatePartyRelationship,
   updateUserLoginStatus,
   updatePartyGroup,
   updatePerson,
