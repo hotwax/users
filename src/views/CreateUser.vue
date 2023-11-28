@@ -42,7 +42,7 @@
         <template v-else>
           <ion-item>
             <ion-label position="floating">{{ translate('First name') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.firstName"></ion-input>
+            <ion-input v-model="formData.firstName" autofocus></ion-input>
           </ion-item>
           <ion-item>
             <ion-label position="floating">{{ translate('Last name') }} <ion-text color="danger">*</ion-text></ion-label>
