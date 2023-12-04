@@ -319,7 +319,7 @@ export default defineComponent({
         validationErrors.push(translate('Invalid email address.'));
       }
       if (data.currentPassword && !isValidPassword(data.currentPassword)) {
-        validationErrors.push(translate('Invalid passowrd. Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.'));
+        validationErrors.push(translate('Invalid passowrd. Password should be at least 5 characters long and contain at least one number, alphabet and special character.'));
       }
       return validationErrors;
     },

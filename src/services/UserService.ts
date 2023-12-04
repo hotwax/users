@@ -2,6 +2,8 @@ import { api, client, hasError } from '@/adapter';
 import { DateTime } from "luxon";
 
 import store from '@/store';
+import { showToast } from '@/utils';
+import { translate } from '@hotwax/dxp-components';
 
 const login = async (username: string, password: string): Promise<any> => {
   return api({
@@ -242,6 +244,14 @@ const createNewUserLogin = async (payload: any): Promise <any> => {
   });
 }
 
+const checkUserLoginId = async (payload: any): Promise<any> => {
+  return api({
+    url: 'performFind',
+    method: 'POST',
+    data: payload
+  })
+}
+
 const sendResetPasswordEmail = async (payload: any): Promise <any> => {
   return api({
     url: "sendResetPasswordMail", 
@@ -444,6 +454,28 @@ const updateProductStoreRole = async (payload: any): Promise <any> => {
   });
 }
 
+const isUserLoginIdAlreadyExists = async(username: string): Promise<any> => {
+  try {
+    const resp = await checkUserLoginId({
+      entityName: "UserLogin",
+      inputFields: {
+        userLoginId: username
+      },
+      viewSize: 1,
+      fieldList: ['userLoginId', 'partyId'],
+      distinct: 'Y',
+      noConditionFind: 'Y'
+    }) as any
+    if(!hasError(resp) && resp.data.docs.length) {
+      showToast(translate('Could not create login user: user with ID already exists.', { userLoginId: username }))
+      return true
+    }
+    return false
+  } catch(err) {
+    return false
+  }
+}
+
 const finishSetup = async (payload: any): Promise <any> => {
   try {
     const selectedUser = payload.selectedUser;
@@ -452,6 +484,11 @@ const finishSetup = async (payload: any): Promise <any> => {
     const promises = [];
     
     if (selectedTemplate.isUserLoginRequired || selectedUser.partyTypeId === "PARTY_GROUP") {
+
+      if(await isUserLoginIdAlreadyExists(payload.formData.userLoginId)) {
+        throw `Could not create login user: user with ID ${payload.formData.userLoginId} already exists.`
+      }
+
       const resp = await createNewUserLogin({
         "partyId": partyId,
         "userLoginId": payload.formData.userLoginId,
@@ -570,7 +607,6 @@ export const UserService = {
   addPartyToFacility,
   addUserToSecurityGroup,
   createUser,
-  ensurePartyRole,
   createCommercePartyRelationshipFrom,
   createNewUserLogin,
   createUpdatePartyEmailAddress,
@@ -578,6 +614,7 @@ export const UserService = {
   createProductStoreRole,
   deletePartyContactMech,
   deletePartyRole,
+  ensurePartyRole,
   getAvailableTimeZones,
   fetchPartyRelationship,
   fetchUsers,
@@ -589,6 +626,7 @@ export const UserService = {
   getUserFacilities,
   getUserProductStores,
   getUserSecurityGroup,
+  isUserLoginIdAlreadyExists,
   login,
   removePartyFromFacility,
   resetPassword,
