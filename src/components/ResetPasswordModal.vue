@@ -14,7 +14,7 @@
     <ion-list>
       <ion-item lines="none">
         <p>
-          {{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}
+          {{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}
         </p>
       </ion-item>
       <ion-item lines="full" ref="password">

@@ -242,6 +242,14 @@ const createNewUserLogin = async (payload: any): Promise <any> => {
   });
 }
 
+const checkUserLoginId = async (payload: any): Promise<any> => {
+  return api({
+    url: 'performFind',
+    method: 'POST',
+    data: payload
+  })
+}
+
 const sendResetPasswordEmail = async (payload: any): Promise <any> => {
   return api({
     url: "sendResetPasswordMail", 
@@ -569,8 +577,8 @@ const finishSetup = async (payload: any): Promise <any> => {
 export const UserService = {
   addPartyToFacility,
   addUserToSecurityGroup,
+  checkUserLoginId,
   createUser,
-  ensurePartyRole,
   createCommercePartyRelationshipFrom,
   createNewUserLogin,
   createUpdatePartyEmailAddress,
@@ -578,6 +586,7 @@ export const UserService = {
   createProductStoreRole,
   deletePartyContactMech,
   deletePartyRole,
+  ensurePartyRole,
   getAvailableTimeZones,
   fetchPartyRelationship,
   fetchUsers,

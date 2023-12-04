@@ -69,7 +69,7 @@
                     <ion-label class="ion-text-wrap" position="fixed">{{ translate("Password") }} <ion-text color="danger">*</ion-text></ion-label>
                     <ion-input :placeholder="translate('Default password')" name="password" v-model="password" id="password" type="password" @ionInput="validatePassword" @ionBlur="markPasswordTouched" required />
                     <ion-note slot="helper">{{ translate('will be asked to reset their password when they login', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName }) }}</ion-note>
-                    <ion-note slot="error">{{ translate('Password should be at least 5 characters long, it contains at least one number, one alphabet and one special character.') }}</ion-note>
+                    <ion-note slot="error">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
                   </ion-item>
                 </ion-list>
                 <ion-button @click="createNewUserLogin()" fill="outline" expand="block">
@@ -413,12 +413,39 @@ export default defineComponent({
     markPasswordTouched() {
       (this as any).$refs.password.$el.classList.add('ion-touched');
     },
+    async isUserLoginIdAlreadyExists() {
+      try {
+        const resp = await UserService.checkUserLoginId({
+          entityName: "UserLogin",
+          inputFields: {
+            userLoginId: this.username
+          },
+          viewSize: 1,
+          fieldList: ['userLoginId', 'partyId'],
+          distinct: 'Y',
+          noConditionFind: 'Y'
+        }) as any
+
+        if(!hasError(resp) && resp.data.docs.length) {
+          return true
+        }
+
+        return false
+      } catch(err) {
+        return false
+      }
+    },
     async createNewUserLogin() {
       this.username = this.username.trim()
 
       if (!this.password || !this.username) {
         translate('Username or password cannot be empty.')
         return
+      }
+
+      if(await this.isUserLoginIdAlreadyExists()) {
+        showToast(translate('Could not create login user: user with ID already exists.', { userLoginId: this.username }))
+        return;
       }
 
       try {

@@ -28,6 +28,7 @@
   "Contact details": "Contact details",
   "Copy": "Copy",
   "Copied to clipboard": "Copied to clipboard",
+  "Could not create login user: user with ID already exists.": "Could not create login user: user with ID {userLoginId} already exists.",
   "Create user": "Create user",
   "Create User": "Create User",
   "Create a new user": "Create a new user",
