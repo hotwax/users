@@ -413,28 +413,6 @@ export default defineComponent({
     markPasswordTouched() {
       (this as any).$refs.password.$el.classList.add('ion-touched');
     },
-    async isUserLoginIdAlreadyExists() {
-      try {
-        const resp = await UserService.checkUserLoginId({
-          entityName: "UserLogin",
-          inputFields: {
-            userLoginId: this.username
-          },
-          viewSize: 1,
-          fieldList: ['userLoginId', 'partyId'],
-          distinct: 'Y',
-          noConditionFind: 'Y'
-        }) as any
-
-        if(!hasError(resp) && resp.data.docs.length) {
-          return true
-        }
-
-        return false
-      } catch(err) {
-        return false
-      }
-    },
     async createNewUserLogin() {
       this.username = this.username.trim()
 
@@ -443,8 +421,7 @@ export default defineComponent({
         return
       }
 
-      if(await this.isUserLoginIdAlreadyExists()) {
-        showToast(translate('Could not create login user: user with ID already exists.', { userLoginId: this.username }))
+      if(await UserService.isUserLoginIdAlreadyExists(this.username)) {
         return;
       }
 
