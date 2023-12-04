@@ -1,12 +1,17 @@
 <template>
   <ion-page>
+    <FilterMenu content-id="filter-menu" />
+
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-title>{{ translate("Find Users") }}</ion-title>
+        <ion-menu-button slot="end" class="mobile-only">
+          <ion-icon :icon="optionsOutline" />
+        </ion-menu-button>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content>
+    <ion-content id="filter-menu">
       <div class="find">
         <section class="search">
           <ion-searchbar :placeholder="translate('Search users')" v-model="query.queryString" @keyup.enter="updateQuery()" />
@@ -109,6 +114,7 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonMenuButton,
   IonPage,
   IonSearchbar,
   IonSelect,
@@ -124,6 +130,7 @@ import {
   cloudyNightOutline,
   ellipsisVerticalOutline,
   idCardOutline,
+  optionsOutline,
   toggleOutline,
 } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
@@ -131,10 +138,12 @@ import { mapGetters, useStore } from 'vuex';
 import { DateTime } from 'luxon';
 import UserPopover from '@/components/UserPopover.vue';
 import { translate } from '@hotwax/dxp-components'
+import FilterMenu from '@/components/FilterMenu.vue';
 
 export default defineComponent({
   name: 'FindUsers',
   components: {
+    FilterMenu,
     IonChip,
     IonContent,
     IonFab,
@@ -146,6 +155,7 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
+    IonMenuButton,
     IonPage,
     IonSearchbar,
     IonSelect,
@@ -215,6 +225,7 @@ export default defineComponent({
       cloudyNightOutline,
       ellipsisVerticalOutline,
       idCardOutline,
+      optionsOutline,
       toggleOutline,
       translate,
       router,
