@@ -25,6 +25,13 @@
             <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
           </ion-select>
         </ion-item>
+        <ion-item>
+          <ion-icon slot="start" :icon="cloudyNightOutline"/>
+          <ion-label>
+            {{ translate("Hide disabled users") }}
+          </ion-label>
+          <ion-toggle v-model="query.hideDisabledUser" @ionChange="closeMenu" slot="end" />
+        </ion-item>
       </ion-list>
     </ion-content>
   </ion-menu>
@@ -40,12 +47,13 @@ import {
   IonList,
   IonMenu,
   IonTitle,
+  IonToggle,
   IonToolbar,
   IonSelect,
   IonSelectOption,
   menuController
 } from '@ionic/vue'
-import { idCardOutline, toggleOutline } from 'ionicons/icons'
+import { cloudyNightOutline, idCardOutline, toggleOutline } from 'ionicons/icons'
 import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 import { translate } from '@hotwax/dxp-components'
@@ -60,6 +68,7 @@ export default defineComponent({
     IonList,
     IonMenu,
     IonTitle,
+    IonToggle,
     IonToolbar,
     IonSelect,
     IonSelectOption
@@ -79,6 +88,7 @@ export default defineComponent({
   },
   setup() {
     return {
+      cloudyNightOutline,
       idCardOutline,
       toggleOutline,
       translate
