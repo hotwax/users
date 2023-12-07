@@ -675,8 +675,13 @@ export default defineComponent({
             throw resp.data
           }
         }
-      } catch (error) {
-        showToast(translate('Something went wrong.'))
+      } catch (error: any) {
+        const errorMessage = error?.response?.data?.error.message;
+        if (errorMessage && errorMessage?.startsWith('Security Error:')) {
+          showToast(translate(translate("You don't have permission to update the security group.")))
+        } else {
+          showToast(translate('Something went wrong.'))
+        }
         console.error(error)
       }
     },
