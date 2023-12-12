@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import UserDetails from '@/views/UserDetails.vue'
-import { Login, useAuthStore } from '@hotwax/dxp-components';
+import { DxpLogin, useAuthStore } from '@hotwax/dxp-components';
 import { loader } from '@/utils/user';
 import store from '@/store'
 import { showToast } from '@/utils'
@@ -45,8 +45,8 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/login',
-    name: 'Login',
-    component: Login,
+    name: 'DxpLogin',
+    component: DxpLogin,
     beforeEnter: loginGuard
   },
   {
