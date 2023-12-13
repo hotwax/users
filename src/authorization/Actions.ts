@@ -1,1 +1,4 @@
-export default {}
+export default {
+  'APP_USER_CREATE': 'APP_USER_CREATE',
+  'APP_SUPER_USER': 'APP_SUPER_USER'
+}

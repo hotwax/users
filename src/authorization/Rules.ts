@@ -1,1 +1,4 @@
-export default {} as any 
+export default {
+  'APP_USER_CREATE': 'SECURITY_CREATE OR SECURITY_ADMIN',
+  'APP_SUPER_USER': 'WEBTOOLS_VIEW'
+} as any
