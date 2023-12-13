@@ -133,8 +133,9 @@
               <ion-item>
                 <ion-icon :icon="businessOutline" slot="start" />
                 <ion-label>{{ translate('Security Group') }}</ion-label>        
-                <ion-select interface="popover" :disabled="!selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
-                  <ion-select-option v-for="securityGroup in securityGroups" :key="securityGroup.groupId" :value="securityGroup.groupId">
+                <ion-label v-if="!hasPermission(Actions.APP_SUPER_USER) && selectedUser.securityGroup?.groupId === 'SUPER'" slot="end">{{ translate('Super') }}</ion-label>
+                <ion-select v-else interface="popover" :disabled="!selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
+                  <ion-select-option v-for="securityGroup in getSecurityGroups(securityGroups)" :key="securityGroup.groupId" :value="securityGroup.groupId">
                     {{ securityGroup.groupName }}
                   </ion-select-option>
                   <ion-select-option value="">{{ translate("None") }}</ion-select-option>
@@ -234,6 +235,7 @@ import { UserService } from "@/services/UserService";
 import { isValidEmail, isValidPassword, showToast } from "@/utils";
 import { hasError } from '@/adapter';
 import { DateTime } from "luxon";
+import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
   name: "UserDetails",
@@ -714,6 +716,20 @@ export default defineComponent({
         console.error(error)
       }
     },
+    getSecurityGroups(securityGroups: any) {
+      const excludedSecurityGroups = JSON.parse(process.env.VUE_APP_EXCLUDED_SECURITY_GROUPS)
+      const selectedSecurityGroup = this.selectedUser.securityGroup.groupId
+
+      if(!hasPermission(Actions.APP_SUPER_USER)) excludedSecurityGroups.push('SUPER')
+
+      // We have some excluded security groups that can't be created by any users,
+      // But if a user exists of these excluded security groups, we will show them in the select option.
+      if(excludedSecurityGroups.includes(selectedSecurityGroup)) {
+        excludedSecurityGroups.splice(excludedSecurityGroups.indexOf(selectedSecurityGroup), 1)
+      }
+
+      return securityGroups.filter((group: any) => !excludedSecurityGroups.includes(group.groupId))
+    }
   },
   setup() {
     const router = useRouter();
@@ -724,11 +740,13 @@ export default defineComponent({
       businessOutline,
       callOutline,
       ellipsisVerticalOutline,
+      hasPermission,
       mailOutline,
       router,
       store,
       translate,
       warningOutline,
+      Actions
     }
   }
 })
