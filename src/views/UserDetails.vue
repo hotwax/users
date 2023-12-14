@@ -13,19 +13,38 @@
           {{ translate("Failed to fetch user data") }}
         </div>
         <template v-else>
-          <section>
-            <ion-item lines="none">
-              <!-- TODO fetch and show image only if available -->
-              <!-- <ion-avatar slot="start">
-                <Image />
-              </ion-avatar> -->
-              <!-- TODO return available name instead of if-else -->
-              <ion-label>
-                <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
-                <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
-                <p>{{ selectedUser.userLoginId }}</p>
-              </ion-label>
-            </ion-item>
+          <section class="user-details">
+            <ion-card class="profile">
+              <div>
+                <ion-item lines="none">
+                  <ion-avatar>
+                    <Image />
+                  </ion-avatar>
+                  <ion-label>
+                    <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
+                    <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
+                    <p>{{ selectedUser.userLoginId }}</p>
+                  </ion-label>
+                  <ion-button fill="outline">{{ translate('Edit') }}</ion-button>
+                </ion-item>
+              </div>
+              <div>
+                <ion-item detail>
+                  <ion-icon :icon="bodyOutline" slot="start" />
+                  <ion-label>{{ translate("Created by", {partyId: 'xyz'}) }}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-icon :icon="cameraOutline" slot="start" />
+                  <ion-label>{{ translate("Add profile picture") }}</ion-label>
+                  <ion-button fill="outline">{{ translate('Upload') }}</ion-button>
+                </ion-item>
+                <ion-item lines="none">
+                  <ion-icon :icon="cloudyNightOutline" slot="start" />
+                  <ion-label>{{ translate("Disable user") }}</ion-label>
+                  <ion-toggle :checked="true" />
+                </ion-item>
+              </div>
+            </ion-card>
           </section>
 
           <section class="user-details">
@@ -188,6 +207,7 @@
 <script lang="ts">
 import {
   alertController,
+  IonAvatar,
   IonBackButton,
   IonButton,
   IonCard,
@@ -210,7 +230,7 @@ import {
   IonToggle,
   IonToolbar,
   modalController,
-  popoverController,
+  popoverController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 import { useRouter } from 'vue-router';
@@ -218,8 +238,11 @@ import { mapGetters, useStore } from 'vuex'
 import {
   addOutline,
   addCircleOutline,
+  bodyOutline,
   businessOutline,
   callOutline,
+  cameraOutline,
+  cloudyNightOutline,
   ellipsisVerticalOutline,
   mailOutline,
   warningOutline
@@ -234,10 +257,12 @@ import { UserService } from "@/services/UserService";
 import { isValidEmail, isValidPassword, showToast } from "@/utils";
 import { hasError } from '@/adapter';
 import { DateTime } from "luxon";
+import Image from "@/components/Image.vue";
 
 export default defineComponent({
   name: "UserDetails",
   components: {
+    IonAvatar,
     IonBackButton,
     IonButton,
     IonCard,
@@ -259,6 +284,7 @@ export default defineComponent({
     IonTitle,
     IonToggle,
     IonToolbar,
+    Image
   },
   computed: {
     ...mapGetters({
@@ -721,8 +747,11 @@ export default defineComponent({
     return {
       addOutline,
       addCircleOutline,
+      bodyOutline,
       businessOutline,
       callOutline,
+      cameraOutline,
+      cloudyNightOutline,
       ellipsisVerticalOutline,
       mailOutline,
       router,
@@ -738,6 +767,12 @@ export default defineComponent({
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   align-items: start;
+}
+
+.profile {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
 }
 
 .section-header {
