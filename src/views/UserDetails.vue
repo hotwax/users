@@ -25,7 +25,7 @@
                     <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
                     <p>{{ selectedUser.userLoginId }}</p>
                   </ion-label>
-                  <ion-button fill="outline">{{ translate('Edit') }}</ion-button>
+                  <ion-button fill="outline" @click="editName">{{ translate('Edit') }}</ion-button>
                 </ion-item>
               </div>
               <div>
@@ -36,12 +36,12 @@
                 <ion-item>
                   <ion-icon :icon="cameraOutline" slot="start" />
                   <ion-label>{{ translate("Add profile picture") }}</ion-label>
-                  <ion-button fill="outline">{{ translate('Upload') }}</ion-button>
+                  <ion-button fill="outline" slot="end">{{ translate('Upload') }}</ion-button>
                 </ion-item>
                 <ion-item lines="none">
                   <ion-icon :icon="cloudyNightOutline" slot="start" />
                   <ion-label>{{ translate("Disable user") }}</ion-label>
-                  <ion-toggle :checked="true" />
+                  <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click="updateUserStatus($event)" slot="end" />
                 </ion-item>
               </div>
             </ion-card>
@@ -312,7 +312,8 @@ export default defineComponent({
         }
       } as any,
       username: "",
-      password: ""
+      password: "",
+      isUserEnabled: false as boolean
     }
   },
   async ionViewWillEnter() {
@@ -740,6 +741,106 @@ export default defineComponent({
         console.error(error)
       }
     },
+    async editName() {
+      let inputFields = [{
+          name: "firstName",
+          value: this.selectedUser.firstName
+        }, 
+        {
+          name: "lastName",
+          value: this.selectedUser.lastName
+        }]
+
+
+      if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
+        inputFields = [{
+          name: "groupName",
+          value: this.selectedUser.groupName
+        }]
+      }
+
+      const alert = await alertController.create({
+        header: translate("Edit name"),
+        inputs: inputFields,
+        buttons: [{
+          text: translate('Cancel'),
+          role: "cancel"
+        },
+        {
+          text: translate('Confirm'),
+          handler: async (data: any) => {
+            if(data.firstName || data.groupName) {
+              let resp;
+              try {
+                if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
+                  resp = await UserService.updatePartyGroup({
+                    groupName: data.groupName,
+                    partyId: this.selectedUser.partyId
+                  })
+                } else {
+                  resp = await UserService.updatePerson({
+                    partyId: this.selectedUser.partyId,
+                    firstName: data.firstName,
+                    lastName: data.lastName
+                  })
+                }
+
+                if(!hasError(resp)) {
+                  showToast(translate("User renamed successfully."))
+                  await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
+                  await this.fetchUsers()
+                }else {
+                  throw resp.data;
+                }
+              } catch(err) {
+                console.error(err)
+              }
+            }
+          }
+        }]
+      })
+
+      alert.present()
+    },
+    async updateUserStatus(event: any) {
+      event.stopImmediatePropagation();
+
+      const isChecked = !event.target.checked
+      let resp;
+
+      const payload = {
+        partyId: this.selectedUser.partyId,
+        statusId: isChecked ? 'PARTY_ENABLED' : 'PARTY_DISABLED'
+      }
+
+      try {
+        if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
+          resp = await UserService.updatePartyGroup(payload)
+        } else {
+          resp = await UserService.updatePerson({...payload, firstName: this.selectedUser.firstName})
+        }
+
+        if(!hasError(resp)) {
+          showToast(translate("User status updated successfully."))
+          await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
+          event.target.checked = isChecked
+        }else {
+          throw resp.data;
+        }
+      } catch(err) {
+        console.error(err)
+        showToast(translate("Failed to update user status."))
+      }
+    },
+    async fetchUsers(vSize?: any, vIndex?: any) {
+      const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+      const viewIndex = vIndex ? vIndex : 0;
+      const payload = {
+        viewSize,
+        viewIndex
+      };
+      await this.store.dispatch('user/fetchUsers', payload)
+    }
   },
   setup() {
     const router = useRouter();
