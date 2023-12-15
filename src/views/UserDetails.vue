@@ -20,10 +20,11 @@
                   <ion-avatar>
                     <Image />
                   </ion-avatar>
-                  <ion-label>
+                  <ion-label class="ion-margin-start">
                     <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
                     <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
                     <p>{{ selectedUser.userLoginId }}</p>
+                    <ion-badge v-if="selectedUser.userLoginId === userProfile.userLoginId">{{ translate("Your user") }}</ion-badge>
                   </ion-label>
                   <ion-button fill="outline" @click="editName">{{ translate('Edit') }}</ion-button>
                 </ion-item>
@@ -211,6 +212,7 @@ import {
   alertController,
   IonAvatar,
   IonBackButton,
+  IonBadge,
   IonButton,
   IonCard,
   IonCardHeader,
@@ -266,6 +268,7 @@ export default defineComponent({
   components: {
     IonAvatar,
     IonBackButton,
+    IonBadge,
     IonButton,
     IonCard,
     IonCardHeader,
@@ -293,7 +296,8 @@ export default defineComponent({
       selectedUser: 'user/getSelectedUser',
       userProductStores: 'user/getUserProductStores',
       getRoleTypeDesc: 'util/getRoleTypeDesc',
-      securityGroups: 'util/getSecurityGroups'
+      securityGroups: 'util/getSecurityGroups',
+      userProfile: 'user/getUserProfile'
     })
   },
   props: ['partyId'],
