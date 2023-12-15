@@ -35,8 +35,10 @@
                 </ion-item>
                 <ion-item>
                   <ion-icon :icon="cameraOutline" slot="start" />
-                  <ion-label>{{ translate("Add profile picture") }}</ion-label>
-                  <ion-button fill="outline" slot="end">{{ translate('Upload') }}</ion-button>
+                  <ion-label v-if="!file.name">{{ translate("Add profile picture") }}</ion-label>
+                  <ion-label v-else class="ion-text-right ion-padding-end">{{ file.name }}</ion-label>
+                  <input @change="uploadImage" ref="file" class="ion-hide" type="file" id="profilePic"/>
+                  <label for="profilePic">{{ translate("Upload") }}</label>
                 </ion-item>
                 <ion-item lines="none">
                   <ion-icon :icon="cloudyNightOutline" slot="start" />
@@ -313,12 +315,14 @@ export default defineComponent({
       } as any,
       username: "",
       password: "",
-      isUserEnabled: false as boolean
+      isUserEnabled: false as boolean,
+      file: {}
     }
   },
   async ionViewWillEnter() {
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
-    await this.store.dispatch('util/getSecurityGroups')
+    await this.store.dispatch('util/getSecurityGroups');
+    (this as any).$refs.file.value = null;
   },
   methods: {
     async openContactActionsPopover(event: Event, type: string, value: string) {
@@ -840,7 +844,21 @@ export default defineComponent({
         viewIndex
       };
       await this.store.dispatch('user/fetchUsers', payload)
-    }
+    },
+    async uploadImage(event: any) {
+      const file = event.target.files[0];
+
+      try {
+        if (file) {
+          this.file = file;
+          showToast(translate("File uploaded successfully"));
+        } else {
+          showToast(translate("No new file upload. Please try again"));
+        }
+      } catch {
+        showToast(translate("Please upload a valid reset inventory csv to continue"));
+      }
+    },
   },
   setup() {
     const router = useRouter();
@@ -896,5 +914,9 @@ ion-card>ion-button[expand="block"] {
   .user-details {
     gap: var(--spacer-base);
   }
+}
+
+label {
+  cursor: pointer;
 }
 </style>
