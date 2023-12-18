@@ -300,6 +300,11 @@ const actions: ActionTree<UserState, RootState> = {
       filters['lastName_grp'] = '3'
     }
 
+    if(!state.query.queryString) {
+      filters['partyId_value'] = payload.selectedUserPartyId,
+      filters['partyId_op'] = 'notEqual'
+    }
+
     const params = {
       "inputFields": {
         "roleTypeIdTo": "APPLICATION_USER", 
@@ -312,7 +317,8 @@ const actions: ActionTree<UserState, RootState> = {
       "noConditionFind": "Y",
       "distinct": "Y",
       "fieldList": ['createdDate', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'userLoginId'],
-      ...payload
+      "viewIndex": payload.viewIndex,
+      "viewSize": payload.viewSize
     }
 
     let users = [], total = 0;
