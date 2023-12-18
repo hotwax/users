@@ -36,8 +36,8 @@
                 </ion-item>
                 <ion-item>
                   <ion-icon :icon="cameraOutline" slot="start" />
-                  <ion-label v-if="!file.name">{{ translate("Add profile picture") }}</ion-label>
-                  <ion-label v-else class="ion-text-right ion-padding-end">{{ file.name }}</ion-label>
+                  <ion-label v-if="true">{{ translate("Add profile picture") }}</ion-label>
+                  <ion-label v-else>{{ translate("Replace profile picture") }}</ion-label>
                   <input @change="uploadImage" ref="file" class="ion-hide" type="file" id="profilePic"/>
                   <label for="profilePic">{{ translate("Upload") }}</label>
                 </ion-item>
@@ -320,8 +320,7 @@ export default defineComponent({
       } as any,
       username: "",
       password: "",
-      isUserEnabled: false as boolean,
-      file: {}
+      isUserEnabled: false as boolean
     }
   },
   async ionViewWillEnter() {
@@ -855,7 +854,6 @@ export default defineComponent({
 
       try {
         if (file) {
-          this.file = file;
 
           const image = await fileToImage(file)
 
