@@ -38,7 +38,7 @@
                   <ion-icon :icon="cameraOutline" slot="start" />
                   <ion-label v-if="true">{{ translate("Add profile picture") }}</ion-label>
                   <ion-label v-else>{{ translate("Replace profile picture") }}</ion-label>
-                  <input @change="uploadImage" ref="file" class="ion-hide" type="file" id="profilePic"/>
+                  <input @change="uploadImage" ref="file" class="ion-hide" type="file" accepts="image/*" id="profilePic"/>
                   <label for="profilePic">{{ translate("Upload") }}</label>
                 </ion-item>
                 <ion-item lines="none">
@@ -262,7 +262,6 @@ import { isValidEmail, isValidPassword, showToast } from "@/utils";
 import { hasError } from '@/adapter';
 import { DateTime } from "luxon";
 import Image from "@/components/Image.vue";
-import { fileToImage } from "@/utils";
 
 export default defineComponent({
   name: "UserDetails",
@@ -857,12 +856,11 @@ export default defineComponent({
 
       try {
         if (file) {
-
-          const image = await fileToImage(file)
+          const image = Object.values(new Int8Array(await file.arrayBuffer()))
 
           const resp = await UserService.uploadPartyImage({
             partyId: this.selectedUser.partyId,
-            uploadImage: image,
+            uploadedFile: image,
             _uploadedFile_fileName: file.name
           })
 
