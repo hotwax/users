@@ -47,7 +47,7 @@
         </aside>
 
         <main v-if="users?.length">
-          <div class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser.partyId)>
+          <div class="list-item" v-if="!query.queryString && currentUser.partyId" @click=viewUserDetails(currentUser.partyId)>
             <ion-item lines="none">
               <ion-label>
                 {{ currentUser.groupName ? currentUser.groupName : `${currentUser.firstName} ${currentUser.lastName}` }}
