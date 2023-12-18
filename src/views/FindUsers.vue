@@ -47,7 +47,7 @@
         </aside>
 
         <main v-if="users?.length">
-          <div class="list-item" v-if="!query.queryString && currentUser.partyId" @click=viewUserDetails(currentUser.partyId)>
+          <div class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser.partyId)>
             <ion-item lines="none">
               <ion-label>
                 {{ currentUser.groupName ? currentUser.groupName : `${currentUser.firstName} ${currentUser.lastName}` }}
@@ -209,7 +209,6 @@ export default defineComponent({
     }
   },
   async mounted() {
-    if(!this.query.queryString) await this.fetchLoggedInUserDetails()
     await this.fetchUsers();
     await this.store.dispatch('util/getSecurityGroups')
   },
@@ -231,6 +230,9 @@ export default defineComponent({
       this.fetchUsers();
     },
     async fetchUsers(vSize?: any, vIndex?: any) {
+      if(!this.query.queryString) await this.fetchLoggedInUserDetails()
+      else this.currentUser = {}
+
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
       const payload = {
