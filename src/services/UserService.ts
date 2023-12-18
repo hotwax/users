@@ -614,6 +614,7 @@ const uploadPartyImage = async (payload: any): Promise <any> => {
 export const UserService = {
   addPartyToFacility,
   addUserToSecurityGroup,
+  checkUserLoginId,
   createUser,
   createCommercePartyRelationshipFrom,
   createNewUserLogin,

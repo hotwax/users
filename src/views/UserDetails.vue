@@ -30,9 +30,9 @@
                 </ion-item>
               </div>
               <div>
-                <ion-item detail>
+                <ion-item detail button>
                   <ion-icon :icon="bodyOutline" slot="start" />
-                  <ion-label>{{ translate("Created by", {partyId: 'xyz'}) }}</ion-label>
+                  <ion-label @click="openCreatedByUserDetail">{{ translate("Created by", {partyId: selectedUser.createdByUserPartyId}) }}</ion-label>
                 </ion-item>
                 <ion-item>
                   <ion-icon :icon="cameraOutline" slot="start" />
@@ -346,6 +346,9 @@ export default defineComponent({
         showBackdrop: false,
       });
       return contactActionsPopover.present();
+    },
+    async openCreatedByUserDetail() {
+      this.router.push({ path: `/user-details/${this.selectedUser.createdByUserPartyId}` })
     },
     async addContactField(type: string) {
       const contactUpdateAlert = await alertController.create({
@@ -864,7 +867,6 @@ export default defineComponent({
           })
 
           if(!hasError(resp)) {
-            console.log(resp);
             showToast(translate("Image uploaded successfully"));
           } else {
             throw resp.data

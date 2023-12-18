@@ -171,7 +171,7 @@ const actions: ActionTree<UserState, RootState> = {
       filterByDate: "Y",
       viewSize: 1,
       entityName: 'PartyAndUserLoginSecurityGroupDetails',
-      fieldList: ['userLoginId', 'enabled', 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName', 'externalId', 'statusId'],
+      fieldList: ['createdByUserLogin', 'userLoginId', 'enabled', 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName', 'externalId', 'statusId'],
     }
 
     try {
@@ -252,6 +252,24 @@ const actions: ActionTree<UserState, RootState> = {
         selectedUser.pickerRelationship = pickerRelationship;
       }
     }
+
+    if(selectedUser['createdByUserLogin']) {
+      const resp = await UserService.checkUserLoginId({
+        entityName: "UserLogin",
+        inputFields: {
+          userLoginId: selectedUser['createdByUserLogin']
+        },
+        viewSize: 1,
+        fieldList: ['partyId'],
+        distinct: 'Y',
+        noConditionFind: 'Y'
+      })
+
+      if(!hasError(resp)) {
+        selectedUser['createdByUserPartyId'] = resp.data.docs[0].partyId
+      }
+    }
+
     commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
     emitter.emit('dismissLoader')
   },
