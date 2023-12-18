@@ -301,7 +301,7 @@ const actions: ActionTree<UserState, RootState> = {
     }
 
     if(!state.query.queryString) {
-      filters['partyId_value'] = payload.selectedUserPartyId,
+      filters['partyId_value'] = payload.currentUserPartyId,
       filters['partyId_op'] = 'notEqual'
     }
 

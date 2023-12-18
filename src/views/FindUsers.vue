@@ -238,7 +238,7 @@ export default defineComponent({
       const payload = {
         viewSize,
         viewIndex,
-        selectedUserPartyId: this.userProfile.partyId
+        currentUserPartyId: this.userProfile.partyId
       };
       await this.store.dispatch('user/fetchUsers', payload)
     },
