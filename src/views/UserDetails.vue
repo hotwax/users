@@ -262,6 +262,7 @@ import { isValidEmail, isValidPassword, showToast } from "@/utils";
 import { hasError } from '@/adapter';
 import { DateTime } from "luxon";
 import Image from "@/components/Image.vue";
+import { fileToImage } from "@/utils";
 
 export default defineComponent({
   name: "UserDetails",
@@ -855,12 +856,26 @@ export default defineComponent({
       try {
         if (file) {
           this.file = file;
-          showToast(translate("File uploaded successfully"));
+
+          const image = await fileToImage(file)
+
+          const resp = await UserService.uploadPartyImage({
+            partyId: this.selectedUser.partyId,
+            uploadImage: image,
+            _uploadedFile_fileName: file.name
+          })
+
+          if(!hasError(resp)) {
+            console.log(resp);
+            showToast(translate("Image uploaded successfully"));
+          } else {
+            throw resp.data
+          }
         } else {
           showToast(translate("No new file upload. Please try again"));
         }
-      } catch {
-        showToast(translate("Please upload a valid reset inventory csv to continue"));
+      } catch(err) {
+        console.error(err)
       }
     },
   },

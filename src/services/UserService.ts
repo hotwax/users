@@ -603,6 +603,14 @@ const finishSetup = async (payload: any): Promise <any> => {
   }
 }
 
+const uploadPartyImage = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/uploadPartyLogoImage",
+    method: "post",
+    data: payload
+  });
+}
+
 export const UserService = {
   addPartyToFacility,
   addUserToSecurityGroup,
@@ -637,6 +645,7 @@ export const UserService = {
   updatePartyGroup,
   updatePerson,
   updateProductStoreRole,
+  uploadPartyImage,
   removeUserSecurityGroup,
   finishSetup
 }

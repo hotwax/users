@@ -42,4 +42,13 @@ const isValidPassword = (password : string) => {
   return passwordPattern.test(password);
 }
 
-export { copyToClipboard, showToast, isValidEmail, isValidPassword }
+const fileToImage = async (file: any) => {
+  const blob = new Blob([file], {
+    type: "image/png"
+  })
+
+  const result = await blob.arrayBuffer()
+  return result
+}
+
+export { copyToClipboard, showToast, isValidEmail, isValidPassword, fileToImage }
