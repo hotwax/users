@@ -300,6 +300,8 @@ const actions: ActionTree<UserState, RootState> = {
       filters['lastName_grp'] = '3'
     }
 
+    // By default we are showing logged in user on top manually,
+    // hence not fetching it in default list.
     if(!state.query.queryString) {
       filters['partyId_value'] = payload.currentUserPartyId,
       filters['partyId_op'] = 'notEqual'

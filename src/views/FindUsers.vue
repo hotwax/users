@@ -47,7 +47,7 @@
         </aside>
 
         <main v-if="users?.length">
-          <div class="list-item" v-if="!query.queryString && currentUser.partyId" @click=viewUserDetails(currentUser.partyId)>
+          <div class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser.partyId)>
             <ion-item lines="none">
               <ion-label>
                 {{ currentUser.groupName ? currentUser.groupName : `${currentUser.firstName} ${currentUser.lastName}` }}
@@ -258,15 +258,15 @@ export default defineComponent({
     async fetchLoggedInUserDetails() {
       const params = {
         "inputFields": {
-          "roleTypeIdTo": "APPLICATION_USER",
+          "roleTypeIdTo": 'APPLICATION_USER',
           "partyId": this.userProfile.partyId
         },
-        "fromDateName": "relationshipFromDate",
-        "thruDateName": "relationshipThruDate",
-        "filterByDate": "Y",
-        "entityName": "PartyAndUserLoginSecurityGroupDetails",
-        "noConditionFind": "Y",
-        "distinct": "Y",
+        "fromDateName": 'relationshipFromDate',
+        "thruDateName": 'relationshipThruDate',
+        "filterByDate": 'Y',
+        "entityName": 'PartyAndUserLoginSecurityGroupDetails',
+        "noConditionFind": 'Y',
+        "distinct": 'Y',
         "fieldList": ['createdDate', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'userLoginId'],
       }
 
