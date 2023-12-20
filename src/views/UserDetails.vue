@@ -869,6 +869,7 @@ export default defineComponent({
 
         if(!hasError(resp)) {
           showToast(translate("Image uploaded successfully."))
+          await this.fetchProfileImage()
         } else {
           throw resp.data
         }
