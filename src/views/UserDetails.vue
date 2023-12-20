@@ -17,7 +17,7 @@
             <ion-card class="profile">
               <div>
                 <ion-item lines="none">
-                  <ion-avatar slot="start" v-if="imageUrl">
+                  <ion-avatar slot="start">
                     <Image :src="imageUrl"/>
                   </ion-avatar>
                   <ion-label class="ion-margin-start">
