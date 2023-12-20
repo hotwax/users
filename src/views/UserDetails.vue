@@ -38,7 +38,7 @@
                   <ion-icon :icon="cameraOutline" slot="start" />
                   <ion-label v-if="true">{{ translate("Add profile picture") }}</ion-label>
                   <ion-label v-else>{{ translate("Replace profile picture") }}</ion-label>
-                  <input @change="uploadImage" ref="file" class="ion-hide" type="file" accepts="image/*" id="profilePic"/>
+                  <input @change="uploadImage" class="ion-hide" type="file" accept="image/*" id="profilePic"/>
                   <label for="profilePic">{{ translate("Upload") }}</label>
                 </ion-item>
                 <ion-item lines="none">
@@ -325,7 +325,6 @@ export default defineComponent({
   async ionViewWillEnter() {
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
     await this.store.dispatch('util/getSecurityGroups');
-    (this as any).$refs.file.value = null;
   },
   methods: {
     async openContactActionsPopover(event: Event, type: string, value: string) {
@@ -852,28 +851,27 @@ export default defineComponent({
       await this.store.dispatch('user/fetchUsers', payload)
     },
     async uploadImage(event: any) {
-      const file = event.target.files[0];
+      const selectedFile = event.target.files[0];
 
+      if(!selectedFile) {
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('partyId', this.selectedUser.partyId);
+      formData.append('_uploadedFile_contentType', 'image/*');
+      formData.append('uploadedFile', selectedFile, selectedFile?.name);
       try {
-        if (file) {
-          const image = Object.values(new Int8Array(await file.arrayBuffer()))
+        const resp = await UserService.uploadPartyImage(formData);
 
-          const resp = await UserService.uploadPartyImage({
-            partyId: this.selectedUser.partyId,
-            uploadedFile: image,
-            _uploadedFile_fileName: file.name
-          })
-
-          if(!hasError(resp)) {
-            showToast(translate("Image uploaded successfully"));
-          } else {
-            throw resp.data
-          }
+        if(!hasError(resp)) {
+          showToast(translate("Image uploaded successfully."))
         } else {
-          showToast(translate("No new file upload. Please try again"));
+          throw resp.data
         }
-      } catch(err) {
-        console.error(err)
+      } catch (error) {
+        showToast(translate("Failed to upload image."))
+        console.error('Error uploading image:', error);
       }
     },
   },

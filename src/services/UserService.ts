@@ -604,11 +604,15 @@ const finishSetup = async (payload: any): Promise <any> => {
 }
 
 const uploadPartyImage = async (payload: any): Promise <any> => {
-  return api({
-    url: "service/uploadPartyLogoImage",
-    method: "post",
-    data: payload
-  });
+  let baseURL = store.getters['user/getInstanceUrl'];
+  baseURL = baseURL && baseURL.startsWith('http') ? baseURL : `https://${baseURL}.hotwax.io/api/`;
+  return client({
+    url: 'service/uploadPartyLogoImage',
+    method: 'POST',
+    data: payload,
+    baseURL,
+    headers: { "Content-Type": "multipart/form-data" },
+  })
 }
 
 export const UserService = {
