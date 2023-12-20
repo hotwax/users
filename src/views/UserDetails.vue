@@ -30,9 +30,9 @@
                 </ion-item>
               </div>
               <div>
-                <ion-item detail button>
+                <ion-item @click="openCreatedByUserDetail" detail button>
                   <ion-icon :icon="bodyOutline" slot="start" />
-                  <ion-label @click="openCreatedByUserDetail">{{ translate("Created by", {partyId: selectedUser.createdByUserPartyId}) }}</ion-label>
+                  <ion-label >{{ translate("Created by", {userLoginId: selectedUser.createdByUserLogin}) }}</ion-label>
                 </ion-item>
                 <ion-item>
                   <ion-icon :icon="cameraOutline" slot="start" />

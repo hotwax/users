@@ -34,7 +34,7 @@
   "Create User": "Create User",
   "Create a new user": "Create a new user",
   "created": "created",
-  "Created by": "Created by {partyId}",
+  "Created by": "Created by {userLoginId}",
   "Deactivate": "Deactivate",
   "Default password": "Default password",
   "Disable user": "Disable user",

@@ -617,8 +617,8 @@ const uploadPartyImage = async (payload: any): Promise <any> => {
 
 const fetchLogoImageForParty = async (partyId: any): Promise<any> => {
   let profileImage = {};
-  try {
 
+  try {
     let resp = await api({
       url: 'performFind',
       method: 'POST',
