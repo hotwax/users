@@ -17,8 +17,8 @@
             <ion-card class="profile">
               <div>
                 <ion-item lines="none">
-                  <ion-avatar>
-                    <Image />
+                  <ion-avatar slot="start" v-if="imageUrl">
+                    <Image :src="imageUrl"/>
                   </ion-avatar>
                   <ion-label class="ion-margin-start">
                     <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
@@ -36,7 +36,7 @@
                 </ion-item>
                 <ion-item>
                   <ion-icon :icon="cameraOutline" slot="start" />
-                  <ion-label v-if="true">{{ translate("Add profile picture") }}</ion-label>
+                  <ion-label v-if="!imageUrl">{{ translate("Add profile picture") }}</ion-label>
                   <ion-label v-else>{{ translate("Replace profile picture") }}</ion-label>
                   <input @change="uploadImage" class="ion-hide" type="file" accept="image/*" id="profilePic"/>
                   <label for="profilePic">{{ translate("Upload") }}</label>
@@ -297,7 +297,8 @@ export default defineComponent({
       userProductStores: 'user/getUserProductStores',
       getRoleTypeDesc: 'util/getRoleTypeDesc',
       securityGroups: 'util/getSecurityGroups',
-      userProfile: 'user/getUserProfile'
+      userProfile: 'user/getUserProfile',
+      baseUrl: 'user/getBaseUrl'
     })
   },
   props: ['partyId'],
@@ -319,11 +320,13 @@ export default defineComponent({
       } as any,
       username: "",
       password: "",
-      isUserEnabled: false as boolean
+      isUserEnabled: false as boolean,
+      imageUrl: ""
     }
   },
   async ionViewWillEnter() {
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
+    await this.fetchProfileImage()
     await this.store.dispatch('util/getSecurityGroups');
   },
   methods: {
@@ -874,6 +877,13 @@ export default defineComponent({
         console.error('Error uploading image:', error);
       }
     },
+    async fetchProfileImage() {
+      const profileImage = await UserService.fetchLogoImageForParty(this.selectedUser.partyId)
+
+      if (profileImage.objectInfo) {
+        this.imageUrl = (this.baseUrl.startsWith('http') ? this.baseUrl.replace(/api\/?/, "") : `https://${this.baseUrl}.hotwax.io/`) + profileImage.objectInfo
+      }
+    }
   },
   setup() {
     const router = useRouter();
