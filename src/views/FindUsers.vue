@@ -173,8 +173,10 @@ export default defineComponent({
       isScrollable: "user/isScrollable"
     })
   },
+  async ionViewWillEnter() {
+    await this.fetchUsers()
+  },
   async mounted() {
-    await this.fetchUsers();
     await this.store.dispatch('util/getSecurityGroups')
   },
   methods: {

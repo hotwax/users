@@ -264,6 +264,7 @@ import { hasError } from '@/adapter';
 import { DateTime } from "luxon";
 import Image from "@/components/Image.vue";
 import { Actions, hasPermission } from '@/authorization'
+import emitter from "@/event-bus";
 
 export default defineComponent({
   name: "UserDetails",
@@ -765,7 +766,6 @@ export default defineComponent({
           value: this.selectedUser.lastName
         }]
 
-
       if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
         inputFields = [{
           name: "groupName",
@@ -785,30 +785,28 @@ export default defineComponent({
           handler: async (data: any) => {
             if(data.firstName || data.groupName) {
               let resp;
+              const payload = { partyId: this.selectedUser.partyId, ...data }
+
+              emitter.emit('presentLoader')
+
               try {
                 if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
-                  resp = await UserService.updatePartyGroup({
-                    groupName: data.groupName,
-                    partyId: this.selectedUser.partyId
-                  })
+                  resp = await UserService.updatePartyGroup(payload)
                 } else {
-                  resp = await UserService.updatePerson({
-                    partyId: this.selectedUser.partyId,
-                    firstName: data.firstName,
-                    lastName: data.lastName
-                  })
+                  resp = await UserService.updatePerson(payload)
                 }
 
                 if(!hasError(resp)) {
                   showToast(translate("User renamed successfully."))
-                  await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
-                  await this.fetchUsers()
+                  await this.store.dispatch("user/updateSelectedUser", { ...this.selectedUser, ...payload });
                 }else {
                   throw resp.data;
                 }
               } catch(err) {
                 console.error(err)
               }
+
+              emitter.emit('dismissLoader')
             }
           }
         }]
@@ -827,6 +825,8 @@ export default defineComponent({
         statusId: isChecked ? 'PARTY_ENABLED' : 'PARTY_DISABLED'
       }
 
+      emitter.emit('presentLoader')
+
       try {
         if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
           resp = await UserService.updatePartyGroup(payload)
@@ -836,7 +836,7 @@ export default defineComponent({
 
         if(!hasError(resp)) {
           showToast(translate("User status updated successfully."))
-          await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
+          await this.store.dispatch("user/updateSelectedUser", { ...this.selectedUser, ...payload });
           event.target.checked = isChecked
         }else {
           throw resp.data;
@@ -845,15 +845,8 @@ export default defineComponent({
         console.error(err)
         showToast(translate("Failed to update user status."))
       }
-    },
-    async fetchUsers(vSize?: any, vIndex?: any) {
-      const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
-      const viewIndex = vIndex ? vIndex : 0;
-      const payload = {
-        viewSize,
-        viewIndex
-      };
-      await this.store.dispatch('user/fetchUsers', payload)
+
+      emitter.emit('dismissLoader')
     },
     async uploadImage(event: any) {
       const selectedFile = event.target.files[0];
