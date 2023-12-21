@@ -300,6 +300,13 @@ const actions: ActionTree<UserState, RootState> = {
       filters['lastName_grp'] = '3'
     }
 
+    // By default we are showing logged in user on top manually,
+    // hence not fetching it in default list.
+    if(!state.query.queryString) {
+      filters['partyId_value'] = payload.currentUserPartyId,
+      filters['partyId_op'] = 'notEqual'
+    }
+
     const params = {
       "inputFields": {
         "roleTypeIdTo": "APPLICATION_USER", 
@@ -312,7 +319,8 @@ const actions: ActionTree<UserState, RootState> = {
       "noConditionFind": "Y",
       "distinct": "Y",
       "fieldList": ['createdDate', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'userLoginId'],
-      ...payload
+      "viewIndex": payload.viewIndex,
+      "viewSize": payload.viewSize
     }
 
     let users = [], total = 0;
