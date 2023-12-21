@@ -45,7 +45,7 @@
 
     <!-- TODO improve disable button logic -->
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button :disabled="checkResetButtonStatus()" @click="resetPassword()">
+      <ion-fab-button :disabled="!hasPermission(Actions.APP_UPDT_PASSWORD) || checkResetButtonStatus()" @click="resetPassword()">
         <ion-icon :icon="lockClosedOutline" />  
       </ion-fab-button>
     </ion-fab>
@@ -83,6 +83,7 @@ import { translate } from '@hotwax/dxp-components'
 import { isValidPassword, showToast } from "@/utils";
 import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
+import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
   name: "CustomFieldModal",
@@ -189,10 +190,12 @@ export default defineComponent({
       closeOutline,
       eyeOutline,
       eyeOffOutline,
+      hasPermission,
       lockClosedOutline,
       mailOutline,
       store,
-      translate
+      translate,
+      Actions
     };
   },
 });
