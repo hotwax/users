@@ -209,8 +209,10 @@ export default defineComponent({
       currentUser: {}
     }
   },
+  async ionViewWillEnter() {
+    await this.fetchUsers()
+  },
   async mounted() {
-    await this.fetchUsers();
     await this.store.dispatch('util/getSecurityGroups')
   },
   methods: {

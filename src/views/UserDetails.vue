@@ -13,19 +13,41 @@
           {{ translate("Failed to fetch user data") }}
         </div>
         <template v-else>
-          <section>
-            <ion-item lines="none">
-              <!-- TODO fetch and show image only if available -->
-              <!-- <ion-avatar slot="start">
-                <Image />
-              </ion-avatar> -->
-              <!-- TODO return available name instead of if-else -->
-              <ion-label>
-                <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
-                <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
-                <p>{{ selectedUser.userLoginId }}</p>
-              </ion-label>
-            </ion-item>
+          <section class="user-details">
+            <ion-card class="profile">
+              <div>
+                <ion-item lines="none">
+                  <ion-avatar slot="start">
+                    <Image :src="imageUrl"/>
+                  </ion-avatar>
+                  <ion-label class="ion-margin-start">
+                    <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
+                    <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
+                    <p>{{ selectedUser.userLoginId }}</p>
+                    <ion-badge v-if="selectedUser.userLoginId === userProfile.userLoginId">{{ translate("Your user") }}</ion-badge>
+                  </ion-label>
+                  <ion-button fill="outline" @click="editName">{{ translate('Edit') }}</ion-button>
+                </ion-item>
+              </div>
+              <div>
+                <ion-item @click="openCreatedByUserDetail" detail button>
+                  <ion-icon :icon="bodyOutline" slot="start" />
+                  <ion-label >{{ translate("Created by", {userLoginId: selectedUser.createdByUserLogin}) }}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-icon :icon="cameraOutline" slot="start" />
+                  <ion-label v-if="!imageUrl">{{ translate("Add profile picture") }}</ion-label>
+                  <ion-label v-else>{{ translate("Replace profile picture") }}</ion-label>
+                  <input @change="uploadImage" class="ion-hide" type="file" accept="image/*" id="profilePic"/>
+                  <label for="profilePic">{{ translate("Upload") }}</label>
+                </ion-item>
+                <ion-item lines="none">
+                  <ion-icon :icon="cloudyNightOutline" slot="start" />
+                  <ion-label>{{ translate("Disable user") }}</ion-label>
+                  <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click="updateUserStatus($event)" slot="end" />
+                </ion-item>
+              </div>
+            </ion-card>
           </section>
 
           <section class="user-details">
@@ -189,7 +211,9 @@
 <script lang="ts">
 import {
   alertController,
+  IonAvatar,
   IonBackButton,
+  IonBadge,
   IonButton,
   IonCard,
   IonCardHeader,
@@ -211,7 +235,7 @@ import {
   IonToggle,
   IonToolbar,
   modalController,
-  popoverController,
+  popoverController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 import { useRouter } from 'vue-router';
@@ -219,8 +243,11 @@ import { mapGetters, useStore } from 'vuex'
 import {
   addOutline,
   addCircleOutline,
+  bodyOutline,
   businessOutline,
   callOutline,
+  cameraOutline,
+  cloudyNightOutline,
   ellipsisVerticalOutline,
   mailOutline,
   warningOutline
@@ -235,12 +262,16 @@ import { UserService } from "@/services/UserService";
 import { isValidEmail, isValidPassword, showToast } from "@/utils";
 import { hasError } from '@/adapter';
 import { DateTime } from "luxon";
+import Image from "@/components/Image.vue";
 import { Actions, hasPermission } from '@/authorization'
+import emitter from "@/event-bus";
 
 export default defineComponent({
   name: "UserDetails",
   components: {
+    IonAvatar,
     IonBackButton,
+    IonBadge,
     IonButton,
     IonCard,
     IonCardHeader,
@@ -261,13 +292,16 @@ export default defineComponent({
     IonTitle,
     IonToggle,
     IonToolbar,
+    Image
   },
   computed: {
     ...mapGetters({
       selectedUser: 'user/getSelectedUser',
       userProductStores: 'user/getUserProductStores',
       getRoleTypeDesc: 'util/getRoleTypeDesc',
-      securityGroups: 'util/getSecurityGroups'
+      securityGroups: 'util/getSecurityGroups',
+      userProfile: 'user/getUserProfile',
+      baseUrl: 'user/getBaseUrl'
     })
   },
   props: ['partyId'],
@@ -288,12 +322,15 @@ export default defineComponent({
         }
       } as any,
       username: "",
-      password: ""
+      password: "",
+      isUserEnabled: false as boolean,
+      imageUrl: ""
     }
   },
   async ionViewWillEnter() {
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
-    await this.store.dispatch('util/getSecurityGroups')
+    await this.fetchProfileImage()
+    await this.store.dispatch('util/getSecurityGroups');
   },
   methods: {
     async openContactActionsPopover(event: Event, type: string, value: string) {
@@ -313,6 +350,9 @@ export default defineComponent({
         showBackdrop: false,
       });
       return contactActionsPopover.present();
+    },
+    async openCreatedByUserDetail() {
+      this.router.push({ path: `/user-details/${this.selectedUser.createdByUserPartyId}` })
     },
     async addContactField(type: string) {
       const contactUpdateAlert = await alertController.create({
@@ -716,6 +756,131 @@ export default defineComponent({
         console.error(error)
       }
     },
+    async editName() {
+      let inputFields = [{
+          name: "firstName",
+          value: this.selectedUser.firstName
+        }, 
+        {
+          name: "lastName",
+          value: this.selectedUser.lastName
+        }]
+
+      if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
+        inputFields = [{
+          name: "groupName",
+          value: this.selectedUser.groupName
+        }]
+      }
+
+      const alert = await alertController.create({
+        header: translate("Edit name"),
+        inputs: inputFields,
+        buttons: [{
+          text: translate('Cancel'),
+          role: "cancel"
+        },
+        {
+          text: translate('Confirm'),
+          handler: async (data: any) => {
+            if(data.firstName || data.groupName) {
+              let resp;
+              const payload = { partyId: this.selectedUser.partyId, ...data }
+
+              emitter.emit('presentLoader')
+
+              try {
+                if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
+                  resp = await UserService.updatePartyGroup(payload)
+                } else {
+                  resp = await UserService.updatePerson(payload)
+                }
+
+                if(!hasError(resp)) {
+                  showToast(translate("User renamed successfully."))
+                  await this.store.dispatch("user/updateSelectedUser", { ...this.selectedUser, ...payload });
+                }else {
+                  throw resp.data;
+                }
+              } catch(err) {
+                console.error(err)
+              }
+
+              emitter.emit('dismissLoader')
+            }
+          }
+        }]
+      })
+
+      alert.present()
+    },
+    async updateUserStatus(event: any) {
+      event.stopImmediatePropagation();
+
+      const isChecked = !event.target.checked
+      let resp;
+
+      const payload = {
+        partyId: this.selectedUser.partyId,
+        statusId: isChecked ? 'PARTY_ENABLED' : 'PARTY_DISABLED'
+      }
+
+      emitter.emit('presentLoader')
+
+      try {
+        if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
+          resp = await UserService.updatePartyGroup(payload)
+        } else {
+          resp = await UserService.updatePerson({...payload, firstName: this.selectedUser.firstName})
+        }
+
+        if(!hasError(resp)) {
+          showToast(translate("User status updated successfully."))
+          await this.store.dispatch("user/updateSelectedUser", { ...this.selectedUser, ...payload });
+          event.target.checked = isChecked
+        }else {
+          throw resp.data;
+        }
+      } catch(err) {
+        console.error(err)
+        showToast(translate("Failed to update user status."))
+      }
+
+      emitter.emit('dismissLoader')
+    },
+    async uploadImage(event: any) {
+      const selectedFile = event.target.files[0];
+
+      if(!selectedFile) {
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('partyId', this.selectedUser.partyId);
+      formData.append('_uploadedFile_contentType', 'image/*');
+      formData.append('uploadedFile', selectedFile, selectedFile?.name);
+      try {
+        const resp = await UserService.uploadPartyImage(formData);
+
+        if(!hasError(resp)) {
+          showToast(translate("Image uploaded successfully."))
+          await this.fetchProfileImage()
+        } else {
+          throw resp.data
+        }
+      } catch (error) {
+        showToast(translate("Failed to upload image."))
+        console.error('Error uploading image:', error);
+      }
+    },
+    async fetchProfileImage() {
+      const profileImage = await UserService.fetchLogoImageForParty(this.selectedUser.partyId)
+
+      if (profileImage.objectInfo) {
+        this.imageUrl = (this.baseUrl.startsWith('http') ? this.baseUrl.replace(/api\/?/, "") : `https://${this.baseUrl}.hotwax.io/`) + profileImage.objectInfo
+      }
+    },
+
     getSecurityGroups(securityGroups: any) {
       const excludedSecurityGroups = JSON.parse(process.env.VUE_APP_EXCLUDED_SECURITY_GROUPS)
       const selectedSecurityGroup = this.selectedUser.securityGroup.groupId
@@ -737,8 +902,11 @@ export default defineComponent({
     return {
       addOutline,
       addCircleOutline,
+      bodyOutline,
       businessOutline,
       callOutline,
+      cameraOutline,
+      cloudyNightOutline,
       ellipsisVerticalOutline,
       hasPermission,
       mailOutline,
@@ -756,6 +924,12 @@ export default defineComponent({
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   align-items: start;
+}
+
+.profile {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
 }
 
 .section-header {
@@ -778,5 +952,9 @@ ion-card>ion-button[expand="block"] {
   .user-details {
     gap: var(--spacer-base);
   }
+}
+
+label {
+  cursor: pointer;
 }
 </style>

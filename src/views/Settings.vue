@@ -11,7 +11,7 @@
         <ion-card>
           <ion-item lines="full">
             <ion-avatar slot="start" v-if="userProfile?.partyImageUrl">
-              <Image :src="userProfile.partyImageUrl"/>
+              <Image :src="getImageUrl(userProfile.partyImageUrl)"/>
             </ion-avatar>
             <!-- ion-no-padding to remove extra side/horizontal padding as additional padding 
             is added on sides from ion-item and ion-padding-vertical to compensate the removed
@@ -144,6 +144,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       userProfile: 'user/getUserProfile',
+      baseUrl: 'user/getBaseUrl'
     })
   },
   mounted() {
@@ -171,6 +172,9 @@ export default defineComponent({
       });
       return timeZoneModal.present();
     },
+    getImageUrl(imageUrl: string) {
+      return (this.baseUrl.startsWith('http') ? this.baseUrl.replace(/api\/?/, "") : `https://${this.baseUrl}.hotwax.io/`) + imageUrl
+    }
   },
   setup () {
     const store = useStore();

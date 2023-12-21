@@ -603,9 +603,70 @@ const finishSetup = async (payload: any): Promise <any> => {
   }
 }
 
+const uploadPartyImage = async (payload: any): Promise <any> => {
+  let baseURL = store.getters['user/getInstanceUrl'];
+  baseURL = baseURL && baseURL.startsWith('http') ? baseURL : `https://${baseURL}.hotwax.io/api/`;
+  return client({
+    url: 'service/uploadPartyLogoImage',
+    method: 'POST',
+    data: payload,
+    baseURL,
+    headers: { "Content-Type": "multipart/form-data" },
+  })
+}
+
+const fetchLogoImageForParty = async (partyId: any): Promise<any> => {
+  let profileImage = {};
+
+  try {
+    let resp = await api({
+      url: 'performFind',
+      method: 'POST',
+      data: {
+        entityName: "PartyContentDetail",
+        inputFields: {
+          partyId,
+        },
+        viewSize: 1,
+        fieldList: ['partyId', 'dataResourceId'],
+        noConditionFind: 'Y',
+        filterByDate: 'Y'
+      }
+    }) as any
+
+    if (!hasError(resp) && resp.data.count > 0) {
+      const partyContents = resp.data.docs;
+
+      resp = await api({
+        url: 'performFind',
+        method: 'POST',
+        data: {
+          entityName: "DataResource",
+          inputFields: {
+            dataResourceId: partyContents[0].dataResourceId
+          },
+          viewSize: 1,
+          fieldList: ['dataResourceId', 'objectInfo'],
+          noConditionFind: 'Y'
+        }
+      })
+
+      if (!hasError(resp) && resp.data.count > 0) {
+        profileImage = resp.data.docs[0]
+      } else {
+        throw resp.data
+      }
+    }
+    return profileImage;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
 export const UserService = {
   addPartyToFacility,
   addUserToSecurityGroup,
+  checkUserLoginId,
   createUser,
   createCommercePartyRelationshipFrom,
   createNewUserLogin,
@@ -616,6 +677,7 @@ export const UserService = {
   deletePartyRole,
   ensurePartyRole,
   getAvailableTimeZones,
+  fetchLogoImageForParty,
   fetchPartyRelationship,
   fetchUsers,
   getPartyRole,
@@ -637,6 +699,7 @@ export const UserService = {
   updatePartyGroup,
   updatePerson,
   updateProductStoreRole,
+  uploadPartyImage,
   removeUserSecurityGroup,
   finishSetup
 }
