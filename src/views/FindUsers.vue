@@ -47,6 +47,34 @@
         </aside>
 
         <main v-if="users?.length">
+          <div class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser.partyId)>
+            <ion-item lines="none">
+              <ion-label>
+                {{ currentUser.groupName ? currentUser.groupName : `${currentUser.firstName} ${currentUser.lastName}` }}
+                <p>{{ currentUser.userLoginId }}</p>
+                <p>{{ currentUser.infoString }}</p>
+              </ion-label>
+            </ion-item>
+
+            <div class="tablet">
+              <ion-label class="ion-text-center" v-if="currentUser.createdDate">
+                {{ getDate(currentUser.createdDate) }}
+                <p>{{ translate("created") }}</p>
+              </ion-label>
+              <ion-label v-else>
+                {{ '-' }}
+              </ion-label>
+            </div>
+
+            <div class="tablet">
+              <ion-chip outline v-if="currentUser.securityGroupId">
+                <ion-label>{{ currentUser.securityGroupName }}</ion-label>
+              </ion-chip>
+              <ion-label v-else>
+                {{ '-' }}
+              </ion-label>
+            </div>
+          </div>
           <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user.partyId)>
             <ion-item lines="none">
               <ion-label>
@@ -139,6 +167,8 @@ import { DateTime } from 'luxon';
 import UserPopover from '@/components/UserPopover.vue';
 import { translate } from '@hotwax/dxp-components'
 import FilterMenu from '@/components/FilterMenu.vue';
+import { UserService } from '@/services/UserService';
+import { hasError } from '@/adapter';
 import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
@@ -170,8 +200,14 @@ export default defineComponent({
       users: 'user/getUsers',
       securityGroups: 'util/getSecurityGroups',
       query: 'user/getQuery',
-      isScrollable: "user/isScrollable"
+      isScrollable: "user/isScrollable",
+      userProfile: 'user/getUserProfile'
     })
+  },
+  data() {
+    return {
+      currentUser: {}
+    }
   },
   async ionViewWillEnter() {
     await this.fetchUsers()
@@ -197,11 +233,15 @@ export default defineComponent({
       this.fetchUsers();
     },
     async fetchUsers(vSize?: any, vIndex?: any) {
+      if(!this.query.queryString) await this.fetchLoggedInUserDetails()
+      else this.currentUser = {}
+
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
       const payload = {
         viewSize,
-        viewIndex
+        viewIndex,
+        currentUserPartyId: this.userProfile.partyId
       };
       await this.store.dispatch('user/fetchUsers', payload)
     },
@@ -218,6 +258,33 @@ export default defineComponent({
         event.target.complete();
       });
     },
+    async fetchLoggedInUserDetails() {
+      const params = {
+        inputFields: {
+          roleTypeIdTo: 'APPLICATION_USER',
+          partyId: this.userProfile.partyId
+        },
+        fromDateName: 'relationshipFromDate',
+        thruDateName: 'relationshipThruDate',
+        filterByDate: 'Y',
+        entityName: 'PartyAndUserLoginSecurityGroupDetails',
+        noConditionFind: 'Y',
+        distinct: 'Y',
+        fieldList: ['createdDate', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'userLoginId'],
+      }
+
+      try {
+        const resp = await UserService.fetchUsers(params)
+
+        if (!hasError(resp) && resp.data.count) {
+          this.currentUser = resp.data.docs[0]
+        } else {
+          throw resp.data
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
   },
   setup() {
     const router = useRouter();
