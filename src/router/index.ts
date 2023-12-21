@@ -74,21 +74,30 @@ const routes: Array<RouteRecordRaw> = [
     path: '/create-user',
     name: 'CreateUser',
     component: CreateUser,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      permissionId: "APP_USER_CREATE"
+    }
   },
   {
     path: '/user-confirmation/:partyId',
     name: 'UserConfirmation',
     component: UserConfirmation,
     beforeEnter: authGuard,
-    props: true
+    props: true,
+    meta: {
+      permissionId: "APP_USER_CREATE"
+    }
   },
   {
     path: '/user-quick-setup/:partyId',
     name: 'UserQuickSetup',
     component: UserQuickSetup,
     beforeEnter: authGuard,
-    props: true
+    props: true,
+    meta: {
+      permissionId: "APP_USER_CREATE"
+    }
   }
 ]
 

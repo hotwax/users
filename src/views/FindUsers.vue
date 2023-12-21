@@ -109,8 +109,8 @@
         </main>
       </div>
 
-      <ion-fab vertical="bottom" horizontal="end" slot="fixed" @click="router.push('/create-user')">
-        <ion-fab-button>
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button :disabled="!hasPermission(Actions.APP_USER_CREATE)" @click="router.push('/create-user')">
           <ion-icon :icon="addOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -169,6 +169,7 @@ import { translate } from '@hotwax/dxp-components'
 import FilterMenu from '@/components/FilterMenu.vue';
 import { UserService } from '@/services/UserService';
 import { hasError } from '@/adapter';
+import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
   name: 'FindUsers',
@@ -291,12 +292,14 @@ export default defineComponent({
       addOutline,
       cloudyNightOutline,
       ellipsisVerticalOutline,
+      hasPermission,
       idCardOutline,
       optionsOutline,
       toggleOutline,
       translate,
       router,
-      store
+      store,
+      Actions
     };
   }
 });
