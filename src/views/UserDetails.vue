@@ -73,7 +73,7 @@
                   </ion-item>
                   <ion-item>
                     <ion-label>{{ translate("Block login") }}</ion-label>
-                    <ion-toggle slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
+                    <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
                   </ion-item>
                 </ion-list>
                 <ion-button @click="resetPassword()" fill="outline" color="warning" expand="block">
@@ -155,8 +155,9 @@
               <ion-item>
                 <ion-icon :icon="businessOutline" slot="start" />
                 <ion-label>{{ translate('Security Group') }}</ion-label>        
-                <ion-select interface="popover" :disabled="!selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
-                  <ion-select-option v-for="securityGroup in securityGroups" :key="securityGroup.groupId" :value="securityGroup.groupId">
+                <ion-label v-if="!hasPermission(Actions.APP_SUPER_USER) && selectedUser.securityGroup?.groupId === 'SUPER'" slot="end">{{ translate('Super') }}</ion-label>
+                <ion-select v-else interface="popover" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
+                  <ion-select-option v-for="securityGroup in getSecurityGroups(securityGroups)" :key="securityGroup.groupId" :value="securityGroup.groupId">
                     {{ securityGroup.groupName }}
                   </ion-select-option>
                   <ion-select-option value="">{{ translate("None") }}</ion-select-option>
@@ -169,12 +170,12 @@
               <ion-list v-else>
                 <ion-list-header color="light">
                   <ion-label>{{ translate('Product stores') }}</ion-label>
-                  <ion-button @click="selectProductStore()">
+                  <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" @click="selectProductStore()">
                     {{ translate('Add') }}
                     <ion-icon slot="end" :icon="addCircleOutline" />
                   </ion-button>
                 </ion-list-header>
-                <ion-item v-for="store in userProductStores" :key="store.productStoreId">
+                <ion-item :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-for="store in userProductStores" :key="store.productStoreId">
                   <ion-label>
                     <h2>{{ store.storeName }}</h2>
                     <p>{{ getRoleTypeDesc(store.roleTypeId) }}</p>
@@ -194,9 +195,9 @@
               <ion-list>
                 <ion-item>
                   <ion-label>{{ translate("Show as picker") }}</ion-label>
-                  <ion-toggle slot="end" @click="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true" />
+                  <ion-toggle slot="end" :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)" @click="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true" />
                 </ion-item>
-                <ion-item lines="none" button detail @click="selectFacility()">
+                <ion-item lines="none" button detail :disabled="!hasPermission(Actions.APP_UPDT_FULFILLMENT_FACILITY)" @click="selectFacility()">
                   <ion-label>{{ selectedUser.facilities.length === 1 ? translate('Added to 1 facility') : translate('Added to facilities', { count: selectedUser.facilities.length }) }}</ion-label>
                 </ion-item>
               </ion-list>
@@ -262,6 +263,7 @@ import { isValidEmail, isValidPassword, showToast } from "@/utils";
 import { hasError } from '@/adapter';
 import { DateTime } from "luxon";
 import Image from "@/components/Image.vue";
+import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
   name: "UserDetails",
@@ -884,6 +886,21 @@ export default defineComponent({
       if (profileImage.objectInfo) {
         this.imageUrl = (this.baseUrl.startsWith('http') ? this.baseUrl.replace(/api\/?/, "") : `https://${this.baseUrl}.hotwax.io/`) + profileImage.objectInfo
       }
+    },
+
+    getSecurityGroups(securityGroups: any) {
+      const excludedSecurityGroups = JSON.parse(process.env.VUE_APP_EXCLUDED_SECURITY_GROUPS)
+      const selectedSecurityGroup = this.selectedUser.securityGroup.groupId
+
+      if(!hasPermission(Actions.APP_SUPER_USER)) excludedSecurityGroups.push('SUPER')
+
+      // We have some excluded security groups that can't be created by any users,
+      // But if a user exists of these excluded security groups, we will show them in the select option.
+      if(excludedSecurityGroups.includes(selectedSecurityGroup)) {
+        excludedSecurityGroups.splice(excludedSecurityGroups.indexOf(selectedSecurityGroup), 1)
+      }
+
+      return securityGroups.filter((group: any) => !excludedSecurityGroups.includes(group.groupId))
     }
   },
   setup() {
@@ -898,11 +915,13 @@ export default defineComponent({
       cameraOutline,
       cloudyNightOutline,
       ellipsisVerticalOutline,
+      hasPermission,
       mailOutline,
       router,
       store,
       translate,
       warningOutline,
+      Actions
     }
   }
 })
