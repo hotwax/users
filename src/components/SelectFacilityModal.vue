@@ -11,7 +11,7 @@
   </ion-header>
 
   <ion-content>
-    <ion-list>
+    <ion-list v-if="!isFacilityLogin">
       <ion-item v-for="facility in facilities" :key="facility.facilityId">
         <ion-label>
           {{ facility.facilityName }}
@@ -20,7 +20,16 @@
         <ion-checkbox slot="end" :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)" />
       </ion-item>
     </ion-list>
-  
+
+    <ion-list v-else>
+      <ion-radio-group :value="selectedFacilities[0].facilityId" @ionChange="updateSelectedFacility($event)">
+        <ion-item v-for="facility in facilities" :key="facility.facilityId">
+          <ion-label>{{ facility.facilityId }}</ion-label>
+          <ion-radio slot="end" :value="facility.facilityId"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
+    </ion-list>
+
     <ion-fab @click="saveFacilities()" vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button>
         <ion-icon :icon="saveOutline" />  
@@ -42,6 +51,8 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonRadio,
+  IonRadioGroup,
   IonTitle,
   IonToolbar,
   modalController
@@ -65,10 +76,12 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
+    IonRadio,
+    IonRadioGroup,
     IonTitle,
     IonToolbar,
   },
-  props: ["selectedFacilities"],
+  props: ["selectedFacilities", "isFacilityLogin"],
   data() {
     return {
       selectedFacilityValues: JSON.parse(JSON.stringify(this.selectedFacilities)),
@@ -87,6 +100,16 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true });
     },
     saveFacilities() {
+      if(this.isFacilityLogin) {
+        modalController.dismiss({
+          dismissed: true,
+          value: {
+            selectedFacilities: this.selectedFacilityValues
+          }
+        })
+        return;
+      }
+
       // taking out the difference of selected facilities and the originally
       // user associated facilities for adding and removing facilities
       const facilitiesToAdd = this.selectedFacilityValues.filter((selectedFacility: any) => !this.selectedFacilities.some((facility: any) => facility.facilityId === selectedFacility.facilityId))
@@ -110,6 +133,9 @@ export default defineComponent({
     },
     isSelected(facilityId: any) {
       return this.selectedFacilityValues.some((facility: any) => facility.facilityId === facilityId);
+    },
+    updateSelectedFacility(event: CustomEvent) {
+      this.selectedFacilityValues = this.facilities.filter((facility: any) => facility.facilityId === event.detail.value)
     }
   },
   setup() {
