@@ -24,7 +24,10 @@
     <ion-list v-else>
       <ion-radio-group :value="selectedFacilities[0].facilityId" @ionChange="updateSelectedFacility($event)">
         <ion-item v-for="facility in facilities" :key="facility.facilityId">
-          <ion-label>{{ facility.facilityId }}</ion-label>
+          <ion-label>
+            {{ facility.facilityName }}
+            <p>{{ facility.facilityId }}</p>
+          </ion-label>
           <ion-radio slot="end" :value="facility.facilityId"></ion-radio>
         </ion-item>
       </ion-radio-group>
