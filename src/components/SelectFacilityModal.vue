@@ -103,16 +103,6 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true });
     },
     saveFacilities() {
-      if(this.isFacilityLogin) {
-        modalController.dismiss({
-          dismissed: true,
-          value: {
-            selectedFacilities: this.selectedFacilityValues
-          }
-        })
-        return;
-      }
-
       // taking out the difference of selected facilities and the originally
       // user associated facilities for adding and removing facilities
       const facilitiesToAdd = this.selectedFacilityValues.filter((selectedFacility: any) => !this.selectedFacilities.some((facility: any) => facility.facilityId === selectedFacility.facilityId))

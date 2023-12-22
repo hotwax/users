@@ -550,9 +550,17 @@ export default defineComponent({
       return productStoreActionsPopover.present();
     },
     async selectFacility() {
+      let componentProps = {
+        selectedFacilities: this.selectedUser.facilities
+      } as any
+
+      if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
+        componentProps['isFacilityLogin'] = true
+      }
+
       const selectFacilityModal = await modalController.create({
         component: SelectFacilityModal,
-        componentProps: { selectedFacilities: this.selectedUser.facilities }
+        componentProps
       });
 
       selectFacilityModal.onDidDismiss().then( async (result) => {
