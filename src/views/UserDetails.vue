@@ -616,14 +616,18 @@ export default defineComponent({
           }
 
           await Promise.allSettled(facilitiesToRemove
-            .map(async (payload: any) => await UserService.removePartyFromFacility({
-              partyId: this.selectedUser.partyId,
-              facilityId: payload.facilityId,
-              roleTypeId: 'FAC_LOGIN',
-              fromDate: payload.fromDate,
-              thruDate: DateTime.now().toMillis()
-            }))
-          )          
+            .map(async (payload: any) => {
+              const facilityLogin = this.selectedUser.facilities.find((facility: any) => facility.facilityId === payload.facilityId && facility.roleTypeId === 'FAC_LOGIN')
+
+              return await UserService.removePartyFromFacility({
+                partyId: this.selectedUser.partyId,
+                facilityId: payload.facilityId,
+                roleTypeId: 'FAC_LOGIN',
+                fromDate: facilityLogin.fromDate,
+                thruDate: DateTime.now().toMillis()
+              })
+            })
+          )
 
           await Promise.allSettled(facilitiesToAdd
             .map(async (payload: any) => await UserService.addPartyToFacility({
