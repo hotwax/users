@@ -47,12 +47,13 @@
         </aside>
 
         <main v-if="users?.length">
-          <div class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser.partyId)>
+          <ion-card class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser.partyId)>
             <ion-item lines="none">
               <ion-label>
                 {{ currentUser.groupName ? currentUser.groupName : `${currentUser.firstName} ${currentUser.lastName}` }}
                 <p>{{ currentUser.userLoginId }}</p>
                 <p>{{ currentUser.infoString }}</p>
+                <ion-badge>{{ translate("Your user") }}</ion-badge>
               </ion-label>
             </ion-item>
 
@@ -66,15 +67,17 @@
               </ion-label>
             </div>
 
-            <div class="tablet">
-              <ion-chip outline v-if="currentUser.securityGroupId">
-                <ion-label>{{ currentUser.securityGroupName }}</ion-label>
-              </ion-chip>
-              <ion-label v-else>
-                {{ '-' }}
-              </ion-label>
-            </div>
-          </div>
+            <ion-item lines="none">
+              <div class="tablet">
+                <ion-chip outline v-if="currentUser.securityGroupId">
+                  <ion-label>{{ currentUser.securityGroupName }}</ion-label>
+                </ion-chip>
+                <ion-label v-else>
+                  {{ '-' }}
+                </ion-label>
+              </div>
+            </ion-item>
+          </ion-card>
           <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user.partyId)>
             <ion-item lines="none">
               <ion-label>
@@ -131,6 +134,8 @@
 
 <script lang="ts">
 import {
+  IonBadge,
+  IonCard,
   IonChip,
   IonContent,
   IonFab,
@@ -175,6 +180,8 @@ export default defineComponent({
   name: 'FindUsers',
   components: {
     FilterMenu,
+    IonBadge,
+    IonCard,
     IonChip,
     IonContent,
     IonFab,
