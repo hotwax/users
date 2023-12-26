@@ -361,6 +361,7 @@ const getUserFacilities = async (partyId: string): Promise<any> => {
   const payload = {
     inputFields: {
       partyId,
+      roleTypeId: 'WAREHOUSE_MANAGER'
     },
     noConditionFind: "Y",
     filterByDate: "Y",
@@ -603,6 +604,39 @@ const finishSetup = async (payload: any): Promise <any> => {
   }
 }
 
+const createRoleType = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/createRoleType",
+    method: "post",
+    data: payload
+  });
+}
+
+const isRoleTypeExists = async (roleTypeId: string): Promise<any> => {
+  try {
+
+    const resp = await api({
+      url: 'performFind',
+      method: 'POST',
+      data: {
+        entityName: "RoleType",
+        inputFields: {
+          roleTypeId: roleTypeId
+        },
+        viewSize: 1,
+        fieldList: ['roleTypeId'],
+        noConditionFind: 'Y'
+      }
+    }) as any
+    if (!hasError(resp) && resp.data.docs.length) {
+      return true
+    }
+    return false
+  } catch (err) {
+    return false
+  }
+}
+
 const uploadPartyImage = async (payload: any): Promise <any> => {
   let baseURL = store.getters['user/getInstanceUrl'];
   baseURL = baseURL && baseURL.startsWith('http') ? baseURL : `https://${baseURL}.hotwax.io/api/`;
@@ -673,6 +707,7 @@ export const UserService = {
   createUpdatePartyEmailAddress,
   createUpdatePartyTelecomNumber,
   createProductStoreRole,
+  createRoleType,
   deletePartyContactMech,
   deletePartyRole,
   ensurePartyRole,
@@ -689,6 +724,7 @@ export const UserService = {
   getUserProductStores,
   getUserSecurityGroup,
   isUserLoginIdAlreadyExists,
+  isRoleTypeExists,
   login,
   removePartyFromFacility,
   resetPassword,

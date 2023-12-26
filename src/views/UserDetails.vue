@@ -603,7 +603,36 @@ export default defineComponent({
               roleTypeId: 'WAREHOUSE_MANAGER',
             }))
           )
-    
+
+          //Create role type if not exists. This is required for associating facility login user to facility.
+          if (!await UserService.isRoleTypeExists("FAC_LOGIN")) {
+            const resp = await UserService.createRoleType({
+              "roleTypeId": "FAC_LOGIN",
+              "description": "Facility Login",
+            })
+            if (hasError(resp)) {
+              throw resp.data;
+            }
+          }
+
+          await Promise.allSettled(facilitiesToRemove
+            .map(async (payload: any) => await UserService.removePartyFromFacility({
+              partyId: this.selectedUser.partyId,
+              facilityId: payload.facilityId,
+              roleTypeId: 'FAC_LOGIN',
+              fromDate: payload.fromDate,
+              thruDate: DateTime.now().toMillis()
+            }))
+          )          
+
+          await Promise.allSettled(facilitiesToAdd
+            .map(async (payload: any) => await UserService.addPartyToFacility({
+              partyId: this.selectedUser.partyId,
+              facilityId: payload.facilityId,
+              roleTypeId: 'FAC_LOGIN',
+            }))
+          )
+
           const hasFailedResponse = [...removeResponses, ...createResponses].some((response: any) => response.status === 'rejected')
           if (hasFailedResponse) {
             showToast(translate('Failed to update some association(s).'))

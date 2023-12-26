@@ -22,7 +22,7 @@
     </ion-list>
 
     <ion-list v-else>
-      <ion-radio-group :value="selectedFacilities[0].facilityId" @ionChange="updateSelectedFacility($event)">
+      <ion-radio-group :value="selectedFacilities[0]?.facilityId" @ionChange="updateSelectedFacility($event)">
         <ion-item v-for="facility in facilities" :key="facility.facilityId">
           <ion-label>
             {{ facility.facilityName }}
@@ -97,6 +97,7 @@ export default defineComponent({
   },
   async mounted() {
     await this.store.dispatch('util/fetchFacilities');
+    
   },
   methods: {
     closeModal() {
