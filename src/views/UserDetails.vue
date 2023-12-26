@@ -32,7 +32,8 @@
               <div>
                 <ion-item @click="openCreatedByUserDetail" detail button>
                   <ion-icon :icon="bodyOutline" slot="start" />
-                  <ion-label >{{ translate("Created by", {userLoginId: selectedUser.createdByUserLogin}) }}</ion-label>
+                  <ion-label v-if="isCreatedBySystem()">{{ translate("Created by", { userLoginId: "&#129502;" }) }}</ion-label>
+                  <ion-label v-else>{{ translate("Created by", { userLoginId: selectedUser.createdByUserLogin }) }}</ion-label>
                 </ion-item>
                 <ion-item>
                   <ion-icon :icon="cameraOutline" slot="start" />
@@ -352,7 +353,14 @@ export default defineComponent({
       return contactActionsPopover.present();
     },
     async openCreatedByUserDetail() {
-      this.router.push({ path: `/user-details/${this.selectedUser.createdByUserPartyId}` })
+      if(this.isCreatedBySystem()) {
+        window.location.href='https://youtu.be/dQw4w9WgXcQ?si=cPE1jkfRLPiebJuW'
+      } else {
+        this.router.push({ path: `/user-details/${this.selectedUser.createdByUserPartyId}` })
+      }
+    },
+    isCreatedBySystem() {
+      return !this.selectedUser.createdByUserLogin || this.selectedUser.createdByUserLogin === 'system'
     },
     async addContactField(type: string) {
       const contactUpdateAlert = await alertController.create({
