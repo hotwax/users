@@ -66,7 +66,7 @@
               {{ facility.facilityName }}
               <p>{{ facility.facilityId }}</p>
             </ion-label>
-            <ion-checkbox slot="end" :checked="true" @ionChange="toggleFacilitySelection(facility)" />
+            <ion-checkbox v-if="!isFacilityLogin" slot="end" :checked="true" @ionChange="toggleFacilitySelection(facility)" />
           </ion-item>
         </ion-list>
 
@@ -429,7 +429,7 @@ export default defineComponent({
     async addFacilities() {
       const selectFacilityModal = await modalController.create({
         component: SelectFacilityModal,
-        componentProps: { selectedFacilities: this.selectedFacilities }
+        componentProps: { selectedFacilities: this.selectedFacilities, isFacilityLogin: this.isFacilityLogin() }
       });
 
       selectFacilityModal.onDidDismiss().then((result) => {

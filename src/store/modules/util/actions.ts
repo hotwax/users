@@ -104,7 +104,9 @@ const actions: ActionTree<UtilState, RootState> = {
       const payload = {
         "inputFields": {
           "parentTypeId": "VIRTUAL_FACILITY",
-          "parentTypeId_op": "notEqual"
+          "parentTypeId_op": "notEqual",
+          "facilityTypeId": "VIRTUAL_FACILITY",
+          "facilityTypeId_op": "notEqual"
         },
         "entityName": "FacilityAndType",
         "viewSize": 100 // keeping view size 100 as considering that we will have max 100 facilities
