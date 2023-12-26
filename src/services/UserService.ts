@@ -360,8 +360,7 @@ const getUserFacilities = async (partyId: string): Promise<any> => {
   let facilities = []
   const payload = {
     inputFields: {
-      partyId,
-      roleTypeId: 'WAREHOUSE_MANAGER'
+      partyId
     },
     noConditionFind: "Y",
     filterByDate: "Y",

@@ -198,7 +198,7 @@
                   <ion-toggle slot="end" :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)" @click="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true" />
                 </ion-item>
                 <ion-item lines="none" button detail :disabled="!hasPermission(Actions.APP_UPDT_FULFILLMENT_FACILITY)" @click="selectFacility()">
-                  <ion-label>{{ selectedUser.facilities.length === 1 ? translate('Added to 1 facility') : translate('Added to facilities', { count: selectedUser.facilities.length }) }}</ion-label>
+                  <ion-label>{{  getUserFacilities(selectedUser.facilities).length === 1 ? translate('Added to 1 facility') : translate('Added to facilities', { count: getUserFacilities(selectedUser.facilities).length }) }}</ion-label>
                 </ion-item>
               </ion-list>
             </ion-card>
@@ -551,7 +551,7 @@ export default defineComponent({
     },
     async selectFacility() {
       let componentProps = {
-        selectedFacilities: this.selectedUser.facilities
+        selectedFacilities: this.getUserFacilities(this.selectedUser.facilities)
       } as any
 
       if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
@@ -931,6 +931,9 @@ export default defineComponent({
       }
 
       return securityGroups.filter((group: any) => !excludedSecurityGroups.includes(group.groupId))
+    },
+    getUserFacilities(facilities: any) {
+      return facilities.filter((facility: any) => facility.roleTypeId === 'WAREHOUSE_MANAGER')
     }
   },
   setup() {

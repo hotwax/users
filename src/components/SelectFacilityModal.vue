@@ -97,7 +97,6 @@ export default defineComponent({
   },
   async mounted() {
     await this.store.dispatch('util/fetchFacilities');
-    
   },
   methods: {
     closeModal() {
