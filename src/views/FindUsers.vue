@@ -47,7 +47,7 @@
         </aside>
 
         <main v-if="users?.length">
-          <div class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser.partyId)>
+          <div class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser)>
             <ion-item lines="none">
               <ion-label>
                 {{ currentUser.groupName ? currentUser.groupName : `${currentUser.firstName} ${currentUser.lastName}` }}
@@ -75,7 +75,7 @@
               </ion-label>
             </div>
           </div>
-          <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user.partyId)>
+          <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user)>
             <ion-item lines="none">
               <ion-label>
                 {{ user.groupName ? user.groupName : `${user.firstName} ${user.lastName}` }}
@@ -245,8 +245,10 @@ export default defineComponent({
       };
       await this.store.dispatch('user/fetchUsers', payload)
     },
-    async viewUserDetails(partyId: string) {
-      this.router.push({ path: `/user-details/${partyId}` })
+    async viewUserDetails(user: any) {
+      console.log(user);
+      this.store.dispatch('user/updateSelectedUser', user)
+      this.router.push({ path: `/user-details/${user.partyId}` })
     },
     async loadMoreUsers(event: any) {
       this.fetchUsers(
