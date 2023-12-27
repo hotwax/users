@@ -28,7 +28,8 @@
               <div v-if="isUserFetched">
                 <ion-item @click="openCreatedByUserDetail" detail button>
                   <ion-icon :icon="bodyOutline" slot="start" />
-                  <ion-label >{{ translate("Created by", {userLoginId: selectedUser.createdByUserLogin}) }}</ion-label>
+                  <ion-label v-if="isCreatedBySystem()">{{ translate("Created by", { userLoginId: "&#129502;" }) }}</ion-label>
+                  <ion-label v-else>{{ translate("Created by", { userLoginId: selectedUser.createdByUserLogin }) }}</ion-label>
                 </ion-item>
                 <ion-item>
                   <ion-icon :icon="cameraOutline" slot="start" />
@@ -40,7 +41,7 @@
                 <ion-item lines="none">
                   <ion-icon :icon="cloudyNightOutline" slot="start" />
                   <ion-label>{{ translate("Disable user") }}</ion-label>
-                  <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click="updateUserStatus($event)" slot="end" />
+                  <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click="updateUserStatus($event)" slot="end" />
                 </ion-item>
               </div>
               <div v-else>
@@ -297,7 +298,7 @@
                   <ion-toggle slot="end" :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)" @click="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true" />
                 </ion-item>
                 <ion-item lines="none" button detail :disabled="!hasPermission(Actions.APP_UPDT_FULFILLMENT_FACILITY)" @click="selectFacility()">
-                  <ion-label>{{ selectedUser.facilities.length === 1 ? translate('Added to 1 facility') : translate('Added to facilities', { count: selectedUser.facilities.length }) }}</ion-label>
+                  <ion-label>{{  getUserFacilities().length === 1 ? translate('Added to 1 facility') : translate('Added to facilities', { count: getUserFacilities().length }) }}</ion-label>
                 </ion-item>
               </ion-list>
             </ion-card>
@@ -470,7 +471,14 @@ export default defineComponent({
       return contactActionsPopover.present();
     },
     async openCreatedByUserDetail() {
-      this.router.push({ path: `/user-details/${this.selectedUser.createdByUserPartyId}` })
+      if(this.isCreatedBySystem()) {
+        window.location.href = 'https://youtu.be/dQw4w9WgXcQ?si=cPE1jkfRLPiebJuW'
+      } else {
+        this.router.push({ path: `/user-details/${this.selectedUser.createdByUserPartyId}` })
+      }
+    },
+    isCreatedBySystem() {
+      return !this.selectedUser.createdByUserLogin || this.selectedUser.createdByUserLogin === 'system'
     },
     async addContactField(type: string) {
       const contactUpdateAlert = await alertController.create({
@@ -621,7 +629,7 @@ export default defineComponent({
 
       const isChecked = !event.target.checked;
       const header = isChecked ? 'Block user login' : 'Unblock user login'
-      const message = 'Are you sure you want to perform this action?'
+      const message = isChecked ? 'Block this user from logging into HotWax Commerce. Login can be re-enabled by disabling this setting' : 'Unblocking a user will allow them to login to the OMS again with their credentials.'
 
       const alert = await alertController.create({
         header: translate(header),
@@ -669,7 +677,7 @@ export default defineComponent({
     },
     async selectFacility() {
       let componentProps = {
-        selectedFacilities: this.selectedUser.facilities
+        selectedFacilities: this.getUserFacilities()
       } as any
 
       if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
@@ -721,7 +729,7 @@ export default defineComponent({
               roleTypeId: 'WAREHOUSE_MANAGER',
             }))
           )
-    
+
           const hasFailedResponse = [...removeResponses, ...createResponses].some((response: any) => response.status === 'rejected')
           if (hasFailedResponse) {
             showToast(translate('Failed to update some association(s).'))
@@ -948,7 +956,7 @@ export default defineComponent({
 
       const payload = {
         partyId: this.selectedUser.partyId,
-        statusId: isChecked ? 'PARTY_ENABLED' : 'PARTY_DISABLED'
+        statusId: isChecked ? 'PARTY_DISABLED' : 'PARTY_ENABLED'
       }
 
       emitter.emit('presentLoader')
@@ -1020,6 +1028,11 @@ export default defineComponent({
       }
 
       return securityGroups.filter((group: any) => !excludedSecurityGroups.includes(group.groupId))
+    },
+    // Currently a user is getting associated with two roles at a time i.e., 'WAREHOUSE_MANAGER' and 'FAC_LOGIN'
+    // And here we only want to show records of 'WAREHOUSE_MANAGER'
+    getUserFacilities() {
+      return this.selectedUser.facilities.filter((facility: any) => facility.roleTypeId === 'WAREHOUSE_MANAGER')
     }
   },
   setup() {

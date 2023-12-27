@@ -360,7 +360,7 @@ const getUserFacilities = async (partyId: string): Promise<any> => {
   let facilities = []
   const payload = {
     inputFields: {
-      partyId,
+      partyId
     },
     noConditionFind: "Y",
     filterByDate: "Y",
@@ -588,6 +588,28 @@ const finishSetup = async (payload: any): Promise <any> => {
           "roleTypeId" : payload.selectedTemplate.facilityRoleTypeId ? payload.selectedTemplate.facilityRoleTypeId :  "WAREHOUSE_MANAGER",
         }));
       });
+
+      if(selectedUser.partyTypeId === "PARTY_GROUP") {
+        // Considering facility login can only be associated with only one facility.
+        const facilityId = facilitiesToAdd.length ? facilitiesToAdd[0].facilityId : selectedUser.facilityId
+
+        //Create role type if not exists. This is required for associating facility login user to facility.
+        if (!await UserService.isRoleTypeExists("FAC_LOGIN")) {
+          const resp = await UserService.createRoleType({
+            "roleTypeId": "FAC_LOGIN",
+            "description": "Facility Login",
+          })
+          if (hasError(resp)) {
+            throw resp.data;
+          }
+        }
+
+        promises.push(addPartyToFacility({
+          "partyId": partyId,
+          "facilityId": facilityId,
+          "roleTypeId": "FAC_LOGIN"
+        }));
+      }
     }
 
     await Promise.all(promises).then(responses => {
@@ -600,6 +622,39 @@ const finishSetup = async (payload: any): Promise <any> => {
     
   } catch (error: any) {
     return Promise.reject(error)
+  }
+}
+
+const createRoleType = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/createRoleType",
+    method: "post",
+    data: payload
+  });
+}
+
+const isRoleTypeExists = async (roleTypeId: string): Promise<any> => {
+  try {
+
+    const resp = await api({
+      url: 'performFind',
+      method: 'POST',
+      data: {
+        entityName: "RoleType",
+        inputFields: {
+          roleTypeId: roleTypeId
+        },
+        viewSize: 1,
+        fieldList: ['roleTypeId'],
+        noConditionFind: 'Y'
+      }
+    }) as any
+    if (!hasError(resp) && resp.data.docs.length) {
+      return true
+    }
+    return false
+  } catch (err) {
+    return false
   }
 }
 
@@ -673,6 +728,7 @@ export const UserService = {
   createUpdatePartyEmailAddress,
   createUpdatePartyTelecomNumber,
   createProductStoreRole,
+  createRoleType,
   deletePartyContactMech,
   deletePartyRole,
   ensurePartyRole,
@@ -689,6 +745,7 @@ export const UserService = {
   getUserProductStores,
   getUserSecurityGroup,
   isUserLoginIdAlreadyExists,
+  isRoleTypeExists,
   login,
   removePartyFromFacility,
   resetPassword,
