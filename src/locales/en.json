@@ -170,7 +170,7 @@
   "This is the name of the OMS you are connected to right now. Make sure that you are connected to the right instance before proceeding.": "This is the name of the OMS you are connected to right now. Make sure that you are connected to the right instance before proceeding.",
   "This user was disabled due to repeated failed password attempts": "This user was disabled due to repeated failed password attempts",
   "Unblock user login": "Unblock user login",
-  "Unblock this user from logging into HotWax Commerce. Logout can be re-enabled later by disabling this setting.": "Unblock this user from logging into HotWax Commerce. Logout can be re-enabled later by disabling this setting.",
+  "Unblocking a user will allow them to login to the OMS again with their credentials.": "Unblocking a user will allow them to login to the OMS again with their credentials.",
   "Update product store role": "Update product store role",
   "Update security group": "Update security group",
   "Update time zone": "Update time zone",
