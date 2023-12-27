@@ -44,7 +44,7 @@
                 <ion-item lines="none">
                   <ion-icon :icon="cloudyNightOutline" slot="start" />
                   <ion-label>{{ translate("Disable user") }}</ion-label>
-                  <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click="updateUserStatus($event)" slot="end" />
+                  <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click="updateUserStatus($event)" slot="end" />
                 </ion-item>
               </div>
             </ion-card>
@@ -830,7 +830,7 @@ export default defineComponent({
 
       const payload = {
         partyId: this.selectedUser.partyId,
-        statusId: isChecked ? 'PARTY_ENABLED' : 'PARTY_DISABLED'
+        statusId: isChecked ? 'PARTY_DISABLED' : 'PARTY_ENABLED'
       }
 
       emitter.emit('presentLoader')
