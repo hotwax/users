@@ -562,7 +562,7 @@ const finishSetup = async (payload: any): Promise <any> => {
 
     if (payload.facilities.length > 0) {
       const selectedFacilityIds = new Set(payload.facilities.map((facility: any) => facility.facilityId));
-      let facilitiesToAdd = payload.facilities.filter((facility: any) => !selectedUser.facilities?.some((fac: any) => fac.facilityId === facility.facilityId));
+      const facilitiesToAdd = payload.facilities.filter((facility: any) => !selectedUser.facilities?.some((fac: any) => fac.facilityId === facility.facilityId));
       const facilitiestoDelete = selectedUser.facilities?.filter((facility: any) => !selectedFacilityIds.has(facility.facilityId));
 
       //This is ensure that party have required role before associating it in FacilityParty. Because below logic is executing in parallel.
@@ -590,9 +590,8 @@ const finishSetup = async (payload: any): Promise <any> => {
       });
 
       if(selectedUser.partyTypeId === "PARTY_GROUP") {
-        if (!facilitiesToAdd.length && !facilitiestoDelete.length) {
-          facilitiesToAdd = selectedUser.facilities
-        }
+        // Considering facility login can only be associated with only one facility.
+        const facilityId = facilitiesToAdd.length ? facilitiesToAdd[0].facilityId : selectedUser.facilityId
 
         //Create role type if not exists. This is required for associating facility login user to facility.
         if (!await UserService.isRoleTypeExists("FAC_LOGIN")) {
@@ -604,26 +603,12 @@ const finishSetup = async (payload: any): Promise <any> => {
             throw resp.data;
           }
         }
-  
-        facilitiestoDelete?.map((facility: any) => {
-          const facilityLogin = selectedUser.facilities.find((selectedFacility: any) => selectedFacility.facilityId === facility.facilityId && selectedFacility.roleTypeId === 'FAC_LOGIN')
 
-          promises.push(removePartyFromFacility({
-            partyId: partyId,
-            facilityId: facility.facilityId,
-            roleTypeId: "FAC_LOGIN",
-            fromDate: facilityLogin.fromDate,
-            thruDate: DateTime.now().toMillis()
-          }));
-        });
-  
-        facilitiesToAdd?.map((facility: any) => {
-          promises.push(addPartyToFacility({
-            "partyId": partyId,
-            "facilityId": facility.facilityId,
-            "roleTypeId": "FAC_LOGIN"
-          }));
-        });
+        promises.push(addPartyToFacility({
+          "partyId": partyId,
+          "facilityId": facilityId,
+          "roleTypeId": "FAC_LOGIN"
+        }));
       }
     }
 
