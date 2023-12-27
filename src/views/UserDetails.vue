@@ -503,7 +503,7 @@ export default defineComponent({
 
       const isChecked = !event.target.checked;
       const header = isChecked ? 'Block user login' : 'Unblock user login'
-      const message = 'Are you sure you want to perform this action?'
+      const message = isChecked ? 'Block this user from logging into HotWax Commerce. Login can be re-enabled by disabling this setting' : 'Unblocking a user will allow them to login to the OMS again with their credentials.'
 
       const alert = await alertController.create({
         header: translate(header),
