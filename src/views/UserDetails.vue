@@ -10,7 +10,7 @@
     <ion-content>
       <main>
         <section class="user-details">
-          <ion-card v-if="isUserFetched || selectedUser.userLoginId" class="profile">
+          <ion-card v-if="isUserFetched || Object.keys(selectedUser).length" class="profile">
             <div>
               <ion-item lines="none">
                 <ion-avatar slot="start">
@@ -25,7 +25,7 @@
                 <ion-button fill="outline" @click="editName">{{ translate('Edit') }}</ion-button>
               </ion-item>
             </div>
-            <div>
+            <div v-if="isUserFetched">
               <ion-item @click="openCreatedByUserDetail" detail button>
                 <ion-icon :icon="bodyOutline" slot="start" />
                 <ion-label >{{ translate("Created by", {userLoginId: selectedUser.createdByUserLogin}) }}</ion-label>
@@ -36,6 +36,21 @@
                 <ion-label v-else>{{ translate("Replace profile picture") }}</ion-label>
                 <input @change="uploadImage" class="ion-hide" type="file" accept="image/*" id="profilePic"/>
                 <label for="profilePic">{{ translate("Upload") }}</label>
+              </ion-item>
+              <ion-item lines="none">
+                <ion-icon :icon="cloudyNightOutline" slot="start" />
+                <ion-label>{{ translate("Disable user") }}</ion-label>
+                <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click="updateUserStatus($event)" slot="end" />
+              </ion-item>
+            </div>
+            <div v-else>
+              <ion-item detail button>
+                <ion-icon :icon="bodyOutline" slot="start" />
+                <ion-label >{{ translate("Created by", {userLoginId: selectedUser.createdByUserLogin}) }}</ion-label>
+              </ion-item>
+              <ion-item>
+                <ion-icon :icon="cameraOutline" slot="start" />
+                <ion-skeleton-text animated style="width: 100%; height: 40%;" />
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
@@ -59,18 +74,18 @@
               </ion-item>
             </div>
             <div>
-              <ion-item @click="openCreatedByUserDetail" detail button>
+              <ion-item detail button>
                 <ion-icon :icon="bodyOutline" slot="start" />
-                <ion-skeleton-text animated style="height: 50%; width: 100%;" />
+                <ion-skeleton-text animated />
               </ion-item>
               <ion-item>
                 <ion-icon :icon="cameraOutline" slot="start" />
-                <ion-skeleton-text animated style="height: 50%; width: 100%;" />
+                <ion-skeleton-text animated />
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
                 <ion-label>{{ translate("Disable user") }}</ion-label>
-                <ion-skeleton-text animated style="height: 50%; width: 30%;" />
+                <ion-skeleton-text animated style="width: 30%;" />
               </ion-item>
             </div>
           </ion-card>
@@ -134,14 +149,14 @@
             <ion-list>
               <ion-item>
                 <ion-label>{{ translate('Username') }}</ion-label>
-                <ion-skeleton-text animated style="width: 40%; height: 40%;" />
+                <ion-skeleton-text animated style="width: 40%;" />
               </ion-item>
               <ion-item>
                 <ion-label>{{ translate("Block login") }}</ion-label>
-                <ion-skeleton-text animated style="width: 40%; height: 40%;" />
+                <ion-skeleton-text animated style="width: 40%;" />
               </ion-item>
             </ion-list>
-            <ion-button @click="resetPassword()" disabled fill="outline" color="warning" expand="block">
+            <ion-button disabled fill="outline" color="warning" expand="block">
               {{ translate('Reset password') }}
             </ion-button>
           </ion-card>
@@ -194,15 +209,15 @@
             <ion-list>
               <ion-item>
                 <ion-icon :icon="mailOutline" slot="start" />
-                <ion-skeleton-text animated style="width: 100%; height: 40%;" />
+                <ion-skeleton-text animated />
               </ion-item>
               <ion-item>
                 <ion-icon :icon="callOutline" slot="start" />
-                <ion-skeleton-text animated style="width: 100%; height: 40%;" />
+                <ion-skeleton-text animated />
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="businessOutline" slot="start" />
-                <ion-skeleton-text animated style="width: 100%; height: 40%;" />
+                <ion-skeleton-text animated />
               </ion-item>
             </ion-list>
           </ion-card>
@@ -262,7 +277,7 @@
             <ion-item lines="none">
               <ion-icon :icon="businessOutline" slot="start" />
               <ion-label>{{ translate('Security Group') }}</ion-label>        
-              <ion-skeleton-text animated style="width: 40%; height: 40%;" />
+              <ion-skeleton-text animated style="width: 40%;" />
             </ion-item>
             <ion-button disabled fill="outline" expand="block">
               <ion-icon :icon="addOutline" slot='start' />
@@ -294,10 +309,10 @@
             </ion-card-header>
             <ion-list>
               <ion-item>
-                <ion-skeleton-text animated style="width: 100%; height: 40%;" />
+                <ion-skeleton-text animated />
               </ion-item>
               <ion-item lines="none" button >
-                <ion-skeleton-text animated style="width: 100%; height: 40%;" />
+                <ion-skeleton-text animated />
               </ion-item>
             </ion-list>
           </ion-card>
@@ -328,6 +343,7 @@ import {
   IonPage,
   IonSelect,
   IonSelectOption,
+  IonSkeletonText,
   IonText,
   IonTitle,
   IonToggle,
@@ -386,6 +402,7 @@ export default defineComponent({
     IonPage,
     IonSelect,
     IonSelectOption,
+    IonSkeletonText,
     IonText,
     IonTitle,
     IonToggle,
@@ -1054,7 +1071,8 @@ ion-card>ion-button[expand="block"] {
 }
 
 ion-skeleton-text {
-  height: 100%;
+  width: 100%;
+  height: 40%;
 }
 
 @media (min-width: 700px) {

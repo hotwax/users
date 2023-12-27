@@ -246,8 +246,7 @@ export default defineComponent({
       await this.store.dispatch('user/fetchUsers', payload)
     },
     async viewUserDetails(user: any) {
-      console.log(user);
-      this.store.dispatch('user/updateSelectedUser', user)
+      await this.store.dispatch('user/updateSelectedUser', user)
       this.router.push({ path: `/user-details/${user.partyId}` })
     },
     async loadMoreUsers(event: any) {
@@ -272,7 +271,7 @@ export default defineComponent({
         entityName: 'PartyAndUserLoginSecurityGroupDetails',
         noConditionFind: 'Y',
         distinct: 'Y',
-        fieldList: ['createdDate', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'userLoginId'],
+        fieldList: ['createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
       }
 
       try {
