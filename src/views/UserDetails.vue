@@ -51,7 +51,7 @@
                 </ion-item>
                 <ion-item>
                   <ion-icon :icon="cameraOutline" slot="start" />
-                  <ion-skeleton-text animated style="width: 100%; height: 40%;" />
+                  <ion-skeleton-text animated />
                 </ion-item>
                 <ion-item lines="none">
                   <ion-icon :icon="cloudyNightOutline" slot="start" />
@@ -63,9 +63,7 @@
             <ion-card v-else class="profile">
               <div>
                 <ion-item lines="none">
-                  <ion-avatar slot="start">
-                    <Image :src="imageUrl"/>
-                  </ion-avatar>
+                  <ion-skeleton-text animated style="width: 10%;"/>
                   <ion-label class="ion-margin-start">
                     <ion-skeleton-text animated />
                     <ion-skeleton-text animated />
@@ -75,7 +73,7 @@
                 </ion-item>
               </div>
               <div>
-                <ion-item detail button>
+                <ion-item>
                   <ion-icon :icon="bodyOutline" slot="start" />
                   <ion-skeleton-text animated />
                 </ion-item>
@@ -312,7 +310,7 @@
                 <ion-item>
                   <ion-skeleton-text animated />
                 </ion-item>
-                <ion-item lines="none" button >
+                <ion-item lines="none">
                   <ion-skeleton-text animated />
                 </ion-item>
               </ion-list>
