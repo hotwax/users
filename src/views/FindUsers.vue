@@ -47,7 +47,7 @@
         </aside>
 
         <main v-if="users?.length">
-          <ion-card class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser.partyId)>
+          <ion-card class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser)>
             <ion-item lines="none">
               <ion-label>
                 {{ currentUser.groupName ? currentUser.groupName : `${currentUser.firstName} ${currentUser.lastName}` }}
@@ -78,7 +78,7 @@
               </div>
             </ion-item>
           </ion-card>
-          <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user.partyId)>
+          <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user)>
             <ion-item lines="none">
               <ion-label>
                 {{ user.groupName ? user.groupName : `${user.firstName} ${user.lastName}` }}
@@ -252,8 +252,9 @@ export default defineComponent({
       };
       await this.store.dispatch('user/fetchUsers', payload)
     },
-    async viewUserDetails(partyId: string) {
-      this.router.push({ path: `/user-details/${partyId}` })
+    async viewUserDetails(user: any) {
+      await this.store.dispatch('user/updateSelectedUser', user)
+      this.router.push({ path: `/user-details/${user.partyId}` })
     },
     async loadMoreUsers(event: any) {
       this.fetchUsers(
@@ -277,7 +278,7 @@ export default defineComponent({
         entityName: 'PartyAndUserLoginSecurityGroupDetails',
         noConditionFind: 'Y',
         distinct: 'Y',
-        fieldList: ['createdDate', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'userLoginId'],
+        fieldList: ['createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
       }
 
       try {

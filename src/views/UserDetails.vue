@@ -9,12 +9,8 @@
 
     <ion-content>
       <main>
-        <div v-if="!Object.keys(selectedUser).length" class="ion-text-center ion-padding-top">
-          {{ translate("Failed to fetch user data") }}
-        </div>
-        <template v-else>
           <section class="user-details">
-            <ion-card class="profile">
+            <ion-card v-if="isUserFetched || Object.keys(selectedUser).length" class="profile">
               <div>
                 <ion-item lines="none">
                   <ion-avatar slot="start">
@@ -29,7 +25,7 @@
                   <ion-button fill="outline" @click="editName">{{ translate('Edit') }}</ion-button>
                 </ion-item>
               </div>
-              <div>
+              <div v-if="isUserFetched">
                 <ion-item @click="openCreatedByUserDetail" detail button>
                   <ion-icon :icon="bodyOutline" slot="start" />
                   <ion-label v-if="isCreatedBySystem()">{{ translate("Created by", { userLoginId: "&#129502;" }) }}</ion-label>
@@ -48,11 +44,54 @@
                   <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click="updateUserStatus($event)" slot="end" />
                 </ion-item>
               </div>
+              <div v-else>
+                <ion-item detail button>
+                  <ion-icon :icon="bodyOutline" slot="start" />
+                  <ion-label >{{ translate("Created by", {userLoginId: selectedUser.createdByUserLogin}) }}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-icon :icon="cameraOutline" slot="start" />
+                  <ion-skeleton-text animated />
+                </ion-item>
+                <ion-item lines="none">
+                  <ion-icon :icon="cloudyNightOutline" slot="start" />
+                  <ion-label>{{ translate("Disable user") }}</ion-label>
+                  <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click="updateUserStatus($event)" slot="end" />
+                </ion-item>
+              </div>
+            </ion-card>
+            <ion-card v-else class="profile">
+              <div>
+                <ion-item lines="none">
+                  <ion-skeleton-text animated style="width: 10%;"/>
+                  <ion-label class="ion-margin-start">
+                    <ion-skeleton-text animated />
+                    <ion-skeleton-text animated />
+                    <ion-skeleton-text animated />
+                    <ion-skeleton-text animated />
+                  </ion-label>
+                </ion-item>
+              </div>
+              <div>
+                <ion-item>
+                  <ion-icon :icon="bodyOutline" slot="start" />
+                  <ion-skeleton-text animated />
+                </ion-item>
+                <ion-item>
+                  <ion-icon :icon="cameraOutline" slot="start" />
+                  <ion-skeleton-text animated />
+                </ion-item>
+                <ion-item lines="none">
+                  <ion-icon :icon="cloudyNightOutline" slot="start" />
+                  <ion-label>{{ translate("Disable user") }}</ion-label>
+                  <ion-skeleton-text animated style="width: 30%;" />
+                </ion-item>
+              </div>
             </ion-card>
           </section>
 
           <section class="user-details">
-            <ion-card>
+            <ion-card v-if="isUserFetched || selectedUser.userLoginId">
               <ion-card-header>
                 <ion-card-title>
                   {{ translate('Login details') }}
@@ -100,8 +139,28 @@
                 </ion-button>
               </template>
             </ion-card>
+            <ion-card v-else>
+              <ion-card-header>
+                <ion-card-title>
+                  {{ translate('Login details') }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-list>
+                <ion-item>
+                  <ion-label>{{ translate('Username') }}</ion-label>
+                  <ion-skeleton-text animated style="width: 40%;" />
+                </ion-item>
+                <ion-item>
+                  <ion-label>{{ translate("Block login") }}</ion-label>
+                  <ion-skeleton-text animated style="width: 40%;" />
+                </ion-item>
+              </ion-list>
+              <ion-button disabled fill="outline" color="warning" expand="block">
+                {{ translate('Reset password') }}
+              </ion-button>
+            </ion-card>
     
-            <ion-card>
+            <ion-card v-if="isUserFetched">
               <ion-card-header>
                 <ion-card-title>
                   {{ translate('Contact details') }}
@@ -140,6 +199,27 @@
                 </ion-item>
               </ion-list>
             </ion-card>
+            <ion-card v-else>
+              <ion-card-header>
+                <ion-card-title>
+                  {{ translate('Contact details') }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-list>
+                <ion-item>
+                  <ion-icon :icon="mailOutline" slot="start" />
+                  <ion-skeleton-text animated />
+                </ion-item>
+                <ion-item>
+                  <ion-icon :icon="callOutline" slot="start" />
+                  <ion-skeleton-text animated />
+                </ion-item>
+                <ion-item lines="none">
+                  <ion-icon :icon="businessOutline" slot="start" />
+                  <ion-skeleton-text animated />
+                </ion-item>
+              </ion-list>
+            </ion-card>
           </section>
 
           <div class="section-header">
@@ -147,7 +227,7 @@
           </div>
 
           <section class="user-details">
-            <ion-card>
+            <ion-card v-if="isUserFetched">
               <ion-card-header>
                 <ion-card-title>
                   {{ translate('Clearance') }}
@@ -187,7 +267,24 @@
                 </ion-item>
               </ion-list>
             </ion-card>
-            <ion-card>
+            <ion-card v-else>
+              <ion-card-header>
+                <ion-card-title>
+                  {{ translate('Clearance') }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-item lines="none">
+                <ion-icon :icon="businessOutline" slot="start" />
+                <ion-label>{{ translate('Security Group') }}</ion-label>        
+                <ion-skeleton-text animated style="width: 40%;" />
+              </ion-item>
+              <ion-button disabled fill="outline" expand="block">
+                <ion-icon :icon="addOutline" slot='start' />
+                {{ translate('Add to a product store') }}
+              </ion-button>
+            </ion-card>
+
+            <ion-card v-if="isUserFetched">
               <ion-card-header>
                 <ion-card-title>
                   {{ translate('Fulfillment') }}
@@ -203,8 +300,22 @@
                 </ion-item>
               </ion-list>
             </ion-card>
+            <ion-card v-else>
+              <ion-card-header>
+                <ion-card-title>
+                  {{ translate('Fulfillment') }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-list>
+                <ion-item>
+                  <ion-skeleton-text animated />
+                </ion-item>
+                <ion-item lines="none">
+                  <ion-skeleton-text animated />
+                </ion-item>
+              </ion-list>
+            </ion-card>
           </section>
-        </template>
       </main>
     </ion-content>
   </ion-page>
@@ -231,6 +342,7 @@ import {
   IonPage,
   IonSelect,
   IonSelectOption,
+  IonSkeletonText,
   IonText,
   IonTitle,
   IonToggle,
@@ -289,6 +401,7 @@ export default defineComponent({
     IonPage,
     IonSelect,
     IonSelectOption,
+    IonSkeletonText,
     IonText,
     IonTitle,
     IonToggle,
@@ -325,13 +438,16 @@ export default defineComponent({
       username: "",
       password: "",
       isUserEnabled: false as boolean,
-      imageUrl: ""
+      imageUrl: "",
+      isUserFetched: false
     }
   },
   async ionViewWillEnter() {
+    this.isUserFetched = false
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
     await this.fetchProfileImage()
     await this.store.dispatch('util/getSecurityGroups');
+    this.isUserFetched = true
   },
   methods: {
     async openContactActionsPopover(event: Event, type: string, value: string) {
@@ -963,6 +1079,11 @@ export default defineComponent({
 ion-card>ion-button[expand="block"] {
   margin-inline: var(--spacer-sm);
   margin-bottom: var(--spacer-sm);
+}
+
+ion-skeleton-text {
+  width: 100%;
+  height: 40%;
 }
 
 @media (min-width: 700px) {

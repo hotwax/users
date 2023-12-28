@@ -159,8 +159,6 @@ const actions: ActionTree<UserState, RootState> = {
       return
     }
 
-    emitter.emit('presentLoader')
-
     let userResp = {} as any, selectedUser = {} as any, params = {
       inputFields: {
         "roleTypeIdTo": "APPLICATION_USER",
@@ -271,7 +269,6 @@ const actions: ActionTree<UserState, RootState> = {
     }
 
     commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
-    emitter.emit('dismissLoader')
   },
 
   updateSelectedUser({ commit }, selectedUser) {
@@ -336,7 +333,7 @@ const actions: ActionTree<UserState, RootState> = {
       "entityName": "PartyAndUserLoginSecurityGroupDetails",
       "noConditionFind": "Y",
       "distinct": "Y",
-      "fieldList": ['createdDate', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'userLoginId'],
+      "fieldList": ['createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
       "viewIndex": payload.viewIndex,
       "viewSize": payload.viewSize
     }
