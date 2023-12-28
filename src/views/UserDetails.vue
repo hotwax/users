@@ -124,8 +124,7 @@
                 <ion-list>
                   <ion-item lines="full">
                     <ion-label class="ion-text-wrap" position="fixed">{{ translate("Username") }} <ion-text color="danger">*</ion-text></ion-label>
-                    <ion-input :placeholder="selectedUser.groupName ? (selectedUser.groupName)?.toLowerCase() : (`${selectedUser.firstName}.${selectedUser.lastName}`?.toLowerCase())" 
-                        name="username" v-model="username" id="username" required />
+                    <ion-input name="username" v-model="username" id="username" required />
                   </ion-item>
                   <ion-item ref="password">
                     <ion-label class="ion-text-wrap" position="fixed">{{ translate("Password") }} <ion-text color="danger">*</ion-text></ion-label>
@@ -448,6 +447,7 @@ export default defineComponent({
     await this.fetchProfileImage()
     await this.store.dispatch('util/getSecurityGroups');
     this.isUserFetched = true
+    this.username = this.selectedUser.groupName ? (this.selectedUser.groupName)?.toLowerCase() : (`${this.selectedUser.firstName}.${this.selectedUser.lastName}`?.toLowerCase())
   },
   methods: {
     async openContactActionsPopover(event: Event, type: string, value: string) {
@@ -581,9 +581,18 @@ export default defineComponent({
     },
     async createNewUserLogin() {
       this.username = this.username.trim()
+      let missingFields = ''
 
+      if(!this.password && !this.username) {
+        missingFields = 'username and password'
+      } else if(!this.password) {
+        missingFields = 'password'
+      } else if(!this.username){
+        missingFields = 'username'
+      }
+      
       if (!this.password || !this.username) {
-        translate('Username or password cannot be empty.')
+        showToast(translate("Please add a to create a user login", { missingFields }))
         return
       }
 
