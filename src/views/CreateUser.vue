@@ -11,55 +11,48 @@
         <h1 class="ion-margin-start">{{ translate('Create a new user') }}</h1>
         <ion-item>
           <ion-icon slot="start" :icon="desktopOutline"/>
-          <ion-label>
-            {{ translate("Facility login") }}
-          </ion-label>
-          <ion-toggle :checked="isFacilityLogin" @ionChange="updateFacilityLogin" slot="end" />
+          <ion-toggle :checked="isFacilityLogin" @ionChange="updateFacilityLogin" label-placement="start" justify="space-between">{{ translate("Facility login") }}</ion-toggle>
         </ion-item>
         <template v-if="isFacilityLogin">
           <ion-item>
             <ion-icon slot="start" :icon="businessOutline"/>
-            <ion-label>
-              {{ translate("Select facility") }} <ion-text color="danger">*</ion-text>
-            </ion-label>
             <ion-select interface="popover" v-model="formData.facilityId" @ionChange="updateGroupName">
+              <div slot="label">{{ translate("Select facility") }} <ion-text color="danger">*</ion-text></div>
               <ion-select-option v-for="facility in (facilities ? facilities : [])" :key="facility.facilityId" :value="facility.facilityId">{{ facility.facilityName }}</ion-select-option>
             </ion-select>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ translate('Name') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.groupName"></ion-input>
+            <ion-input label-placement="floating">
+              <div slot="label">{{ translate('Name') }} <ion-text color="danger">*</ion-text></div>
+            </ion-input>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ translate('Reset password email') }}</ion-label>
-            <ion-input v-model="formData.emailAddress" type="email"></ion-input>
+            <ion-input :label="translate('Reset password email')" label-placement="floating" v-model="formData.emailAddress" type="email"></ion-input>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ translate('Facility contact number') }}</ion-label>
-            <ion-input v-model="formData.contactNumber" type="tel"></ion-input>
+            <ion-input :label="translate('Facility contact number')" label-placement="floating" v-model="formData.contactNumber" type="tel"></ion-input>
           </ion-item>
         </template>
         <template v-else>
           <ion-item>
-            <ion-label position="floating">{{ translate('First name') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.firstName" autofocus></ion-input>
+            <ion-input label-placement="floating" v-model="formData.firstName" autofocus>
+              <div slot="label">{{ translate('First name') }} <ion-text color="danger">*</ion-text></div>
+            </ion-input>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ translate('Last name') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.lastName"></ion-input>
+            <ion-input label-placement="floating" v-model="formData.lastName">
+              <div slot="label">{{ translate('Last name') }} <ion-text color="danger">*</ion-text></div>
+            </ion-input>
           </ion-item>
 
           <ion-item class="ion-margin-top">
-            <ion-label position="floating">{{ translate('Employee ID') }}</ion-label>
-            <ion-input v-model="formData.externalId"></ion-input>
+            <ion-input :label="translate('Employee ID')" label-placement="floating" v-model="formData.externalId"></ion-input>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ translate('Email') }}</ion-label>
-            <ion-input v-model="formData.emailAddress" type="email"></ion-input>
+            <ion-input :label="translate('Email')" label-placement="floating" v-model="formData.emailAddress" type="email"></ion-input>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ translate('Phone number') }}</ion-label>
-            <ion-input v-model="formData.contactNumber" type="tel"></ion-input>
+            <ion-input :label="translate('Phone number')" label-placement="floating" v-model="formData.contactNumber" type="tel"></ion-input>
           </ion-item>
         </template>
         <ion-button class="ion-margin-top" @click="createUser()">
@@ -79,7 +72,6 @@ import {
   IonHeader,
   IonIcon,
   IonItem,
-  IonLabel,
   IonPage,
   IonText,
   IonTitle,
@@ -111,7 +103,6 @@ export default defineComponent({
     IonHeader,
     IonIcon,
     IonItem,
-    IonLabel,
     IonPage,
     IonText,
     IonTitle,

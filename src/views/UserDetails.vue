@@ -40,8 +40,9 @@
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
-                <ion-label>{{ translate("Disable user") }}</ion-label>
-                <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click="updateUserStatus($event)" slot="end" />
+                <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click.prevent="updateUserStatus($event)" label-placement="start" justify="space-between">
+                  {{ translate("Disable user") }}
+                </ion-toggle>
               </ion-item>
             </div>
             <div v-else>
@@ -55,8 +56,9 @@
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
-                <ion-label>{{ translate("Disable user") }}</ion-label>
-                <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click="updateUserStatus($event)" slot="end" />
+                <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click.prevent="updateUserStatus($event)" label-placement="start" justify="space-between">
+                  {{ translate("Disable user") }}
+                </ion-toggle>
               </ion-item>
             </div>
           </ion-card>
@@ -112,8 +114,9 @@
                   <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
                 </ion-item>
                 <ion-item>
-                  <ion-label>{{ translate("Block login") }}</ion-label>
-                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
+                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" label-placement="start" justify="space-between" @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'">
+                    {{ translate("Block login") }}
+                  </ion-toggle>
                 </ion-item>
               </ion-list>
               <ion-button @click="resetPassword()" fill="outline" color="warning" expand="block">
@@ -123,14 +126,25 @@
             <template v-else>
               <ion-list>
                 <ion-item lines="full">
-                  <ion-label class="ion-text-wrap" position="fixed">{{ translate("Username") }} <ion-text color="danger">*</ion-text></ion-label>
-                  <ion-input name="username" v-model="username" id="username" required />
+                  <ion-input label-placement="fixed" name="username" v-model="username" id="username">
+                    <div slot="label">{{ translate("Username") }} <ion-text color="danger">*</ion-text></div>
+                  </ion-input>
                 </ion-item>
                 <ion-item ref="password">
-                  <ion-label class="ion-text-wrap" position="fixed">{{ translate("Password") }} <ion-text color="danger">*</ion-text></ion-label>
-                  <ion-input :placeholder="translate('Default password')" name="password" v-model="password" id="password" type="password" @ionInput="validatePassword" @ionBlur="markPasswordTouched" required />
-                  <ion-note slot="helper">{{ translate('will be asked to reset their password when they login', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName }) }}</ion-note>
-                  <ion-note slot="error">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
+                  <ion-input 
+                    label-placement="fixed" 
+                    :placeholder="translate('Default password')" 
+                    name="password" 
+                    v-model="password" 
+                    id="password" 
+                    type="password" 
+                    @ionInput="validatePassword" 
+                    @ionBlur="markPasswordTouched"
+                    :helper-text="translate('will be asked to reset their password when they login', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName })"
+                    :error-text="translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.')"
+                  >
+                    <div slot="label">{{ translate("Password") }} <ion-text color="danger">*</ion-text></div>
+                  </ion-input>
                 </ion-item>
               </ion-list>
               <ion-button @click="createNewUserLogin()" fill="outline" expand="block">
@@ -291,8 +305,9 @@
             </ion-card-header>
             <ion-list>
               <ion-item>
-                <ion-label>{{ translate("Show as picker") }}</ion-label>
-                <ion-toggle slot="end" :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)" @click="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true" />
+                <ion-toggle label-placement="start" justify="space-between" :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)" @click.prevent="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true">
+                  {{ translate("Show as picker") }}
+                </ion-toggle>
               </ion-item>
               <ion-item lines="none" button detail :disabled="!hasPermission(Actions.APP_UPDT_FULFILLMENT_FACILITY)" @click="selectFacility()">
                 <ion-label>{{  getUserFacilities().length === 1 ? translate('Added to 1 facility') : translate('Added to facilities', { count: getUserFacilities().length }) }}</ion-label>
@@ -337,7 +352,6 @@ import {
   IonList,
   IonListHeader,
   IonLabel,
-  IonNote,
   IonPage,
   IonSelect,
   IonSelectOption,
@@ -396,7 +410,6 @@ export default defineComponent({
     IonLabel,
     IonList,
     IonListHeader,
-    IonNote,
     IonPage,
     IonSelect,
     IonSelectOption,
