@@ -470,7 +470,7 @@ export default defineComponent({
     },
     async openCreatedByUserDetail() {
       if(this.isCreatedBySystem()) {
-        window.location.href = 'https://youtu.be/dQw4w9WgXcQ?si=cPE1jkfRLPiebJuW'
+        window.open('https://youtu.be/dQw4w9WgXcQ?si=cPE1jkfRLPiebJuW', '_blank');
       } else {
         this.router.push({ path: `/user-details/${this.selectedUser.createdByUserPartyId}` })
       }
