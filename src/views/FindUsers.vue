@@ -109,7 +109,7 @@
             </div>
           </div>
           <div v-else>
-           <p class="ion-text-center">{{ translate("No users found") }}</p>
+            <p class="ion-text-center">{{ translate("No users found") }}</p>
           </div>
         </main>
       </div>
