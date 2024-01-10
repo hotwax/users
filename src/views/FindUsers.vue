@@ -78,6 +78,7 @@
               </div>
             </ion-item>
           </ion-card>
+          
           <div v-if="users?.length">
             <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user)>
              <ion-item lines="none">
