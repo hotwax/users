@@ -128,7 +128,8 @@
                 </ion-item>
                 <ion-item ref="password">
                   <ion-label class="ion-text-wrap" position="fixed">{{ translate("Password") }} <ion-text color="danger">*</ion-text></ion-label>
-                  <ion-input :placeholder="translate('Default password')" name="password" v-model="password" id="password" type="password" @ionInput="validatePassword" @ionBlur="markPasswordTouched" required />
+                  <ion-input :placeholder="translate('Default password')" name="password" v-model="password" id="password" :type="showPassword ? 'text' : 'password'" @ionInput="validatePassword" required />
+                  <ion-icon :icon="showPassword ? eyeOffOutline : eyeOutline" slot="end" @click="showPassword = !showPassword" />
                   <ion-note slot="helper">{{ translate('will be asked to reset their password when they login', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName }) }}</ion-note>
                   <ion-note slot="error">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
                 </ion-item>
@@ -361,6 +362,8 @@ import {
   cameraOutline,
   cloudyNightOutline,
   ellipsisVerticalOutline,
+  eyeOffOutline,
+  eyeOutline,
   mailOutline,
   warningOutline
 } from 'ionicons/icons';
@@ -438,7 +441,8 @@ export default defineComponent({
       password: "",
       isUserEnabled: false as boolean,
       imageUrl: "",
-      isUserFetched: false
+      isUserFetched: false,
+      showPassword: false
     }
   },
   async ionViewWillEnter() {
@@ -1054,6 +1058,8 @@ export default defineComponent({
       cameraOutline,
       cloudyNightOutline,
       ellipsisVerticalOutline,
+      eyeOffOutline,
+      eyeOutline,
       hasPermission,
       mailOutline,
       router,
