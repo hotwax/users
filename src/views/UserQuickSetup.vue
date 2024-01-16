@@ -29,14 +29,14 @@
             <ion-note slot="error">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ isFacilityLogin() ? translate('Reset password email') : translate('Email') }} <ion-text color="danger">*</ion-text></ion-label>
+            <ion-label position="floating">{{ isFacilityLogin() ? translate('Reset password email') : translate('Email') }} <ion-text v-if="selectedUserTemplate.templateId !== 'INTEGRATION'" color="danger">*</ion-text></ion-label>
             <ion-input v-model="formData.emailAddress"></ion-input>
           </ion-item>
           <ion-item ion-margin-top>
             <ion-label>
               {{ translate("Require password reset on login") }}
             </ion-label>
-            <ion-toggle :checked="formData.requirePasswordChange" slot="end" />
+            <ion-toggle :disabled="selectedUserTemplate.isPasswordChangeDisabled" v-model="formData.requirePasswordChange" slot="end" />
           </ion-item>
         </template>
         <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isEmployeeIdRequired && !isFacilityLogin()">
@@ -227,6 +227,20 @@ export default defineComponent({
           "facilityRoleTypeId": "",
           "isProductStoreRequired": false,
           "productStoreRoleTypeId": ""
+        },
+        {
+          "templateId": "INTEGRATION",
+          "templateName": "Integration",
+          "securityGroupId": "INTEGRATION",
+          "roleTypeId": "",
+          "isUserLoginRequired": true,
+          "isEmployeeIdRequired": false,
+          "isFacilityRequired": false,
+          "isPasswordChangeRequired": false,
+          "isPasswordChangeDisabled": true,
+          "facilityRoleTypeId": "",
+          "isProductStoreRequired": false,
+          "productStoreRoleTypeId": ""
         }
       ]
     }
@@ -271,6 +285,9 @@ export default defineComponent({
           this.formData.userLoginId = this.selectedUserTemplate.isUserLoginRequired ? `${this.selectedUser.firstName.toLowerCase()}.${this.selectedUser.lastName.toLowerCase()}` : '';
         }
         this.formData.emailAddress = this.selectedUser.emailDetails?.email;
+        if(!this.selectedUserTemplate.isPasswordChangeRequired) {
+          this.formData.requirePasswordChange = false;
+        }
       }
     },
     clearFormData() {
@@ -311,7 +328,7 @@ export default defineComponent({
         if (!data.currentPassword) {
           validationErrors.push(translate('Password is required.'));
         }
-        if (!data.emailAddress) {
+        if (this.selectedUserTemplate.templateId !== 'INTEGRATION' && !data.emailAddress) {
           validationErrors.push(translate('Email is required.'));
         }
       }
