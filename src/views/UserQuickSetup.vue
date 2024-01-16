@@ -24,7 +24,10 @@
           </ion-item>
           <ion-item ref="password">
             <ion-label position="floating">{{ translate('Password') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.currentPassword" type="password" autocomplete="new-password" @ionInput="validatePassword" @ionBlur="markPasswordTouched"></ion-input>
+            <ion-input v-model="formData.currentPassword" :type="showPassword ? 'text' : 'password'" autocomplete="new-password" @ionInput="validatePassword" @ionBlur="markPasswordTouched"></ion-input>
+            <ion-button @click="showPassword = !showPassword" slot="end" fill="clear">
+              <ion-icon :icon="showPassword ? eyeOutline : eyeOffOutline" slot="icon-only" />
+            </ion-button>
             <ion-note slot="helper">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
             <ion-note slot="error">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
           </ion-item>
@@ -118,7 +121,9 @@ import {
   addCircleOutline,
   arrowForwardOutline,
   caretDownOutline,
-  documentTextOutline
+  documentTextOutline,
+  eyeOffOutline,
+  eyeOutline
 } from 'ionicons/icons';
 import { copyToClipboard, showToast, isValidPassword, isValidEmail } from '@/utils'
 import { translate } from "@hotwax/dxp-components";
@@ -164,6 +169,7 @@ export default defineComponent({
       facilities: [] as any,
       selectedFacilities: [] as any,
       selectedProductStores: [] as any,
+      showPassword: false,
       formData: {
         userLoginId: '',
         currentPassword: '',
@@ -473,6 +479,8 @@ export default defineComponent({
       arrowForwardOutline,
       caretDownOutline,
       documentTextOutline,
+      eyeOffOutline,
+      eyeOutline,
       translate
     };
   }
