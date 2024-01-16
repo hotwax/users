@@ -46,7 +46,7 @@
           </ion-list>
         </aside>
 
-        <main v-if="users?.length">
+        <main>
           <ion-card class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser)>
             <ion-item lines="none">
               <ion-label>
@@ -78,37 +78,39 @@
               </div>
             </ion-item>
           </ion-card>
-          <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user)>
-            <ion-item lines="none">
-              <ion-label>
-                {{ user.groupName ? user.groupName : `${user.firstName} ${user.lastName}` }}
-                <p>{{ user.userLoginId }}</p>
-                <p>{{ user.infoString }}</p>
-              </ion-label>
-            </ion-item>
+          <div v-if="users?.length">
+            <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user)>
+              <ion-item lines="none">
+                <ion-label>
+                  {{ user.groupName ? user.groupName : `${user.firstName} ${user.lastName}` }}
+                  <p>{{ user.userLoginId }}</p>
+                  <p>{{ user.infoString }}</p>
+                </ion-label>
+              </ion-item>
 
-            <div class="tablet">
-              <ion-label class="ion-text-center" v-if="user.createdDate">
-                {{ getDate(user.createdDate) }}
-                <p>{{ translate("created") }}</p>
-              </ion-label>
-              <ion-label v-else>
-                {{ '-' }}
-              </ion-label>
-            </div>
+              <div class="tablet">
+                <ion-label class="ion-text-center" v-if="user.createdDate">
+                  {{ getDate(user.createdDate) }}
+                  <p>{{ translate("created") }}</p>
+                </ion-label>
+                <ion-label v-else>
+                  {{ '-' }}
+                </ion-label>
+              </div>
 
-            <div class="tablet">
-              <ion-chip outline v-if="user.securityGroupId">
-                <ion-label>{{ user.securityGroupName }}</ion-label>
-              </ion-chip>
-              <ion-label v-else>
-                {{ '-' }}
-              </ion-label>
+              <div class="tablet">
+                <ion-chip outline v-if="user.securityGroupId">
+                  <ion-label>{{ user.securityGroupName }}</ion-label>
+                </ion-chip>
+                <ion-label v-else>
+                  {{ '-' }}
+                </ion-label>
+              </div>
             </div>
           </div>
-        </main>
-        <main v-else>
-          <p class="ion-text-center">{{ translate("No users found") }}</p>
+          <div v-else>
+            <p class="ion-text-center">{{ translate("No users found") }}</p>
+          </div>
         </main>
       </div>
 
