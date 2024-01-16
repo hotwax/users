@@ -100,10 +100,10 @@
 
               <div class="tablet">
                 <ion-chip outline v-if="user.securityGroupId">
-                 <ion-label>{{ user.securityGroupName }}</ion-label>
+                  <ion-label>{{ user.securityGroupName }}</ion-label>
                 </ion-chip>
                 <ion-label v-else>
-                 {{ '-' }}
+                  {{ '-' }}
                 </ion-label>
               </div>
             </div>
