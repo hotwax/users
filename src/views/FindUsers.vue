@@ -77,27 +77,26 @@
                 </ion-label>
               </div>
             </ion-item>
-          </ion-card>
-          
+          </ion-card>  
           <div v-if="users?.length">
             <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user)>
-             <ion-item lines="none">
-              <ion-label>
-                {{ user.groupName ? user.groupName : `${user.firstName} ${user.lastName}` }}
-                <p>{{ user.userLoginId }}</p>
-                <p>{{ user.infoString }}</p>
-              </ion-label>
-             </ion-item>
+              <ion-item lines="none">
+                <ion-label>
+                  {{ user.groupName ? user.groupName : `${user.firstName} ${user.lastName}` }}
+                  <p>{{ user.userLoginId }}</p>
+                  <p>{{ user.infoString }}</p>
+                </ion-label>
+              </ion-item>
 
-             <div class="tablet">
-              <ion-label class="ion-text-center" v-if="user.createdDate">
-                 {{ getDate(user.createdDate) }}
-                 <p>{{ translate("created") }}</p>
-              </ion-label>
-              <ion-label v-else>
-                {{ '-' }}
-              </ion-label>
-             </div>
+              <div class="tablet">
+                <ion-label class="ion-text-center" v-if="user.createdDate">
+                  {{ getDate(user.createdDate) }}
+                  <p>{{ translate("created") }}</p>
+                </ion-label>
+                <ion-label v-else>
+                  {{ '-' }}
+                </ion-label>
+              </div>
 
               <div class="tablet">
                 <ion-chip outline v-if="user.securityGroupId">
