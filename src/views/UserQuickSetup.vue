@@ -36,7 +36,7 @@
             <ion-label>
               {{ translate("Require password reset on login") }}
             </ion-label>
-            <ion-toggle :checked="formData.requirePasswordChange" slot="end" />
+            <ion-toggle v-model="formData.requirePasswordChange" slot="end" />
           </ion-item>
         </template>
         <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isEmployeeIdRequired && !isFacilityLogin()">
