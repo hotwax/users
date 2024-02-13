@@ -23,13 +23,10 @@
             <ion-item button detail>
               <ion-label>SecurityGroupId</ion-label>
             </ion-item>
-            <ion-item button detail>
-              <ion-label>SecurityGroupId</ion-label>
-            </ion-item>
           </ion-list>
 
-          <ion-button @click="createGroup()" fill="outline" expand="block">
-            <ion-icon :icon="addOutline" />
+          <ion-button @click="createGroup()" fill="clear" expand="block">
+            <ion-icon slot="start" :icon="addOutline" />
             <ion-label>{{ translate("Create security group") }}</ion-label>
           </ion-button>
         </aside>

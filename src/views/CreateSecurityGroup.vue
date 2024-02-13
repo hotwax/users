@@ -22,10 +22,12 @@
           <ion-textarea v-model="formData.description" />
         </ion-item>
 
-        <ion-button class="ion-margin-top" expand="block">
-          <ion-icon slot="start" :icon="addOutline" />
-          {{ translate("Create security group") }}
-        </ion-button>
+        <div class="ion-text-center ion-margin">
+          <ion-button>
+            <ion-icon slot="start" :icon="addOutline" />
+            {{ translate("Create security group") }}
+          </ion-button>
+        </div>
       </main>
     </ion-content>
   </ion-page>

@@ -156,9 +156,7 @@ ion-card-header {
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
 }
 
-
 @media screen and (min-width: 700px) {
-
   ion-content > main {
     margin: var(--spacer-lg)
   }
