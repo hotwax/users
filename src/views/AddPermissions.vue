@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>{{ translate("Users management") }}</ion-title>
+        <ion-title>{{ translate("Add permissions") }}</ion-title>
         <ion-buttons slot="end">
           <ion-button>
             <ion-icon :icon="downloadOutline" slot="icon-only" />
@@ -22,7 +22,7 @@
           </ion-item>
         </div>
         <hr />
-        <section class="permissions-section">
+        <section>
           <ion-card>
             <ion-card-header>
               <div>
@@ -72,6 +72,18 @@
         <hr />
       </main>
     </ion-content>
+
+    <ion-footer>
+      <ion-toolbar>
+        <ion-item slot="end">
+          <ion-button color="medium" fill="clear" class="ion-margin-end">{{ translate("Add later") }}</ion-button>
+          <ion-button>
+            <ion-icon :icon="checkmarkDoneOutline" />
+            {{ translate("Add permissions") }}
+          </ion-button>
+        </ion-item>
+      </ion-toolbar>
+    </ion-footer>
   </ion-page>
 </template>
 
@@ -85,6 +97,7 @@ import {
   IonCardTitle,
   IonCheckbox,
   IonContent,
+  IonFooter,
   IonHeader,
   IonIcon,
   IonItem,
@@ -99,6 +112,7 @@ import { defineComponent } from 'vue';
 import { translate } from '@hotwax/dxp-components';
 import {
   addOutline,
+  checkmarkDoneOutline,
   downloadOutline,
   shieldCheckmarkOutline
 } from 'ionicons/icons';
@@ -115,6 +129,7 @@ export default defineComponent({
     IonCardTitle,
     IonCheckbox,
     IonContent,
+    IonFooter,
     IonHeader,
     IonIcon,
     IonItem,
@@ -135,6 +150,7 @@ export default defineComponent({
 
     return {
       addOutline,
+      checkmarkDoneOutline,
       downloadOutline,
       shieldCheckmarkOutline,
       router,
@@ -150,8 +166,7 @@ ion-card-header {
   justify-content: space-between;
   align-items: center;
 }
-
-.permissions-section {
+section {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
 }
