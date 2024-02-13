@@ -41,7 +41,7 @@
             </ion-item>
           </div>
           <hr />
-          <section class="permissions-section">
+          <section>
             <ion-card>
               <ion-card-header>
                 <div>
