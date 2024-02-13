@@ -28,7 +28,7 @@
             </ion-item>
           </ion-list>
 
-          <ion-button  fill="outline" expand="block">
+          <ion-button @click="createGroup()" fill="outline" expand="block">
             <ion-icon :icon="addOutline" />
             <ion-label>{{ translate("Create security group") }}</ion-label>
           </ion-button>
@@ -43,6 +43,7 @@
               <ion-toggle slot="end" />
             </ion-item>
           </div>
+          <hr />
           <section class="permissions-section">
             <ion-card>
               <ion-card-header>
@@ -90,6 +91,7 @@
               </ion-card-header>
             </ion-card>
           </section>
+          <hr/>
         </main>
       </div>
     </ion-content>
@@ -125,6 +127,7 @@ import {
   downloadOutline,
   shieldCheckmarkOutline
 } from 'ionicons/icons';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'Permissions',
@@ -148,11 +151,19 @@ export default defineComponent({
     IonToggle,
     IonToolbar
   },
+  methods: {
+    createGroup() {
+      this.$router.replace({ path: `/create-security-group/` })
+    }
+  },
   setup() {
+    const router = useRouter();
+
     return {
       addOutline,
       downloadOutline,
       shieldCheckmarkOutline,
+      router,
       translate
     }
   }
