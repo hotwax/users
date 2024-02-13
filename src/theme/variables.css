@@ -274,6 +274,21 @@ http://ionicframework.com/docs/theming/ */
   grid-area: search;
 }
 
+.search-permissions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(343px, 1fr));
+  gap: var(--spacer-xs);
+  align-items: center;
+  margin-bottom: var(--spacer-lg);
+}
+
+/* desktop only */
+@media (min-width: 720px) {
+  .search-permissions {
+    padding-inline-end: var(--spacer-xs);
+  }
+}
+
 @media (min-width: 991px) {
   .find {
     grid: "search  main" min-content

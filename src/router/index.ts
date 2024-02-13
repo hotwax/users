@@ -59,6 +59,9 @@ const routes: Array<RouteRecordRaw> = [
       },{
         path: 'settings',
         component: () => import('@/views/Settings.vue')
+      },{
+        path: 'permissions',
+        component: () => import('@/views/Permissions.vue')
       },
     ],
     beforeEnter: authGuard,
