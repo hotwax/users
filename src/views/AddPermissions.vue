@@ -75,7 +75,7 @@
 
     <ion-footer>
       <ion-toolbar>
-        <ion-item slot="end">
+        <ion-item slot="end" lines="none">
           <ion-button color="medium" fill="clear" class="ion-margin-end">{{ translate("Add later") }}</ion-button>
           <ion-button>
             <ion-icon :icon="checkmarkDoneOutline" />
