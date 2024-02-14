@@ -18,10 +18,10 @@
 
           <ion-list>
             <ion-item button detail>
-              <ion-label>SecurityGroupId</ion-label>
-            </ion-item>
-            <ion-item button detail>
-              <ion-label>SecurityGroupId</ion-label>
+              <ion-label>
+                <p class="overline">SecurityGroupId</p>
+                Security Group Name
+              </ion-label>
             </ion-item>
           </ion-list>
 
@@ -31,80 +31,16 @@
           </ion-button>
         </aside>
 
-        <main>
-          <div class="search-permissions">
-            <ion-searchbar :placeholder="translate('Search permissions')"  />
-            <ion-item lines="none">
-              <ion-icon :icon="shieldCheckmarkOutline" slot="start" />
-              <ion-label>{{ translate("Only selected permissions") }}</ion-label>
-              <ion-toggle slot="end" />
-            </ion-item>
-          </div>
-          <hr />
-          <section>
-            <ion-card>
-              <ion-card-header>
-                <div>
-                  <ion-card-title>Permission ID</ion-card-title>
-                  <ion-card-subtitle>permission desc</ion-card-subtitle>
-                </div>
-                <ion-checkbox></ion-checkbox>
-              </ion-card-header>
-            </ion-card>
-            <ion-card>
-              <ion-card-header>
-                <div>
-                  <ion-card-title>Permission ID</ion-card-title>
-                  <ion-card-subtitle>permission desc</ion-card-subtitle>
-                </div>
-                <ion-checkbox></ion-checkbox>
-              </ion-card-header>
-            </ion-card>
-            <ion-card>
-              <ion-card-header>
-                <div>
-                  <ion-card-title>Permission ID</ion-card-title>
-                  <ion-card-subtitle>permission desc</ion-card-subtitle>
-                </div>
-                <ion-checkbox></ion-checkbox>
-              </ion-card-header>
-            </ion-card>
-            <ion-card>
-              <ion-card-header>
-                <div>
-                  <ion-card-title>Permission ID</ion-card-title>
-                  <ion-card-subtitle>permission desc</ion-card-subtitle>
-                </div>
-                <ion-checkbox></ion-checkbox>
-              </ion-card-header>
-            </ion-card>
-            <ion-card>
-              <ion-card-header>
-                <div>
-                  <ion-card-title>Permission ID</ion-card-title>
-                  <ion-card-subtitle>permission desc</ion-card-subtitle>
-                </div>
-                <ion-checkbox></ion-checkbox>
-              </ion-card-header>
-            </ion-card>
-          </section>
-          <hr/>
-        </main>
+        <PermissionItems />
       </div>
     </ion-content>
   </ion-page>
-  
 </template>
 
 <script lang="ts">
 import {
   IonButton,
   IonButtons,
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonCheckbox,
   IonContent,
   IonHeader,
   IonIcon,
@@ -112,9 +48,7 @@ import {
   IonLabel,
   IonList,
   IonPage,
-  IonSearchbar,
   IonTitle,
-  IonToggle,
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
@@ -122,20 +56,19 @@ import { translate } from '@hotwax/dxp-components';
 import {
   addOutline,
   downloadOutline,
-  shieldCheckmarkOutline
+  idCardOutline,
+  openOutline,
+  shieldCheckmarkOutline,
+  trashOutline
 } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
+import PermissionItems from '@/components/PermissionItems.vue'
 
 export default defineComponent({
   name: 'Permissions',
   components: {
     IonButton,
     IonButtons,
-    IonCard,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonCheckbox,
     IonContent,
     IonHeader,
     IonIcon,
@@ -143,10 +76,9 @@ export default defineComponent({
     IonLabel,
     IonList,
     IonPage,
-    IonSearchbar,
     IonTitle,
-    IonToggle,
-    IonToolbar
+    IonToolbar,
+    PermissionItems
   },
   methods: {
     createGroup() {
@@ -159,22 +91,13 @@ export default defineComponent({
     return {
       addOutline,
       downloadOutline,
+      idCardOutline,
+      openOutline,
       shieldCheckmarkOutline,
       router,
-      translate
+      translate,
+      trashOutline
     }
   }
 });
 </script>
-
-<style scoped>
-ion-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-}
-</style>

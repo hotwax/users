@@ -278,7 +278,8 @@ http://ionicframework.com/docs/theming/ */
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(343px, 1fr));
   gap: var(--spacer-xs);
-  align-items: center;
+  align-items: start;
+  margin-bottom: var(--spacer-lg);
 }
 
 /* desktop only */

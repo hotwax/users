@@ -12,76 +12,18 @@
     </ion-header>
 
     <ion-content>
-      <main>
-        <div class="search-permissions">
-          <ion-searchbar :placeholder="translate('Search permissions')" />
-          <ion-item lines="none">
-            <ion-icon :icon="shieldCheckmarkOutline" slot="start" />
-            <ion-label>{{ translate("Only selected permissions") }}</ion-label>
-            <ion-toggle slot="end" />
-          </ion-item>
-        </div>
-        <hr />
-        <section>
-          <ion-card>
-            <ion-card-header>
-              <div>
-                <ion-card-title>Permission ID</ion-card-title>
-                <ion-card-subtitle>permission desc</ion-card-subtitle>
-              </div>
-              <ion-checkbox></ion-checkbox>
-            </ion-card-header>
-          </ion-card>
-          <ion-card>
-            <ion-card-header>
-              <div>
-                <ion-card-title>Permission ID</ion-card-title>
-                <ion-card-subtitle>permission desc</ion-card-subtitle>
-              </div>
-              <ion-checkbox></ion-checkbox>
-            </ion-card-header>
-          </ion-card>
-          <ion-card>
-            <ion-card-header>
-              <div>
-                <ion-card-title>Permission ID</ion-card-title>
-                <ion-card-subtitle>permission desc</ion-card-subtitle>
-              </div>
-              <ion-checkbox></ion-checkbox>
-            </ion-card-header>
-          </ion-card>
-          <ion-card>
-            <ion-card-header>
-              <div>
-                <ion-card-title>Permission ID</ion-card-title>
-                <ion-card-subtitle>permission desc</ion-card-subtitle>
-              </div>
-              <ion-checkbox></ion-checkbox>
-            </ion-card-header>
-          </ion-card>
-          <ion-card>
-            <ion-card-header>
-              <div>
-                <ion-card-title>Permission ID</ion-card-title>
-                <ion-card-subtitle>permission desc</ion-card-subtitle>
-              </div>
-              <ion-checkbox></ion-checkbox>
-            </ion-card-header>
-          </ion-card>
-        </section>
-        <hr />
-      </main>
+      <PermissionItems />
     </ion-content>
 
     <ion-footer>
       <ion-toolbar>
-        <ion-item slot="end" lines="none">
-          <ion-button color="medium" fill="clear" class="ion-margin-end">{{ translate("Add later") }}</ion-button>
-          <ion-button>
-            <ion-icon :icon="checkmarkDoneOutline" />
+        <ion-buttons slot="end" >
+          <ion-button color="medium" class="ion-margin-end">{{ translate("Add later") }}</ion-button>
+          <ion-button fill="solid" color="primary">
+            <ion-icon slot="start" :icon="checkmarkDoneOutline" />
             {{ translate("Add permissions") }}
           </ion-button>
-        </ion-item>
+        </ion-buttons>
       </ion-toolbar>
     </ion-footer>
   </ion-page>
@@ -91,21 +33,13 @@
 import {
   IonButton,
   IonButtons,
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonCheckbox,
   IonContent,
   IonFooter,
   IonHeader,
   IonIcon,
   IonItem,
-  IonLabel,
   IonPage,
-  IonSearchbar,
   IonTitle,
-  IonToggle,
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
@@ -117,28 +51,22 @@ import {
   shieldCheckmarkOutline
 } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
+import PermissionItems from '@/components/PermissionItems.vue';
 
 export default defineComponent({
   name: 'Permissions',
   components: {
     IonButton,
     IonButtons,
-    IonCard,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonCheckbox,
     IonContent,
     IonFooter,
     IonHeader,
     IonIcon,
-    IonItem,
-    IonLabel,
+    // IonItem,
     IonPage,
-    IonSearchbar,
     IonTitle,
-    IonToggle,
-    IonToolbar
+    IonToolbar,
+    PermissionItems
   },
   methods: {
     createGroup() {
@@ -161,16 +89,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-ion-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-}
-
 @media screen and (min-width: 700px) {
   ion-content > main {
     margin: var(--spacer-lg)

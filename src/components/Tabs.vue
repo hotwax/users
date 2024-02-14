@@ -8,7 +8,7 @@
           <ion-label>{{ translate("Find Users") }}</ion-label>
         </ion-tab-button>
         <ion-tab-button tab="permissions" href="/tabs/permissions">
-          <ion-icon :icon="phonePortraitOutline" />
+          <ion-icon :icon="idCardOutline" />
           <ion-label>{{ translate("Permissions") }}</ion-label>
         </ion-tab-button>
         <ion-tab-button tab="more" href="/tabs/settings">
@@ -25,7 +25,7 @@ import { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs, IonRouter
 import {
   settingsOutline,
   personOutline,
-  phonePortraitOutline
+  idCardOutline
 } from "ionicons/icons";
 import { translate } from "@hotwax/dxp-components";
 
@@ -36,7 +36,7 @@ export default {
     return {
       settingsOutline,
       personOutline,
-      phonePortraitOutline,
+      idCardOutline,
       translate
     };
   }

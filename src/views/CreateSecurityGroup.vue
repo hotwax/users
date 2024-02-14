@@ -9,19 +9,21 @@
 
     <ion-content>
       <main>
-        <ion-item  class="ion-margin-top">
-          <ion-label position="floating">{{ translate('Name') }}</ion-label>
-          <ion-input v-model="formData.name" />
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">{{ translate('Internal ID') }}</ion-label>
-          <ion-input v-model="formData.internalId" />
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">{{ translate('Description') }}</ion-label>
-          <ion-textarea v-model="formData.description" />
-        </ion-item>
-
+        <ion-list>
+          <ion-item>
+            <ion-label position="floating">{{ translate('Name') }}</ion-label>
+            <ion-input v-model="formData.name" />
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">{{ translate('Internal ID') }}</ion-label>
+            <ion-input v-model="formData.internalId" />
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">{{ translate('Description') }}</ion-label>
+            <ion-textarea v-model="formData.description" />
+          </ion-item>
+        </ion-list>
+  
         <div class="ion-text-center ion-margin">
           <ion-button>
             <ion-icon slot="start" :icon="addOutline" />
@@ -42,6 +44,7 @@ import {
   IonIcon,
   IonItem,
   IonLabel,
+  IonList,
   IonPage,
   IonTextarea,
   IonTitle,
@@ -64,6 +67,7 @@ export default defineComponent({
     IonIcon,
     IonItem,
     IonLabel,
+    IonList,
     IonPage,
     IonTextarea,
     IonTitle,
