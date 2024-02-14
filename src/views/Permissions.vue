@@ -47,7 +47,7 @@
                 10 users
                 <ion-icon :icon="openOutline" slot="end" />
               </ion-button>
-              <ion-button color="danger">
+              <ion-button color="danger" @click="openDeleteSecurityGroupModal()">
                 Delete Group
                 <ion-icon :icon="trashOutline" slot="end" />
               </ion-button>
@@ -71,9 +71,11 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonNote,
   IonPage,
   IonTitle,
-  IonToolbar
+  IonToolbar,
+  modalController
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { translate } from '@hotwax/dxp-components';
@@ -87,6 +89,7 @@ import {
 } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import PermissionItems from '@/components/PermissionItems.vue'
+import DeleteSecurityGroupModal from '@/components/DeleteSecurityGroupModal.vue';
 
 export default defineComponent({
   name: 'Permissions',
@@ -99,6 +102,7 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
+    IonNote,
     IonPage,
     IonTitle,
     IonToolbar,
@@ -107,6 +111,13 @@ export default defineComponent({
   methods: {
     createGroup() {
       this.$router.replace({ path: `/create-security-group/` })
+    },
+    async openDeleteSecurityGroupModal() {
+      const deleteSecurityGroupModal = await modalController.create({
+        component: DeleteSecurityGroupModal,
+      });
+
+      return deleteSecurityGroupModal.present();
     }
   },
   setup() {

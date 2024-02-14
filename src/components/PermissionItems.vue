@@ -60,8 +60,6 @@
 
 <script lang="ts">
 import {
-  // IonButton,
-  // IonButtons,
   IonCard,
   IonCardHeader,
   IonCardSubtitle,
@@ -70,7 +68,6 @@ import {
   IonIcon,
   IonItem,
   IonLabel,
-  IonNote,
   IonSearchbar,
   IonToggle,
 } from '@ionic/vue';
@@ -87,8 +84,6 @@ import { useRouter } from 'vue-router';
 export default defineComponent({
   name: 'PermissionItems',
   components: {
-    // IonButton,
-    // IonButtons,
     IonCard,
     IonCardHeader,
     IonCardSubtitle,
@@ -97,7 +92,6 @@ export default defineComponent({
     IonIcon,
     IonItem,
     IonLabel,
-    // IonNote,
     IonSearchbar,
     IonToggle,
   },
