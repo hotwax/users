@@ -30,8 +30,32 @@
             <ion-label>{{ translate("Create security group") }}</ion-label>
           </ion-button>
         </aside>
-
-        <PermissionItems />
+        
+        <main>
+          <div class="section-header">
+            <ion-item lines="none">
+              <ion-icon :icon="idCardOutline" slot="start" />
+              <ion-label>
+                <ion-note class="overline">Security Group Id</ion-note>
+                <h1>Security group name</h1>
+                <p>Description</p>
+              </ion-label>
+              <ion-button slot="end" fill="outline">{{ translate("Edit") }}</ion-button>
+            </ion-item>
+            <ion-buttons>
+              <ion-button color="medium">
+                10 users
+                <ion-icon :icon="openOutline" slot="end" />
+              </ion-button>
+              <ion-button color="danger">
+                Delete Group
+                <ion-icon :icon="trashOutline" slot="end" />
+              </ion-button>
+            </ion-buttons>
+          </div>
+          <hr />
+          <PermissionItems />
+        </main>
       </div>
     </ion-content>
   </ion-page>
@@ -101,3 +125,11 @@ export default defineComponent({
   }
 });
 </script>
+
+<style scoped>
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+</style>

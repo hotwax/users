@@ -12,7 +12,9 @@
     </ion-header>
 
     <ion-content>
-      <PermissionItems />
+      <main>
+        <PermissionItems />
+      </main>
     </ion-content>
 
     <ion-footer>

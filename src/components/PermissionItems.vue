@@ -1,93 +1,67 @@
 <template>
-  <main>
-    <div class="section-header">
-      <ion-item lines="none">
-        <ion-icon :icon="idCardOutline" slot="start" />
-        <ion-label>
-          <ion-note class="overline">Security Group Id</ion-note>
-          <h1>Security group name</h1>
-          <p>Description</p>
-        </ion-label>
-        <ion-button slot="end" fill="outline">{{ translate("Edit") }}</ion-button>
-      </ion-item>
-      <ion-buttons>
-        <ion-button color="medium">
-          10 users
-          <ion-icon :icon="openOutline" slot="end" />
-        </ion-button>
-        <ion-button color="danger">
-          Delete Group
-          <ion-icon :icon="trashOutline" slot="end" />
-        </ion-button>
-      </ion-buttons>
-    </div>
+  <div class="search-permissions">
+    <ion-searchbar :placeholder="translate('Search permissions')"  />
+    <ion-item lines="none">
+      <ion-icon :icon="shieldCheckmarkOutline" slot="start" />
+      <ion-label>{{ translate("Only selected permissions") }}</ion-label>
+      <ion-toggle slot="end" />
+    </ion-item>
+  </div>
 
-    <hr />
-
-    <div class="search-permissions">
-      <ion-searchbar :placeholder="translate('Search permissions')"  />
-      <ion-item lines="none">
-        <ion-icon :icon="shieldCheckmarkOutline" slot="start" />
-        <ion-label>{{ translate("Only selected permissions") }}</ion-label>
-        <ion-toggle slot="end" />
-      </ion-item>
-    </div>
-
-    <section>
-      <ion-card>
-        <ion-card-header>
-          <div>
-            <ion-card-title>Permission ID</ion-card-title>
-            <ion-card-subtitle>permission desc</ion-card-subtitle>
-          </div>
-          <ion-checkbox></ion-checkbox>
-        </ion-card-header>
-      </ion-card>
-      <ion-card>
-        <ion-card-header>
-          <div>
-            <ion-card-title>Permission ID</ion-card-title>
-            <ion-card-subtitle>permission desc</ion-card-subtitle>
-          </div>
-          <ion-checkbox></ion-checkbox>
-        </ion-card-header>
-      </ion-card>
-      <ion-card>
-        <ion-card-header>
-          <div>
-            <ion-card-title>Permission ID</ion-card-title>
-            <ion-card-subtitle>permission desc</ion-card-subtitle>
-          </div>
-          <ion-checkbox></ion-checkbox>
-        </ion-card-header>
-      </ion-card>
-      <ion-card>
-        <ion-card-header>
-          <div>
-            <ion-card-title>Permission ID</ion-card-title>
-            <ion-card-subtitle>permission desc</ion-card-subtitle>
-          </div>
-          <ion-checkbox></ion-checkbox>
-        </ion-card-header>
-      </ion-card>
-      <ion-card>
-        <ion-card-header>
-          <div>
-            <ion-card-title>Permission ID</ion-card-title>
-            <ion-card-subtitle>permission desc</ion-card-subtitle>
-          </div>
-          <ion-checkbox></ion-checkbox>
-        </ion-card-header>
-      </ion-card>
-    </section>
-    <hr/>
-  </main>
+  <section>
+    <ion-card>
+      <ion-card-header>
+        <div>
+          <ion-card-title>Permission ID</ion-card-title>
+          <ion-card-subtitle>permission desc</ion-card-subtitle>
+        </div>
+        <ion-checkbox></ion-checkbox>
+      </ion-card-header>
+    </ion-card>
+    <ion-card>
+      <ion-card-header>
+        <div>
+          <ion-card-title>Permission ID</ion-card-title>
+          <ion-card-subtitle>permission desc</ion-card-subtitle>
+        </div>
+        <ion-checkbox></ion-checkbox>
+      </ion-card-header>
+    </ion-card>
+    <ion-card>
+      <ion-card-header>
+        <div>
+          <ion-card-title>Permission ID</ion-card-title>
+          <ion-card-subtitle>permission desc</ion-card-subtitle>
+        </div>
+        <ion-checkbox></ion-checkbox>
+      </ion-card-header>
+    </ion-card>
+    <ion-card>
+      <ion-card-header>
+        <div>
+          <ion-card-title>Permission ID</ion-card-title>
+          <ion-card-subtitle>permission desc</ion-card-subtitle>
+        </div>
+        <ion-checkbox></ion-checkbox>
+      </ion-card-header>
+    </ion-card>
+    <ion-card>
+      <ion-card-header>
+        <div>
+          <ion-card-title>Permission ID</ion-card-title>
+          <ion-card-subtitle>permission desc</ion-card-subtitle>
+        </div>
+        <ion-checkbox></ion-checkbox>
+      </ion-card-header>
+    </ion-card>
+  </section>
+  <hr/>
 </template>
 
 <script lang="ts">
 import {
-  IonButton,
-  IonButtons,
+  // IonButton,
+  // IonButtons,
   IonCard,
   IonCardHeader,
   IonCardSubtitle,
@@ -113,8 +87,8 @@ import { useRouter } from 'vue-router';
 export default defineComponent({
   name: 'PermissionItems',
   components: {
-    IonButton,
-    IonButtons,
+    // IonButton,
+    // IonButtons,
     IonCard,
     IonCardHeader,
     IonCardSubtitle,
@@ -123,7 +97,7 @@ export default defineComponent({
     IonIcon,
     IonItem,
     IonLabel,
-    IonNote,
+    // IonNote,
     IonSearchbar,
     IonToggle,
   },
@@ -151,10 +125,5 @@ ion-card-header {
 section {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-}
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 </style>
