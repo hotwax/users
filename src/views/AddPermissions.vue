@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>{{ translate("Add permissions") }}</ion-title>
+        <ion-title>{{ translate("Add permissions to <groupName>") }}</ion-title>
         <ion-buttons slot="end">
           <ion-button>
             <ion-icon :icon="downloadOutline" slot="icon-only" />

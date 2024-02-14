@@ -21,10 +21,10 @@
         <ion-label class="ion-text-wrap">{{ "Users linked with this security group may lose access to the Hotwax Commerce apps they use." }}</ion-label>
       </ion-item>
 
-      <!-- <ion-button class="ion-margin-left" color="warning" fill="outline">
+      <ion-button class="ion-margin-start" color="warning" fill="outline">
         <ion-icon :icon="personRemoveOutline" slot="start" />
         {{ translate("Remove users") }}
-      </ion-button> -->
+      </ion-button>
     </ion-list>
 
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
