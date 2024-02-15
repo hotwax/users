@@ -1,6 +1,6 @@
 <template>
   <div class="search-permissions">
-    <ion-searchbar :placeholder="translate('Search permissions')"  />
+    <ion-searchbar :placeholder="translate('Search permissions')" v-model="query.queryString" @keyup.enter="updateQuery()" />
     <ion-item lines="none">
       <ion-icon :icon="shieldCheckmarkOutline" slot="start" />
       <ion-label>{{ translate("Only selected permissions") }}</ion-label>
@@ -8,53 +8,26 @@
     </ion-item>
   </div>
 
-  <section>
-    <ion-card>
-      <ion-card-header>
-        <div>
-          <ion-card-title>Permission ID</ion-card-title>
-          <ion-card-subtitle>permission desc</ion-card-subtitle>
-        </div>
-        <ion-checkbox></ion-checkbox>
-      </ion-card-header>
-    </ion-card>
-    <ion-card>
-      <ion-card-header>
-        <div>
-          <ion-card-title>Permission ID</ion-card-title>
-          <ion-card-subtitle>permission desc</ion-card-subtitle>
-        </div>
-        <ion-checkbox></ion-checkbox>
-      </ion-card-header>
-    </ion-card>
-    <ion-card>
-      <ion-card-header>
-        <div>
-          <ion-card-title>Permission ID</ion-card-title>
-          <ion-card-subtitle>permission desc</ion-card-subtitle>
-        </div>
-        <ion-checkbox></ion-checkbox>
-      </ion-card-header>
-    </ion-card>
-    <ion-card>
-      <ion-card-header>
-        <div>
-          <ion-card-title>Permission ID</ion-card-title>
-          <ion-card-subtitle>permission desc</ion-card-subtitle>
-        </div>
-        <ion-checkbox></ion-checkbox>
-      </ion-card-header>
-    </ion-card>
-    <ion-card>
-      <ion-card-header>
-        <div>
-          <ion-card-title>Permission ID</ion-card-title>
-          <ion-card-subtitle>permission desc</ion-card-subtitle>
-        </div>
-        <ion-checkbox></ion-checkbox>
-      </ion-card-header>
-    </ion-card>
-  </section>
+  <div v-for="(group, groupId) in permissionsByGroupType" :key="groupId">
+    <ion-item-divider class="ion-margin-vertical" color="light">
+      <ion-label>
+        {{ group.groupName }}
+      </ion-label>
+    </ion-item-divider>
+
+    <section>
+      <ion-card v-for="permission in group.permissions" :key="permission.permissionId">
+        <ion-card-header>
+          <div>
+            <ion-card-title>{{ permission.permissionId }}</ion-card-title>
+            <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
+          </div>
+          <ion-checkbox />
+        </ion-card-header>
+      </ion-card>
+    </section>
+  </div>
+
   <hr/>
 </template>
 
@@ -67,6 +40,7 @@ import {
   IonCheckbox,
   IonIcon,
   IonItem,
+  IonItemDivider,
   IonLabel,
   IonSearchbar,
   IonToggle,
@@ -80,6 +54,7 @@ import {
   trashOutline
 } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
+import { mapGetters, useStore } from 'vuex';
 
 export default defineComponent({
   name: 'PermissionItems',
@@ -91,18 +66,33 @@ export default defineComponent({
     IonCheckbox,
     IonIcon,
     IonItem,
+    IonItemDivider,
     IonLabel,
     IonSearchbar,
     IonToggle,
   },
+  computed: {
+    ...mapGetters({
+      permissionsByGroupType: 'permission/getPermissionsByGroupType',
+      query: 'permission/getQuery'
+    })
+  },
+  methods: {
+    async updateQuery() {
+      await this.store.dispatch('permission/updateQuery', this.query)
+      // await this.store.dispatch('permission/getSecurityPermissions')
+    },
+  },
   setup() {
     const router = useRouter();
+    const store = useStore();
 
     return {
       idCardOutline,
       openOutline,
       shieldCheckmarkOutline,
       router,
+      store,
       translate,
       trashOutline
     }

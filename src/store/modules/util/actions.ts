@@ -79,8 +79,10 @@ const actions: ActionTree<UtilState, RootState> = {
       viewSize: 200,
       distinct: "Y",
       noConditionFind: "Y",
-      fieldList: ["groupId", "groupName"]
-
+      fieldList: ["description", "groupId", "groupName"],
+      inputFields: {
+        groupTypeEnumId_op: "empty"
+      }
     }
     let securityGroups = []
 

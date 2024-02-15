@@ -14,13 +14,13 @@
     <ion-content>
       <div class="find">
         <aside>
-          <h1>Security Groups</h1>
+          <h1>{{ translate("Security Groups") }}</h1>
 
           <ion-list>
-            <ion-item button detail>
-              <ion-label>
-                <p class="overline">SecurityGroupId</p>
-                Security Group Name
+            <ion-item v-for="group in securityGroups" :key="group.groupId" button detail @click="updateCurrentGroup(group)">
+              <ion-label  :color="group.groupId === currentGroup.groupId ? 'primary' : ''">
+                <p class="overline">{{ group.groupId }}</p>
+                {{ group.groupName }}
               </ion-label>
             </ion-item>
           </ion-list>
@@ -30,15 +30,14 @@
             <ion-label>{{ translate("Create security group") }}</ion-label>
           </ion-button>
         </aside>
-        
-        <main>
+        <main v-if="Object.keys(currentGroup).length">
           <div class="section-header">
             <ion-item lines="none">
               <ion-icon :icon="idCardOutline" slot="start" />
               <ion-label>
-                <ion-note class="overline">Security Group Id</ion-note>
-                <h1>Security group name</h1>
-                <p>Description</p>
+                <ion-note class="overline">{{ currentGroup.groupId }}</ion-note>
+                <h1>{{ currentGroup.groupName }}</h1>
+                <p class="ion-text-wrap">{{ currentGroup.description }}</p>
               </ion-label>
               <ion-button slot="end" fill="outline">{{ translate("Edit") }}</ion-button>
             </ion-item>
@@ -55,6 +54,9 @@
           </div>
           <hr />
           <PermissionItems />
+        </main>
+        <main v-else class="ion-text-center">
+          <h1>{{ "Select a security group to view its details" }}</h1>
         </main>
       </div>
     </ion-content>
@@ -90,6 +92,7 @@ import {
 import { useRouter } from 'vue-router';
 import PermissionItems from '@/components/PermissionItems.vue'
 import DeleteSecurityGroupModal from '@/components/DeleteSecurityGroupModal.vue';
+import { mapGetters, useStore } from 'vuex';
 
 export default defineComponent({
   name: 'Permissions',
@@ -108,6 +111,25 @@ export default defineComponent({
     IonToolbar,
     PermissionItems
   },
+  data() {
+    return {
+      selectedGroup: ''
+    }
+  },
+  computed: {
+    ...mapGetters({
+      securityGroups: 'util/getSecurityGroups',
+      securityPermissions: 'permission/getPermissionsByGroupType',
+      groups: 'permission/getPermissionsByGroup',
+      currentGroup: "permission/getCurrentGroup"
+    })
+  },
+  async mounted() {
+    await this.store.dispatch('util/getSecurityGroups')
+    console.log(this.securityPermissions);
+    if(!this.securityPermissions) await this.store.dispatch('permission/getSecurityPermissions')
+    if(this.currentGroup) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
+  },
   methods: {
     createGroup() {
       this.$router.replace({ path: `/create-security-group/` })
@@ -118,18 +140,24 @@ export default defineComponent({
       });
 
       return deleteSecurityGroupModal.present();
+    },
+    async updateCurrentGroup(group: any) {
+      await this.store.dispatch('permission/updateCurrentGroup', group)
+      await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
     }
   },
   setup() {
     const router = useRouter();
+    const store = useStore();
 
     return {
       addOutline,
       downloadOutline,
       idCardOutline,
       openOutline,
-      shieldCheckmarkOutline,
       router,
+      shieldCheckmarkOutline,
+      store,
       translate,
       trashOutline
     }
