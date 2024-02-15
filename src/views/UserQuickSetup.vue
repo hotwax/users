@@ -120,7 +120,6 @@ import { useRouter } from 'vue-router'
 import {
   addCircleOutline,
   arrowForwardOutline,
-  caretDownOutline,
   documentTextOutline,
   eyeOffOutline,
   eyeOutline
@@ -494,7 +493,6 @@ export default defineComponent({
       router,
       addCircleOutline,
       arrowForwardOutline,
-      caretDownOutline,
       documentTextOutline,
       eyeOffOutline,
       eyeOutline,

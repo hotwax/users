@@ -163,7 +163,6 @@ import { defineComponent } from 'vue';
 import {
   addOutline,
   cloudyNightOutline,
-  ellipsisVerticalOutline,
   idCardOutline,
   optionsOutline,
   toggleOutline,
@@ -227,15 +226,6 @@ export default defineComponent({
   methods: {
     getDate(date: any) {
       return DateTime.fromMillis(date).toFormat('dd LLL yyyy')
-    },
-    async openUserPopover(ev: Event, user:any) {
-      const popover = await popoverController.create({
-        component: UserPopover,
-        componentProps: { user },
-        event: ev,
-        showBackdrop: false,
-      });
-      return popover.present();
     },
     async updateQuery() {
       await this.store.dispatch('user/updateQuery', this.query)
@@ -303,7 +293,6 @@ export default defineComponent({
     return {
       addOutline,
       cloudyNightOutline,
-      ellipsisVerticalOutline,
       hasPermission,
       idCardOutline,
       optionsOutline,

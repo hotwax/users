@@ -89,12 +89,7 @@ import {
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import {
-  codeWorkingOutline,
-  ellipsisVertical,
-  openOutline,
-  personCircleOutline,
-  sendOutline,
-  storefrontOutline
+  openOutline
 } from 'ionicons/icons'
 import { mapGetters, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -182,14 +177,9 @@ export default defineComponent({
 
     return {
       Actions,
-      ellipsisVertical,
       hasPermission,
-      personCircleOutline,
       router,
-      sendOutline,
       store,
-      storefrontOutline,
-      codeWorkingOutline,
       openOutline,
       translate
     }
