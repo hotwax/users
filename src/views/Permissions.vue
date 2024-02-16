@@ -178,7 +178,6 @@ export default defineComponent({
                 })
 
                 if (!hasError(resp)) {
-                  console.log(resp);
                   showToast(translate("Security group renamed successfully."))
                 } else {
                   throw resp.data

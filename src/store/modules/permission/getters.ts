@@ -17,6 +17,9 @@ const getters: GetterTree<PermissionState, RootState> = {
   },
   getPermissionsByGroup(state) {
     return state.permissionsByGroup
+  },
+  getAllPermissions(state) {
+    return state.allPermissions
   }
 }
 export default getters;

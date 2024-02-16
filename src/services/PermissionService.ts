@@ -26,9 +26,27 @@ const createSecurityGroup = async (payload: any): Promise<any> => {
   });
 }
 
+const addSecurityPermissionToSecurityGroup = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/addSecurityPermissionToSecurityGroup",
+    method: "post",
+    data: payload
+  });
+}
+
+const removeSecurityPermissionFromSecurityGroup = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/updateSecurityPermissionToSecurityGroup",
+    method: "post",
+    data: payload
+  });
+}
+
 export const PermissionService = {
+  addSecurityPermissionToSecurityGroup,
   createSecurityGroup,
   getpermissionsByGroupType,
-  getPermissionsByGroup
+  getPermissionsByGroup,
+  removeSecurityPermissionFromSecurityGroup
 }
 

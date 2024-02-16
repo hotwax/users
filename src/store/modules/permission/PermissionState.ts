@@ -5,4 +5,5 @@ export default interface PermissionState {
   };
   currentGroup: any;
   permissionsByGroup: any;
+  allPermissions: any;
 }

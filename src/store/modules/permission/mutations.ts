@@ -15,5 +15,8 @@ const mutations: MutationTree<PermissionState> = {
   [types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED](state, payload) {
     state.permissionsByGroup = payload
   },
+  [types.PERMISSION_ALL_PERMISSIONS_UPDATED](state, payload) {
+    state.allPermissions = payload
+  },
 }
 export default mutations;

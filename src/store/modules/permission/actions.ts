@@ -7,8 +7,6 @@ import { hasError } from '@/adapter'
 
 const actions: ActionTree<PermissionState, RootState> = {
   async getpermissionsByGroupType({ state, commit }, payload) {
-    console.log('type');
-    
     let permissions = [] as any, resp;
     let viewIndex = 0;
     try {
@@ -37,6 +35,7 @@ const actions: ActionTree<PermissionState, RootState> = {
     }
 
     const groupTypes = {} as any;
+    const allPermissions = JSON.parse(JSON.stringify(permissions))
 
     permissions.map((permission: any) => {
       if(groupTypes[permission.groupId]) {
@@ -50,6 +49,7 @@ const actions: ActionTree<PermissionState, RootState> = {
       }
     })
 
+    commit(types.PERMISSION_ALL_PERMISSIONS_UPDATED, allPermissions)
     commit(types.PERMISSION_BY_GROUP_TYPE_UPDATED, groupTypes)
   },
 
@@ -88,22 +88,34 @@ const actions: ActionTree<PermissionState, RootState> = {
     }
 
     const result = JSON.parse(JSON.stringify(state.permissionsByGroup))
-    console.log('new', typeof result);
-    console.log('res', result);
-    
     result[groupId] = permissions    
-    console.log('new', typeof result);
-    console.log('res', result);
-
     commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, result)
   },
-
+  
   async updatePermissionsByGroup({ commit }, payload) {
     commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, payload )
   },
-
+  
   updateQuery({ commit }, query) {
     commit(types.PERMISSION_QUERY_UPDATED, { query })
+  },
+  
+  updateCurrentGroupPermissions({ commit, state }, payload) {
+    const permissionsByGroup = JSON.parse(JSON.stringify(state.permissionsByGroup))
+    const permissions = permissionsByGroup[payload.groupId]
+
+    if(permissions.includes(payload.permissionId)) {
+      permissions.remove(payload.permissionId)
+    } else {
+      permissions.push(payload.permissionId)
+    }
+
+    permissionsByGroup[payload.groupId] = permissions
+    commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, permissionsByGroup)
+  },
+
+  updatePermissionsByGroupType({commit}, payload) {
+    commit(types.PERMISSION_BY_GROUP_TYPE_UPDATED, payload)
   },
 
   updateCurrentGroup({ commit }, payload) {

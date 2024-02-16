@@ -13,7 +13,8 @@ const utilModule: Module<PermissionState, RootState> = {
       queryString: ''
     },
     currentGroup: {},
-    permissionsByGroup: {}
+    permissionsByGroup: {},
+    allPermissions: []
   },
   getters,
   actions,
