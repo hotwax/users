@@ -107,22 +107,17 @@ export default defineComponent({
     IonToolbar,
     PermissionItems
   },
-  data() {
-    return {
-      selectedGroup: ''
-    }
-  },
   computed: {
     ...mapGetters({
       securityGroups: 'util/getSecurityGroups',
       permissionsByGroupType: 'permission/getPermissionsByGroupType',
-      groupPermissions: 'permission/getPermissionsByGroup',
+      currentGroupPermissions: 'permission/getCurrentGroupPermissions',
       currentGroup: "permission/getCurrentGroup"
     })
   },
   async mounted() {
     await this.store.dispatch('util/getSecurityGroups')
-    if(!this.permissionsByGroupType) await this.store.dispatch('permission/getpermissionsByGroupType')
+    if(!Object.keys(this.permissionsByGroupType).length) await this.store.dispatch('permission/getpermissionsByGroupType')
     if(this.currentGroup) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
     this.checkAssociated()
   },
@@ -145,7 +140,7 @@ export default defineComponent({
     checkAssociated() {
       Object.values(this.permissionsByGroupType).map((groupType: any) => {
         groupType.permissions.map((permission: any) => {
-          if (this.groupPermissions.includes(permission.permissionId)) {            
+          if (this.currentGroupPermissions.includes(permission.permissionId)) {            
             permission.isChecked = true
           } else {
             permission.isChecked = false

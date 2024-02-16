@@ -148,6 +148,10 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_PRODUCT_STORES_UPDATED, stores)
   },
 
+  updateSecurityGroup({commit}, payload) {
+    commit(types.UTIL_SECURITY_GROUPS_UPDATED, payload)
+  },
+
   clearUtilState({ commit }) {
     commit(types.UTIL_FACILITIES_UPDATED, [])
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, []);

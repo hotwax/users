@@ -18,7 +18,16 @@ const getPermissionsByGroup = async (payload: any): Promise<any> => {
   })
 }
 
+const createSecurityGroup = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/createSecurityGroup",
+    method: "post",
+    data: payload
+  });
+}
+
 export const PermissionService = {
+  createSecurityGroup,
   getpermissionsByGroupType,
   getPermissionsByGroup
 }

@@ -7,6 +7,8 @@ import { hasError } from '@/adapter'
 
 const actions: ActionTree<PermissionState, RootState> = {
   async getpermissionsByGroupType({ state, commit }, payload) {
+    console.log('type');
+    
     let permissions = [] as any, resp;
     let viewIndex = 0;
     try {
@@ -86,9 +88,18 @@ const actions: ActionTree<PermissionState, RootState> = {
     }
 
     const result = JSON.parse(JSON.stringify(state.permissionsByGroup))
+    console.log('new', typeof result);
+    console.log('res', result);
+    
     result[groupId] = permissions    
+    console.log('new', typeof result);
+    console.log('res', result);
 
-    commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, result )
+    commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, result)
+  },
+
+  async updatePermissionsByGroup({ commit }, payload) {
+    commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, payload )
   },
 
   updateQuery({ commit }, query) {

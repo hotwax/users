@@ -42,4 +42,8 @@ const isValidPassword = (password : string) => {
   return passwordPattern.test(password);
 }
 
-export { copyToClipboard, showToast, isValidEmail, isValidPassword }
+const generateInternalId = (name: string) => {
+  return name.trim().toUpperCase().split(' ').join('_');
+}
+
+export { copyToClipboard, showToast, generateInternalId, isValidEmail, isValidPassword }

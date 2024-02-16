@@ -75,7 +75,7 @@ export default defineComponent({
     ...mapGetters({
       permissionsByGroupType: 'permission/getPermissionsByGroupType',
       query: 'permission/getQuery',
-      groupPermissions: 'permission/getPermissionsByGroup',
+      currentGroupPermissions: 'permission/getCurrentGroupPermissions',
     })
   },
   methods: {
