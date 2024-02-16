@@ -95,7 +95,8 @@ const actions: ActionTree<PermissionState, RootState> = {
   },
 
   async getPermissionsByGroup({ state, commit }, groupId) {
-    let permissions = [] as any, resp;
+    const permissions = {} as any
+    let resp;
     let viewIndex = 0;
 
     if(state.permissionsByGroup[groupId]) {
@@ -116,7 +117,12 @@ const actions: ActionTree<PermissionState, RootState> = {
           }
         })
         if (!hasError(resp) && resp.data.count) {
-          permissions = permissions.concat(resp.data.docs)
+          const temp = resp.data.docs
+          resp.data.docs.map((permission: any) => {
+            if(!permissions[permission.permissionId]) {
+              permissions[permission.permissionId] = permission
+            }
+          })
           viewIndex++;
         } else {
           throw resp.data

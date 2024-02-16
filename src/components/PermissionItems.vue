@@ -126,18 +126,17 @@ export default defineComponent({
     },
     async checkAssociated() {
       const permissionsByGroupTypeValues = JSON.parse(JSON.stringify(this.permissionsByGroupType))
-      Object.values(permissionsByGroupTypeValues).map((groupType: any) => {
-        groupType.permissions.map((permission: any) => {
-          if (this.currentGroupPermissions.includes(permission.permissionId)) {
+      Object.values(permissionsByGroupTypeValues).map((group: any) => {
+        group.permissions.map((permission: any) => {
+          if (this.currentGroupPermissions[permission.permissionId]) {
             permission.isChecked = true
           } else {
             permission.isChecked = false
           }
         })
       })
-      
       await this.store.dispatch('permission/updatePermissionsByGroupType', permissionsByGroupTypeValues)
-    },
+    }
   },
   setup() {
     const router = useRouter();

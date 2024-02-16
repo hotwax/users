@@ -128,7 +128,7 @@ export default defineComponent({
     await this.store.dispatch('permission/updateCurrentGroup', this.securityGroups[0])
     await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
 
-    // this.checkAssociated()
+    this.checkAssociated()
   },
   methods: {
     createGroup() {
@@ -147,9 +147,9 @@ export default defineComponent({
       this.checkAssociated()
     },
     checkAssociated() {
-      Object.values(this.permissionsByGroupType).map((groupType: any) => {
-        groupType.permissions.map((permission: any) => {
-          if (this.currentGroupPermissions.includes(permission.permissionId)) {            
+      Object.values(this.permissionsByGroupType).map((group: any) => {
+        group.permissions.map((permission: any) => {
+          if(this.currentGroupPermissions[permission.permissionId]) {
             permission.isChecked = true
           } else {
             permission.isChecked = false

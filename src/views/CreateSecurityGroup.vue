@@ -139,7 +139,7 @@ export default defineComponent({
           await this.store.dispatch('util/updateSecurityGroups', this.securityGroups.push(this.formData))
           await this.store.dispatch('permission/updateCurrentGroup', this.formData)
           const permissionsByGroup = JSON.parse(JSON.stringify(this.permissionsByGroup))
-          permissionsByGroup[this.formData.groupId] = []
+          permissionsByGroup[this.formData.groupId] = {}
           await this.store.dispatch('permission/updatePermissionsByGroup', permissionsByGroup)
           this.router.replace('/add-permissions/')
         } else {
