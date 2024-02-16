@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>{{ translate("Add permissions to <groupName>") }}</ion-title>
+        <ion-title>{{ translate("Add permissions to", { groupName: currentGroup.groupName }) }}</ion-title>
         <ion-buttons slot="end">
           <ion-button>
             <ion-icon :icon="downloadOutline" slot="icon-only" />
@@ -20,7 +20,7 @@
     <ion-footer>
       <ion-toolbar>
         <ion-buttons slot="end" >
-          <ion-button color="medium" class="ion-margin-end">{{ translate("Add later") }}</ion-button>
+          <ion-button color="medium" @click="openPermissions()" class="ion-margin-end">{{ translate("Add later") }}</ion-button>
           <ion-button fill="solid" color="primary">
             <ion-icon slot="start" :icon="checkmarkDoneOutline" />
             {{ translate("Add permissions") }}
@@ -54,6 +54,7 @@ import {
 } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import PermissionItems from '@/components/PermissionItems.vue';
+import { mapGetters } from 'vuex';
 
 export default defineComponent({
   name: 'Permissions',
@@ -70,9 +71,14 @@ export default defineComponent({
     IonToolbar,
     PermissionItems
   },
+  computed: {
+    ...mapGetters({
+      currentGroup: "permission/getCurrentGroup"
+    })
+  },
   methods: {
-    createGroup() {
-      this.$router.replace({ path: `/create-security-group/` })
+    openPermissions() {
+      this.router.push('tabs/permissions')
     }
   },
   setup() {

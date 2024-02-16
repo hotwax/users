@@ -39,7 +39,7 @@
                 <h1>{{ currentGroup.groupName }}</h1>
                 <p class="ion-text-wrap">{{ currentGroup.description }}</p>
               </ion-label>
-              <ion-button slot="end" fill="outline">{{ translate("Edit") }}</ion-button>
+              <ion-button slot="end" @click="editGroupName()" fill="outline">{{ translate("Edit") }}</ion-button>
             </ion-item>
             <ion-buttons>
               <ion-button color="medium">
@@ -73,6 +73,7 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
+  alertController,
   modalController
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
@@ -89,6 +90,10 @@ import { useRouter } from 'vue-router';
 import PermissionItems from '@/components/PermissionItems.vue'
 import DeleteSecurityGroupModal from '@/components/DeleteSecurityGroupModal.vue';
 import { mapGetters, useStore } from 'vuex';
+import { showToast } from '@/utils';
+import { hasError } from '@/adapter';
+import { UtilService } from '@/services/UtilService';
+import emitter from "@/event-bus";
 
 export default defineComponent({
   name: 'Permissions',
@@ -119,6 +124,7 @@ export default defineComponent({
     await this.store.dispatch('util/getSecurityGroups')
     if(!Object.keys(this.permissionsByGroupType).length) await this.store.dispatch('permission/getpermissionsByGroupType')
     if(this.currentGroup) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
+    await this.store.dispatch('permission/updateCurrentGroup', this.securityGroups[0])
     this.checkAssociated()
   },
   methods: {
@@ -147,7 +153,49 @@ export default defineComponent({
           }
         })
       })
-    }
+    },
+    async editGroupName() {
+      const alert = await alertController.create({
+        header: translate("Rename Security Group"),
+        inputs: [{
+          name: "groupName",
+          value: this.currentGroup.groupName
+        }],
+        buttons: [{
+          text: translate('Cancel'),
+          role: "cancel"
+        },
+        {
+          text: translate('Apply'),
+          handler: async (data: any) => {
+            if (data.groupName) {
+              emitter.emit('presentLoader')
+
+              try {
+                const resp = await UtilService.updateSecurityGroup({
+                  groupId: this.currentGroup.groupId,
+                  groupName: data.groupName
+                })
+
+                if (!hasError(resp)) {
+                  console.log(resp);
+                  showToast(translate("Security group renamed successfully."))
+                } else {
+                  throw resp.data
+                }
+              } catch (error) {
+                showToast(translate('Failed to rename security group.'))
+                console.error(error)
+              }
+
+              emitter.emit('dismissLoader')
+            }
+          }
+        }]
+      })
+
+      await alert.present()
+    },
   },
   setup() {
     const router = useRouter();
