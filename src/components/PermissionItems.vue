@@ -22,7 +22,7 @@
             <ion-card-title>{{ permission.permissionId }}</ion-card-title>
             <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
           </div>
-          <ion-checkbox />
+          <ion-checkbox :checked="permission.isChecked" />
         </ion-card-header>
       </ion-card>
     </section>
@@ -74,13 +74,14 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       permissionsByGroupType: 'permission/getPermissionsByGroupType',
-      query: 'permission/getQuery'
+      query: 'permission/getQuery',
+      groupPermissions: 'permission/getPermissionsByGroup',
     })
   },
   methods: {
     async updateQuery() {
       await this.store.dispatch('permission/updateQuery', this.query)
-      // await this.store.dispatch('permission/getSecurityPermissions')
+      // await this.store.dispatch('permission/getpermissionsByGroupType')
     },
   },
   setup() {

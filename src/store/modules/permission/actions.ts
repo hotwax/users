@@ -6,12 +6,12 @@ import * as types from './mutation-types'
 import { hasError } from '@/adapter'
 
 const actions: ActionTree<PermissionState, RootState> = {
-  async getSecurityPermissions({ state, commit }, payload) {
+  async getpermissionsByGroupType({ state, commit }, payload) {
     let permissions = [] as any, resp;
     let viewIndex = 0;
     try {
       do{
-        resp = await PermissionService.getSecurityPermissions({
+        resp = await PermissionService.getpermissionsByGroupType({
           entityName: "SecurityGroupAndPermission",
           distinct: "Y",
           noConditionFind: "Y",
@@ -73,7 +73,8 @@ const actions: ActionTree<PermissionState, RootState> = {
           }
         })
         if (!hasError(resp) && resp.data.count) {
-          permissions = JSON.parse(JSON.stringify(permissions)).concat(resp.data.docs)
+          const permissionIds =  resp.data.docs.map((count: any) => count.permissionId)
+          permissions = permissions.concat(permissionIds)
           viewIndex++;
         } else {
           throw resp.data
@@ -85,7 +86,7 @@ const actions: ActionTree<PermissionState, RootState> = {
     }
 
     const result = JSON.parse(JSON.stringify(state.permissionsByGroup))
-    result[groupId] = permissions
+    result[groupId] = permissions    
 
     commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, result )
   },

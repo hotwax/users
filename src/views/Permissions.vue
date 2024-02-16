@@ -46,10 +46,6 @@
                 10 users
                 <ion-icon :icon="openOutline" slot="end" />
               </ion-button>
-              <ion-button color="danger" @click="openDeleteSecurityGroupModal()">
-                Delete Group
-                <ion-icon :icon="trashOutline" slot="end" />
-              </ion-button>
             </ion-buttons>
           </div>
           <hr />
@@ -119,16 +115,16 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       securityGroups: 'util/getSecurityGroups',
-      securityPermissions: 'permission/getPermissionsByGroupType',
-      groups: 'permission/getPermissionsByGroup',
+      permissionsByGroupType: 'permission/getPermissionsByGroupType',
+      groupPermissions: 'permission/getPermissionsByGroup',
       currentGroup: "permission/getCurrentGroup"
     })
   },
   async mounted() {
     await this.store.dispatch('util/getSecurityGroups')
-    console.log(this.securityPermissions);
-    if(!this.securityPermissions) await this.store.dispatch('permission/getSecurityPermissions')
+    if(!this.permissionsByGroupType) await this.store.dispatch('permission/getpermissionsByGroupType')
     if(this.currentGroup) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
+    this.checkAssociated()
   },
   methods: {
     createGroup() {
@@ -144,6 +140,18 @@ export default defineComponent({
     async updateCurrentGroup(group: any) {
       await this.store.dispatch('permission/updateCurrentGroup', group)
       await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
+      this.checkAssociated()
+    },
+    checkAssociated() {
+      Object.values(this.permissionsByGroupType).map((groupType: any) => {
+        groupType.permissions.map((permission: any) => {
+          if (this.groupPermissions.includes(permission.permissionId)) {            
+            permission.isChecked = true
+          } else {
+            permission.isChecked = false
+          }
+        })
+      })
     }
   },
   setup() {

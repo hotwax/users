@@ -13,9 +13,7 @@ const getters: GetterTree<PermissionState, RootState> = {
     return state.currentGroup
   },
   getPermissionsByGroup(state) {
-    console.log(state.permissionsByGroup);
-    
-    return state.permissionsByGroup[state.currentGroup.groupId]
+    return state.permissionsByGroup[state.currentGroup.groupId] ? JSON.parse(JSON.stringify(state.permissionsByGroup[state.currentGroup.groupId])) : []
   }
 }
 export default getters;
