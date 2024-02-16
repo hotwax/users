@@ -101,6 +101,7 @@ import { translate } from "@hotwax/dxp-components";
 import { showToast, isValidEmail } from '@/utils'
 import { UserService } from '@/services/UserService'
 import { hasError } from '@/adapter'
+import logger from '@/logger';
 
 export default defineComponent({
   name: "CreateUser",
@@ -194,7 +195,7 @@ export default defineComponent({
         const validationErrors = this.validateCreateUserDetail({...this.formData, partyTypeId});
         if (validationErrors.length > 0) {
           const errorMessages = validationErrors.join(" ");
-          console.error(errorMessages);
+          logger.error(errorMessages);
           showToast(translate(errorMessages));
           return;
         }
@@ -219,7 +220,7 @@ export default defineComponent({
           throw resp.data;
         }
       } catch (err) {
-        console.error('error', err)
+        logger.error('error', err)
         showToast(translate('Failed to create user.'))
       }
     },

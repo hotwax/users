@@ -30,6 +30,7 @@ import { mapGetters, useStore } from 'vuex';
 import { hasError } from "@/adapter";
 import { copyToClipboard, isValidEmail, showToast } from "@/utils";
 import { UserService } from "@/services/UserService";
+import logger from '@/logger';
 
 export default defineComponent({
   name: "ContactActionsPopover",
@@ -158,7 +159,7 @@ export default defineComponent({
               showToast(translate(`${this.OPTIONS[this.type].placeholder} updated successfully.`))
             } catch (error) {
               showToast(translate(`Failed to update ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
-              console.error(error)
+              logger.error(error)
             }
             return true
           }
@@ -216,7 +217,7 @@ export default defineComponent({
               showToast(translate(`${this.OPTIONS[this.type].placeholder} removed successfully.`))
             } catch (error) {
               showToast(translate(`Failed to remove ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
-              console.error(error)
+              logger.error(error)
             }
           }
         }]

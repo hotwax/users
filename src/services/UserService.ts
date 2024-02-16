@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import store from '@/store';
 import { showToast } from '@/utils';
 import { translate } from '@hotwax/dxp-components';
+import logger from '@/logger';
 
 const login = async (username: string, password: string): Promise<any> => {
   return api({
@@ -290,7 +291,7 @@ const getUserSecurityGroup = async (userLoginId: string): Promise<any> => {
       throw resp.data
     }
   } catch (error) {
-    console.error('Failed to fetch user associated security group.', error)
+    logger.error('Failed to fetch user associated security group.', error)
   }
 
   return userSecurityGroup
@@ -382,7 +383,7 @@ const getUserFacilities = async (partyId: string): Promise<any> => {
       throw resp.data;
     }
   } catch (error) {
-    console.error('Failed to fetch user associated facilities.', error)
+    logger.error('Failed to fetch user associated facilities.', error)
   }
 
   return facilities
@@ -433,7 +434,7 @@ const getUserProductStores = async (partyId: string): Promise<any> => {
       throw resp.data
     }
   } catch (error) {
-    console.error('Failed to fetch user associated product stores.', error)
+    logger.error('Failed to fetch user associated product stores.', error)
   }
   return productStores
 }

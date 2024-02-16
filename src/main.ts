@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
 import './registerServiceWorker'
+import logger from '@/logger';
 
 import { IonicVue } from '@ionic/vue';
 
@@ -12,7 +13,6 @@ import '@ionic/vue/css/core.css';
 import '@ionic/vue/css/normalize.css';
 import '@ionic/vue/css/structure.css';
 import '@ionic/vue/css/typography.css';
-
 /* Optional CSS utils that can be commented out */
 import '@ionic/vue/css/padding.css';
 import '@ionic/vue/css/float-elements.css';
@@ -46,6 +46,9 @@ const app = createApp(App)
   .use(permissionPlugin, {
     rules: permissionRules,
     actions: permissionActions
+  })
+  .use(logger, {
+    level: process.env.VUE_APP_DEFAULT_LOG_LEVEL
   })
   .use(dxpComponents, {
     appLoginUrl: process.env.VUE_APP_LOGIN_URL as string,
