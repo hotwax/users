@@ -117,15 +117,18 @@ export default defineComponent({
       securityGroups: 'util/getSecurityGroups',
       permissionsByGroupType: 'permission/getPermissionsByGroupType',
       currentGroupPermissions: 'permission/getCurrentGroupPermissions',
-      currentGroup: "permission/getCurrentGroup"
+      currentGroup: 'permission/getCurrentGroup',
+      allPermissions: 'permission/getAllPermissions'
     })
   },
   async mounted() {
     await this.store.dispatch('util/getSecurityGroups')
-    if(!Object.keys(this.permissionsByGroupType).length) await this.store.dispatch('permission/getpermissionsByGroupType')
-    if(this.currentGroup) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
+    await this.store.dispatch('permission/getAllPermissions')
+    await this.store.dispatch('permission/getpermissionsByGroupType')
     await this.store.dispatch('permission/updateCurrentGroup', this.securityGroups[0])
-    this.checkAssociated()
+    await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
+
+    // this.checkAssociated()
   },
   methods: {
     createGroup() {

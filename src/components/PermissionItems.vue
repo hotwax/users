@@ -110,12 +110,8 @@ export default defineComponent({
             fromDate: DateTime.now().toMillis()
           })
         }
-        console.log('resp', resp);
-        
 
         if(!hasError(resp)) {
-          console.log('resp');
-          
           showToast(translate("Permission successfully associated to security group."))
           await this.store.dispatch('permission/updateCurrentGroupPermissions', { groupId: this.currentGroup.groupId, permissionId: permission.permissionId})
           this.checkAssociated()
