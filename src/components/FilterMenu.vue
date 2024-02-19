@@ -81,7 +81,7 @@ export default defineComponent({
   },
   methods: {
     closeMenu() {
-      // Query Updation and fetchUsers action automatically gets handled by the event handlers on FindUsers page
+      // Query Updation and fetchUsers action automatically gets handled by the event handlers on Users page
       // Hence, we don't need to call query updation action and just need to close the menu.
       menuController.close()
     }
