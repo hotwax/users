@@ -17,10 +17,10 @@
           <h1>{{ translate("Security Groups") }}</h1>
 
           <ion-list>
-            <ion-item v-for="group in securityGroups" :key="group.groupId" button detail @click="updateCurrentGroup(group)">
-              <ion-label  :color="group.groupId === currentGroup.groupId ? 'primary' : ''">
-                <p class="overline">{{ group.groupId }}</p>
-                {{ group.groupName }}
+            <ion-item v-for="group in securityGroups" :key="group?.groupId" button detail @click="updateCurrentGroup(group)">
+              <ion-label  :color="group?.groupId === currentGroup?.groupId ? 'primary' : ''">
+                <p class="overline">{{ group?.groupId }}</p>
+                {{ group?.groupName }}
               </ion-label>
             </ion-item>
           </ion-list>
@@ -88,7 +88,6 @@ import {
 } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import PermissionItems from '@/components/PermissionItems.vue'
-import DeleteSecurityGroupModal from '@/components/DeleteSecurityGroupModal.vue';
 import { mapGetters, useStore } from 'vuex';
 import { showToast } from '@/utils';
 import { hasError } from '@/adapter';
@@ -123,38 +122,32 @@ export default defineComponent({
   },
   async mounted() {
     await this.store.dispatch('util/getSecurityGroups')
-    await this.store.dispatch('permission/getAllPermissions')
-    await this.store.dispatch('permission/getpermissionsByGroupType')
+    if(!this.allPermissions.length)await this.store.dispatch('permission/getAllPermissions')
+    if(!Object.keys(this.permissionsByGroupType).length) await this.store.dispatch('permission/getpermissionsByGroupType')
     if(this.currentGroup) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
     this.checkAssociated()
-    
   },
   methods: {
     createGroup() {
       this.$router.replace({ path: `/create-security-group/` })
-    },
-    async openDeleteSecurityGroupModal() {
-      const deleteSecurityGroupModal = await modalController.create({
-        component: DeleteSecurityGroupModal,
-      });
-
-      return deleteSecurityGroupModal.present();
     },
     async updateCurrentGroup(group: any) {
       await this.store.dispatch('permission/updateCurrentGroup', group)
       await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
       this.checkAssociated()
     },
-    checkAssociated() {
-      Object.values(this.permissionsByGroupType).map((group: any) => {
+    async checkAssociated() {
+      const permissionsByGroupTypeValues = JSON.parse(JSON.stringify(this.permissionsByGroupType))
+      Object.values(permissionsByGroupTypeValues).map((group: any) => {
         group.permissions.map((permission: any) => {
-          if(this.currentGroupPermissions[permission.permissionId]) {
+          if (this.currentGroupPermissions[permission.permissionId]) {
             permission.isChecked = true
           } else {
             permission.isChecked = false
           }
         })
       })
+      await this.store.dispatch('permission/updatePermissionsByGroupType', permissionsByGroupTypeValues)
     },
     async editGroupName() {
       const alert = await alertController.create({
@@ -181,6 +174,8 @@ export default defineComponent({
 
                 if (!hasError(resp)) {
                   showToast(translate("Security group renamed successfully."))
+                  await this.store.dispatch('util/getSecurityGroups')
+                  await this.store.dispatch('permission/updateCurrentGroup', this.securityGroups.find((group: any) => group.groupId === this.currentGroup.groupId))
                 } else {
                   throw resp.data
                 }
