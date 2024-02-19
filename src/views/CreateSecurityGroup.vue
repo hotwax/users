@@ -129,18 +129,15 @@ export default defineComponent({
       if (!this.formData.groupId) {
         this.formData.groupId = generateInternalId(this.formData.groupName)
       }
-      
-      
+
       try {
         const resp = await PermissionService.createSecurityGroup(this.formData)
-        
+
         if(!hasError(resp)) {
           showToast(translate("Security group created successfully."))
           await this.store.dispatch('util/updateSecurityGroups', this.securityGroups.push(this.formData))
           await this.store.dispatch('permission/updateCurrentGroup', this.formData)
-          const permissionsByGroup = JSON.parse(JSON.stringify(this.permissionsByGroup))
-          permissionsByGroup[this.formData.groupId] = {}
-          await this.store.dispatch('permission/updatePermissionsByGroup', permissionsByGroup)
+          // await this.store.dispatch('permission/updatePermissionsByGroup', permissionsByGroup)
           this.router.replace('/add-permissions/')
         } else {
           throw resp.data
@@ -149,7 +146,6 @@ export default defineComponent({
         console.error(err)
         showToast(translate("Failed to create security group."))
       }
-      
     }
   },
   setup() {

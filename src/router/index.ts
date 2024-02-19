@@ -109,20 +109,14 @@ const routes: Array<RouteRecordRaw> = [
     name: 'CreateSecurityGroup',
     component: CreateSecurityGroup,
     beforeEnter: authGuard,
-    props: true,
-    meta: {
-      permissionId: "APP_USER_CREATE"
-    }
+    props: true
   },
   {
     path: '/add-permissions/',
     name: 'AddPermissions',
     component: AddPermissions,
     beforeEnter: authGuard,
-    props: true,
-    meta: {
-      permissionId: "APP_USER_CREATE"
-    }
+    props: true
   }
 ]
 

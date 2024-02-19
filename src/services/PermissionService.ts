@@ -51,12 +51,21 @@ const removeSecurityPermissionFromSecurityGroup = async (payload: any): Promise<
   });
 }
 
+const getSecurityGroupUsers = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "POST",
+    data: payload
+  })
+}
+
 export const PermissionService = {
   addSecurityPermissionToSecurityGroup,
   createSecurityGroup,
   getAllPermissions,
   getpermissionsByGroupType,
   getPermissionsByGroup,
+  getSecurityGroupUsers,
   removeSecurityPermissionFromSecurityGroup
 }
 

@@ -80,8 +80,7 @@ export default defineComponent({
       permissionsByGroupType: 'permission/getPermissionsByGroupType',
       query: 'permission/getQuery',
       currentGroupPermissions: 'permission/getCurrentGroupPermissions',
-      currentGroup: "permission/getCurrentGroup",
-      allPermissions: "permission/getAllPermissions"
+      currentGroup: "permission/getCurrentGroup"
     })
   },
   methods: {
@@ -97,12 +96,11 @@ export default defineComponent({
       }
 
       let currentPermissions = JSON.parse(JSON.stringify(this.currentGroupPermissions))
-      console.log('before', this.currentGroupPermissions);
 
       try {
         if(isChecked) {
           const fromDate = this.currentGroupPermissions[permission.permissionId].fromDate
-          
+
           resp = await PermissionService.removeSecurityPermissionFromSecurityGroup({
             ...payload,
             thruDate: DateTime.now().toMillis(),
@@ -122,9 +120,6 @@ export default defineComponent({
             fromDate: time
           }
         }
-
-        console.log('updated', currentPermissions);
-        
 
         if(!hasError(resp)) {
           showToast(translate("Permission association with security group updated successfully."))

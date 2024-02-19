@@ -20,6 +20,7 @@ const actions: ActionTree<PermissionState, RootState> = {
           viewSize: 250,
           viewIndex: viewIndex,
         })
+
         if (!hasError(resp) && resp.data.count) {
           permissions = permissions.concat(resp.data.docs)
           viewIndex++;
@@ -38,6 +39,7 @@ const actions: ActionTree<PermissionState, RootState> = {
   async getpermissionsByGroupType({ state, commit }, payload) {
     let permissions = [] as any, resp;
     let viewIndex = 0;
+
     try {
       do{
         resp = await PermissionService.getpermissionsByGroupType({
@@ -51,6 +53,7 @@ const actions: ActionTree<PermissionState, RootState> = {
             groupTypeEnumId_op: "not-empty"
           }
         })
+
         if(!hasError(resp)) {
           permissions = JSON.parse(JSON.stringify(permissions)).concat(resp.data.docs)
           viewIndex++;
@@ -77,6 +80,7 @@ const actions: ActionTree<PermissionState, RootState> = {
       }
     })
 
+    // Filtering all the permissions which are not part of any group type.
     let allPermissions = JSON.parse(JSON.stringify(state.allPermissions))
     Object.values(groupTypes).map((group: any) => {
       group.permissions.map((permission: any) => {
@@ -96,8 +100,7 @@ const actions: ActionTree<PermissionState, RootState> = {
 
   async getPermissionsByGroup({ state, commit }, groupId) {
     const permissions = {} as any
-    let resp;
-    let viewIndex = 0;
+    let viewIndex = 0, resp;
 
     if(state.permissionsByGroup[groupId]) {
       return;
@@ -116,8 +119,8 @@ const actions: ActionTree<PermissionState, RootState> = {
             groupId
           }
         })
+
         if (!hasError(resp) && resp.data.count) {
-          const temp = resp.data.docs
           resp.data.docs.map((permission: any) => {
             if(!permissions[permission.permissionId]) {
               permissions[permission.permissionId] = permission
@@ -133,28 +136,24 @@ const actions: ActionTree<PermissionState, RootState> = {
       console.error(error);
     }
 
-    const result = JSON.parse(JSON.stringify(state.permissionsByGroup))
-    result[groupId] = permissions
+    const permissionsByGroup = JSON.parse(JSON.stringify(state.permissionsByGroup))
+    permissionsByGroup[groupId] = permissions
 
-    commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, result)
+    commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, permissionsByGroup)
   },
 
   async updatePermissionsByGroup({ commit }, payload) {
     commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, payload )
   },
- 
+
   updateQuery({ commit }, query) {
     commit(types.PERMISSION_QUERY_UPDATED, { query })
   },
 
   updateCurrentGroupPermissions({ commit, state }, payload) {
-    console.log('ok', state.permissionsByGroup);
     const permissionsByGroup = JSON.parse(JSON.stringify(state.permissionsByGroup))
-
     permissionsByGroup[payload.groupId] = payload.currentPermissions
-    console.log(permissionsByGroup);
-    
-    
+
     commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, permissionsByGroup)
   },
 

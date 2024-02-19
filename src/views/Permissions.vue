@@ -41,9 +41,9 @@
               </ion-label>
               <ion-button slot="end" @click="editGroupName()" fill="outline">{{ translate("Edit") }}</ion-button>
             </ion-item>
-            <ion-buttons>
+            <ion-buttons v-if="Object.keys(currentGroup).length">
               <ion-button color="medium">
-                10 users
+                {{ securityGroupUsers[currentGroup.groupId] }}
                 <ion-icon :icon="openOutline" slot="end" />
               </ion-button>
             </ion-buttons>
@@ -93,6 +93,7 @@ import { showToast } from '@/utils';
 import { hasError } from '@/adapter';
 import { UtilService } from '@/services/UtilService';
 import emitter from "@/event-bus";
+import { PermissionService } from '@/services/PermissionService';
 
 export default defineComponent({
   name: 'Permissions',
@@ -110,6 +111,11 @@ export default defineComponent({
     IonTitle,
     IonToolbar,
     PermissionItems
+  },
+  data() {
+    return {
+      securityGroupUsers: {} as any
+    }
   },
   computed: {
     ...mapGetters({
@@ -135,6 +141,7 @@ export default defineComponent({
       await this.store.dispatch('permission/updateCurrentGroup', group)
       await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
       this.checkAssociated()
+      await this.getUsersCount()
     },
     async checkAssociated() {
       const permissionsByGroupTypeValues = JSON.parse(JSON.stringify(this.permissionsByGroupType))
@@ -192,6 +199,32 @@ export default defineComponent({
 
       await alert.present()
     },
+    async getUsersCount() {
+      if(this.securityGroupUsers[this.currentGroup.groupId]) {
+        return;
+      }
+
+      try {
+        const resp = await PermissionService.getSecurityGroupUsers({
+         entityName: "UserLoginAndSecurityGroup",
+          distinct: "Y",
+          noConditionFind: "Y",
+          filterByDate: "Y",
+          viewSize: 100,
+          inputFields: {
+            groupId: this.currentGroup.groupId
+          }
+        })
+
+        if(!hasError(resp)) {
+          this.securityGroupUsers[this.currentGroup.groupId] = resp.data.count
+        } else {
+          throw resp.data;
+        }
+      } catch(err) {
+        console.error(err)
+      }
+    }
   },
   setup() {
     const router = useRouter();
