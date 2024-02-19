@@ -20,10 +20,9 @@
     <ion-footer>
       <ion-toolbar>
         <ion-buttons slot="end" >
-          <ion-button color="medium" @click="openPermissions()" class="ion-margin-end">{{ translate("Add later") }}</ion-button>
-          <ion-button fill="solid" color="primary">
+          <ion-button fill="solid" color="primary" @click="openPermissions()" >
             <ion-icon slot="start" :icon="checkmarkDoneOutline" />
-            {{ translate("Add permissions") }}
+            {{ translate("Finish setup") }}
           </ion-button>
         </ion-buttons>
       </ion-toolbar>

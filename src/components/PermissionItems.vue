@@ -1,15 +1,15 @@
 <template>
   <div class="search-permissions">
-    <ion-searchbar :placeholder="translate('Search permissions')" v-model="query.queryString" @keyup.enter="updateQuery()" />
+    <ion-searchbar :placeholder="translate('Search permissions')" :value="query.queryString" @keyup.enter="query.queryString = $event.target.value; updateQuery()" />
     <ion-item lines="none">
       <ion-icon :icon="shieldCheckmarkOutline" slot="start" />
       <ion-label>{{ translate("Only selected permissions") }}</ion-label>
-      <ion-toggle slot="end" />
+      <ion-toggle slot="end" v-model="query.showSelected" @ionChange="updateQuery"/>
     </ion-item>
   </div>
 
-  <div v-for="(group, groupId) in permissionsByGroupType" :key="groupId">
-    <ion-item-divider class="ion-margin-vertical" color="light">
+  <div v-for="(group, groupId) in permissions" :key="groupId">
+    <ion-item-divider v-if="group.permissions.length" class="ion-margin-vertical" color="light">
       <ion-label>
         {{ group.groupName }}
       </ion-label>
@@ -80,7 +80,8 @@ export default defineComponent({
       permissionsByGroupType: 'permission/getPermissionsByGroupType',
       query: 'permission/getQuery',
       currentGroupPermissions: 'permission/getCurrentGroupPermissions',
-      currentGroup: "permission/getCurrentGroup"
+      currentGroup: "permission/getCurrentGroup",
+      permissions: "permission/getPermissions"
     })
   },
   methods: {
@@ -124,7 +125,7 @@ export default defineComponent({
         if(!hasError(resp)) {
           showToast(translate("Permission association with security group updated successfully."))
           await this.store.dispatch('permission/updateCurrentGroupPermissions', { groupId: this.currentGroup.groupId, currentPermissions})
-          this.checkAssociated()
+          await this.store.dispatch('permission/checkAssociated')
         } else {
           throw resp.data
         }
@@ -132,20 +133,6 @@ export default defineComponent({
         showToast(translate("Failed to update permission association to security group."))
         console.error(err)
       }
-      
-    },
-    async checkAssociated() {
-      const permissionsByGroupTypeValues = JSON.parse(JSON.stringify(this.permissionsByGroupType))
-      Object.values(permissionsByGroupTypeValues).map((group: any) => {
-        group.permissions.map((permission: any) => {
-          if (this.currentGroupPermissions[permission.permissionId]) {
-            permission.isChecked = true
-          } else {
-            permission.isChecked = false
-          }
-        })
-      })
-      await this.store.dispatch('permission/updatePermissionsByGroupType', permissionsByGroupTypeValues)
     }
   },
   setup() {

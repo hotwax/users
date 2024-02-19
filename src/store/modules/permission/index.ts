@@ -10,7 +10,8 @@ const utilModule: Module<PermissionState, RootState> = {
   state: {
     permissionsByGroupType: {},
     query: {
-      queryString: ''
+      queryString: '',
+      showSelected: false
     },
     currentGroup: {},
     permissionsByGroup: {},

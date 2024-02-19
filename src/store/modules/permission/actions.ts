@@ -4,6 +4,7 @@ import RootState from '@/store/RootState'
 import PermissionState from './PermissionState'
 import * as types from './mutation-types'
 import { hasError } from '@/adapter'
+import store from '@/store'
 
 const actions: ActionTree<PermissionState, RootState> = {
   async getAllPermissions({ commit }) {
@@ -96,6 +97,7 @@ const actions: ActionTree<PermissionState, RootState> = {
     }
 
     commit(types.PERMISSION_BY_GROUP_TYPE_UPDATED, groupTypes)
+    store.dispatch('permission/checkAssociated')
   },
 
   async getPermissionsByGroup({ state, commit }, groupId) {
@@ -140,6 +142,21 @@ const actions: ActionTree<PermissionState, RootState> = {
     permissionsByGroup[groupId] = permissions
 
     commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, permissionsByGroup)
+  },
+
+  async checkAssociated({ state, commit }, groupId) {
+    const permissionsByGroupTypeValues = JSON.parse(JSON.stringify(state.permissionsByGroupType))
+    Object.values(permissionsByGroupTypeValues).map((group: any) => {
+      group.permissions.map((permission: any) => {
+        const currentGroupPermissions = state.permissionsByGroup[state.currentGroup.groupId] ? JSON.parse(JSON.stringify(state.permissionsByGroup[state.currentGroup.groupId])) : []
+        if (currentGroupPermissions[permission.permissionId]) {
+          permission.isChecked = true
+        } else {
+          permission.isChecked = false
+        }
+      })
+    })
+    store.dispatch('permission/updatePermissionsByGroupType', permissionsByGroupTypeValues)
   },
 
   async updatePermissionsByGroup({ commit }, payload) {

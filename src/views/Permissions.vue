@@ -42,7 +42,7 @@
               <ion-button slot="end" @click="editGroupName()" fill="outline">{{ translate("Edit") }}</ion-button>
             </ion-item>
             <ion-buttons v-if="Object.keys(currentGroup).length">
-              <ion-button color="medium">
+              <ion-button color="medium" @click="openCurrentGroupUsers()">
                 {{ securityGroupUsers[currentGroup.groupId] }}
                 <ion-icon :icon="openOutline" slot="end" />
               </ion-button>
@@ -131,30 +131,19 @@ export default defineComponent({
     if(!this.allPermissions.length)await this.store.dispatch('permission/getAllPermissions')
     if(!Object.keys(this.permissionsByGroupType).length) await this.store.dispatch('permission/getpermissionsByGroupType')
     if(this.currentGroup) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
-    this.checkAssociated()
+    await this.store.dispatch('permission/checkAssociated')
   },
   methods: {
     createGroup() {
       this.$router.replace({ path: `/create-security-group/` })
     },
     async updateCurrentGroup(group: any) {
+      emitter.emit('presentLoader')
       await this.store.dispatch('permission/updateCurrentGroup', group)
       await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
-      this.checkAssociated()
+      await this.store.dispatch('permission/checkAssociated')
       await this.getUsersCount()
-    },
-    async checkAssociated() {
-      const permissionsByGroupTypeValues = JSON.parse(JSON.stringify(this.permissionsByGroupType))
-      Object.values(permissionsByGroupTypeValues).map((group: any) => {
-        group.permissions.map((permission: any) => {
-          if (this.currentGroupPermissions[permission.permissionId]) {
-            permission.isChecked = true
-          } else {
-            permission.isChecked = false
-          }
-        })
-      })
-      await this.store.dispatch('permission/updatePermissionsByGroupType', permissionsByGroupTypeValues)
+      emitter.emit('dismissLoader')
     },
     async editGroupName() {
       const alert = await alertController.create({
@@ -224,6 +213,10 @@ export default defineComponent({
       } catch(err) {
         console.error(err)
       }
+    },
+    async openCurrentGroupUsers() {
+      await this.store.dispatch('user/updateQuery', {queryString: '', securityGroup: this.currentGroup.groupId, status: '', hideDisabledUser: true})
+      this.router.replace('find-users')
     }
   },
   setup() {
