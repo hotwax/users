@@ -95,31 +95,46 @@ export default defineComponent({
         groupId: this.currentGroup.groupId,
         permissionId: permission.permissionId
       }
-      
+
+      let currentPermissions = JSON.parse(JSON.stringify(this.currentGroupPermissions))
+      console.log('before', this.currentGroupPermissions);
+
       try {
         if(isChecked) {
-          const fromDate = this.allPermissions.filter((perm: any) => perm.permissionId === permission.permissionId)
+          const fromDate = this.currentGroupPermissions[permission.permissionId].fromDate
+          
           resp = await PermissionService.removeSecurityPermissionFromSecurityGroup({
             ...payload,
             thruDate: DateTime.now().toMillis(),
             fromDate
           })
+
+          delete currentPermissions[permission.permissionId]
         } else {
+          const time = DateTime.now().toMillis() 
           resp = await PermissionService.addSecurityPermissionToSecurityGroup({
             ...payload,
-            fromDate: DateTime.now().toMillis()
+            fromDate: time
           })
+
+          currentPermissions[permission.permissionId] = {
+            ...payload,
+            fromDate: time
+          }
         }
 
+        console.log('updated', currentPermissions);
+        
+
         if(!hasError(resp)) {
-          showToast(translate("Permission successfully associated to security group."))
-          await this.store.dispatch('permission/updateCurrentGroupPermissions', { groupId: this.currentGroup.groupId, permissionId: permission.permissionId})
+          showToast(translate("Permission association with security group updated successfully."))
+          await this.store.dispatch('permission/updateCurrentGroupPermissions', { groupId: this.currentGroup.groupId, currentPermissions})
           this.checkAssociated()
         } else {
           throw resp.data
         }
       } catch(err) {
-        showToast(translate("Failed to associated permission to security group."))
+        showToast(translate("Failed to update permission association to security group."))
         console.error(err)
       }
       

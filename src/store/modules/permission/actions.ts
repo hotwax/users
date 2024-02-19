@@ -148,16 +148,13 @@ const actions: ActionTree<PermissionState, RootState> = {
   },
 
   updateCurrentGroupPermissions({ commit, state }, payload) {
+    console.log('ok', state.permissionsByGroup);
     const permissionsByGroup = JSON.parse(JSON.stringify(state.permissionsByGroup))
-    const permissions = permissionsByGroup[payload.groupId]
 
-    if(permissions.includes(payload.permissionId)) {
-      permissions.remove(payload.permissionId)
-    } else {
-      permissions.push(payload.permissionId)
-    }
-
-    permissionsByGroup[payload.groupId] = permissions
+    permissionsByGroup[payload.groupId] = payload.currentPermissions
+    console.log(permissionsByGroup);
+    
+    
     commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, permissionsByGroup)
   },
 

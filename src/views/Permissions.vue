@@ -125,10 +125,9 @@ export default defineComponent({
     await this.store.dispatch('util/getSecurityGroups')
     await this.store.dispatch('permission/getAllPermissions')
     await this.store.dispatch('permission/getpermissionsByGroupType')
-    await this.store.dispatch('permission/updateCurrentGroup', this.securityGroups[0])
-    await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
-
+    if(this.currentGroup) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
     this.checkAssociated()
+    
   },
   methods: {
     createGroup() {
