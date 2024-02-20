@@ -1,6 +1,8 @@
 import { toastController } from '@ionic/vue';
 import { Plugins } from '@capacitor/core';
 import { translate } from '@hotwax/dxp-components';
+import Papa from 'papaparse'
+import saveAs from "file-saver";
 
 const showToast = async (message: string, configButtons?: any) => {
   const defaultButtons = [{
@@ -46,4 +48,31 @@ const generateInternalId = (name: string) => {
   return name.trim().toUpperCase().split(' ').join('_');
 }
 
-export { copyToClipboard, showToast, generateInternalId, isValidEmail, isValidPassword }
+// Here we have created a JsonToCsvOption which contains the properties which we can pass to jsonToCsv function
+
+interface JsonToCsvOption {
+  parse?: object | null;
+  encode?: object | null;
+  name?: string;
+  download?: boolean;
+}
+
+const jsonToCsv = (file: any, options: JsonToCsvOption = {}) => {
+  const csv = Papa.unparse(file, {
+    ...options.parse
+  });
+  const encoding = {
+    type: String,
+    default: "utf-8",
+    ...options.encode
+  };
+  const blob = new Blob([csv], {
+    type: "application/csvcharset=" + JSON.stringify(encoding)
+  });
+  if (options.download) {
+    saveAs(blob, options.name ? options.name : "default.csv");
+  }
+  return blob;
+}
+
+export { copyToClipboard, showToast, generateInternalId, isValidEmail, isValidPassword, jsonToCsv }

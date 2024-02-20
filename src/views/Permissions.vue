@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-title>{{ translate("Users management") }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button>
+          <ion-button @click="downloadCSV()">
             <ion-icon :icon="downloadOutline" slot="icon-only" />
           </ion-button>
         </ion-buttons>
@@ -89,11 +89,12 @@ import {
 import { useRouter } from 'vue-router';
 import PermissionItems from '@/components/PermissionItems.vue'
 import { mapGetters, useStore } from 'vuex';
-import { showToast } from '@/utils';
+import { jsonToCsv, showToast } from '@/utils';
 import { hasError } from '@/adapter';
 import { UtilService } from '@/services/UtilService';
 import emitter from "@/event-bus";
 import { PermissionService } from '@/services/PermissionService';
+import { DateTime } from 'luxon';
 
 export default defineComponent({
   name: 'Permissions',
@@ -217,6 +218,67 @@ export default defineComponent({
     async openCurrentGroupUsers() {
       await this.store.dispatch('user/updateQuery', {queryString: '', securityGroup: this.currentGroup.groupId, status: '', hideDisabledUser: true})
       this.router.replace('find-users')
+    },
+    async downloadCSV() {
+      emitter.emit('presentLoader')
+      let finalJSON = [] as any
+      
+      if(Object.keys(this.currentGroup).length) {
+        Object.values(this.currentGroupPermissions).map((permission: any) => {
+          finalJSON.push({
+            "Group Id": permission.groupId,
+            "Permission ID": permission.permissionId,
+            "Permission Desc": permission.description,
+            "Member Created Date": DateTime.fromMillis(permission.fromDate).toFormat('dd-MM-yyyy')
+          })
+        })
+      } 
+      else {
+        finalJSON =  await this.downloadAllCSV() 
+      }
+
+      await jsonToCsv(finalJSON, { download: true })
+
+    },
+    async downloadAllCSV() {
+     let permissionsByGroup = [] as any;
+
+      try {
+        await Promise.allSettled(this.securityGroups.map(async (group: any) => {
+          let viewIndex = 0, resp;
+          do {
+            resp = await PermissionService.getPermissionsByGroup({
+              entityName: "SecurityGroupAndPermission",
+              distinct: "Y",
+              noConditionFind: "Y",
+              filterByDate: "Y",
+              viewSize: 250,
+              viewIndex: viewIndex,
+              inputFields: {
+                groupId: group.groupId
+              }
+            });
+
+            if (!hasError(resp) && resp.data.count) {
+              resp.data.docs.map((permission: any) => {
+                permissionsByGroup.push({
+                  "Group Id": permission.groupId,
+                  "Permission ID": permission.permissionId,
+                  "Permission Desc": permission.description,
+                  "Member Created Date": DateTime.fromMillis(permission.fromDate).toFormat('dd-MM-yyyy')
+                });
+              });
+              viewIndex++;
+            } else {
+              throw resp.data;
+            }
+          } while (resp.data.docs.length >= 250);
+        }));
+      } catch (err) {
+        console.log(err);
+      }
+
+      return permissionsByGroup;
     }
   },
   setup() {
