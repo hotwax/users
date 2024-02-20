@@ -37,7 +37,7 @@ const actions: ActionTree<PermissionState, RootState> = {
     commit(types.PERMISSION_ALL_PERMISSIONS_UPDATED, permissions)
   },
 
-  async getpermissionsByGroupType({ state, commit }, payload) {
+  async getpermissionsByGroupType({ state, commit }) {
     let permissions = [] as any, resp;
     let viewIndex = 0;
 
@@ -82,18 +82,18 @@ const actions: ActionTree<PermissionState, RootState> = {
     })
 
     // Filtering all the permissions which are not part of any group type.
-    let allPermissions = JSON.parse(JSON.stringify(state.allPermissions))
+    let otherPermissions = JSON.parse(JSON.stringify(state.allPermissions))
     Object.values(groupTypes).map((group: any) => {
       group.permissions.map((permission: any) => {
-        allPermissions = allPermissions.filter((perm: any) => perm.permissionId !== permission.permissionId)
+        otherPermissions = otherPermissions.filter((perm: any) => perm.permissionId !== permission.permissionId)
       })
     })
-    
+
     // Others category for permissions not in any internal group.
     groupTypes['OTHERS'] = {
       groupId: 'OTHERS',
       groupName: 'Other Category',
-      permissions: allPermissions
+      permissions: otherPermissions
     }
 
     commit(types.PERMISSION_BY_GROUP_TYPE_UPDATED, groupTypes)
@@ -144,11 +144,13 @@ const actions: ActionTree<PermissionState, RootState> = {
     commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, permissionsByGroup)
   },
 
-  async checkAssociated({ state, commit }, groupId) {
+  async checkAssociated({ state }) {
     const permissionsByGroupTypeValues = JSON.parse(JSON.stringify(state.permissionsByGroupType))
+
     Object.values(permissionsByGroupTypeValues).map((group: any) => {
       group.permissions.map((permission: any) => {
         const currentGroupPermissions = state.permissionsByGroup[state.currentGroup.groupId] ? JSON.parse(JSON.stringify(state.permissionsByGroup[state.currentGroup.groupId])) : []
+
         if (currentGroupPermissions[permission.permissionId]) {
           permission.isChecked = true
         } else {
@@ -156,6 +158,7 @@ const actions: ActionTree<PermissionState, RootState> = {
         }
       })
     })
+
     store.dispatch('permission/updatePermissionsByGroupType', permissionsByGroupTypeValues)
   },
 

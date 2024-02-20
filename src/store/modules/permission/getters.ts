@@ -6,21 +6,21 @@ const getters: GetterTree<PermissionState, RootState> = {
   getPermissionsByGroupType(state) {
     return state.permissionsByGroupType
   },
-  getPermissions(state) {
+  getCurrentPermissionsByGroupType(state) {
     const groupType = JSON.parse(JSON.stringify(state.permissionsByGroupType))
     const filteredData = {} as any
     const query = state.query
 
-    for (const key in groupType) {
-      const group = groupType[key];
+    for (const typeId in groupType) {
+      const group = groupType[typeId];
 
       if(state.query.showSelected) {
-        filteredData[key] = {
+        filteredData[typeId] = {
           ...group,
           permissions: group.permissions.filter((permission: any) => permission.description && permission.description.toLowerCase().includes(query.queryString.toLowerCase()) && permission.isChecked)
         };
       } else {
-        filteredData[key] = {
+        filteredData[typeId] = {
           ...group,
           permissions: group.permissions.filter((permission: any) => permission.description && permission.description.toLowerCase().includes(query.queryString.toLowerCase()))
         };

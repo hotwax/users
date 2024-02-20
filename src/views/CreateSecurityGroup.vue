@@ -18,11 +18,11 @@
             <ion-label position="floating">{{ translate('Internal ID') }}</ion-label>
             <ion-input @ionChange="validateGroupId" @ionBlur="markGroupIdTouched" v-model="formData.groupId" />
             <ion-note slot="error">
-              {{ translate('Internal ID cannot be more than 20 characters.') }}
+              {{ translate("Internal ID cannot be more than 20 characters.") }}
             </ion-note>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ translate('Description') }}</ion-label>
+            <ion-label position="floating">{{ translate("Description") }}</ion-label>
             <ion-textarea v-model="formData.description" />
           </ion-item>
         </ion-list>
@@ -64,7 +64,7 @@ import { PermissionService } from "@/services/PermissionService";
 import { hasError } from "@/adapter";
 
 export default defineComponent({
-  name: "CreateUser",
+  name: "CreateSecurityGroup",
   components: {
     IonBackButton,
     IonButton,
@@ -78,7 +78,7 @@ export default defineComponent({
     IonTextarea,
     IonTitle,
     IonToolbar,
-    IonInput,
+    IonInput
   },
   data() {
     return {
@@ -115,12 +115,12 @@ export default defineComponent({
     },
     async createGroup() {
       if (!this.formData.groupName?.trim()) {
-        showToast(translate('Security Group name is required.'))
+        showToast(translate("Security group name is required."))
         return
       }
 
       if (this.formData.groupId.length > 20) {
-        showToast(translate('Internal ID cannot be more than 20 characters.'))
+        showToast(translate("Internal ID cannot be more than 20 characters."))
         return
       }
 
@@ -137,7 +137,6 @@ export default defineComponent({
           showToast(translate("Security group created successfully."))
           await this.store.dispatch('util/updateSecurityGroups', this.securityGroups.push(this.formData))
           await this.store.dispatch('permission/updateCurrentGroup', this.formData)
-          // await this.store.dispatch('permission/updatePermissionsByGroup', permissionsByGroup)
           this.router.replace('/add-permissions/')
         } else {
           throw resp.data

@@ -3,11 +3,6 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-title>{{ translate("Add permissions to", { groupName: currentGroup.groupName }) }}</ion-title>
-        <ion-buttons slot="end">
-          <ion-button>
-            <ion-icon :icon="downloadOutline" slot="icon-only" />
-          </ion-button>
-        </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
@@ -38,19 +33,13 @@ import {
   IonFooter,
   IonHeader,
   IonIcon,
-  IonItem,
   IonPage,
   IonTitle,
   IonToolbar
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { translate } from '@hotwax/dxp-components';
-import {
-  addOutline,
-  checkmarkDoneOutline,
-  downloadOutline,
-  shieldCheckmarkOutline
-} from 'ionicons/icons';
+import { checkmarkDoneOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import PermissionItems from '@/components/PermissionItems.vue';
 import { mapGetters } from 'vuex';
@@ -64,7 +53,6 @@ export default defineComponent({
     IonFooter,
     IonHeader,
     IonIcon,
-    // IonItem,
     IonPage,
     IonTitle,
     IonToolbar,
@@ -84,10 +72,7 @@ export default defineComponent({
     const router = useRouter();
 
     return {
-      addOutline,
       checkmarkDoneOutline,
-      downloadOutline,
-      shieldCheckmarkOutline,
       router,
       translate
     }

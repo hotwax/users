@@ -73,19 +73,11 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
-  alertController,
-  modalController
+  alertController
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { translate } from '@hotwax/dxp-components';
-import {
-  addOutline,
-  downloadOutline,
-  idCardOutline,
-  openOutline,
-  shieldCheckmarkOutline,
-  trashOutline
-} from 'ionicons/icons';
+import { addOutline, downloadOutline, idCardOutline, openOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import PermissionItems from '@/components/PermissionItems.vue'
 import { mapGetters, useStore } from 'vuex';
@@ -129,9 +121,9 @@ export default defineComponent({
   },
   async mounted() {
     await this.store.dispatch('util/getSecurityGroups')
-    if(!this.allPermissions.length)await this.store.dispatch('permission/getAllPermissions')
+    if(!this.allPermissions.length) await this.store.dispatch('permission/getAllPermissions')
     if(!Object.keys(this.permissionsByGroupType).length) await this.store.dispatch('permission/getpermissionsByGroupType')
-    if(this.currentGroup) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
+    if(Object.keys(this.currentGroup).length) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
     await this.store.dispatch('permission/checkAssociated')
   },
   methods: {
@@ -154,11 +146,11 @@ export default defineComponent({
           value: this.currentGroup.groupName
         }],
         buttons: [{
-          text: translate('Cancel'),
+          text: translate("Cancel"),
           role: "cancel"
         },
         {
-          text: translate('Apply'),
+          text: translate("Confirm"),
           handler: async (data: any) => {
             if (data.groupName) {
               emitter.emit('presentLoader')
@@ -177,7 +169,7 @@ export default defineComponent({
                   throw resp.data
                 }
               } catch (error) {
-                showToast(translate('Failed to rename security group.'))
+                showToast(translate("Failed to rename security group."))
                 console.error(error)
               }
 
@@ -220,9 +212,8 @@ export default defineComponent({
       this.router.replace('find-users')
     },
     async downloadCSV() {
-      emitter.emit('presentLoader')
       let finalJSON = [] as any
-      
+
       if(Object.keys(this.currentGroup).length) {
         Object.values(this.currentGroupPermissions).map((permission: any) => {
           finalJSON.push({
@@ -291,10 +282,8 @@ export default defineComponent({
       idCardOutline,
       openOutline,
       router,
-      shieldCheckmarkOutline,
       store,
-      translate,
-      trashOutline
+      translate
     }
   }
 });

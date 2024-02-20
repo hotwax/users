@@ -4,11 +4,11 @@
     <ion-item lines="none">
       <ion-icon :icon="shieldCheckmarkOutline" slot="start" />
       <ion-label>{{ translate("Only selected permissions") }}</ion-label>
-      <ion-toggle slot="end" v-model="query.showSelected" @ionChange="updateQuery"/>
+      <ion-toggle slot="end" v-model="query.showSelected" @ionChange="updateQuery()"/>
     </ion-item>
   </div>
 
-  <div v-for="(group, groupId) in permissions" :key="groupId">
+  <div v-for="(group, groupId) in currentPermissionsByGroupType" :key="groupId">
     <ion-item-divider v-if="group.permissions.length" class="ion-margin-vertical" color="light">
       <ion-label>
         {{ group.groupName }}
@@ -22,7 +22,7 @@
             <ion-card-title>{{ permission.permissionId }}</ion-card-title>
             <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
           </div>
-          <ion-checkbox :checked="permission.isChecked" @click="updatePermissionAssociation(permission, permission.isChecked)" />
+          <ion-checkbox :checked="permission.isChecked" @click="updatePermissionAssociation(permission)" />
         </ion-card-header>
       </ion-card>
     </section>
@@ -43,22 +43,17 @@ import {
   IonItemDivider,
   IonLabel,
   IonSearchbar,
-  IonToggle,
+  IonToggle
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { translate } from '@hotwax/dxp-components';
-import {
-  idCardOutline,
-  openOutline,
-  shieldCheckmarkOutline,
-  trashOutline
-} from 'ionicons/icons';
-import { useRouter } from 'vue-router';
+import { shieldCheckmarkOutline, trashOutline } from 'ionicons/icons';
 import { mapGetters, useStore } from 'vuex';
 import { PermissionService } from '@/services/PermissionService';
 import { showToast } from '@/utils';
-import { hasError } from '@hotwax/oms-api';
+import { hasError } from '@/adapter';
 import { DateTime } from 'luxon';
+import emitter from '@/event-bus';
 
 export default defineComponent({
   name: 'PermissionItems',
@@ -77,19 +72,17 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      permissionsByGroupType: 'permission/getPermissionsByGroupType',
       query: 'permission/getQuery',
       currentGroupPermissions: 'permission/getCurrentGroupPermissions',
       currentGroup: "permission/getCurrentGroup",
-      permissions: "permission/getPermissions"
+      currentPermissionsByGroupType: "permission/getCurrentPermissionsByGroupType"
     })
   },
   methods: {
     async updateQuery() {
       await this.store.dispatch('permission/updateQuery', this.query)
-      // await this.store.dispatch('permission/getpermissionsByGroupType')
     },
-    async updatePermissionAssociation(permission: any, isChecked: boolean) {
+    async updatePermissionAssociation(permission: any) {
       let resp = {} as any;
       const payload = {
         groupId: this.currentGroup.groupId,
@@ -97,9 +90,10 @@ export default defineComponent({
       }
 
       let currentPermissions = JSON.parse(JSON.stringify(this.currentGroupPermissions))
+      emitter.emit('presentLoader')
 
       try {
-        if(isChecked) {
+        if(permission.isChecked) {
           const fromDate = this.currentGroupPermissions[permission.permissionId].fromDate
 
           resp = await PermissionService.removeSecurityPermissionFromSecurityGroup({
@@ -110,7 +104,8 @@ export default defineComponent({
 
           delete currentPermissions[permission.permissionId]
         } else {
-          const time = DateTime.now().toMillis() 
+          const time = DateTime.now().toMillis()
+
           resp = await PermissionService.addSecurityPermissionToSecurityGroup({
             ...payload,
             fromDate: time
@@ -123,30 +118,26 @@ export default defineComponent({
         }
 
         if(!hasError(resp)) {
-          showToast(translate("Permission association with security group updated successfully."))
+          showToast(translate("Security group permission association successfully updated."))
           await this.store.dispatch('permission/updateCurrentGroupPermissions', { groupId: this.currentGroup.groupId, currentPermissions})
           await this.store.dispatch('permission/checkAssociated')
         } else {
           throw resp.data
         }
       } catch(err) {
-        showToast(translate("Failed to update permission association to security group."))
+        showToast(translate("Failed to update security group permission association."))
         console.error(err)
       }
+      emitter.emit('dismissLoader')
     }
   },
   setup() {
-    const router = useRouter();
     const store = useStore();
 
     return {
-      idCardOutline,
-      openOutline,
       shieldCheckmarkOutline,
-      router,
       store,
-      translate,
-      trashOutline
+      translate
     }
   }
 });
