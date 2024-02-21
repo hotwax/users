@@ -137,7 +137,7 @@ export default defineComponent({
           showToast(translate("Security group created successfully."))
           await this.store.dispatch('util/updateSecurityGroups', this.securityGroups.push(this.formData))
           await this.store.dispatch('permission/updateCurrentGroup', this.formData)
-          this.router.replace('/add-permissions/')
+          this.router.replace('/add-permissions')
         } else {
           throw resp.data
         }

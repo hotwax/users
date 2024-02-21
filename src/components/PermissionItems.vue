@@ -102,6 +102,10 @@ export default defineComponent({
             fromDate
           })
 
+          if(hasError(resp)) {
+            throw resp.data;
+          }
+
           delete currentPermissions[permission.permissionId]
         } else {
           const time = DateTime.now().toMillis()
@@ -111,6 +115,11 @@ export default defineComponent({
           }
 
           resp = await PermissionService.addSecurityPermissionToSecurityGroup(params)
+
+          if(hasError(resp)) {
+            throw resp.data;
+          }
+
           currentPermissions[permission.permissionId] = params
         }
 

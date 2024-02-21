@@ -112,7 +112,7 @@ const routes: Array<RouteRecordRaw> = [
     props: true
   },
   {
-    path: '/add-permissions/',
+    path: '/add-permissions',
     name: 'AddPermissions',
     component: AddPermissions,
     beforeEnter: authGuard,

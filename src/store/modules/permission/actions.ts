@@ -37,13 +37,13 @@ const actions: ActionTree<PermissionState, RootState> = {
     commit(types.PERMISSION_ALL_PERMISSIONS_UPDATED, permissions)
   },
 
-  async getpermissionsByGroupType({ state, commit }) {
+  async getPermissionsByGroupType({ state, commit }) {
     let permissions = [] as any, resp;
     let viewIndex = 0;
 
     try {
-      do{
-        resp = await PermissionService.getpermissionsByGroupType({
+      do {
+        resp = await PermissionService.getPermissionsByGroupType({
           entityName: "SecurityGroupAndPermission",
           distinct: "Y",
           noConditionFind: "Y",
@@ -56,7 +56,7 @@ const actions: ActionTree<PermissionState, RootState> = {
         })
 
         if(!hasError(resp)) {
-          permissions = JSON.parse(JSON.stringify(permissions)).concat(resp.data.docs)
+          permissions = permissions.concat(resp.data.docs)
           viewIndex++;
         } else {
           throw resp.data

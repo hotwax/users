@@ -1,6 +1,6 @@
 import { api } from '@/adapter';
 
-const getpermissionsByGroupType = async (payload: any): Promise<any> => {
+const getPermissionsByGroupType = async (payload: any): Promise<any> => {
   return api({
     url: "performFind",
     method: "POST",
@@ -63,7 +63,7 @@ export const PermissionService = {
   addSecurityPermissionToSecurityGroup,
   createSecurityGroup,
   getAllPermissions,
-  getpermissionsByGroupType,
+  getPermissionsByGroupType,
   getPermissionsByGroup,
   getSecurityGroupUsers,
   removeSecurityPermissionFromSecurityGroup

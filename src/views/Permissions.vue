@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-title>{{ translate("Users management") }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="downloadCSV()">
+          <ion-button @click="downloadCSVForPermissions()">
             <ion-icon :icon="downloadOutline" slot="icon-only" />
           </ion-button>
         </ion-buttons>
@@ -18,7 +18,7 @@
 
           <ion-list>
             <ion-item v-for="group in securityGroups" :key="group?.groupId" button detail @click="updateCurrentGroup(group)">
-              <ion-label  :color="group?.groupId === currentGroup?.groupId ? 'primary' : ''">
+              <ion-label :color="group?.groupId === currentGroup?.groupId ? 'primary' : ''">
                 <p class="overline">{{ group?.groupId }}</p>
                 {{ group?.groupName }}
               </ion-label>
@@ -41,17 +41,15 @@
               </ion-label>
               <ion-button slot="end" @click="editGroupName()" fill="outline">{{ translate("Edit") }}</ion-button>
             </ion-item>
-            <ion-buttons v-if="Object.keys(currentGroup).length">
-              <ion-button color="medium" @click="openCurrentGroupUsers()">
-                {{ securityGroupUsers[currentGroup.groupId] }}
-                <ion-icon :icon="openOutline" slot="end" />
-              </ion-button>
-            </ion-buttons>
+            <ion-button v-if="securityGroupUsers[currentGroup.groupId]" fill="clear" color="medium" @click="openCurrentGroupUsers()">
+              {{ translate(securityGroupUsers[currentGroup.groupId] > 1 ? "users" : "user", { userCount: securityGroupUsers[currentGroup.groupId] }) }}
+              <ion-icon :icon="openOutline" slot="end" />
+            </ion-button>
           </div>
           <hr />
           <PermissionItems />
         </main>
-        <main v-else class="ion-text-center">
+        <main v-else class="empty-state">
           <h1>{{ "Select a security group to view its details" }}</h1>
         </main>
       </div>
@@ -122,7 +120,7 @@ export default defineComponent({
   async mounted() {
     await this.store.dispatch('util/getSecurityGroups')
     if(!this.allPermissions.length) await this.store.dispatch('permission/getAllPermissions')
-    if(!Object.keys(this.permissionsByGroupType).length) await this.store.dispatch('permission/getpermissionsByGroupType')
+    if(!Object.keys(this.permissionsByGroupType).length) await this.store.dispatch('permission/getPermissionsByGroupType')
     if(Object.keys(this.currentGroup).length) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
     await this.store.dispatch('permission/checkAssociated')
   },
@@ -188,7 +186,7 @@ export default defineComponent({
 
       try {
         const resp = await PermissionService.getSecurityGroupUsers({
-         entityName: "UserLoginAndSecurityGroup",
+          entityName: "UserLoginAndSecurityGroup",
           distinct: "Y",
           noConditionFind: "Y",
           filterByDate: "Y",
@@ -211,7 +209,7 @@ export default defineComponent({
       await this.store.dispatch('user/updateQuery', {queryString: '', securityGroup: this.currentGroup.groupId, status: '', hideDisabledUser: true})
       this.router.replace('find-users')
     },
-    async downloadCSV() {
+    async downloadCSVForPermissions() {
       let finalJSON = [] as any
 
       if(Object.keys(this.currentGroup).length) {
