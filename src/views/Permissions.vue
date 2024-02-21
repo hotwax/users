@@ -223,13 +223,13 @@ export default defineComponent({
         })
       } 
       else {
-        finalJSON =  await this.downloadAllCSV() 
+        finalJSON =  await this.downloadCSVForAllPermissionsCSV()
       }
 
       await jsonToCsv(finalJSON, { download: true })
 
     },
-    async downloadAllCSV() {
+    async downloadCSVForAllPermissionsCSV() {
      let permissionsByGroup = [] as any;
 
       try {
