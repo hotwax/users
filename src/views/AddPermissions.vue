@@ -65,7 +65,7 @@ export default defineComponent({
   },
   methods: {
     openPermissions() {
-      this.router.push('tabs/permissions')
+      this.router.replace('tabs/permissions')
     }
   },
   setup() {

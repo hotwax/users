@@ -47,7 +47,7 @@ import {
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { translate } from '@hotwax/dxp-components';
-import { shieldCheckmarkOutline, trashOutline } from 'ionicons/icons';
+import { shieldCheckmarkOutline } from 'ionicons/icons';
 import { mapGetters, useStore } from 'vuex';
 import { PermissionService } from '@/services/PermissionService';
 import { showToast } from '@/utils';
@@ -105,16 +105,13 @@ export default defineComponent({
           delete currentPermissions[permission.permissionId]
         } else {
           const time = DateTime.now().toMillis()
-
-          resp = await PermissionService.addSecurityPermissionToSecurityGroup({
-            ...payload,
-            fromDate: time
-          })
-
-          currentPermissions[permission.permissionId] = {
+          const params = {
             ...payload,
             fromDate: time
           }
+
+          resp = await PermissionService.addSecurityPermissionToSecurityGroup(params)
+          currentPermissions[permission.permissionId] = params
         }
 
         if(!hasError(resp)) {
