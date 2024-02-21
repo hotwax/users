@@ -45,7 +45,7 @@ import PermissionItems from '@/components/PermissionItems.vue';
 import { mapGetters } from 'vuex';
 
 export default defineComponent({
-  name: 'Permissions',
+  name: 'AddPermissions',
   components: {
     IonButton,
     IonButtons,
