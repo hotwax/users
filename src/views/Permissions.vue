@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>{{ translate("Users management") }}</ion-title>
+        <ion-title>{{ translate("Permissions") }}</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="downloadCSVForPermissions()">
             <ion-icon :icon="downloadOutline" slot="icon-only" />
@@ -18,8 +18,8 @@
 
           <ion-list>
             <ion-item v-for="group in securityGroups" :key="group?.groupId" button detail @click="updateCurrentGroup(group)">
-              <ion-label :color="group?.groupId === currentGroup?.groupId ? 'primary' : ''">
-                <p class="overline">{{ group?.groupId }}</p>
+              <ion-label :color="group.groupId === currentGroup?.groupId ? 'primary' : ''">
+                <p class="overline">{{ group.groupId }}</p>
                 {{ group?.groupName }}
               </ion-label>
             </ion-item>
@@ -30,7 +30,7 @@
             <ion-label>{{ translate("Create security group") }}</ion-label>
           </ion-button>
         </aside>
-        <main v-if="Object.keys(currentGroup).length">
+        <main v-if="currentGroup?.groupId">
           <div class="section-header">
             <ion-item lines="none">
               <ion-icon :icon="idCardOutline" slot="start" />
@@ -121,7 +121,7 @@ export default defineComponent({
     await this.store.dispatch('util/getSecurityGroups')
     if(!this.allPermissions.length) await this.store.dispatch('permission/getAllPermissions')
     if(!Object.keys(this.permissionsByGroupType).length) await this.store.dispatch('permission/getPermissionsByGroupType')
-    if(Object.keys(this.currentGroup).length) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
+    if(this.currentGroup.groupId) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
     await this.store.dispatch('permission/checkAssociated')
   },
   methods: {
@@ -150,7 +150,7 @@ export default defineComponent({
         {
           text: translate("Confirm"),
           handler: async (data: any) => {
-            if (data.groupName) {
+            if (data.groupName?.trim()) {
               emitter.emit('presentLoader')
 
               try {
@@ -210,23 +210,22 @@ export default defineComponent({
       this.router.replace('find-users')
     },
     async downloadCSVForPermissions() {
-      let finalJSON = [] as any
+      let permissionsJson = [] as any
 
-      if(Object.keys(this.currentGroup).length) {
+      if(this.currentGroup.groupId) {
         Object.values(this.currentGroupPermissions).map((permission: any) => {
-          finalJSON.push({
-            "Group Id": permission.groupId,
+          permissionsJson.push({
+            "Group ID": permission.groupId,
             "Permission ID": permission.permissionId,
             "Permission Desc": permission.description,
             "Member Created Date": DateTime.fromMillis(permission.fromDate).toFormat('dd-MM-yyyy')
           })
         })
-      } 
-      else {
-        finalJSON =  await this.downloadCSVForAllPermissionsCSV()
+      } else {
+        permissionsJson =  await this.downloadCSVForAllPermissionsCSV()
       }
 
-      await jsonToCsv(finalJSON, { download: true })
+      await jsonToCsv(permissionsJson, { download: true })
 
     },
     async downloadCSVForAllPermissionsCSV() {

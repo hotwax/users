@@ -5,7 +5,7 @@ import { Module } from 'vuex'
 import PermissionState from './PermissionState'
 import RootState from '@/store/RootState'
 
-const utilModule: Module<PermissionState, RootState> = {
+const permissionModule: Module<PermissionState, RootState> = {
   namespaced: true,
   state: {
     permissionsByGroupType: {},
@@ -22,4 +22,4 @@ const utilModule: Module<PermissionState, RootState> = {
   mutations,
 }
 
-export default utilModule;
+export default permissionModule;

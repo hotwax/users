@@ -4,7 +4,6 @@ import RootState from '@/store/RootState'
 import PermissionState from './PermissionState'
 import * as types from './mutation-types'
 import { hasError } from '@/adapter'
-import store from '@/store'
 
 const actions: ActionTree<PermissionState, RootState> = {
   async getAllPermissions({ commit }) {
@@ -37,7 +36,7 @@ const actions: ActionTree<PermissionState, RootState> = {
     commit(types.PERMISSION_ALL_PERMISSIONS_UPDATED, permissions)
   },
 
-  async getPermissionsByGroupType({ state, commit }) {
+  async getPermissionsByGroupType({ state, commit, dispatch }) {
     let permissions = [] as any, resp;
     let viewIndex = 0;
 
@@ -97,7 +96,7 @@ const actions: ActionTree<PermissionState, RootState> = {
     }
 
     commit(types.PERMISSION_BY_GROUP_TYPE_UPDATED, groupTypes)
-    store.dispatch('permission/checkAssociated')
+    dispatch('permission/checkAssociated')
   },
 
   async getPermissionsByGroup({ state, commit }, groupId) {
@@ -144,10 +143,10 @@ const actions: ActionTree<PermissionState, RootState> = {
     commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, permissionsByGroup)
   },
 
-  async checkAssociated({ state }) {
-    const permissionsByGroupTypeValues = JSON.parse(JSON.stringify(state.permissionsByGroupType))
+  async checkAssociated({ state, dispatch }) {
+    const permissionsByGroupType = JSON.parse(JSON.stringify(state.permissionsByGroupType))
 
-    Object.values(permissionsByGroupTypeValues).map((group: any) => {
+    Object.values(permissionsByGroupType).map((group: any) => {
       group.permissions.map((permission: any) => {
         const currentGroupPermissions = state.permissionsByGroup[state.currentGroup.groupId] ? JSON.parse(JSON.stringify(state.permissionsByGroup[state.currentGroup.groupId])) : []
 
@@ -159,11 +158,7 @@ const actions: ActionTree<PermissionState, RootState> = {
       })
     })
 
-    store.dispatch('permission/updatePermissionsByGroupType', permissionsByGroupTypeValues)
-  },
-
-  async updatePermissionsByGroup({ commit }, payload) {
-    commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, payload )
+    dispatch('updatePermissionsByGroupType', permissionsByGroupType)
   },
 
   updateQuery({ commit }, query) {
@@ -184,6 +179,14 @@ const actions: ActionTree<PermissionState, RootState> = {
   updateCurrentGroup({ commit }, payload) {
     commit(types.PERMISSION_CURRENT_GROUP_UPDATED, payload)
   },
+
+  clearPermissionState({ commit }) {
+    commit(types.PERMISSION_CURRENT_GROUP_UPDATED, {})
+    commit(types.PERMISSION_BY_GROUP_TYPE_UPDATED, [])
+    commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, [])
+    commit(types.PERMISSION_QUERY_UPDATED, {})
+    commit(types.PERMISSION_ALL_PERMISSIONS_UPDATED, [])
+  }
 }
 
 export default actions;

@@ -12,7 +12,7 @@
         <ion-list>
           <ion-item>
             <ion-label position="floating">{{ translate('Name') }}</ion-label>
-            <ion-input @ionBlur="setGroupName($event)" v-model="formData.groupName" />
+            <ion-input @ionBlur="setGroupId($event)" v-model="formData.groupName" />
           </ion-item>
           <ion-item ref="groupId">
             <ion-label position="floating">{{ translate('Internal ID') }}</ion-label>
@@ -96,7 +96,7 @@ export default defineComponent({
     })
   },
   methods: {
-    setGroupName(event: any) {
+    setGroupId(event: any) {
       this.formData.groupId = generateInternalId(event.target.value)
     }, 
     validateGroupId(event: any) {
@@ -135,7 +135,7 @@ export default defineComponent({
 
         if(!hasError(resp)) {
           showToast(translate("Security group created successfully."))
-          await this.store.dispatch('util/updateSecurityGroups', this.securityGroups.push(this.formData))
+          await this.store.dispatch('util/updateSecurityGroup', this.securityGroups.push(this.formData))
           await this.store.dispatch('permission/updateCurrentGroup', this.formData)
           this.router.replace('/add-permissions')
         } else {
