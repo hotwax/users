@@ -48,6 +48,7 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonNote,
   IonPage,
   IonTextarea,
   IonTitle,
@@ -74,6 +75,7 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
+    IonNote,
     IonPage,
     IonTextarea,
     IonTitle,
@@ -111,7 +113,7 @@ export default defineComponent({
         : (this as any).$refs.groupId.$el.classList.add('ion-invalid');
     },
     markGroupIdTouched() {
-      (this as any).$refs.facilityId.$el.classList.add('ion-touched');
+      (this as any).$refs.groupId.$el.classList.add('ion-touched');
     },
     async createGroup() {
       if (!this.formData.groupName?.trim()) {

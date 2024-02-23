@@ -8,27 +8,32 @@
     </ion-item>
   </div>
 
-  <div v-for="(group, groupId) in currentPermissionsByGroupType" :key="groupId">
-    <ion-item-divider v-if="group.permissions.length" class="ion-margin-vertical" color="light">
-      <ion-label>
-        {{ group.groupName }}
-      </ion-label>
-    </ion-item-divider>
+  <template v-if="arePermissionsAvailable()">
+    <div v-for="(group, groupId) in currentPermissionsByGroupType" :key="groupId">
+      <ion-item-divider v-if="group.permissions.length" class="ion-margin-vertical" color="light">
+        <ion-label>
+          {{ group.groupName }}
+        </ion-label>
+      </ion-item-divider>
 
-    <section>
-      <ion-card v-for="permission in group.permissions" :key="permission.permissionId">
-        <ion-card-header>
-          <div>
-            <ion-card-title>{{ permission.permissionId }}</ion-card-title>
-            <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
-          </div>
-          <ion-checkbox :checked="permission.isChecked" @click="updatePermissionAssociation(permission)" />
-        </ion-card-header>
-      </ion-card>
-    </section>
+      <section>
+        <ion-card v-for="permission in group.permissions" :key="permission.permissionId">
+          <ion-card-header>
+            <div>
+              <ion-card-title>{{ permission.permissionId }}</ion-card-title>
+              <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
+            </div>
+            <ion-checkbox :checked="permission.isChecked" @click="updatePermissionAssociation($event, permission)" />
+          </ion-card-header>
+        </ion-card>
+      </section>
+    </div>
+    <hr/>
+  </template>
+  <div v-else class="empty-state">
+    <p>{{ translate("No record found") }}</p>
   </div>
 
-  <hr/>
 </template>
 
 <script lang="ts">
@@ -82,7 +87,9 @@ export default defineComponent({
     async updateQuery() {
       await this.store.dispatch('permission/updateQuery', this.query)
     },
-    async updatePermissionAssociation(permission: any) {
+    async updatePermissionAssociation(event: any, permission: any) {
+      event.stopImmediatePropagation();
+
       let resp = {} as any;
       const payload = {
         groupId: this.currentGroup.groupId,
@@ -90,7 +97,6 @@ export default defineComponent({
       }
 
       let currentPermissions = JSON.parse(JSON.stringify(this.currentGroupPermissions))
-      emitter.emit('presentLoader')
 
       try {
         if(permission.isChecked) {
@@ -126,7 +132,8 @@ export default defineComponent({
         if(!hasError(resp)) {
           showToast(translate("Security group permission association successfully updated."))
           await this.store.dispatch('permission/updateCurrentGroupPermissions', { groupId: this.currentGroup.groupId, currentPermissions})
-          await this.store.dispatch('permission/checkAssociated')
+          this.store.dispatch('permission/checkAssociated')
+          event.target.checked = !permission.isChecked
         } else {
           throw resp.data
         }
@@ -134,7 +141,14 @@ export default defineComponent({
         showToast(translate("Failed to update security group permission association."))
         console.error(err)
       }
-      emitter.emit('dismissLoader')
+    },
+    arePermissionsAvailable() {
+      let arePermissionsAvailable = false;
+
+      Object.values(this.currentPermissionsByGroupType).map((groupType: any) => {
+        if(groupType.permissions.length) arePermissionsAvailable = true
+      })
+      return arePermissionsAvailable
     }
   },
   setup() {
