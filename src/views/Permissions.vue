@@ -50,7 +50,7 @@
           <PermissionItems />
         </main>
         <main v-else class="empty-state">
-          <h1>{{ "Select a security group to view its details" }}</h1>
+          <p>{{ "Select a security group to view its details" }}</p>
         </main>
       </div>
     </ion-content>
