@@ -127,7 +127,7 @@ export default defineComponent({
       // In case the user does not lose focus from the facility name input
       // and click on create the button, we need to set the internal id manually
       if (!this.formData.groupId) {
-        this.formData.groupId = generateInternalId(this.formData.groupName)
+        this.setGroupId(this.formData.groupName)
       }
 
       try {

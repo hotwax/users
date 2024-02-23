@@ -161,8 +161,14 @@ export default defineComponent({
 
                 if (!hasError(resp)) {
                   showToast(translate("Security group renamed successfully."))
-                  await this.store.dispatch('util/getSecurityGroups')
-                  await this.store.dispatch('permission/updateCurrentGroup', this.securityGroups.find((group: any) => group.groupId === this.currentGroup.groupId))
+                  this.securityGroups.map((group: any) => {
+                    if(group.groupId === this.currentGroup.groupId) {
+                      group.groupName = data.groupName
+                    }
+                  })
+                  this.currentGroup.groupName = data.groupName
+                  await this.store.dispatch('util/updateSecurityGroup', this.securityGroups)
+                  await this.store.dispatch('permission/updateCurrentGroup', this.currentGroup)
                 } else {
                   throw resp.data
                 }
