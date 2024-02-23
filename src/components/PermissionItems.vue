@@ -143,12 +143,7 @@ export default defineComponent({
       }
     },
     arePermissionsAvailable() {
-      let arePermissionsAvailable = false;
-
-      Object.values(this.currentPermissionsByGroupType).map((groupType: any) => {
-        if(groupType.permissions.length) arePermissionsAvailable = true
-      })
-      return arePermissionsAvailable
+      return Object.values(this.currentPermissionsByGroupType).some((groupType: any) => groupType.permissions.length)
     }
   },
   setup() {
