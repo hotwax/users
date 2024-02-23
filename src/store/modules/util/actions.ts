@@ -80,7 +80,8 @@ const actions: ActionTree<UtilState, RootState> = {
       noConditionFind: "Y",
       fieldList: ["description", "groupId", "groupName"],
       inputFields: {
-        groupTypeEnumId_op: "empty"
+        groupTypeEnumId: "PRM_CLASS_TYPE",
+        groupTypeEnumId_op: "notEqual"
       }
     }
     let securityGroups = []
