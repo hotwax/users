@@ -96,7 +96,7 @@ const actions: ActionTree<PermissionState, RootState> = {
     }
 
     commit(types.PERMISSION_BY_GROUP_TYPE_UPDATED, groupTypes)
-    dispatch('permission/checkAssociated')
+    dispatch('checkAssociated')
   },
 
   async getPermissionsByGroup({ state, commit }, groupId) {
