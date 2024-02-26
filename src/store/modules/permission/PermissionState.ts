@@ -1,5 +1,5 @@
 export default interface PermissionState {
-  permissionsByGroupType: any;
+  permissionsByClassificationGroups: any;
   query: {
     queryString: string,
     showSelected: boolean

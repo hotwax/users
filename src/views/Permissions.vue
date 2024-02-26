@@ -111,7 +111,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       securityGroups: 'util/getSecurityGroups',
-      permissionsByGroupType: 'permission/getPermissionsByGroupType',
+      permissionsByClassificationGroups: 'permission/getPermissionsByClassificationGroups',
       currentGroupPermissions: 'permission/getCurrentGroupPermissions',
       currentGroup: 'permission/getCurrentGroup',
       allPermissions: 'permission/getAllPermissions'
@@ -120,7 +120,7 @@ export default defineComponent({
   async mounted() {
     await this.store.dispatch('util/getSecurityGroups')
     if(!this.allPermissions.length) await this.store.dispatch('permission/getAllPermissions')
-    if(!Object.keys(this.permissionsByGroupType).length) await this.store.dispatch('permission/getPermissionsByGroupType')
+    if(!Object.keys(this.permissionsByClassificationGroups).length) await this.store.dispatch('permission/getPermissionsByClassificationGroups')
     if(this.currentGroup.groupId) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
     await this.store.dispatch('permission/checkAssociated')
   },

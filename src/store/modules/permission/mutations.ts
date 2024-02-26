@@ -3,8 +3,8 @@ import PermissionState from './PermissionState'
 import * as types from './mutation-types'
 
 const mutations: MutationTree<PermissionState> = {
-  [types.PERMISSION_BY_GROUP_TYPE_UPDATED](state, payload) {
-    state.permissionsByGroupType = payload
+  [types.PERMISSION_BY_CLASSIFICATION_GROUPS_UPDATED](state, payload) {
+    state.permissionsByClassificationGroups = payload
   },
   [types.PERMISSION_QUERY_UPDATED](state, payload) {
     state.query = payload.query

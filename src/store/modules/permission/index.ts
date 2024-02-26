@@ -8,7 +8,7 @@ import RootState from '@/store/RootState'
 const permissionModule: Module<PermissionState, RootState> = {
   namespaced: true,
   state: {
-    permissionsByGroupType: {},
+    permissionsByClassificationGroups: {},
     query: {
       queryString: '',
       showSelected: false

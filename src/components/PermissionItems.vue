@@ -9,7 +9,7 @@
   </div>
 
   <template v-if="arePermissionsAvailable()">
-    <div v-for="(group, groupId) in currentPermissionsByGroupType" :key="groupId">
+    <div v-for="(group, groupId) in filteredPermissions" :key="groupId">
       <ion-item-divider v-if="group.permissions.length" class="ion-margin-vertical" color="light">
         <ion-label>
           {{ group.groupName }}
@@ -79,7 +79,7 @@ export default defineComponent({
       query: 'permission/getQuery',
       currentGroupPermissions: 'permission/getCurrentGroupPermissions',
       currentGroup: "permission/getCurrentGroup",
-      currentPermissionsByGroupType: "permission/getCurrentPermissionsByGroupType"
+      filteredPermissions: "permission/getFilteredPermissions"
     })
   },
   methods: {
@@ -142,7 +142,7 @@ export default defineComponent({
       }
     },
     arePermissionsAvailable() {
-      return Object.values(this.currentPermissionsByGroupType).some((groupType: any) => groupType.permissions.length)
+      return Object.values(this.filteredPermissions).some((groupType: any) => groupType.permissions.length)
     }
   },
   setup() {

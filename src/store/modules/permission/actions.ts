@@ -36,13 +36,13 @@ const actions: ActionTree<PermissionState, RootState> = {
     commit(types.PERMISSION_ALL_PERMISSIONS_UPDATED, permissions)
   },
 
-  async getPermissionsByGroupType({ state, commit, dispatch }) {
+  async getPermissionsByClassificationGroups({ state, commit, dispatch }) {
     let permissions = [] as any, resp;
     let viewIndex = 0;
 
     try {
       do {
-        resp = await PermissionService.getPermissionsByGroupType({
+        resp = await PermissionService.getPermissionsByClassificationGroups({
           entityName: "SecurityGroupAndPermission",
           distinct: "Y",
           noConditionFind: "Y",
@@ -95,7 +95,7 @@ const actions: ActionTree<PermissionState, RootState> = {
       permissions: otherPermissions
     }
 
-    commit(types.PERMISSION_BY_GROUP_TYPE_UPDATED, groupTypes)
+    commit(types.PERMISSION_BY_CLASSIFICATION_GROUPS_UPDATED, groupTypes)
     dispatch('checkAssociated')
   },
 
@@ -144,9 +144,9 @@ const actions: ActionTree<PermissionState, RootState> = {
   },
 
   async checkAssociated({ state, dispatch }) {
-    const permissionsByGroupType = JSON.parse(JSON.stringify(state.permissionsByGroupType))
+    const permissionsByClassificationGroups = JSON.parse(JSON.stringify(state.permissionsByClassificationGroups))
 
-    Object.values(permissionsByGroupType).map((group: any) => {
+    Object.values(permissionsByClassificationGroups).map((group: any) => {
       group.permissions.map((permission: any) => {
         const currentGroupPermissions = state.permissionsByGroup[state.currentGroup.groupId] ? JSON.parse(JSON.stringify(state.permissionsByGroup[state.currentGroup.groupId])) : []
 
@@ -158,7 +158,7 @@ const actions: ActionTree<PermissionState, RootState> = {
       })
     })
 
-    dispatch('updatePermissionsByGroupType', permissionsByGroupType)
+    dispatch('updatePermissionsByClassificationGroups', permissionsByClassificationGroups)
   },
 
   updateQuery({ commit }, query) {
@@ -172,8 +172,8 @@ const actions: ActionTree<PermissionState, RootState> = {
     commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, permissionsByGroup)
   },
 
-  updatePermissionsByGroupType({commit}, payload) {
-    commit(types.PERMISSION_BY_GROUP_TYPE_UPDATED, payload)
+  updatePermissionsByClassificationGroups({commit}, payload) {
+    commit(types.PERMISSION_BY_CLASSIFICATION_GROUPS_UPDATED, payload)
   },
 
   updateCurrentGroup({ commit }, payload) {
@@ -182,9 +182,9 @@ const actions: ActionTree<PermissionState, RootState> = {
 
   clearPermissionState({ commit }) {
     commit(types.PERMISSION_CURRENT_GROUP_UPDATED, {})
-    commit(types.PERMISSION_BY_GROUP_TYPE_UPDATED, [])
+    commit(types.PERMISSION_BY_CLASSIFICATION_GROUPS_UPDATED, [])
     commit(types.PERMISSION_PERMISSIONS_BY_GROUP_UPDATED, [])
-    commit(types.PERMISSION_QUERY_UPDATED, {})
+    commit(types.PERMISSION_QUERY_UPDATED, {query: {queryString: '', showSelected: false}})
     commit(types.PERMISSION_ALL_PERMISSIONS_UPDATED, [])
   }
 }

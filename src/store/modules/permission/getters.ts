@@ -3,11 +3,11 @@ import PermissionState from './PermissionState'
 import RootState from '@/store/RootState'
 
 const getters: GetterTree<PermissionState, RootState> = {
-  getPermissionsByGroupType(state) {
-    return state.permissionsByGroupType
+  getPermissionsByClassificationGroups(state) {
+    return state.permissionsByClassificationGroups
   },
-  getCurrentPermissionsByGroupType(state) {
-    const groupType = JSON.parse(JSON.stringify(state.permissionsByGroupType))
+  getFilteredPermissions(state) {
+    const groupType = JSON.parse(JSON.stringify(state.permissionsByClassificationGroups))
     const query = state.query
 
     if(query.showSelected) {
