@@ -45,6 +45,16 @@ export default defineComponent({
       if (this.loader) {
         this.loader.dismiss();
         this.loader = null as any;
+      } else {
+        // Added this else case as there are some scenarios in which the loader is not created and before that the dismissLoader gets called, resulting in the loader not getting dismissed
+        // So checking that when the loader is not found then try dismissing the loader again after 3 secs.
+        // The above case appears when changing the security group in permissions page in case when permissions are stored in state for that group.
+        // TODO: need to find a more better approach to dismiss the loader in such case
+        setTimeout(() => {
+          if (this.loader) {
+            this.dismissLoader();
+          }
+        }, 3000)
       }
     },
     playAnimation() {

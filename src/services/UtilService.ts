@@ -18,6 +18,14 @@ const getSecurityGroups = async (payload: any): Promise<any> => {
   })
 }
 
+const updateSecurityGroup = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/updateSecurityGroup",
+    method: "post",
+    data: payload
+  });
+}
+
 const fetchFacilities = async (payload: any): Promise<any> => {
   return api({
     url: "performFind",
@@ -40,6 +48,7 @@ export const UtilService = {
   fetchFacilities,
   fetchProductStores,
   getSecurityGroups,
-  fetchRoles
+  fetchRoles,
+  updateSecurityGroup
 }
 

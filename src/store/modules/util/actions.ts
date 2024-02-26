@@ -6,7 +6,6 @@ import * as types from './mutation-types'
 import { showToast } from '@/utils'
 import { hasError } from '@/adapter'
 import { translate } from '@hotwax/dxp-components'
-import { UserService } from '@/services/UserService'
 
 const actions: ActionTree<UtilState, RootState> = {
   async fetchRoles({ commit, state }) {
@@ -79,8 +78,11 @@ const actions: ActionTree<UtilState, RootState> = {
       viewSize: 200,
       distinct: "Y",
       noConditionFind: "Y",
-      fieldList: ["groupId", "groupName"]
-
+      fieldList: ["description", "groupId", "groupName"],
+      inputFields: {
+        groupTypeEnumId: "PRM_CLASS_TYPE",
+        groupTypeEnumId_op: "notEqual"
+      }
     }
     let securityGroups = []
 
@@ -144,6 +146,10 @@ const actions: ActionTree<UtilState, RootState> = {
       console.error('Failed to fetch product stores', err)
     }
     commit(types.UTIL_PRODUCT_STORES_UPDATED, stores)
+  },
+
+  updateSecurityGroup({commit}, payload) {
+    commit(types.UTIL_SECURITY_GROUPS_UPDATED, payload)
   },
 
   clearUtilState({ commit }) {

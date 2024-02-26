@@ -114,6 +114,7 @@ const actions: ActionTree<UserState, RootState> = {
     // TODO add any other tasks if need
     commit(types.USER_END_SESSION)
     this.dispatch('util/clearUtilState')
+    this.dispatch('permission/clearPermissionState')
 
     resetPermissions();
     resetConfig();
