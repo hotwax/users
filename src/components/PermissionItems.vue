@@ -58,7 +58,6 @@ import { PermissionService } from '@/services/PermissionService';
 import { showToast } from '@/utils';
 import { hasError } from '@/adapter';
 import { DateTime } from 'luxon';
-import emitter from '@/event-bus';
 
 export default defineComponent({
   name: 'PermissionItems',
