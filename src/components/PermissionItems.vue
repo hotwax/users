@@ -163,6 +163,11 @@ ion-card-header {
   justify-content: space-between;
   align-items: center;
 }
+
+ion-card-header > ion-checkbox {
+  flex-shrink: 0;
+}
+
 section {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
