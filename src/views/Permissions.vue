@@ -231,8 +231,9 @@ export default defineComponent({
         permissionsJson =  await this.downloadCSVForAllPermissionsCSV()
       }
 
-      await jsonToCsv(permissionsJson, { download: true })
+      const fileName = `HotWaxSecurityGroupExport_${DateTime.now().toFormat('yyyy_MM_dd_HH:mm')}`
 
+      await jsonToCsv(permissionsJson, { download: true, name: fileName })
     },
     async downloadCSVForAllPermissionsCSV() {
      let permissionsByGroup = [] as any;
