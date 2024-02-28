@@ -1032,7 +1032,7 @@ export default defineComponent({
     },
 
     getSecurityGroups(securityGroups: any) {
-      const excludedSecurityGroups = JSON.parse(JSON.stringify(process.env.VUE_APP_EXCLUDED_SECURITY_GROUPS))
+      const excludedSecurityGroups = JSON.parse(process.env.VUE_APP_EXCLUDED_SECURITY_GROUPS as string)
       const selectedSecurityGroup = this.selectedUser.securityGroup.groupId
 
       if(!hasPermission(Actions.APP_SUPER_USER)) excludedSecurityGroups.push('SUPER')
