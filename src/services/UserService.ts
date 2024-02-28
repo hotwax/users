@@ -591,7 +591,7 @@ const finishSetup = async (payload: any): Promise <any> => {
 
       if(selectedUser.partyTypeId === "PARTY_GROUP") {
         // Considering facility login can only be associated with only one facility.
-        const facilityId = facilitiesToAdd.length ? facilitiesToAdd[0].facilityId : selectedUser.facilityId
+        const facilityId = [...selectedFacilityIds][0]
 
         //Create role type if not exists. This is required for associating facility login user to facility.
         if (!await UserService.isRoleTypeExists("FAC_LOGIN")) {
