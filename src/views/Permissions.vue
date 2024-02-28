@@ -39,7 +39,7 @@
                 <h1>{{ currentGroup.groupName }}</h1>
                 <p class="ion-text-wrap">{{ currentGroup.description }}</p>
               </ion-label>
-              <ion-button slot="end" @click="editGroupName()" fill="outline">{{ translate("Edit") }}</ion-button>
+              <ion-button slot="end" @click="editSecurityGroup()" fill="outline">{{ translate("Edit") }}</ion-button>
             </ion-item>
             <ion-button v-if="securityGroupUsers[currentGroup.groupId]" fill="clear" color="medium" @click="openCurrentGroupUsers()">
               {{ translate(securityGroupUsers[currentGroup.groupId] > 1 ? "users" : "user", { userCount: securityGroupUsers[currentGroup.groupId] }) }}
@@ -71,7 +71,7 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
-  alertController
+  modalController
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { translate } from '@hotwax/dxp-components';
@@ -79,12 +79,12 @@ import { addOutline, downloadOutline, idCardOutline, openOutline } from 'ionicon
 import { useRouter } from 'vue-router';
 import PermissionItems from '@/components/PermissionItems.vue'
 import { mapGetters, useStore } from 'vuex';
-import { jsonToCsv, showToast } from '@/utils';
+import { jsonToCsv } from '@/utils';
 import { hasError } from '@/adapter';
-import { UtilService } from '@/services/UtilService';
 import emitter from "@/event-bus";
 import { PermissionService } from '@/services/PermissionService';
 import { DateTime } from 'luxon';
+import EditSecurityGroupModal from '@/components/EditSecurityGroupModal.vue';
 
 export default defineComponent({
   name: 'Permissions',
@@ -136,54 +136,12 @@ export default defineComponent({
       await this.getUsersCount()
       emitter.emit('dismissLoader')
     },
-    async editGroupName() {
-      const alert = await alertController.create({
-        header: translate("Rename Security Group"),
-        inputs: [{
-          name: "groupName",
-          value: this.currentGroup.groupName
-        }],
-        buttons: [{
-          text: translate("Cancel"),
-          role: "cancel"
-        },
-        {
-          text: translate("Confirm"),
-          handler: async (data: any) => {
-            if (data.groupName?.trim()) {
-              emitter.emit('presentLoader')
-
-              try {
-                const resp = await UtilService.updateSecurityGroup({
-                  groupId: this.currentGroup.groupId,
-                  groupName: data.groupName
-                })
-
-                if (!hasError(resp)) {
-                  showToast(translate("Security group renamed successfully."))
-                  this.securityGroups.map((group: any) => {
-                    if(group.groupId === this.currentGroup.groupId) {
-                      group.groupName = data.groupName
-                    }
-                  })
-                  this.currentGroup.groupName = data.groupName
-                  await this.store.dispatch('util/updateSecurityGroup', this.securityGroups)
-                  await this.store.dispatch('permission/updateCurrentGroup', this.currentGroup)
-                } else {
-                  throw resp.data
-                }
-              } catch (error) {
-                showToast(translate("Failed to rename security group."))
-                console.error(error)
-              }
-
-              emitter.emit('dismissLoader')
-            }
-          }
-        }]
+    async editSecurityGroup() {
+      const editSecurityGroupModal = await modalController.create({
+        component: EditSecurityGroupModal
       })
 
-      await alert.present()
+      editSecurityGroupModal.present()
     },
     async getUsersCount() {
       if(this.securityGroupUsers[this.currentGroup.groupId]) {
