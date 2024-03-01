@@ -12,6 +12,7 @@ const utilModule: Module<UtilState, RootState> = {
     productStores: [],
     securityGroups: [],
     facilities: [],
+    shopifyShops: []
   },
   getters,
   actions,

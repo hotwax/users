@@ -44,10 +44,27 @@ const fetchProductStores = async (payload: any): Promise<any> => {
   })
 }
 
+const getShopifyConfigs = async (): Promise <any>  => {
+  const params = {
+    "entityName": "ShopifyShopAndConfig",
+    "noConditionFind": "Y",
+    "fieldList": ["shopifyConfigId", "name", "shopId", "productStoreId"],
+    "viewSize": 250
+  }
+
+  return api({
+    url: "performFind",
+    method: "get",
+    params,
+    cache: true
+  });
+}
+
 export const UtilService = {
   fetchFacilities,
   fetchProductStores,
   getSecurityGroups,
+  getShopifyConfigs,
   fetchRoles,
   updateSecurityGroup
 }
