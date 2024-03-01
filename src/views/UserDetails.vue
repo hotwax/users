@@ -502,8 +502,10 @@ export default defineComponent({
     await this.fetchProfileImage()
     await Promise.all([this.store.dispatch('util/getSecurityGroups'), this.store.dispatch('util/fetchShopifyShopConfigs')]);
     
-    const productStoreId = this.selectedUser.favoriteProductStorePref?.userPrefValue ? this.selectedUser.favoriteProductStorePref?.userPrefValue : this.productStores?.[0].productStoreId;
-    this.getShopifyShops(productStoreId);
+    const productStoreId = this.selectedUser.favoriteProductStorePref?.userPrefValue;
+    if (productStoreId) {
+      this.getShopifyShops(productStoreId);
+    }
     
     this.isUserFetched = true
     this.username = this.selectedUser.groupName ? (this.selectedUser.groupName)?.toLowerCase() : (`${this.selectedUser.firstName}.${this.selectedUser.lastName}`?.toLowerCase())

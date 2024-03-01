@@ -239,11 +239,12 @@ const actions: ActionTree<UserState, RootState> = {
       selectedUser.facilities = await UserService.getUserFacilities(selectedUser.partyId)
       selectedUser.securityGroup = await UserService.getUserSecurityGroup(selectedUser.userLoginId)
       selectedUser.productStores = await UserService.getUserProductStores(selectedUser.partyId)
-
-      const userFavorites = await UserService.getUserFavorites({userLoginId: selectedUser.userLoginId})
-      if (userFavorites) {
-        selectedUser.favoriteProductStorePref = userFavorites.find((userFavorite: any) => userFavorite.userPrefTypeId === 'FAVORITE_PRODUCT_STORE');
-        selectedUser.favoriteShopifyShopPref = userFavorites.find((userFavorite: any) => userFavorite.userPrefTypeId === 'FAVORITE_SHOPIFY_SHOP');
+      if (selectedUser.userLoginId) {
+        const userFavorites = await UserService.getUserFavorites({userLoginId: selectedUser.userLoginId})
+        if (userFavorites) {
+          selectedUser.favoriteProductStorePref = userFavorites.find((userFavorite: any) => userFavorite.userPrefTypeId === 'FAVORITE_PRODUCT_STORE');
+          selectedUser.favoriteShopifyShopPref = userFavorites.find((userFavorite: any) => userFavorite.userPrefTypeId === 'FAVORITE_SHOPIFY_SHOP');
+        }
       }
 
       const resp = await UserService.fetchPartyRelationship({
