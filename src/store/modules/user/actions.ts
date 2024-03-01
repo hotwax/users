@@ -224,6 +224,7 @@ const actions: ActionTree<UserState, RootState> = {
         } else {
           throw contactResp.data
         }
+
       } else {
         throw userResp.data
       }
@@ -238,6 +239,13 @@ const actions: ActionTree<UserState, RootState> = {
       selectedUser.facilities = await UserService.getUserFacilities(selectedUser.partyId)
       selectedUser.securityGroup = await UserService.getUserSecurityGroup(selectedUser.userLoginId)
       selectedUser.productStores = await UserService.getUserProductStores(selectedUser.partyId)
+
+      const userFavorites = await UserService.getUserFavorites({userLoginId: selectedUser.userLoginId})
+      if (userFavorites) {
+        selectedUser.favoriteProductStorePref = userFavorites.find((userFavorite: any) => userFavorite.userPrefTypeId === 'FAVORITE_PRODUCT_STORE');
+        selectedUser.favoriteShopifyShopPref = userFavorites.find((userFavorite: any) => userFavorite.userPrefTypeId === 'FAVORITE_SHOPIFY_SHOP');
+      }
+
       const resp = await UserService.fetchPartyRelationship({
         inputFields: {
           partyIdTo: selectedUser.partyId,
@@ -369,6 +377,45 @@ const actions: ActionTree<UserState, RootState> = {
   },
   async clearSelectedUser({ commit }) {
     commit(types.USER_CLEAR_SELECTED_USER)
+  },
+
+  async setFavoriteProductStore({ commit }, payload) {
+    try {
+      const params = {
+        'userPrefLoginId': payload.userLoginId,
+        'userPrefTypeId': 'FAVORITE_PRODUCT_STORE',
+        'userPrefValue': payload.productStoreId
+      }
+      const resp = await UserService.setUserPreference(params);
+      if (!hasError(resp)) {
+        commit(types.USER_SELECTED_USER_UPDATED, {...this.state.user.selectedUser, favoriteProductStorePref: params})
+        showToast(translate('Favorite product store updated successfully.'));
+      } else {
+        throw resp.data;
+      }
+    } catch (error) {
+      showToast(translate("Failed to set favorite product store."));
+      console.log(error);
+    }
+  },
+  async setFavoriteShopifyShop({ commit }, payload) {
+    try {
+      const params = {
+        'userPrefLoginId': payload.userLoginId,
+        'userPrefTypeId': 'FAVORITE_SHOPIFY_SHOP',
+        'userPrefValue': payload.shopId
+      }
+      const resp = await UserService.setUserPreference(params);
+      if (!hasError(resp)) {
+        commit(types.USER_SELECTED_USER_UPDATED, {...this.state.user.selectedUser, favoriteShopifyShopPref: params})
+        showToast(translate('Favorite shopify shop updated successfully.'));
+      } else {
+        throw resp.data;
+      }
+    } catch (error) {
+      showToast(translate("Failed to set favorite shopify shop."));
+      console.log(error);
+    }
   }
 }
 export default actions;

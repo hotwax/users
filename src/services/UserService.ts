@@ -163,7 +163,37 @@ const getUserContactDetails = async (payload: any): Promise<any> => {
     data: payload
   })
 }
+const getUserFavorites = async (payload: any): Promise<any> => {
+  let favorites = [];
 
+  try {
+    const params = {
+      inputFields: {
+        userLoginId: payload.userLoginId,
+        userPrefTypeId: ['FAVORITE_PRODUCT_STORE', 'FAVORITE_SHOPIFY_SHOP'],
+        userPrefTypeId_op: 'in'
+      },
+      viewSize: 2,
+      entityName: 'UserPreference',
+      fieldList: ['userPrefTypeId', 'userPrefValue', 'userPrefGroupTypeId']
+    } as any
+    
+    const resp = await api({
+      url: 'performFind',
+      method: 'POST',
+      data: params
+    }) as any;
+
+    if (!hasError(resp)) {
+      favorites = resp.data.docs;
+    } else {
+      throw resp.data;
+    }
+  } catch (error) {
+    console.log(error)
+  }
+  return favorites;
+}
 const getPartyRole = async (payload: any): Promise<any> => {
   return api({
     url: 'performFind',
@@ -718,6 +748,14 @@ const fetchLogoImageForParty = async (partyId: any): Promise<any> => {
   }
 }
 
+const setUserPreference = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/setUserPreference",
+    method: "post",
+    data: payload
+  });
+}
+
 export const UserService = {
   addPartyToFacility,
   addUserToSecurityGroup,
@@ -738,6 +776,7 @@ export const UserService = {
   fetchUsers,
   getPartyRole,
   getUserContactDetails,
+  getUserFavorites,
   getUserLoginDetails,
   getUserPermissions,
   getUserProfile,
@@ -750,6 +789,7 @@ export const UserService = {
   removePartyFromFacility,
   resetPassword,
   sendResetPasswordEmail,
+  setUserPreference,
   setUserTimeZone,
   updatePartyRelationship,
   updateUserLoginStatus,

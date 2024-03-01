@@ -14,6 +14,9 @@ const mutations: MutationTree<UtilState> = {
   },
   [types.UTIL_PRODUCT_STORES_UPDATED](state, payload) {
     state.productStores = payload
+  },
+  [types.UTIL_SHOPIFY_SHOPS_UPDATED](state, payload) {
+    state.shopifyShops = payload
   }
 }
 export default mutations;
