@@ -175,7 +175,7 @@ const getUserFavorites = async (payload: any): Promise<any> => {
       },
       viewSize: 2,
       entityName: 'UserPreference',
-      fieldList: ['userPrefTypeId', 'userPrefValue', 'userPrefGroupTypeId']
+      fieldList: ['userPrefTypeId', 'userPrefValue', 'userPrefGroupTypeId', 'userLoginId']
     } as any
     
     const resp = await api({
