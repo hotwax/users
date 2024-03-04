@@ -348,7 +348,7 @@ const actions: ActionTree<UserState, RootState> = {
       "entityName": "PartyAndUserLoginSecurityGroupDetails",
       "noConditionFind": "Y",
       "distinct": "Y",
-      "fieldList": ['createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
+      "fieldList": ['partyId', 'createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
       "viewIndex": payload.viewIndex,
       "viewSize": payload.viewSize
     }
