@@ -380,7 +380,7 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_CLEAR_SELECTED_USER)
   },
 
-  async setFavoriteProductStore({ commit }, payload) {
+  async setFavoriteProductStore({ commit, dispatch }, payload) {
     try {
       const params = {
         'userPrefLoginId': payload.userLoginId,
@@ -390,6 +390,8 @@ const actions: ActionTree<UserState, RootState> = {
       const resp = await UserService.setUserPreference(params);
       if (!hasError(resp)) {
         commit(types.USER_SELECTED_USER_UPDATED, {...this.state.user.selectedUser, favoriteProductStorePref: params})
+        //removing favorite shop on change of favorite product store
+        dispatch('setFavoriteShopifyShop', {'userLoginId': payload.userLoginId, 'shopId': ''});
         showToast(translate('Favorite product store updated successfully.'));
       } else {
         throw resp.data;
