@@ -134,6 +134,7 @@ export default defineComponent({
       await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
       await this.store.dispatch('permission/checkAssociated')
       await this.getUsersCount()
+      await this.store.dispatch('permission/updateQuery', {queryString: '', showAllSelected: false})
       emitter.emit('dismissLoader')
     },
     async editSecurityGroup() {
