@@ -15,7 +15,7 @@ const permissionModule: Module<PermissionState, RootState> = {
     },
     currentGroup: {},
     permissionsByGroup: {},
-    allPermissions: []
+    allPermissions: {}
   },
   getters,
   actions,
