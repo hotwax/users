@@ -95,8 +95,6 @@ export default defineComponent({
     },
     async updateSecurityGroup() {
       try {
-        console.log(this.group);
-        
         const resp = await UtilService.updateSecurityGroup({
           groupId: this.currentGroup.groupId,
           groupName: this.group.groupName,
