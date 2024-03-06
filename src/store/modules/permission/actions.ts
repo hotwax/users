@@ -50,7 +50,9 @@ const actions: ActionTree<PermissionState, RootState> = {
           viewSize: 250,
           viewIndex: viewIndex,
           inputFields: {
-            groupTypeEnumId: "PRM_CLASS_TYPE"
+            groupTypeEnumId: "PRM_CLASS_TYPE",
+            groupId: "SGC_HIDDEN",
+            groupId_op: "notEqual"
           }
         })
 
