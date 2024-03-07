@@ -11,6 +11,8 @@ import Tabs from '@/components/Tabs.vue'
 import CreateUser from '@/views/CreateUser.vue'
 import UserConfirmation from '@/views/UserConfirmation.vue'
 import UserQuickSetup from '@/views/UserQuickSetup.vue'
+import CreateSecurityGroup from '@/views/CreateSecurityGroup.vue';
+import AddPermissions from '@/views/AddPermissions.vue';
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -59,6 +61,9 @@ const routes: Array<RouteRecordRaw> = [
       },{
         path: 'settings',
         component: () => import('@/views/Settings.vue')
+      },{
+        path: 'permissions',
+        component: () => import('@/views/Permissions.vue')
       },
     ],
     beforeEnter: authGuard,
@@ -98,6 +103,18 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       permissionId: "APP_USER_CREATE"
     }
+  },
+  {
+    path: '/create-security-group',
+    name: 'CreateSecurityGroup',
+    component: CreateSecurityGroup,
+    beforeEnter: authGuard
+  },
+  {
+    path: '/add-permissions',
+    name: 'AddPermissions',
+    component: AddPermissions,
+    beforeEnter: authGuard
   }
 ]
 
