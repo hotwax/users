@@ -21,7 +21,7 @@
           <ion-card-header>
             <div>
               <ion-card-title>{{ permission.permissionId }}</ion-card-title>
-              <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
+              <ion-card-subtitle>{{ getPermissionDescription(permission.permissionId) }}</ion-card-subtitle>
             </div>
             <ion-checkbox :checked="permission.isChecked" @click="updatePermissionAssociation($event, permission)" />
           </ion-card-header>
@@ -79,7 +79,8 @@ export default defineComponent({
       query: 'permission/getQuery',
       currentGroupPermissions: 'permission/getCurrentGroupPermissions',
       currentGroup: "permission/getCurrentGroup",
-      filteredPermissions: "permission/getFilteredPermissions"
+      filteredPermissions: "permission/getFilteredPermissions",
+      getPermissionDescription: "permission/getPermissionDescription"
     })
   },
   methods: {

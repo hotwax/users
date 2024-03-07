@@ -7,8 +7,8 @@ import { hasError } from '@/adapter'
 
 const actions: ActionTree<PermissionState, RootState> = {
   async getAllPermissions({ commit }) {
-    let permissions = [] as any, resp;
-    let viewIndex = 0;
+    const permissions = {} as any;
+    let viewIndex = 0, resp;
 
     try {
       do {
@@ -22,7 +22,9 @@ const actions: ActionTree<PermissionState, RootState> = {
         })
 
         if (!hasError(resp) && resp.data.count) {
-          permissions = permissions.concat(resp.data.docs)
+          resp.data.docs.map((permission: any) => {
+            permissions[permission.permissionId] = permission
+          })
           viewIndex++;
         } else {
           throw resp.data
@@ -81,10 +83,10 @@ const actions: ActionTree<PermissionState, RootState> = {
     })
 
     // Filtering all the permissions which are not part of any group type.
-    let otherPermissions = JSON.parse(JSON.stringify(state.allPermissions))
+    const otherPermissions = JSON.parse(JSON.stringify(state.allPermissions))
     Object.values(groupTypes).map((group: any) => {
       group.permissions.map((permission: any) => {
-        otherPermissions = otherPermissions.filter((perm: any) => perm.permissionId !== permission.permissionId)
+        delete otherPermissions[permission.permissionId]
       })
     })
 
@@ -92,7 +94,7 @@ const actions: ActionTree<PermissionState, RootState> = {
     groupTypes['OTHERS'] = {
       groupId: 'OTHERS',
       groupName: 'Other Category',
-      permissions: otherPermissions
+      permissions: Object.values(otherPermissions)
     }
 
     commit(types.PERMISSION_BY_CLASSIFICATION_GROUPS_UPDATED, groupTypes)
