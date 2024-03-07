@@ -23,7 +23,7 @@ const getters: GetterTree<PermissionState, RootState> = {
       Object.values(groupType).map((group: any) => {
         groupType[group.groupId] = {
           ...group,
-          permissions: group.permissions.filter((permission: any) => permission.description && permission.description.toLowerCase().includes(query.queryString.toLowerCase()))
+          permissions: group.permissions.filter((permission: any) => (permission.permissionId.toLowerCase().includes(query.queryString.toLowerCase())) || (permission.description && permission.description.toLowerCase().includes(query.queryString.toLowerCase())))
         }
       })
     }
