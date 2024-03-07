@@ -140,6 +140,7 @@ export default defineComponent({
           await this.store.dispatch('util/updateSecurityGroup', this.securityGroups.push(this.formData))
           await this.store.dispatch('permission/updateCurrentGroup', this.formData)
           await this.store.dispatch('permission/updateQuery', {queryString: '', showAllSelected: false})
+          await this.store.dispatch('permission/checkAssociated')
           this.router.replace('/add-permissions')
         } else {
           throw resp.data
