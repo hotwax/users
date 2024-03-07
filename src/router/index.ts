@@ -43,7 +43,7 @@ const loginGuard = (to: any, from: any, next: any) => {
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/tabs/find-users'
+    redirect: '/tabs/users'
   },
   {
     path: '/login',
@@ -56,8 +56,8 @@ const routes: Array<RouteRecordRaw> = [
     component: Tabs,
     children: [
       {
-        path: 'find-users',
-        component: () => import('@/views/FindUsers.vue'),
+        path: 'users',
+        component: () => import('@/views/Users.vue'),
       },{
         path: 'settings',
         component: () => import('@/views/Settings.vue')
