@@ -71,6 +71,7 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
+  alertController,
   modalController
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
@@ -175,6 +176,20 @@ export default defineComponent({
       this.router.replace('find-users')
     },
     async downloadCSVForPermissions() {
+      if(!Object.keys(this.currentGroupPermissions).length) {
+        const alert = await alertController.create({
+          header: translate("No permissions associated"),
+          message: translate("No permissions have been linked to this group yet. Permissions for a group cannot be downloaded."),
+          buttons: [
+            {
+              text: translate("Dismiss"),
+              role: "cancel"
+            }
+          ],
+        });
+        return alert.present();
+      }
+
       let permissionsJson = [] as any
 
       if(this.currentGroup.groupId) {
