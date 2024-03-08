@@ -177,8 +177,8 @@ export default defineComponent({
     async downloadCSVForPermissions() {
       if(!Object.keys(this.currentGroupPermissions).length) {
         const alert = await alertController.create({
-          header: translate("No permissions associated"),
-          message: translate("No permissions have been linked to this group yet. Permissions for a group cannot be downloaded."),
+          header: translate("No permission associated"),
+          message: translate("No permission have been linked to this group yet. Permissions for a group cannot be downloaded."),
           buttons: [
             {
               text: translate("Dismiss"),
