@@ -84,20 +84,13 @@ const actions: ActionTree<PermissionState, RootState> = {
       }
     })
 
-    // Filtering all the permissions which are not part of any group type.
-    const otherPermissions = JSON.parse(JSON.stringify(state.allPermissions))
+    // Mapping permission description to the desciption of permission data fetched.
+    const allPermissions = state.allPermissions
     Object.values(groupTypes).map((group: any) => {
       group.permissions.map((permission: any) => {
-        delete otherPermissions[permission.permissionId]
+        permission.description = allPermissions[permission.permissionId]?.description
       })
     })
-
-    // Others category for permissions not in any internal group.
-    groupTypes['OTHERS'] = {
-      groupId: 'OTHERS',
-      groupName: 'Other Category',
-      permissions: Object.values(otherPermissions)
-    }
 
     commit(types.PERMISSION_BY_CLASSIFICATION_GROUPS_UPDATED, groupTypes)
   },
