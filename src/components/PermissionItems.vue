@@ -1,6 +1,6 @@
 <template>
   <div class="search-permissions">
-    <ion-searchbar :placeholder="translate('Search permissions')" :value="query.queryString" @keyup.enter="query.queryString = $event.target.value; updateQuery()" />
+    <ion-searchbar :placeholder="translate('Search permissions')" v-model="query.queryString" @ionInput="updateQuery()" />
     <ion-item lines="none">
       <ion-icon :icon="shieldCheckmarkOutline" slot="start" />
       <ion-label>{{ translate("Only selected permissions") }}</ion-label>
