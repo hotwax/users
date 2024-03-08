@@ -23,7 +23,7 @@
               <ion-card-title>{{ permission.permissionId }}</ion-card-title>
               <ion-card-subtitle>{{ getPermissionDescription(permission.permissionId) }}</ion-card-subtitle>
             </div>
-            <ion-checkbox :checked="permission.isChecked" @click="updatePermissionAssociation($event, permission)" />
+            <ion-checkbox :disabled="!hasPermission(Actions.APP_PERMISSION_UPDATE)" :checked="permission.isChecked" @click="updatePermissionAssociation($event, permission)" />
           </ion-card-header>
         </ion-card>
       </section>
@@ -58,6 +58,7 @@ import { PermissionService } from '@/services/PermissionService';
 import { showToast } from '@/utils';
 import { hasError } from '@/adapter';
 import { DateTime } from 'luxon';
+import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
   name: 'PermissionItems',
@@ -150,6 +151,8 @@ export default defineComponent({
     const store = useStore();
 
     return {
+      Actions,
+      hasPermission,
       shieldCheckmarkOutline,
       store,
       translate

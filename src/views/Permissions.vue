@@ -25,7 +25,7 @@
             </ion-item>
           </ion-list>
 
-          <ion-button @click="createGroup()" fill="clear" expand="block">
+          <ion-button @click="createGroup()" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE)" fill="clear" expand="block">
             <ion-icon slot="start" :icon="addOutline" />
             <ion-label>{{ translate("Create security group") }}</ion-label>
           </ion-button>
@@ -86,6 +86,7 @@ import emitter from "@/event-bus";
 import { PermissionService } from '@/services/PermissionService';
 import { DateTime } from 'luxon';
 import EditSecurityGroupModal from '@/components/EditSecurityGroupModal.vue';
+import { Actions, hasPermission } from '@/authorization'
 
 export default defineComponent({
   name: 'Permissions',
@@ -254,8 +255,10 @@ export default defineComponent({
     const store = useStore();
 
     return {
+      Actions,
       addOutline,
       downloadOutline,
+      hasPermission,
       idCardOutline,
       openOutline,
       router,
