@@ -243,7 +243,7 @@ export default defineComponent({
           } while (resp.data.docs.length >= 250);
         }));
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
 
       return permissionsByGroup;
