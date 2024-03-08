@@ -44,9 +44,6 @@ const getters: GetterTree<PermissionState, RootState> = {
   },
   getAllPermissions(state) {
     return state.allPermissions
-  },
-  getPermissionDescription: (state) => (permissionId: any) => {
-    return state.allPermissions[permissionId]?.description ? state.allPermissions[permissionId].description : permissionId
   }
 }
 export default getters;

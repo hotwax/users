@@ -88,6 +88,7 @@ const actions: ActionTree<PermissionState, RootState> = {
     const otherPermissions = JSON.parse(JSON.stringify(state.allPermissions))
     Object.values(groupTypes).map((group: any) => {
       group.permissions.map((permission: any) => {
+        permission.description = state.allPermissions[permission.permissionId]?.description
         delete otherPermissions[permission.permissionId]
       })
     })
