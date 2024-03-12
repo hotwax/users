@@ -219,9 +219,8 @@ export default defineComponent({
           throw resp.data;
         }
       } catch (err:any) {
-        console.log("==========test error=", err);
         let errorMessage = translate('Failed to create user.');
-        if(err?.response?.data?.error?.message) {
+        if (err?.response?.data?.error?.message) {
           errorMessage = err.response.data.error.message
         }
         console.error('error', err)
