@@ -218,9 +218,13 @@ export default defineComponent({
         } else {
           throw resp.data;
         }
-      } catch (err) {
+      } catch (err:any) {
+        let errorMessage = translate('Failed to create user.');
+        if (err?.response?.data?.error?.message) {
+          errorMessage = err.response.data.error.message
+        }
         console.error('error', err)
-        showToast(translate('Failed to create user.'))
+        showToast(errorMessage);
       }
     },
   },
