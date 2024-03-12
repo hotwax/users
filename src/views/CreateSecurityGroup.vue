@@ -12,7 +12,7 @@
         <ion-list>
           <ion-item>
             <ion-label position="floating">{{ translate('Name') }}</ion-label>
-            <ion-input @ionBlur="setGroupId($event)" v-model="formData.groupName" />
+            <ion-input @ionBlur="formData.groupId ? null : setGroupId($event)" v-model="formData.groupName" />
           </ion-item>
           <ion-item ref="groupId">
             <ion-label position="floating">{{ translate('Internal ID') }}</ion-label>
