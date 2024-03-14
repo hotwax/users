@@ -176,7 +176,7 @@ export default defineComponent({
       this.router.replace('users')
     },
     async downloadCSVForPermissions() {
-      if(!Object.keys(this.currentGroupPermissions).length) {
+      if(this.currentGroup.groupId && !Object.keys(this.currentGroupPermissions).length) {
         const alert = await alertController.create({
           header: translate("No permissions associated"),
           message: translate("No permissions have been linked to this group yet. Permissions for a group cannot be downloaded."),
