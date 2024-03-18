@@ -12,7 +12,7 @@
         <ion-list>
           <ion-item>
             <ion-label position="floating">{{ translate('Name') }}</ion-label>
-            <ion-input @ionBlur="formData.groupId ? null : setGroupId($event)" v-model="formData.groupName" />
+            <ion-input @ionBlur="formData.groupId ? null : setGroupId(formData.groupName)" v-model="formData.groupName" />
           </ion-item>
           <ion-item ref="groupId">
             <ion-label position="floating">{{ translate('Internal ID') }}</ion-label>
@@ -98,8 +98,8 @@ export default defineComponent({
     })
   },
   methods: {
-    setGroupId(event: any) {
-      this.formData.groupId = generateInternalId(event.target.value)
+    setGroupId(groupName: string) {
+      this.formData.groupId = generateInternalId(groupName)
     }, 
     validateGroupId(event: any) {
       const value = event.target.value;
