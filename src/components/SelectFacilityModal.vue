@@ -13,9 +13,11 @@
   <ion-content>
     <ion-list v-if="!isFacilityLogin">
       <ion-item v-for="facility in facilities" :key="facility.facilityId">
-        <ion-checkbox label-placement="start" justify="space-between" :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)">
-          {{ facility.facilityName }}
-          <p>{{ facility.facilityId }}</p>
+        <ion-checkbox :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)">
+          <ion-label>
+            {{ facility.facilityName }}
+            <p>{{ facility.facilityId }}</p>
+          </ion-label>
         </ion-checkbox>
       </ion-item>
     </ion-list>
@@ -23,9 +25,11 @@
     <ion-list v-else>
       <ion-radio-group :value="selectedFacilities[0]?.facilityId" @ionChange="updateSelectedFacility($event)">
         <ion-item v-for="facility in facilities" :key="facility.facilityId">
-          <ion-radio label-placement="start" justify="space-between" :value="facility.facilityId">
-            {{ facility.facilityName }}
-            <p>{{ facility.facilityId }}</p>
+          <ion-radio :value="facility.facilityId">
+            <ion-label>
+              {{ facility.facilityName }}
+              <p>{{ facility.facilityId }}</p>
+            </ion-label>
           </ion-radio>
         </ion-item>
       </ion-radio-group>
@@ -50,6 +54,7 @@ import {
   IonHeader,
   IonIcon,
   IonItem,
+  IonLabel,
   IonList,
   IonRadio,
   IonRadioGroup,
@@ -74,6 +79,7 @@ export default defineComponent({
     IonHeader,
     IonIcon,
     IonItem,
+    IonLabel,
     IonList,
     IonRadio,
     IonRadioGroup,

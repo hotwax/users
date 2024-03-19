@@ -13,9 +13,11 @@
   <ion-content>
     <ion-list>
       <ion-item v-for="productStore in productStores" :key="productStore.productStoreId">
-        <ion-checkbox label-placement="start" justify="space-between" :checked="isSelected(productStore.productStoreId)" @ionChange="toggleProductStoreSelection(productStore)">
-          {{ productStore.storeName }}
-          <p>{{ productStore.productStoreId }}</p>
+        <ion-checkbox :checked="isSelected(productStore.productStoreId)" @ionChange="toggleProductStoreSelection(productStore)">
+          <ion-label>
+            {{ productStore.storeName }}
+            <p>{{ productStore.productStoreId }}</p>
+          </ion-label>
         </ion-checkbox>
       </ion-item>
     </ion-list>
@@ -39,6 +41,7 @@ import {
   IonHeader,
   IonIcon,
   IonItem,
+  IonLabel,
   IonList,
   IonTitle,
   IonToolbar,
@@ -61,6 +64,7 @@ export default defineComponent({
     IonHeader,
     IonIcon,
     IonItem,
+    IonLabel,
     IonList,
     IonTitle,
     IonToolbar,

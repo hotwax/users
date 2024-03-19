@@ -136,7 +136,7 @@
                     :placeholder="translate('Default password')" 
                     name="password" 
                     v-model="password" 
-                    id="password" 
+                    id="password"
                     :type="showPassword ? 'text' : 'password'" 
                     @ionInput="validatePassword" 
                     @ionBlur="markPasswordTouched"
@@ -249,11 +249,12 @@
                 {{ translate('Clearance') }}
               </ion-card-title>
             </ion-card-header>
-            <ion-item>
-              <ion-icon :icon="businessOutline" slot="start" />
-              <ion-label>{{ translate('Security Group') }}</ion-label>        
-              <ion-label v-if="!hasPermission(Actions.APP_SUPER_USER) && selectedUser.securityGroup?.groupId === 'SUPER'" slot="end">{{ translate('Super') }}</ion-label>
-              <ion-select v-else interface="popover" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
+            <ion-item lines="none">
+              <template v-if="!hasPermission(Actions.APP_SUPER_USER) && selectedUser.securityGroup?.groupId === 'SUPER'">
+                <ion-label>{{ translate('Security Group') }}</ion-label>        
+                <ion-label slot="end">{{ translate('Super') }}</ion-label>
+              </template>
+              <ion-select v-else :label="translate('Security Group')" interface="popover" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
                 <ion-select-option v-for="securityGroup in getSecurityGroups(securityGroups)" :key="securityGroup.groupId" :value="securityGroup.groupId">
                   {{ securityGroup.groupName }}
                 </ion-select-option>
@@ -344,17 +345,15 @@
           </ion-card-content>
             <ion-list>
               <ion-item>
-                <ion-label>{{ translate('Product store') }}</ion-label>        
-                <ion-select interface="popover" :value="selectedUser.favoriteProductStorePref?.userPrefValue ? selectedUser.favoriteProductStorePref?.userPrefValue : ''" @ionChange="updateFavoriteProductStore($event)">
+                <ion-select :label="translate('Product store')" interface="popover" :value="selectedUser.favoriteProductStorePref?.userPrefValue ? selectedUser.favoriteProductStorePref?.userPrefValue : ''" @ionChange="updateFavoriteProductStore($event)">
                   <ion-select-option v-for="productStore in productStores" :key="productStore.productStoreId" :value="productStore.productStoreId">
                     {{ productStore.storeName }}
                   </ion-select-option>
                   <ion-select-option value="">{{ translate("None") }}</ion-select-option>
                 </ion-select>
               </ion-item>
-              <ion-item>
-                <ion-label>{{ translate('Shopify shop') }}</ion-label>        
-                <ion-select interface="popover" :value="selectedUser.favoriteShopifyShopPref?.userPrefValue ? selectedUser.favoriteShopifyShopPref?.userPrefValue : ''" @ionChange="updateFavoriteShopifyShop($event)">
+              <ion-item lines="none">
+                <ion-select :label="translate('Shopify shop')" interface="popover" :value="selectedUser.favoriteShopifyShopPref?.userPrefValue ? selectedUser.favoriteShopifyShopPref?.userPrefValue : ''" @ionChange="updateFavoriteShopifyShop($event)">
                   <ion-select-option v-for="shopifyShop in shopifyShopsForProductStore" :key="shopifyShop.shopId" :value="shopifyShop.shopId">
                     {{ shopifyShop.name }}
                   </ion-select-option>
@@ -391,6 +390,7 @@ import {
   IonBadge,
   IonButton,
   IonCard,
+  IonCardContent,
   IonCardHeader,
   IonCardTitle,
   IonContent,
@@ -451,6 +451,7 @@ export default defineComponent({
     IonBadge,
     IonButton,
     IonCard,
+    IonCardContent,
     IonCardHeader,
     IonCardTitle,
     IonContent,
