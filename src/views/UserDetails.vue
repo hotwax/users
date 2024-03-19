@@ -246,7 +246,7 @@
                 <ion-select-option value="">{{ translate("None") }}</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-button v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block">
+            <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block">
               <ion-icon :icon="addOutline" slot='start' />
               {{ translate('Add to a product store') }}
             </ion-button>
