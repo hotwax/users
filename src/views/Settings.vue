@@ -34,7 +34,7 @@
         <h1>{{ translate('OMS') }}</h1>
       </div>
       <section>
-        <OmsInstanceNavigator />
+        <DxpOmsInstanceNavigator />
       </section>
 
       <hr />
@@ -62,7 +62,7 @@
           </ion-item>
         </ion-card>
 
-        <LanguageSwitcher />
+        <DxpLanguageSwitcher />
       </section>
     </ion-content>
   </ion-page>
