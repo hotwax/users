@@ -689,8 +689,7 @@ const isRoleTypeExists = async (roleTypeId: string): Promise<any> => {
 }
 
 const uploadPartyImage = async (payload: any): Promise <any> => {
-  let baseURL = store.getters['user/getInstanceUrl'];
-  baseURL = baseURL && baseURL.startsWith('http') ? baseURL : `https://${baseURL}.hotwax.io/api/`;
+  const baseURL = store.getters['user/getBaseUrl'];
   return client({
     url: 'service/uploadPartyLogoImage',
     method: 'POST',
