@@ -25,7 +25,7 @@
               ref="password"
               label-placement="floating" 
               v-model="formData.currentPassword" 
-              type="password" 
+              :type="showPassword ? 'text' : 'password'"
               autocomplete="new-password" 
               @ionInput="validatePassword" 
               @ionBlur="markPasswordTouched"
@@ -34,14 +34,17 @@
             >
               <div slot="label">{{ translate("Password") }} <ion-text color="danger">*</ion-text></div>
             </ion-input>
+            <ion-button @click="showPassword = !showPassword" slot="end" fill="clear">
+              <ion-icon :icon="showPassword ? eyeOutline : eyeOffOutline" slot="icon-only" />
+            </ion-button>
           </ion-item>
           <ion-item>
             <ion-input label-placement="floating" v-model="formData.emailAddress">
-              <div slot="label">{{ isFacilityLogin() ? translate('Reset password email') : translate('Email') }} <ion-text color="danger">*</ion-text></div>
+              <div slot="label">{{ isFacilityLogin() ? translate('Reset password email') : translate('Email') }} <ion-text v-if="selectedUserTemplate.templateId !== 'INTEGRATION'" color="danger">*</ion-text></div>
             </ion-input>
           </ion-item>
           <ion-item ion-margin-top>
-            <ion-toggle :checked="formData.requirePasswordChange" label-placement="start" justify="space-between">
+            <ion-toggle :disabled="selectedUserTemplate.isPasswordChangeDisabled" :checked="formData.requirePasswordChange" label-placement="start" justify="space-between">
               {{ translate("Require password reset on login") }}
             </ion-toggle>
           </ion-item>
@@ -126,7 +129,9 @@ import {
   addCircleOutline,
   arrowForwardOutline,
   caretDownOutline,
-  documentTextOutline
+  documentTextOutline,
+  eyeOffOutline,
+  eyeOutline
 } from 'ionicons/icons';
 import { copyToClipboard, showToast, isValidPassword, isValidEmail } from '@/utils'
 import { translate } from "@hotwax/dxp-components";
@@ -171,6 +176,7 @@ export default defineComponent({
       facilities: [] as any,
       selectedFacilities: [] as any,
       selectedProductStores: [] as any,
+      showPassword: false,
       formData: {
         userLoginId: '',
         currentPassword: '',
@@ -234,6 +240,20 @@ export default defineComponent({
           "facilityRoleTypeId": "",
           "isProductStoreRequired": false,
           "productStoreRoleTypeId": ""
+        },
+        {
+          "templateId": "INTEGRATION",
+          "templateName": "Integration",
+          "securityGroupId": "INTEGRATION",
+          "roleTypeId": "",
+          "isUserLoginRequired": true,
+          "isEmployeeIdRequired": false,
+          "isFacilityRequired": false,
+          "isPasswordChangeRequired": false,
+          "isPasswordChangeDisabled": true,
+          "facilityRoleTypeId": "",
+          "isProductStoreRequired": false,
+          "productStoreRoleTypeId": ""
         }
       ]
     }
@@ -278,6 +298,9 @@ export default defineComponent({
           this.formData.userLoginId = this.selectedUserTemplate.isUserLoginRequired ? `${this.selectedUser.firstName.toLowerCase()}.${this.selectedUser.lastName.toLowerCase()}` : '';
         }
         this.formData.emailAddress = this.selectedUser.emailDetails?.email;
+        if(!this.selectedUserTemplate.isPasswordChangeRequired) {
+          this.formData.requirePasswordChange = false;
+        }
       }
     },
     clearFormData() {
@@ -311,14 +334,14 @@ export default defineComponent({
      },
     validateUserDetail(data: any) {
       const validationErrors = [];
-      if (this.selectedUserTemplate.isUserLoginRequired) {
+      if (this.selectedUserTemplate.isUserLoginRequired || this.isFacilityLogin()) {
         if (!data.userLoginId) {
           validationErrors.push(translate('Username is required.'));
         }
         if (!data.currentPassword) {
           validationErrors.push(translate('Password is required.'));
         }
-        if (!data.emailAddress) {
+        if (this.selectedUserTemplate.templateId !== 'INTEGRATION' && !data.emailAddress) {
           validationErrors.push(translate('Email is required.'));
         }
       }
@@ -480,6 +503,8 @@ export default defineComponent({
       arrowForwardOutline,
       caretDownOutline,
       documentTextOutline,
+      eyeOffOutline,
+      eyeOutline,
       translate
     };
   }

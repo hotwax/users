@@ -20,6 +20,7 @@ import {
 } from '@/authorization'
 import { translate, useAuthStore, useUserStore } from '@hotwax/dxp-components'
 import emitter from '@/event-bus'
+import router from '@/router'
 
 const actions: ActionTree<UserState, RootState> = {
 
@@ -38,7 +39,7 @@ const actions: ActionTree<UserState, RootState> = {
       if (permissionId) serverPermissionsFromRules.push(permissionId);
 
       const serverPermissions = await UserService.getUserPermissions({
-        permissionIds: serverPermissionsFromRules
+        permissionIds: [...new Set(serverPermissionsFromRules)]
       }, token);
       const appPermissions = prepareAppPermissions(serverPermissions);
 
@@ -71,12 +72,16 @@ const actions: ActionTree<UserState, RootState> = {
       commit(types.USER_PERMISSIONS_UPDATED, appPermissions);
       commit(types.USER_TOKEN_CHANGED, { newToken: token })
 
+      const partyId = router.currentRoute.value.query.partyId
+      if (partyId) {
+        return `/user-details/${partyId}`;
+      }
     } catch (err: any) {
       // If any of the API call in try block has status code other than 2xx it will be handled in common catch block.
       // TODO Check if handling of specific status codes is required.
       showToast(translate('Something went wrong while login. Please contact administrator'));
       console.error("error", err);
-      return Promise.reject(new Error(err))
+      return Promise.reject(err instanceof Object ? err :new Error((err)))
     }
   },
 
@@ -114,6 +119,7 @@ const actions: ActionTree<UserState, RootState> = {
     // TODO add any other tasks if need
     commit(types.USER_END_SESSION)
     this.dispatch('util/clearUtilState')
+    this.dispatch('permission/clearPermissionState')
 
     resetPermissions();
     resetConfig();
@@ -218,6 +224,7 @@ const actions: ActionTree<UserState, RootState> = {
         } else {
           throw contactResp.data
         }
+
       } else {
         throw userResp.data
       }
@@ -232,6 +239,14 @@ const actions: ActionTree<UserState, RootState> = {
       selectedUser.facilities = await UserService.getUserFacilities(selectedUser.partyId)
       selectedUser.securityGroup = await UserService.getUserSecurityGroup(selectedUser.userLoginId)
       selectedUser.productStores = await UserService.getUserProductStores(selectedUser.partyId)
+      if (selectedUser.userLoginId) {
+        const userFavorites = await UserService.getUserFavorites({userLoginId: selectedUser.userLoginId})
+        if (userFavorites) {
+          selectedUser.favoriteProductStorePref = userFavorites.find((userFavorite: any) => userFavorite.userPrefTypeId === 'FAVORITE_PRODUCT_STORE');
+          selectedUser.favoriteShopifyShopPref = userFavorites.find((userFavorite: any) => userFavorite.userPrefTypeId === 'FAVORITE_SHOPIFY_SHOP');
+        }
+      }
+
       const resp = await UserService.fetchPartyRelationship({
         inputFields: {
           partyIdTo: selectedUser.partyId,
@@ -333,7 +348,7 @@ const actions: ActionTree<UserState, RootState> = {
       "entityName": "PartyAndUserLoginSecurityGroupDetails",
       "noConditionFind": "Y",
       "distinct": "Y",
-      "fieldList": ['createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
+      "fieldList": ['partyId', 'createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
       "viewIndex": payload.viewIndex,
       "viewSize": payload.viewSize
     }
@@ -363,6 +378,47 @@ const actions: ActionTree<UserState, RootState> = {
   },
   async clearSelectedUser({ commit }) {
     commit(types.USER_CLEAR_SELECTED_USER)
+  },
+
+  async setFavoriteProductStore({ commit, dispatch }, payload) {
+    try {
+      const params = {
+        'userPrefLoginId': payload.userLoginId,
+        'userPrefTypeId': 'FAVORITE_PRODUCT_STORE',
+        'userPrefValue': payload.productStoreId
+      }
+      const resp = await UserService.setUserPreference(params);
+      if (!hasError(resp)) {
+        commit(types.USER_SELECTED_USER_UPDATED, {...this.state.user.selectedUser, favoriteProductStorePref: params})
+        //removing favorite shop on change of favorite product store
+        dispatch('setFavoriteShopifyShop', {'userLoginId': payload.userLoginId, 'shopId': ''});
+        showToast(translate('Favorite product store updated successfully.'));
+      } else {
+        throw resp.data;
+      }
+    } catch (error) {
+      showToast(translate("Failed to set favorite product store."));
+      console.log(error);
+    }
+  },
+  async setFavoriteShopifyShop({ commit }, payload) {
+    try {
+      const params = {
+        'userPrefLoginId': payload.userLoginId,
+        'userPrefTypeId': 'FAVORITE_SHOPIFY_SHOP',
+        'userPrefValue': payload.shopId
+      }
+      const resp = await UserService.setUserPreference(params);
+      if (!hasError(resp)) {
+        commit(types.USER_SELECTED_USER_UPDATED, {...this.state.user.selectedUser, favoriteShopifyShopPref: params})
+        showToast(translate('Favorite shopify shop updated successfully.'));
+      } else {
+        throw resp.data;
+      }
+    } catch (error) {
+      showToast(translate("Failed to set favorite shopify shop."));
+      console.log(error);
+    }
   }
 }
 export default actions;

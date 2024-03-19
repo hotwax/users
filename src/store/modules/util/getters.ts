@@ -17,6 +17,9 @@ const getters: GetterTree<UtilState, RootState> = {
   },
   getFacilities(state) {
     return state.facilities
+  },
+  getShopifyShops(state) {
+    return state.shopifyShops;
   }
 }
 export default getters;
