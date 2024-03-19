@@ -145,9 +145,13 @@ export default defineComponent({
         } else {
           throw resp.data
         }
-      } catch(err) {
-        console.error(err)
-        showToast(translate("Failed to create security group."))
+      } catch(err: any) {
+        console.error(err);
+        if (err.response?.data?.error?.message) {
+          showToast(err.response.data.error.message)
+        } else {
+          showToast(translate("Failed to create security group."))
+        }
       }
     }
   },
