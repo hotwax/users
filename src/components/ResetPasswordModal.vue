@@ -21,7 +21,6 @@
         <ion-input 
           ref="password"
           :label="translate('New password')" 
-          label-placement="fixed" 
           @keyup="validatePassword" 
           @ionBlur="markPasswordTouched" 
           :placeholder="translate('Enter password')" 
@@ -38,7 +37,6 @@
         <ion-input 
           ref="confirmPassword" 
           :label="translate('Verify password')" 
-          label-placement="fixed" 
           @keyup="validateConfirmPassword()" 
           @ionBlur="markConfirmPasswordTouched" 
           :placeholder="translate('Confirm password')" 
