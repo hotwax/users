@@ -41,7 +41,8 @@
               </ion-label>
               <ion-button slot="end" @click="editSecurityGroup()" fill="outline">{{ translate("Edit") }}</ion-button>
             </ion-item>
-            <ion-button v-if="securityGroupUsers[currentGroup.groupId]" fill="clear" color="medium" @click="openCurrentGroupUsers()">
+
+            <ion-button v-if="securityGroupUsers[currentGroup.groupId]" fill="clear" slot="end" color="medium" @click="openCurrentGroupUsers()">
               {{ translate(securityGroupUsers[currentGroup.groupId] > 1 ? "users" : "user", { userCount: securityGroupUsers[currentGroup.groupId] }) }}
               <ion-icon :icon="openOutline" slot="end" />
             </ion-button>
@@ -274,5 +275,9 @@ export default defineComponent({
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.section-header>ion-item {
+  width: 50%;
 }
 </style>

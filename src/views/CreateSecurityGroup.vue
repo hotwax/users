@@ -11,19 +11,13 @@
       <main>
         <ion-list>
           <ion-item>
-            <ion-label position="floating">{{ translate('Name') }}</ion-label>
-            <ion-input @ionBlur="formData.groupId ? null : setGroupId($event)" v-model="formData.groupName" />
+            <ion-input :label="translate('Name')" label-placement="floating" @ionBlur="formData.groupId ? null : setGroupId($event)" v-model="formData.groupName" />
           </ion-item>
-          <ion-item ref="groupId">
-            <ion-label position="floating">{{ translate('Internal ID') }}</ion-label>
-            <ion-input @ionChange="validateGroupId" @ionBlur="markGroupIdTouched" v-model="formData.groupId" />
-            <ion-note slot="error">
-              {{ translate("Internal ID cannot be more than 20 characters.") }}
-            </ion-note>
+          <ion-item ref="groupId" lines="none">
+            <ion-input :label="translate('Internal ID')" label-placement="floating" @ionChange="validateGroupId" @ionBlur="markGroupIdTouched" v-model="formData.groupId" :errorText="translate('Internal ID cannot be more than 20 characters.')" />
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ translate("Description") }}</ion-label>
-            <ion-textarea v-model="formData.description" />
+            <ion-textarea :label="translate('Description')" label-placement="floating" v-model="formData.description" />
           </ion-item>
         </ion-list>
   
@@ -46,9 +40,7 @@ import {
   IonHeader,
   IonIcon,
   IonItem,
-  IonLabel,
   IonList,
-  IonNote,
   IonPage,
   IonTextarea,
   IonTitle,
@@ -73,9 +65,7 @@ export default defineComponent({
     IonHeader,
     IonIcon,
     IonItem,
-    IonLabel,
     IonList,
-    IonNote,
     IonPage,
     IonTextarea,
     IonTitle,

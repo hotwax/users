@@ -860,7 +860,7 @@ export default defineComponent({
               partyId: this.selectedUser.partyId,
               productStoreId: payload.productStoreId,
               roleTypeId: payload.roleTypeId,
-              fromDate: this.userProductStores.find((store: any) => payload.productStoreId === store.productStoreId).fromDate,
+              fromDate: this.userProductStores((store: any) => payload.productStoreId === store.productStoreId).fromDate,
               thruDate: DateTime.now().toMillis()
             }))
           )

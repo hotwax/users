@@ -71,14 +71,14 @@
             </ion-button>
           </ion-list-header>
           <ion-item v-for="facility in facilities" :key="facility.facilityId">
-              <ion-checkbox v-if="!isFacilityLogin()" label-placement="start" justify="space-between" :checked="true" @ionChange="toggleFacilitySelection(facility)">
-               {{ facility.facilityName }}
-               <p>{{ facility.facilityId }}</p>
-              </ion-checkbox>
-              <ion-label v-else>
-                {{ facility.facilityName }}
-                <p>{{ facility.facilityId }}</p>
-              </ion-label>
+            <ion-checkbox v-if="!isFacilityLogin()" label-placement="start" justify="space-between" :checked="true" @ionChange="toggleFacilitySelection(facility)">
+            {{ facility.facilityName }}
+            <p>{{ facility.facilityId }}</p>
+            </ion-checkbox>
+            <ion-label v-else>
+              {{ facility.facilityName }}
+              <p>{{ facility.facilityId }}</p>
+            </ion-label>
           </ion-item>
         </ion-list>
 
