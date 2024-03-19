@@ -25,7 +25,9 @@
         </ion-item>
         <ion-item>
           <ion-icon slot="start" :icon="cloudyNightOutline"/>
-          <ion-toggle v-model="query.hideDisabledUser" @ionChange="closeMenu" label-placement="start" justify="space-between">{{ translate("Hide disabled users") }}</ion-toggle>
+          <ion-toggle v-model="query.hideDisabledUser" @ionChange="closeMenu">
+            {{ translate("Hide disabled users") }}
+          </ion-toggle>
         </ion-item>
       </ion-list>
     </ion-content>

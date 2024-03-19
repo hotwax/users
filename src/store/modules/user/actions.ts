@@ -175,7 +175,7 @@ const actions: ActionTree<UserState, RootState> = {
       filterByDate: "Y",
       viewSize: 1,
       entityName: 'PartyAndUserLoginSecurityGroupDetails',
-      fieldList: ['userLoginId', 'enabled', 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName', 'externalId', 'statusId'],
+      fieldList: ['createdByUserLogin', 'userLoginId', 'enabled', 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName', 'externalId', 'statusId'],
     }
 
     try {

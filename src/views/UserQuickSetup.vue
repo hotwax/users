@@ -10,7 +10,7 @@
       <main>
         <ion-item class="ion-margin-bottom" v-if="!isFacilityLogin()">
           <ion-icon slot="start" :icon="documentTextOutline"/>
-          <ion-select :label="translate('Select template')" justify="space-between" interface="popover" v-model="userTemplateId" @ionChange="updateUserTemplate">
+          <ion-select :label="translate('Select template')" interface="popover" v-model="userTemplateId" @ionChange="updateUserTemplate">
             <ion-select-option v-for="userTemplate in userTemplates" :key="userTemplate.templateId" :value="userTemplate.templateId">{{ userTemplate.templateName }}</ion-select-option>
           </ion-select>
         </ion-item>
@@ -33,10 +33,10 @@
               :error-text="translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.')"
             >
               <div slot="label">{{ translate("Password") }} <ion-text color="danger">*</ion-text></div>
+              <ion-button @click="showPassword = !showPassword" slot="end" fill="clear">
+                <ion-icon :icon="showPassword ? eyeOutline : eyeOffOutline" slot="icon-only" />
+              </ion-button>
             </ion-input>
-            <ion-button @click="showPassword = !showPassword" slot="end" fill="clear">
-              <ion-icon :icon="showPassword ? eyeOutline : eyeOffOutline" slot="icon-only" />
-            </ion-button>
           </ion-item>
           <ion-item>
             <ion-input label-placement="floating" v-model="formData.emailAddress">
@@ -71,9 +71,11 @@
             </ion-button>
           </ion-list-header>
           <ion-item v-for="facility in facilities" :key="facility.facilityId">
-            <ion-checkbox v-if="!isFacilityLogin()" label-placement="start" justify="space-between" :checked="true" @ionChange="toggleFacilitySelection(facility)">
-            {{ facility.facilityName }}
-            <p>{{ facility.facilityId }}</p>
+            <ion-checkbox v-if="!isFacilityLogin()" :checked="true" @ionChange="toggleFacilitySelection(facility)">
+              <ion-label>
+                {{ facility.facilityName }}
+                <p>{{ facility.facilityId }}</p>
+              </ion-label>
             </ion-checkbox>
             <ion-label v-else>
               {{ facility.facilityName }}

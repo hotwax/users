@@ -40,7 +40,7 @@
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
-                <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click.prevent="updateUserStatus($event)" label-placement="start" justify="space-between">
+                <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click.prevent="updateUserStatus($event)">
                   {{ translate("Disable user") }}
                 </ion-toggle>
               </ion-item>
@@ -56,7 +56,7 @@
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
-                <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click.prevent="updateUserStatus($event)" label-placement="start" justify="space-between">
+                <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click.prevent="updateUserStatus($event)">
                   {{ translate("Disable user") }}
                 </ion-toggle>
               </ion-item>
@@ -114,7 +114,7 @@
                   <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
                 </ion-item>
                 <ion-item>
-                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" label-placement="start" justify="space-between" @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'">
+                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'">
                     {{ translate("Block login") }}
                   </ion-toggle>
                 </ion-item>
@@ -309,7 +309,7 @@
             </ion-card-header>
             <ion-list>
               <ion-item>
-                <ion-toggle label-placement="start" justify="space-between" :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)" @click.prevent="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true">
+                <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)" @click.prevent="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true">
                   {{ translate("Show as picker") }}
                 </ion-toggle>
               </ion-item>
@@ -860,7 +860,7 @@ export default defineComponent({
               partyId: this.selectedUser.partyId,
               productStoreId: payload.productStoreId,
               roleTypeId: payload.roleTypeId,
-              fromDate: this.userProductStores((store: any) => payload.productStoreId === store.productStoreId).fromDate,
+              fromDate: this.userProductStores.find((store: any) => payload.productStoreId === store.productStoreId).fromDate,
               thruDate: DateTime.now().toMillis()
             }))
           )
