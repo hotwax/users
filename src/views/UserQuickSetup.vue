@@ -328,7 +328,7 @@ export default defineComponent({
      },
     validateUserDetail(data: any) {
       const validationErrors = [];
-      if (this.selectedUserTemplate.isUserLoginRequired) {
+      if (this.selectedUserTemplate.isUserLoginRequired || this.isFacilityLogin()) {
         if (!data.userLoginId) {
           validationErrors.push(translate('Username is required.'));
         }

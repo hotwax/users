@@ -6,6 +6,7 @@ import RootState from './RootState'
 import createPersistedState from "vuex-persistedstate";
 import userModule from './modules/user';
 import utilModule from "./modules/util"
+import permissionModule from "./modules/permission"
 import { setPermissions } from '@/authorization'
 
 // TODO check how to register it from the components only
@@ -28,7 +29,8 @@ const store = createStore<RootState>({
   plugins: [persistState],
   modules: {
     'user': userModule,
-    'util': utilModule
+    'util': utilModule,
+    'permission': permissionModule
   },
 })
 

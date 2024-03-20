@@ -141,12 +141,15 @@ export default defineComponent({
                 if (this.selectedUser.partyTypeId === 'PERSON') {
                   resp = await UserService.updatePerson({
                     externalId: input,
-                    partyId: this.selectedUser.partyId
+                    partyId: this.selectedUser.partyId,
+                    firstName: this.selectedUser.firstName,
+                    lastName: this.selectedUser.lastName
                   })
                 } else {
                   resp = await UserService.updatePartyGroup({
                     externalId: input,
-                    partyId: this.selectedUser.partyId
+                    partyId: this.selectedUser.partyId,
+                    groupName: this.selectedUser.groupName
                   })
                 }
                 if (hasError(resp)) throw resp.data

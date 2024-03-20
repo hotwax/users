@@ -1,6 +1,6 @@
 {
   "name": "user-management",
-  "version": "1.4.0",
+  "version": "1.6.0",
   "private": true,
   "description": "User Management App",
   "scripts": {
@@ -19,10 +19,13 @@
     "@hotwax/app-version-info": "^1.0.0",
     "@hotwax/apps-theme": "^1.2.4",
     "@hotwax/dxp-components": "^1.11.0",
-    "@hotwax/oms-api": "^1.11.0",
+    "@hotwax/oms-api": "^1.13.0",
     "@ionic/core": "6.7.5",
     "@ionic/vue": "6.7.5",
     "@ionic/vue-router": "6.7.5",
+    "@types/file-saver": "^2.0.4",
+    "@types/papaparse": "^5.3.1",
+    "file-saver": "^2.0.5",
     "core-js": "^3.6.5",
     "luxon": "^3.2.0",
     "mitt": "^2.1.0",
@@ -50,6 +53,7 @@
     "@vue/test-utils": "^2.0.0-0",
     "cypress": "^8.3.0",
     "eslint": "^7.32.0",
+    "papaparse": "^5.3.1",
     "eslint-plugin-vue": "^8.0.3",
     "typescript": "~4.7.4"
   }

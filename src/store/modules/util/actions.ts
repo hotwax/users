@@ -73,6 +73,22 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_PRODUCT_STORES_UPDATED, productStores)
   },
 
+  async fetchShopifyShopConfigs({ commit }) {
+    let shopifyShops = []
+
+    try {
+      const resp = await UtilService.getShopifyConfigs();
+      if (!hasError(resp)) {
+        shopifyShops = resp.data.docs
+      } else {
+        throw resp.data
+      }
+    } catch (error) {
+      console.error(error)
+    }
+    commit(types.UTIL_SHOPIFY_SHOPS_UPDATED, shopifyShops)
+  },
+
 
   async getSecurityGroups({ commit }) {
     const payload = {
@@ -80,8 +96,11 @@ const actions: ActionTree<UtilState, RootState> = {
       viewSize: 200,
       distinct: "Y",
       noConditionFind: "Y",
-      fieldList: ["groupId", "groupName"]
-
+      fieldList: ["description", "groupId", "groupName"],
+      inputFields: {
+        groupTypeEnumId: "PRM_CLASS_TYPE",
+        groupTypeEnumId_op: "notEqual"
+      }
     }
     let securityGroups = []
 
@@ -145,6 +164,10 @@ const actions: ActionTree<UtilState, RootState> = {
       logger.error('Failed to fetch product stores', err)
     }
     commit(types.UTIL_PRODUCT_STORES_UPDATED, stores)
+  },
+
+  updateSecurityGroup({commit}, payload) {
+    commit(types.UTIL_SECURITY_GROUPS_UPDATED, payload)
   },
 
   clearUtilState({ commit }) {

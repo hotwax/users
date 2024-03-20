@@ -4,7 +4,7 @@
 
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>{{ translate("Find Users") }}</ion-title>
+        <ion-title>{{ translate("Users") }}</ion-title>
         <ion-menu-button slot="end" class="mobile-only">
           <ion-icon :icon="optionsOutline" />
         </ion-menu-button>
@@ -180,7 +180,7 @@ import { Actions, hasPermission } from '@/authorization'
 import logger from '@/logger';
 
 export default defineComponent({
-  name: 'FindUsers',
+  name: 'Users',
   components: {
     FilterMenu,
     IonBadge,
