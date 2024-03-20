@@ -84,7 +84,7 @@ const actions: ActionTree<UtilState, RootState> = {
         throw resp.data
       }
     } catch (error) {
-      console.error(error)
+      logger.error(error)
     }
     commit(types.UTIL_SHOPIFY_SHOPS_UPDATED, shopifyShops)
   },
