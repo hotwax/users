@@ -6,7 +6,6 @@ import * as types from './mutation-types'
 import { showToast } from '@/utils'
 import { hasError } from '@/adapter'
 import { translate } from '@hotwax/dxp-components'
-import { UserService } from '@/services/UserService'
 import logger from '@/logger';
 
 const actions: ActionTree<UtilState, RootState> = {
