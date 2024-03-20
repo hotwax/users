@@ -274,6 +274,14 @@ http://ionicframework.com/docs/theming/ */
   grid-area: search;
 }
 
+.search-permissions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(343px, 1fr));
+  gap: var(--spacer-xs);
+  align-items: start;
+  margin-bottom: var(--spacer-lg);
+}
+
 .empty-state {
   max-width: 100%;
   display: flex;
@@ -289,6 +297,14 @@ http://ionicframework.com/docs/theming/ */
 
 .empty-state > p {
   text-align: center;
+  padding: 10px;
+}
+
+/* desktop only */
+@media (min-width: 720px) {
+  .search-permissions {
+    padding-inline-end: var(--spacer-xs);
+  }
 }
 
 @media (min-width: 991px) {

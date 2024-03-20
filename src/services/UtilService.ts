@@ -18,6 +18,14 @@ const getSecurityGroups = async (payload: any): Promise<any> => {
   })
 }
 
+const updateSecurityGroup = async (payload: any): Promise<any> => {
+  return api({
+    url: "service/updateSecurityGroup",
+    method: "post",
+    data: payload
+  });
+}
+
 const fetchFacilities = async (payload: any): Promise<any> => {
   return api({
     url: "performFind",
@@ -36,10 +44,28 @@ const fetchProductStores = async (payload: any): Promise<any> => {
   })
 }
 
+const getShopifyConfigs = async (): Promise <any>  => {
+  const params = {
+    "entityName": "ShopifyShopAndConfig",
+    "noConditionFind": "Y",
+    "fieldList": ["shopifyConfigId", "name", "shopId", "productStoreId"],
+    "viewSize": 250
+  }
+
+  return api({
+    url: "performFind",
+    method: "get",
+    params,
+    cache: true
+  });
+}
+
 export const UtilService = {
   fetchFacilities,
   fetchProductStores,
   getSecurityGroups,
-  fetchRoles
+  getShopifyConfigs,
+  fetchRoles,
+  updateSecurityGroup
 }
 

@@ -3,4 +3,5 @@ export default interface UtilState {
   productStores: any[];
   securityGroups: any[];
   facilities: any[];
+  shopifyShops: any[];
 }

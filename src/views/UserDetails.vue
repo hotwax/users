@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-back-button slot="start" default-href="/tabs/find-users" />
+        <ion-back-button slot="start" default-href="/tabs/users" />
         <ion-title>{{ translate("User details") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -246,7 +246,7 @@
                 <ion-select-option value="">{{ translate("None") }}</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-button v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block">
+            <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block">
               <ion-icon :icon="addOutline" slot='start' />
               {{ translate('Add to a product store') }}
             </ion-button>
@@ -306,6 +306,52 @@
             <ion-card-header>
               <ion-card-title>
                 {{ translate('Fulfillment') }}
+              </ion-card-title>
+            </ion-card-header>
+            <ion-list>
+              <ion-item>
+                <ion-skeleton-text animated />
+              </ion-item>
+              <ion-item lines="none">
+                <ion-skeleton-text animated />
+              </ion-item>
+            </ion-list>
+          </ion-card>
+
+          <ion-card v-if="isUserFetched">
+            <ion-card-header>
+              <ion-card-title>
+                {{ translate('Favorites') }}
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+            {{ translate('Select your favorites to preselect them across all applications') }}
+          </ion-card-content>
+            <ion-list>
+              <ion-item>
+                <ion-label>{{ translate('Product store') }}</ion-label>        
+                <ion-select interface="popover" :value="selectedUser.favoriteProductStorePref?.userPrefValue ? selectedUser.favoriteProductStorePref?.userPrefValue : ''" @ionChange="updateFavoriteProductStore($event)">
+                  <ion-select-option v-for="productStore in productStores" :key="productStore.productStoreId" :value="productStore.productStoreId">
+                    {{ productStore.storeName }}
+                  </ion-select-option>
+                  <ion-select-option value="">{{ translate("None") }}</ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-item>
+                <ion-label>{{ translate('Shopify shop') }}</ion-label>        
+                <ion-select interface="popover" :value="selectedUser.favoriteShopifyShopPref?.userPrefValue ? selectedUser.favoriteShopifyShopPref?.userPrefValue : ''" @ionChange="updateFavoriteShopifyShop($event)">
+                  <ion-select-option v-for="shopifyShop in shopifyShopsForProductStore" :key="shopifyShop.shopId" :value="shopifyShop.shopId">
+                    {{ shopifyShop.name }}
+                  </ion-select-option>
+                  <ion-select-option value="">{{ translate("None") }}</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-list>
+          </ion-card>
+          <ion-card v-else>
+            <ion-card-header>
+              <ion-card-title>
+                {{ translate('Favorites') }}
               </ion-card-title>
             </ion-card-header>
             <ion-list>
@@ -419,7 +465,9 @@ export default defineComponent({
       getRoleTypeDesc: 'util/getRoleTypeDesc',
       securityGroups: 'util/getSecurityGroups',
       userProfile: 'user/getUserProfile',
-      baseUrl: 'user/getBaseUrl'
+      baseUrl: 'user/getBaseUrl',
+      productStores: 'util/getProductStores',
+      shopifyShops: 'util/getShopifyShops'
     })
   },
   props: ['partyId'],
@@ -444,18 +492,41 @@ export default defineComponent({
       isUserEnabled: false as boolean,
       imageUrl: "",
       isUserFetched: false,
-      showPassword: false
+      showPassword: false,
+      shopifyShopsForProductStore: [] as any
     }
   },
   async ionViewWillEnter() {
     this.isUserFetched = false
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
     await this.fetchProfileImage()
-    await this.store.dispatch('util/getSecurityGroups');
+    await Promise.all([this.store.dispatch('util/getSecurityGroups'), this.store.dispatch('util/fetchShopifyShopConfigs')]);
+    
+    const productStoreId = this.selectedUser.favoriteProductStorePref?.userPrefValue;
+    if (productStoreId) {
+      this.getShopifyShops(productStoreId);
+    }
+    
     this.isUserFetched = true
     this.username = this.selectedUser.groupName ? (this.selectedUser.groupName)?.toLowerCase() : (`${this.selectedUser.firstName}.${this.selectedUser.lastName}`?.toLowerCase())
   },
   methods: {
+    getShopifyShops(productStoreId: string) {
+      this.shopifyShopsForProductStore = this.shopifyShops.filter((shopifyShop:any) => shopifyShop.productStoreId === productStoreId);
+    },
+    updateFavoriteProductStore(event: any) {
+      const selectedProductStoreId = event.target.value;
+      if (selectedProductStoreId && selectedProductStoreId !== this.selectedUser?.favoriteProductStorePref?.userPrefTypeId) {
+        this.store.dispatch('user/setFavoriteProductStore', {"userLoginId": this.selectedUser?.userLoginId, "productStoreId": selectedProductStoreId})
+        this.getShopifyShops(selectedProductStoreId);
+      }
+    },
+    updateFavoriteShopifyShop(event: any) {
+      const selectedShopId = event.target.value;
+      if (selectedShopId && selectedShopId !== this.selectedUser?.favoriteShopifyShopPref?.userPrefTypeId) {
+        this.store.dispatch('user/setFavoriteShopifyShop', {"userLoginId": this.selectedUser?.userLoginId, "shopId": selectedShopId})
+      }
+    },
     async openContactActionsPopover(event: Event, type: string, value: string) {
       const contactActionsPopover = await popoverController.create({
         component: ContactActionsPopover,
@@ -545,12 +616,15 @@ export default defineComponent({
                 if (this.selectedUser.partyTypeId === 'PERSON') {
                   resp = await UserService.updatePerson({
                     externalId: input,
-                    partyId: this.selectedUser.partyId
+                    partyId: this.selectedUser.partyId,
+                    firstName: this.selectedUser.firstName,
+                    lastName: this.selectedUser.lastName
                   })
                 } else {
                   resp = await UserService.updatePartyGroup({
                     externalId: input,
-                    partyId: this.selectedUser.partyId
+                    partyId: this.selectedUser.partyId,
+                    groupName: this.selectedUser.groupName
                   })
                 }
                 if (hasError(resp)) resp.data
@@ -1029,7 +1103,7 @@ export default defineComponent({
     },
 
     getSecurityGroups(securityGroups: any) {
-      const excludedSecurityGroups = JSON.parse(process.env.VUE_APP_EXCLUDED_SECURITY_GROUPS)
+      const excludedSecurityGroups = JSON.parse(process.env.VUE_APP_EXCLUDED_SECURITY_GROUPS as string)
       const selectedSecurityGroup = this.selectedUser.securityGroup.groupId
 
       if(!hasPermission(Actions.APP_SUPER_USER)) excludedSecurityGroups.push('SUPER')
