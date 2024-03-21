@@ -33,6 +33,7 @@ import { UserService } from "@/services/UserService";
 import { DateTime } from "luxon";
 import { showToast } from "@/utils";
 import { hasError } from "@/adapter";
+import logger from '@/logger';
 
 export default defineComponent({
   name: "ProductStoreActionsPopover",
@@ -87,7 +88,7 @@ export default defineComponent({
                 throw resp.data
               }
             } catch (error) {
-              console.error(error)
+              logger.error(error)
               return
             }
           }
@@ -128,7 +129,7 @@ export default defineComponent({
         showToast(translate('Role removed successfully.'))
       } catch (error) {
         showToast(translate('Something went wrong.'));
-        console.error(error)
+        logger.error(error)
       }
       // refetching product stores with updated roles
       const userProductStores = await UserService.getUserProductStores(this.selectedUser.partyId)

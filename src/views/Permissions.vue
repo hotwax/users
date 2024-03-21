@@ -87,6 +87,7 @@ import { PermissionService } from '@/services/PermissionService';
 import { DateTime } from 'luxon';
 import EditSecurityGroupModal from '@/components/EditSecurityGroupModal.vue';
 import { Actions, hasPermission } from '@/authorization'
+import logger from '@/logger';
 
 export default defineComponent({
   name: 'Permissions',
@@ -168,7 +169,7 @@ export default defineComponent({
           throw resp.data;
         }
       } catch(err) {
-        console.error(err)
+        logger.error(err)
       }
     },
     async openCurrentGroupUsers() {
@@ -244,7 +245,7 @@ export default defineComponent({
           } while (resp.data.docs.length >= 250);
         }));
       } catch (err) {
-        console.error(err);
+        logger.error(err);
       }
 
       return permissionsByGroup;

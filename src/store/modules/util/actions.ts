@@ -6,6 +6,7 @@ import * as types from './mutation-types'
 import { showToast } from '@/utils'
 import { hasError } from '@/adapter'
 import { translate } from '@hotwax/dxp-components'
+import logger from '@/logger';
 
 const actions: ActionTree<UtilState, RootState> = {
   async fetchRoles({ commit, state }) {
@@ -43,7 +44,7 @@ const actions: ActionTree<UtilState, RootState> = {
       }
     } catch (error) {
       showToast(translate('Something went wrong.'));
-      console.error(error)
+      logger.error(error)
     }
     commit(types.UTIL_ROLES_UPDATED, roles)
   },
@@ -66,7 +67,7 @@ const actions: ActionTree<UtilState, RootState> = {
       }
     } catch (error) {
       showToast(translate('Something went wrong.'));
-      console.error(error)
+      logger.error(error)
     }
     commit(types.UTIL_PRODUCT_STORES_UPDATED, productStores)
   },
@@ -82,7 +83,7 @@ const actions: ActionTree<UtilState, RootState> = {
         throw resp.data
       }
     } catch (error) {
-      console.error(error)
+      logger.error(error)
     }
     commit(types.UTIL_SHOPIFY_SHOPS_UPDATED, shopifyShops)
   },
@@ -111,7 +112,7 @@ const actions: ActionTree<UtilState, RootState> = {
         throw resp.data
       }
     } catch(error) {
-      console.error(error);
+      logger.error(error);
     }
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
   },
@@ -138,7 +139,7 @@ const actions: ActionTree<UtilState, RootState> = {
         throw resp.data
       }
     } catch (err) {
-      console.error('Failed to fetch facilities', err)
+      logger.error('Failed to fetch facilities', err)
     }
     commit(types.UTIL_FACILITIES_UPDATED, facilities)
   },
@@ -159,7 +160,7 @@ const actions: ActionTree<UtilState, RootState> = {
         throw resp.data
       }
     } catch (err) {
-      console.error('Failed to fetch product stores', err)
+      logger.error('Failed to fetch product stores', err)
     }
     commit(types.UTIL_PRODUCT_STORES_UPDATED, stores)
   },

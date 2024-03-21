@@ -20,6 +20,7 @@ import {
 } from '@/authorization'
 import { translate, useAuthStore, useUserStore } from '@hotwax/dxp-components'
 import emitter from '@/event-bus'
+import logger from '@/logger';
 import router from '@/router'
 
 const actions: ActionTree<UserState, RootState> = {
@@ -54,7 +55,7 @@ const actions: ActionTree<UserState, RootState> = {
         if (!hasPermission) {
           const permissionError = 'You do not have permission to access the app.';
           showToast(translate(permissionError));
-          console.error("error", permissionError);
+          logger.error("error", permissionError);
           return Promise.reject(new Error(permissionError));
         }
       }
@@ -80,7 +81,7 @@ const actions: ActionTree<UserState, RootState> = {
       // If any of the API call in try block has status code other than 2xx it will be handled in common catch block.
       // TODO Check if handling of specific status codes is required.
       showToast(translate('Something went wrong while login. Please contact administrator'));
-      console.error("error", err);
+      logger.error("error", err);
       return Promise.reject(err instanceof Object ? err :new Error((err)))
     }
   },
@@ -106,7 +107,7 @@ const actions: ActionTree<UserState, RootState> = {
         // Added logic to remove the `//` from the resp as in case of get request we are having the extra characters and in case of post we are having 403
         resp = JSON.parse(resp.startsWith('//') ? resp.replace('//', '') : resp)
       } catch (err) {
-        console.error('Error parsing data', err)
+        logger.error('Error parsing data', err)
       }
 
       if (resp?.logoutAuthType == 'SAML2SSO') {
@@ -232,7 +233,7 @@ const actions: ActionTree<UserState, RootState> = {
       if (hasError(userResp)) {
         showToast(translate('Something went wrong.'));
       }
-      console.error(error)
+      logger.error(error)
     }
 
     if (Object.keys(selectedUser).length) {
@@ -366,7 +367,7 @@ const actions: ActionTree<UserState, RootState> = {
         throw resp.data
       }
     } catch(error) {
-      console.error(error)
+      logger.error(error)
     }
 
     emitter.emit("dismissLoader");

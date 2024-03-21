@@ -63,6 +63,7 @@ import { translate } from "@hotwax/dxp-components";
 import { generateInternalId, showToast } from "@/utils";
 import { PermissionService } from "@/services/PermissionService";
 import { hasError } from "@/adapter";
+import logger from "@/logger";
 
 export default defineComponent({
   name: "CreateSecurityGroup",
@@ -146,7 +147,7 @@ export default defineComponent({
           throw resp.data
         }
       } catch(err: any) {
-        console.error(err);
+        logger.error(err);
         if (err.response?.data?.error?.message) {
           showToast(err.response.data.error.message)
         } else {

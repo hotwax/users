@@ -4,6 +4,7 @@ import RootState from '@/store/RootState'
 import PermissionState from './PermissionState'
 import * as types from './mutation-types'
 import { hasError } from '@/adapter'
+import logger from '@/logger'
 
 const actions: ActionTree<PermissionState, RootState> = {
   async getAllPermissions({ commit }) {
@@ -32,7 +33,7 @@ const actions: ActionTree<PermissionState, RootState> = {
       }
       while (resp.data.docs.length >= 250);
     } catch (error) {
-      console.error(error);
+      logger.error(error);
     }
 
     commit(types.PERMISSION_ALL_PERMISSIONS_UPDATED, permissions)
@@ -67,7 +68,7 @@ const actions: ActionTree<PermissionState, RootState> = {
       }
       while(resp.data.docs.length >= 250);
     } catch(error) {
-      console.error(error);
+      logger.error(error);
     }
 
     const groupTypes = {} as any;
@@ -130,7 +131,7 @@ const actions: ActionTree<PermissionState, RootState> = {
       }
       while (resp.data.docs.length >= 250);
     } catch(error) {
-      console.error(error);
+      logger.error(error);
     }
 
     const permissionsByGroup = JSON.parse(JSON.stringify(state.permissionsByGroup))
