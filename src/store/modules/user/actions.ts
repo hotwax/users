@@ -393,13 +393,14 @@ const actions: ActionTree<UserState, RootState> = {
         commit(types.USER_SELECTED_USER_UPDATED, {...this.state.user.selectedUser, favoriteProductStorePref: params})
         //removing favorite shop on change of favorite product store
         dispatch('setFavoriteShopifyShop', {'userLoginId': payload.userLoginId, 'shopId': ''});
-        showToast(translate('Favorite product store updated successfully.'));
+        return Promise.resolve({ favoriteProductStorePref: params })
       } else {
         throw resp.data;
       }
     } catch (error) {
       showToast(translate("Failed to set favorite product store."));
-      console.log(error);
+      logger.error(error);
+      return Promise.reject(error)
     }
   },
   async setFavoriteShopifyShop({ commit }, payload) {
@@ -412,13 +413,14 @@ const actions: ActionTree<UserState, RootState> = {
       const resp = await UserService.setUserPreference(params);
       if (!hasError(resp)) {
         commit(types.USER_SELECTED_USER_UPDATED, {...this.state.user.selectedUser, favoriteShopifyShopPref: params})
-        showToast(translate('Favorite shopify shop updated successfully.'));
+        return Promise.resolve({ favoriteProductStorePref: params })
       } else {
         throw resp.data;
       }
     } catch (error) {
       showToast(translate("Failed to set favorite shopify shop."));
-      console.log(error);
+      logger.error(error);
+      Promise.reject(error)
     }
   }
 }

@@ -502,7 +502,7 @@ export default defineComponent({
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
     await this.fetchProfileImage()
     await Promise.all([this.store.dispatch('util/getSecurityGroups'), this.store.dispatch('util/fetchShopifyShopConfigs')]);
-    
+
     const productStoreId = this.selectedUser.favoriteProductStorePref?.userPrefValue;
     if (productStoreId) {
       this.getShopifyShops(productStoreId);
@@ -517,15 +517,21 @@ export default defineComponent({
     },
     updateFavoriteProductStore(event: any) {
       const selectedProductStoreId = event.target.value;
-      if (selectedProductStoreId && selectedProductStoreId !== this.selectedUser?.favoriteProductStorePref?.userPrefTypeId) {
+      if (selectedProductStoreId && selectedProductStoreId !== this.selectedUser?.favoriteProductStorePref?.userPrefValue) {
         this.store.dispatch('user/setFavoriteProductStore', {"userLoginId": this.selectedUser?.userLoginId, "productStoreId": selectedProductStoreId})
-        this.getShopifyShops(selectedProductStoreId);
+        .then(() => {
+          this.getShopifyShops(selectedProductStoreId);
+          showToast(translate('Favorite product store updated successfully.'));
+        })
       }
     },
     updateFavoriteShopifyShop(event: any) {
       const selectedShopId = event.target.value;
-      if (selectedShopId && selectedShopId !== this.selectedUser?.favoriteShopifyShopPref?.userPrefTypeId) {
+      if (selectedShopId && selectedShopId !== this.selectedUser?.favoriteShopifyShopPref?.userPrefValue) {
         this.store.dispatch('user/setFavoriteShopifyShop', {"userLoginId": this.selectedUser?.userLoginId, "shopId": selectedShopId})
+        .then(() => {
+          showToast(translate('Favorite shopify shop updated successfully.'));
+        })
       }
     },
     async openContactActionsPopover(event: Event, type: string, value: string) {
