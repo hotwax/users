@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
+import logger from '@/logger';
 
 import { IonicVue } from '@ionic/vue';
 
@@ -45,6 +46,9 @@ const app = createApp(App)
   .use(permissionPlugin, {
     rules: permissionRules,
     actions: permissionActions
+  })
+  .use(logger, {
+    level: process.env.VUE_APP_DEFAULT_LOG_LEVEL
   })
   .use(dxpComponents, {
     appLoginUrl: process.env.VUE_APP_LOGIN_URL as string,

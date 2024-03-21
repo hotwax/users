@@ -172,6 +172,7 @@ import FilterMenu from '@/components/FilterMenu.vue';
 import { UserService } from '@/services/UserService';
 import { hasError } from '@/adapter';
 import { Actions, hasPermission } from '@/authorization'
+import logger from '@/logger';
 
 export default defineComponent({
   name: 'Users',
@@ -287,7 +288,7 @@ export default defineComponent({
           throw resp.data
         }
       } catch (error) {
-        console.error(error)
+        logger.error(error)
       }
     }
   },

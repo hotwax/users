@@ -261,7 +261,7 @@
                 <ion-select-option value="">{{ translate("None") }}</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-button v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block">
+            <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block">
               <ion-icon :icon="addOutline" slot='start' />
               {{ translate('Add to a product store') }}
             </ion-button>
@@ -442,6 +442,7 @@ import { DateTime } from "luxon";
 import Image from "@/components/Image.vue";
 import { Actions, hasPermission } from '@/authorization'
 import emitter from "@/event-bus";
+import logger from '@/logger';
 
 export default defineComponent({
   name: "UserDetails",
@@ -651,7 +652,7 @@ export default defineComponent({
               showToast(translate(`${this.OPTIONS[type].placeholder} added successfully.`))
             } catch (error) {
               showToast(translate(`Failed to add ${type === 'email' ? 'email' : (type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
-              console.error(error)
+              logger.error(error)
             }
             return true
           }
@@ -711,7 +712,7 @@ export default defineComponent({
         }
       } catch (error) {
         showToast(translate('Something went wrong.'));
-        console.error(error)
+        logger.error(error)
       }
     },
     async resetPassword() {
@@ -757,7 +758,7 @@ export default defineComponent({
               }
             } catch (error) {
               showToast(translate('Failed to update user login status.'))
-              console.error(error)
+              logger.error(error)
             }
           }
         }],
@@ -818,7 +819,7 @@ export default defineComponent({
                 throw resp.data
               }
             } catch (error) {
-              console.error(error)
+              logger.error(error)
               return
             }
           }
@@ -878,7 +879,7 @@ export default defineComponent({
                 throw resp.data
               }
             } catch (error) {
-              console.error(error)
+              logger.error(error)
               return
             }
           }
@@ -959,7 +960,7 @@ export default defineComponent({
         } else {
           showToast(translate('Something went wrong.'))
         }
-        console.error(error)
+        logger.error(error)
       }
     },
     async updatePickerRoleStatus(event: any) {
@@ -988,7 +989,7 @@ export default defineComponent({
         }
       } catch (error) {
         showToast(translate('Failed to update user role.'))
-        console.error(error)
+        logger.error(error)
       }
     },
     async editName() {
@@ -1038,7 +1039,7 @@ export default defineComponent({
                   throw resp.data;
                 }
               } catch(err) {
-                console.error(err)
+                logger.error(err)
               }
 
               emitter.emit('dismissLoader')
@@ -1077,7 +1078,7 @@ export default defineComponent({
           throw resp.data;
         }
       } catch(err) {
-        console.error(err)
+        logger.error(err)
         showToast(translate("Failed to update user status."))
       }
 
@@ -1105,7 +1106,7 @@ export default defineComponent({
         }
       } catch (error) {
         showToast(translate("Failed to upload image."))
-        console.error('Error uploading image:', error);
+        logger.error('Error uploading image:', error);
       }
     },
     async fetchProfileImage() {

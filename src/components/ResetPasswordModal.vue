@@ -99,6 +99,7 @@ import { isValidPassword, showToast } from "@/utils";
 import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
 import { Actions, hasPermission } from '@/authorization'
+import logger from '@/logger';
 
 export default defineComponent({
   name: "CustomFieldModal",
@@ -144,7 +145,7 @@ export default defineComponent({
         }
       } catch (error) {
         showToast(translate('Failed to reset password.'))
-        console.error(error)
+        logger.error(error)
       }
       this.closeModal()
     },
@@ -186,7 +187,7 @@ export default defineComponent({
         }
       } catch (error) {
         showToast(translate('Failed to send password reset email.'))
-        console.error(error)
+        logger.error(error)
       }
       this.closeModal()
     },

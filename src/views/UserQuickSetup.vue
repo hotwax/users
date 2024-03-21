@@ -140,6 +140,7 @@ import { translate } from "@hotwax/dxp-components";
 import { UserService } from '@/services/UserService'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
 import SelectProductStoreModal from "@/components/SelectProductStoreModal.vue";
+import logger from '@/logger';
 
 export default defineComponent({
   name: "UserConfirmation",
@@ -360,7 +361,7 @@ export default defineComponent({
         const validationErrors = this.validateUserDetail(this.formData);
         if (validationErrors.length > 0) {
           const errorMessages = validationErrors.join(" ");
-          console.error(errorMessages);
+          logger.error(errorMessages);
           showToast(translate(errorMessages));
           return;
         }
@@ -377,7 +378,7 @@ export default defineComponent({
           this.$router.replace({ path: `/user-details/${this.partyId}` });
         }
       } catch (err) {
-        console.error('error', err)
+        logger.error('error', err)
         showToast(translate('Failed to quick setup user.'))
       }
     },
@@ -440,7 +441,7 @@ export default defineComponent({
         const validationErrors = this.validateUserDetail(this.formData);
         if (validationErrors.length > 0) {
           const errorMessages = validationErrors.join(" ");
-          console.error(errorMessages);
+          logger.error(errorMessages);
           showToast(translate(errorMessages));
           return;
         }
@@ -454,7 +455,7 @@ export default defineComponent({
         await this.store.dispatch('user/clearSelectedUser');
         await this.$router.replace({ path: `/create-user` })
       } catch (err) {
-        console.error('error', err)
+        logger.error('error', err)
         showToast(translate('Failed to quick setup user.'))
       }
     },

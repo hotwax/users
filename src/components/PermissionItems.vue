@@ -60,6 +60,7 @@ import { showToast } from '@/utils';
 import { hasError } from '@/adapter';
 import { DateTime } from 'luxon';
 import { Actions, hasPermission } from '@/authorization'
+import logger from '@/logger';
 
 export default defineComponent({
   name: 'PermissionItems',
@@ -140,7 +141,7 @@ export default defineComponent({
         }
       } catch(err) {
         showToast(translate("Failed to update security group permission association."))
-        console.error(err)
+        logger.error(err)
       }
     },
     arePermissionsAvailable() {

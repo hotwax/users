@@ -51,6 +51,7 @@ import { translate } from '@hotwax/dxp-components'
 import { UtilService } from "@/services/UtilService";
 import { hasError } from "@/adapter";
 import { showToast } from "@/utils";
+import logger from "@/logger";
 
 export default defineComponent({
   name: "FacilityAddressModal",
@@ -115,7 +116,7 @@ export default defineComponent({
         }
       } catch (error) {
         showToast(translate("Failed to update security group."))
-        console.error(error)
+        logger.error(error)
       }
     }
   },

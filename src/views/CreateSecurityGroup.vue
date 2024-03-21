@@ -11,7 +11,7 @@
       <main>
         <ion-list>
           <ion-item>
-            <ion-input :label="translate('Name')" label-placement="floating" @ionBlur="formData.groupId ? null : setGroupId($event)" v-model="formData.groupName" />
+            <ion-input :label="translate('Name')" label-placement="floating" @ionBlur="formData.groupId ? null : setGroupId(formData.groupName)" v-model="formData.groupName" />
           </ion-item>
           <ion-item ref="groupId" lines="none">
             <ion-input :label="translate('Internal ID')" label-placement="floating" @ionChange="validateGroupId" @ionBlur="markGroupIdTouched" v-model="formData.groupId" :errorText="translate('Internal ID cannot be more than 20 characters.')" />
@@ -55,6 +55,7 @@ import { translate } from "@hotwax/dxp-components";
 import { generateInternalId, showToast } from "@/utils";
 import { PermissionService } from "@/services/PermissionService";
 import { hasError } from "@/adapter";
+import logger from "@/logger";
 
 export default defineComponent({
   name: "CreateSecurityGroup",
@@ -88,8 +89,8 @@ export default defineComponent({
     })
   },
   methods: {
-    setGroupId(event: any) {
-      this.formData.groupId = generateInternalId(event.target.value)
+    setGroupId(groupName: string) {
+      this.formData.groupId = generateInternalId(groupName)
     }, 
     validateGroupId(event: any) {
       const value = event.target.value;
@@ -136,7 +137,7 @@ export default defineComponent({
           throw resp.data
         }
       } catch(err: any) {
-        console.error(err);
+        logger.error(err);
         if (err.response?.data?.error?.message) {
           showToast(err.response.data.error.message)
         } else {
