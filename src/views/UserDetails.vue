@@ -522,6 +522,8 @@ export default defineComponent({
         .then(() => {
           this.getShopifyShops(selectedProductStoreId);
           showToast(translate('Favorite product store updated successfully.'));
+        }).catch(() =>{
+          showToast(translate("Failed to set favorite product store."));
         })
       }
     },
@@ -531,6 +533,8 @@ export default defineComponent({
         this.store.dispatch('user/setFavoriteShopifyShop', {"userLoginId": this.selectedUser?.userLoginId, "shopId": selectedShopId})
         .then(() => {
           showToast(translate('Favorite shopify shop updated successfully.'));
+        }).catch(() => {
+          showToast(translate("Failed to set favorite shopify shop."));
         })
       }
     },

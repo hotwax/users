@@ -398,7 +398,6 @@ const actions: ActionTree<UserState, RootState> = {
         throw resp.data;
       }
     } catch (error) {
-      showToast(translate("Failed to set favorite product store."));
       logger.error(error);
       return Promise.reject(error)
     }
@@ -418,7 +417,6 @@ const actions: ActionTree<UserState, RootState> = {
         throw resp.data;
       }
     } catch (error) {
-      showToast(translate("Failed to set favorite shopify shop."));
       logger.error(error);
       return Promise.reject(error)
     }
