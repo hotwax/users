@@ -420,7 +420,7 @@ const actions: ActionTree<UserState, RootState> = {
     } catch (error) {
       showToast(translate("Failed to set favorite shopify shop."));
       logger.error(error);
-      Promise.reject(error)
+      return Promise.reject(error)
     }
   }
 }

@@ -502,7 +502,7 @@ export default defineComponent({
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
     await this.fetchProfileImage()
     await Promise.all([this.store.dispatch('util/getSecurityGroups'), this.store.dispatch('util/fetchShopifyShopConfigs')]);
-
+    
     const productStoreId = this.selectedUser.favoriteProductStorePref?.userPrefValue;
     if (productStoreId) {
       this.getShopifyShops(productStoreId);
