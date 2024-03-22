@@ -393,7 +393,7 @@ const actions: ActionTree<UserState, RootState> = {
         commit(types.USER_SELECTED_USER_UPDATED, {...this.state.user.selectedUser, favoriteProductStorePref: params})
         //removing favorite shop on change of favorite product store
         dispatch('setFavoriteShopifyShop', {'userLoginId': payload.userLoginId, 'shopId': ''});
-        return Promise.resolve({ favoriteProductStorePref: params })
+        return Promise.resolve(resp.data)
       } else {
         throw resp.data;
       }
@@ -413,7 +413,7 @@ const actions: ActionTree<UserState, RootState> = {
       const resp = await UserService.setUserPreference(params);
       if (!hasError(resp)) {
         commit(types.USER_SELECTED_USER_UPDATED, {...this.state.user.selectedUser, favoriteShopifyShopPref: params})
-        return Promise.resolve({ favoriteProductStorePref: params })
+        return Promise.resolve(resp.data)
       } else {
         throw resp.data;
       }
