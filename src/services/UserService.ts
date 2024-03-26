@@ -191,7 +191,7 @@ const getUserFavorites = async (payload: any): Promise<any> => {
       throw resp.data;
     }
   } catch (error) {
-    console.log(error)
+    logger.error(error)
   }
   return favorites;
 }
