@@ -34,7 +34,7 @@ import permissionActions from '@/authorization/Actions';
 import { dxpComponents } from '@hotwax/dxp-components'
 import { login, logout, loader } from '@/utils/user';
 import localeMessages from '@/locales';
-import { getConfig, initialise, setUserLocale } from '@/adapter';
+import { getConfig, initialise, setUserLocale, setUserTimeZone, getAvailableTimeZones } from '@/adapter';
 
 
 const app = createApp(App)
@@ -60,6 +60,8 @@ const app = createApp(App)
     logout,
     localeMessages,
     setUserLocale,
+    setUserTimeZone,
+    getAvailableTimeZones
   });
 
 router.isReady().then(() => {
