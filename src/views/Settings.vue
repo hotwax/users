@@ -34,7 +34,7 @@
         <h1>{{ translate('OMS') }}</h1>
       </div>
       <section>
-        <OmsInstanceNavigator />
+        <DxpOmsInstanceNavigator />
       </section>
 
       <hr />
@@ -48,7 +48,7 @@
 
       <section>
         <DxpTimeZoneSwitcher @timeZoneUpdated="timeZoneUpdated" />
-        <LanguageSwitcher />
+        <DxpLanguageSwitcher />
       </section>
     </ion-content>
   </ion-page>
