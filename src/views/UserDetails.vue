@@ -376,6 +376,7 @@ import {
   IonBadge,
   IonButton,
   IonCard,
+  IonCardContent,
   IonCardHeader,
   IonCardTitle,
   IonContent,
@@ -438,6 +439,7 @@ export default defineComponent({
     IonBadge,
     IonButton,
     IonCard,
+    IonCardContent,
     IonCardHeader,
     IonCardTitle,
     IonContent,
@@ -1080,10 +1082,38 @@ export default defineComponent({
 
       emitter.emit('dismissLoader')
     },
+   
+    async validateImageType(file: any, validImageTypes: string[]): Promise<boolean> {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = document.createElement('img');
+          img.onload = () => {
+            if (validImageTypes.includes(file.type)) {
+              resolve(true);
+            }
+          };
+          img.onerror = () => {
+            reject(false);
+          };
+          img.src = reader.result as string;
+        };
+        reader.readAsDataURL(file);
+      });
+    },
+
     async uploadImage(event: any) {
       const selectedFile = event.target.files[0];
+      if (!selectedFile) {
+        return;
+      }
 
-      if(!selectedFile) {
+      // Validate the file type
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
+      try {
+        await this.validateImageType(selectedFile, validImageTypes);
+      } catch (error) {
+        showToast(translate("Please upload a valid image file"));
         return;
       }
 
@@ -1093,8 +1123,7 @@ export default defineComponent({
       formData.append('uploadedFile', selectedFile, selectedFile?.name);
       try {
         const resp = await UserService.uploadPartyImage(formData);
-
-        if(!hasError(resp)) {
+        if (!hasError(resp)) {
           showToast(translate("Image uploaded successfully."))
           await this.fetchProfileImage()
         } else {
@@ -1105,6 +1134,7 @@ export default defineComponent({
         logger.error('Error uploading image:', error);
       }
     },
+
     async fetchProfileImage() {
       const profileImage = await UserService.fetchLogoImageForParty(this.selectedUser.partyId)
 
