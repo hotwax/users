@@ -14,7 +14,7 @@
           {{ translate("Fetching user details") }}
         </ion-item>
       </div>
-      <div v-else-if="!isValid" class="empty-state">
+      <div v-else-if="Object.keys(selectedUser).length === 0" class="empty-state">
         <p>{{ translate("User not found") }}</p>
       </div>
       <main v-else>
@@ -504,14 +504,12 @@ export default defineComponent({
       isUserFetched: false,
       showPassword: false,
       shopifyShopsForProductStore: [] as any,
-      isValid: false
     }
   },
  
   async ionViewWillEnter() {
     this.isUserFetched = false;
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
-    this.isValid = Object.keys(this.selectedUser).length > 0;
     await this.fetchProfileImage()
     await Promise.all([this.store.dispatch('util/getSecurityGroups'), this.store.dispatch('util/fetchShopifyShopConfigs')]);
     
