@@ -230,9 +230,6 @@ const actions: ActionTree<UserState, RootState> = {
         throw userResp.data
       }
     } catch (error) {
-      if (hasError(userResp)) {
-        showToast(translate('Something went wrong.'));
-      }
       logger.error(error)
     }
 
@@ -283,7 +280,6 @@ const actions: ActionTree<UserState, RootState> = {
         selectedUser['createdByUserPartyId'] = resp.data.docs[0].partyId
       }
     }
-
     commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
   },
 

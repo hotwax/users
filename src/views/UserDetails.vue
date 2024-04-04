@@ -8,7 +8,16 @@
     </ion-header>
 
     <ion-content>
-      <main>
+      <div v-if="isLoading" class="empty-state">
+        <ion-item lines="none">
+          <ion-spinner color="secondary" name="crescent" slot="start" />
+          {{ translate("Fetching user details") }}
+        </ion-item>
+      </div>
+      <div v-else-if="!isValid" class="empty-state">
+        <p>{{ translate("User not found") }}</p>
+      </div>
+      <main v-else>
         <section class="user-details">
           <ion-card v-if="isUserFetched || Object.keys(selectedUser).length" class="profile">
             <div>
@@ -494,12 +503,18 @@ export default defineComponent({
       imageUrl: "",
       isUserFetched: false,
       showPassword: false,
-      shopifyShopsForProductStore: [] as any
+      shopifyShopsForProductStore: [] as any,
+      isValid: false,
+      isLoading: false
     }
   },
+ 
   async ionViewWillEnter() {
-    this.isUserFetched = false
+    this.isUserFetched = false;
+    this.isLoading = true;
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
+    this.isValid = Object.keys(this.selectedUser).length > 0;
+    this.isLoading = false;
     await this.fetchProfileImage()
     await Promise.all([this.store.dispatch('util/getSecurityGroups'), this.store.dispatch('util/fetchShopifyShopConfigs')]);
     
