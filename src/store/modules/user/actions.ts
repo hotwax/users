@@ -282,7 +282,6 @@ const actions: ActionTree<UserState, RootState> = {
     }
     commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
   },
-
   updateSelectedUser({ commit }, selectedUser) {
     commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
   },
