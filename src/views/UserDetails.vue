@@ -8,7 +8,16 @@
     </ion-header>
 
     <ion-content>
-      <main>
+      <div v-if="!isUserFetched" class="empty-state">
+        <ion-item lines="none">
+          <ion-spinner color="secondary" name="crescent" slot="start" />
+          {{ translate("Fetching user details") }}
+        </ion-item>
+      </div>
+      <div v-else-if="!Object.keys(selectedUser).length" class="empty-state">
+        <p>{{ translate("User not found") }}</p>
+      </div>
+      <main v-else>
         <section class="user-details">
           <ion-card v-if="isUserFetched || Object.keys(selectedUser).length" class="profile">
             <div>
@@ -497,6 +506,7 @@ export default defineComponent({
       shopifyShopsForProductStore: [] as any
     }
   },
+ 
   async ionViewWillEnter() {
     this.isUserFetched = false
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
