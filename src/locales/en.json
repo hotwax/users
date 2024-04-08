@@ -145,6 +145,7 @@
   "Phone number updated successfully.": "Phone number updated successfully.",
   "Please add a to create a user login": "Please add a {missingFields} to create a user login",
   "Please enter a value": "Please enter a value",
+  "Please upload a valid image file": "Please upload a valid image file",
   "Proceed": "Proceed",
   "Product stores": "Product stores",
   "Quick Setup": "Quick Setup",
