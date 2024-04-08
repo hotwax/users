@@ -2,7 +2,7 @@
   "name": "users",
   "version": "1.7.0",
   "private": true,
-  "description": "User Management App",
+  "description": "Users",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
