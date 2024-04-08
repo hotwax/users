@@ -13,22 +13,24 @@
   <ion-content>
     <ion-list v-if="!isFacilityLogin">
       <ion-item v-for="facility in facilities" :key="facility.facilityId">
-        <ion-label>
-          {{ facility.facilityName }}
-          <p>{{ facility.facilityId }}</p>
-        </ion-label>
-        <ion-checkbox slot="end" :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)" />
+        <ion-checkbox :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)">
+          <ion-label>
+            {{ facility.facilityName }}
+            <p>{{ facility.facilityId }}</p>
+          </ion-label>
+        </ion-checkbox>
       </ion-item>
     </ion-list>
 
     <ion-list v-else>
       <ion-radio-group :value="selectedFacilities[0]?.facilityId" @ionChange="updateSelectedFacility($event)">
         <ion-item v-for="facility in facilities" :key="facility.facilityId">
-          <ion-label>
-            {{ facility.facilityName }}
-            <p>{{ facility.facilityId }}</p>
-          </ion-label>
-          <ion-radio slot="end" :value="facility.facilityId"></ion-radio>
+          <ion-radio :value="facility.facilityId">
+            <ion-label>
+              {{ facility.facilityName }}
+              <p>{{ facility.facilityId }}</p>
+            </ion-label>
+          </ion-radio>
         </ion-item>
       </ion-radio-group>
     </ion-list>

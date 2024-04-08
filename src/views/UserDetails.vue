@@ -49,8 +49,9 @@
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
-                <ion-label>{{ translate("Disable user") }}</ion-label>
-                <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click="updateUserStatus($event)" slot="end" />
+                <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click.prevent="updateUserStatus($event)">
+                  {{ translate("Disable user") }}
+                </ion-toggle>
               </ion-item>
             </div>
             <div v-else>
@@ -64,8 +65,9 @@
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
-                <ion-label>{{ translate("Disable user") }}</ion-label>
-                <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click="updateUserStatus($event)" slot="end" />
+                <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click.prevent="updateUserStatus($event)">
+                  {{ translate("Disable user") }}
+                </ion-toggle>
               </ion-item>
             </div>
           </ion-card>
@@ -121,8 +123,9 @@
                   <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
                 </ion-item>
                 <ion-item>
-                  <ion-label>{{ translate("Block login") }}</ion-label>
-                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" slot="end" @click="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'" />
+                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'">
+                    {{ translate("Block login") }}
+                  </ion-toggle>
                 </ion-item>
               </ion-list>
               <ion-button @click="resetPassword()" fill="outline" color="warning" expand="block">
@@ -132,17 +135,28 @@
             <template v-else>
               <ion-list>
                 <ion-item lines="full">
-                  <ion-label class="ion-text-wrap" position="fixed">{{ translate("Username") }} <ion-text color="danger">*</ion-text></ion-label>
-                  <ion-input name="username" v-model="username" id="username" required />
+                  <ion-input label-placement="fixed" name="username" v-model="username" id="username">
+                    <div slot="label">{{ translate("Username") }} <ion-text color="danger">*</ion-text></div>
+                  </ion-input>
                 </ion-item>
                 <ion-item ref="password">
-                  <ion-label class="ion-text-wrap" position="fixed">{{ translate("Password") }} <ion-text color="danger">*</ion-text></ion-label>
-                  <ion-input :placeholder="translate('Default password')" name="password" v-model="password" id="password" :type="showPassword ? 'text' : 'password'" @ionInput="validatePassword" @ionBlur="markPasswordTouched" required />
-                  <ion-button @click="showPassword = !showPassword" slot="end" fill="clear">
-                    <ion-icon :icon="showPassword ? eyeOutline : eyeOffOutline" slot="icon-only" />
-                  </ion-button>
-                  <ion-note slot="helper">{{ translate('will be asked to reset their password when they login', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName }) }}</ion-note>
-                  <ion-note slot="error">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
+                  <ion-input 
+                    label-placement="fixed" 
+                    :placeholder="translate('Default password')" 
+                    name="password" 
+                    v-model="password" 
+                    id="password"
+                    :type="showPassword ? 'text' : 'password'" 
+                    @ionInput="validatePassword" 
+                    @ionBlur="markPasswordTouched"
+                    :helper-text="translate('will be asked to reset their password when they login', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName })"
+                    :error-text="translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.')"
+                  >
+                    <div slot="label">{{ translate("Password") }} <ion-text color="danger">*</ion-text></div>
+                    <ion-button @click="showPassword = !showPassword" slot="end" fill="clear">
+                      <ion-icon :icon="showPassword ? eyeOutline : eyeOffOutline" slot="icon-only" />
+                    </ion-button>
+                  </ion-input>
                 </ion-item>
               </ion-list>
               <ion-button @click="createNewUserLogin()" fill="outline" expand="block">
@@ -244,11 +258,12 @@
                 {{ translate('Clearance') }}
               </ion-card-title>
             </ion-card-header>
-            <ion-item>
-              <ion-icon :icon="businessOutline" slot="start" />
-              <ion-label>{{ translate('Security Group') }}</ion-label>        
-              <ion-label v-if="!hasPermission(Actions.APP_SUPER_USER) && selectedUser.securityGroup?.groupId === 'SUPER'" slot="end">{{ translate('Super') }}</ion-label>
-              <ion-select v-else interface="popover" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
+            <ion-item lines="none">
+              <template v-if="!hasPermission(Actions.APP_SUPER_USER) && selectedUser.securityGroup?.groupId === 'SUPER'">
+                <ion-label>{{ translate('Security Group') }}</ion-label>        
+                <ion-label slot="end">{{ translate('Super') }}</ion-label>
+              </template>
+              <ion-select v-else :label="translate('Security Group')" interface="popover" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
                 <ion-select-option v-for="securityGroup in getSecurityGroups(securityGroups)" :key="securityGroup.groupId" :value="securityGroup.groupId">
                   {{ securityGroup.groupName }}
                 </ion-select-option>
@@ -303,8 +318,9 @@
             </ion-card-header>
             <ion-list>
               <ion-item>
-                <ion-label>{{ translate("Show as picker") }}</ion-label>
-                <ion-toggle slot="end" :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG) || selectedUser.securityGroup.groupId === 'INTEGRATION'" @click="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true" />
+                <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)" @click.prevent="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true">
+                  {{ translate("Show as picker") }}
+                </ion-toggle>
               </ion-item>
               <ion-item lines="none" button detail :disabled="!hasPermission(Actions.APP_UPDT_FULFILLMENT_FACILITY) || selectedUser.securityGroup.groupId === 'INTEGRATION'" @click="selectFacility()">
                 <ion-label>{{  getUserFacilities().length === 1 ? translate('Added to 1 facility') : translate('Added to facilities', { count: getUserFacilities().length }) }}</ion-label>
@@ -338,17 +354,15 @@
           </ion-card-content>
             <ion-list>
               <ion-item>
-                <ion-label>{{ translate('Product store') }}</ion-label>        
-                <ion-select interface="popover" :value="selectedUser.favoriteProductStorePref?.userPrefValue ? selectedUser.favoriteProductStorePref?.userPrefValue : ''" @ionChange="updateFavoriteProductStore($event)">
+                <ion-select :label="translate('Product store')" interface="popover" :value="selectedUser.favoriteProductStorePref?.userPrefValue ? selectedUser.favoriteProductStorePref?.userPrefValue : ''" @ionChange="updateFavoriteProductStore($event)">
                   <ion-select-option v-for="productStore in productStores" :key="productStore.productStoreId" :value="productStore.productStoreId">
                     {{ productStore.storeName }}
                   </ion-select-option>
                   <ion-select-option value="">{{ translate("None") }}</ion-select-option>
                 </ion-select>
               </ion-item>
-              <ion-item>
-                <ion-label>{{ translate('Shopify shop') }}</ion-label>        
-                <ion-select interface="popover" :value="selectedUser.favoriteShopifyShopPref?.userPrefValue ? selectedUser.favoriteShopifyShopPref?.userPrefValue : ''" @ionChange="updateFavoriteShopifyShop($event)">
+              <ion-item lines="none">
+                <ion-select :label="translate('Shopify shop')" interface="popover" :value="selectedUser.favoriteShopifyShopPref?.userPrefValue ? selectedUser.favoriteShopifyShopPref?.userPrefValue : ''" @ionChange="updateFavoriteShopifyShop($event)">
                   <ion-select-option v-for="shopifyShop in shopifyShopsForProductStore" :key="shopifyShop.shopId" :value="shopifyShop.shopId">
                     {{ shopifyShop.name }}
                   </ion-select-option>
@@ -396,7 +410,6 @@ import {
   IonList,
   IonListHeader,
   IonLabel,
-  IonNote,
   IonPage,
   IonSelect,
   IonSelectOption,
@@ -459,7 +472,6 @@ export default defineComponent({
     IonLabel,
     IonList,
     IonListHeader,
-    IonNote,
     IonPage,
     IonSelect,
     IonSelectOption,

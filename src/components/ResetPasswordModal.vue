@@ -17,21 +17,37 @@
           {{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}
         </p>
       </ion-item>
-      <ion-item lines="full" ref="password">
-        <ion-label class="ion-text-wrap" position="fixed">{{ translate("New password") }}</ion-label>
-        <ion-input @keyup="validatePassword" @ionBlur="markPasswordTouched" :placeholder="translate('Enter password')" name="password" v-model="newPassword" id="newPassword" :type="showNewPassword ? 'text' : 'password'" required />
+      <ion-item lines="none">
+        <ion-input 
+          ref="password"
+          :label="translate('New password')" 
+          @keyup="validatePassword" 
+          @ionBlur="markPasswordTouched" 
+          :placeholder="translate('Enter password')" 
+          name="password" 
+          v-model="newPassword" 
+          id="newPassword" 
+          :type="showNewPassword ? 'text' : 'password'"
+          :error-text="translate('Password requirements not fulfilled.')"/>
         <!-- <ion-button fill="clear" @click="showNewPassword = !showNewPassword">
           <ion-icon :icon="showNewPassword ? eyeOutline : eyeOffOutline"/>
         </ion-button> -->
-        <ion-note slot="error">{{ translate('Password requirements not fulfilled.') }}</ion-note>
       </ion-item>
-      <ion-item ref="confirmPassword">
-        <ion-label class="ion-text-wrap" position="fixed">{{ translate("Verify password") }}</ion-label>
-        <ion-input @keyup="validateConfirmPassword()" @ionBlur="markConfirmPasswordTouched" :placeholder="translate('Confirm password')" name="confirmPassword" v-model="confirmPassword" id="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" required />
+      <ion-item lines="none">
+        <ion-input 
+          ref="confirmPassword" 
+          :label="translate('Verify password')" 
+          @keyup="validateConfirmPassword()" 
+          @ionBlur="markConfirmPasswordTouched" 
+          :placeholder="translate('Confirm password')" 
+          name="confirmPassword" 
+          v-model="confirmPassword" 
+          id="confirmPassword" 
+          :type="showConfirmPassword ? 'text' : 'password'"
+          :error-text="translate('Passwords do not match.')"/>
         <!-- <ion-button fill="clear" @click="showConfirmPassword = !showConfirmPassword">
           <ion-icon :icon="showConfirmPassword ? eyeOutline : eyeOffOutline"/>
         </ion-button> -->
-        <ion-note slot="error">{{ translate('Passwords do not match.') }}</ion-note>
       </ion-item>
     </ion-list>
 
@@ -65,7 +81,6 @@ import {
   IonItem,
   IonLabel,
   IonList,
-  IonNote,
   IonTitle,
   IonToolbar,
   modalController
@@ -100,7 +115,6 @@ export default defineComponent({
     IonItem,
     IonLabel,
     IonList,
-    IonNote,
     IonTitle,
     IonToolbar,
   },

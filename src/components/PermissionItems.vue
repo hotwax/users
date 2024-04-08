@@ -3,8 +3,9 @@
     <ion-searchbar :placeholder="translate('Search permissions')" v-model="query.queryString" @ionInput="updateQuery()" />
     <ion-item lines="none">
       <ion-icon :icon="shieldCheckmarkOutline" slot="start" />
-      <ion-label>{{ translate("Only selected permissions") }}</ion-label>
-      <ion-toggle slot="end" v-model="query.showSelected" @ionChange="updateQuery()"/>
+      <ion-toggle v-model="query.showSelected" @ionChange="updateQuery()">
+        {{ translate("Only selected permissions") }}
+      </ion-toggle>
     </ion-item>
   </div>
 
@@ -164,6 +165,7 @@ export default defineComponent({
 <style scoped>
 ion-card-header {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }

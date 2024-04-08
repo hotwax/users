@@ -276,4 +276,8 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
 }
+
+.section-header>ion-item {
+  width: 50%;
+}
 </style>

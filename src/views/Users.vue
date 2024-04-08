@@ -21,16 +21,14 @@
           <ion-list>
             <ion-item lines="none">
               <ion-icon :icon="idCardOutline" slot="start" />
-              <ion-label>{{ translate("Clearance") }}</ion-label>
-              <ion-select interface="popover" v-model="query.securityGroup" @ionChange="updateQuery()">
+              <ion-select :label="translate('Clearance')" interface="popover" v-model="query.securityGroup" @ionChange="updateQuery()">
                 <ion-select-option value="">{{ translate("All") }}</ion-select-option>
                 <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName }}</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item lines="none">
               <ion-icon :icon="toggleOutline" slot="start" />
-              <ion-label>{{ translate("Login") }}</ion-label>
-              <ion-select interface="popover" v-model="query.status" @ionChange="updateQuery()">
+              <ion-select :label="translate('Login')" interface="popover" v-model="query.status" @ionChange="updateQuery()">
                 <ion-select-option value="">{{ translate("All") }}</ion-select-option>
                 <ion-select-option value="Y">{{ translate("Active") }}</ion-select-option>
                 <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
@@ -38,10 +36,7 @@
             </ion-item>
             <ion-item>
               <ion-icon slot="start" :icon="cloudyNightOutline"/>
-              <ion-label>
-                {{ translate("Hide disabled users") }}
-              </ion-label>
-              <ion-toggle v-model="query.hideDisabledUser" @ionChange="updateQuery()" slot="end" />
+              <ion-toggle v-model="query.hideDisabledUser" @ionChange="updateQuery()" label-placement="start" justify="space-between">{{ translate("Hide disabled users") }}</ion-toggle>
             </ion-item>
           </ion-list>
         </aside>
@@ -322,4 +317,10 @@ export default defineComponent({
 .list-item {
   --columns-desktop: 4;
 }
+
+/* Added width property as after updating to ionic7 min-width is getting applied on ion-label inside ion-item
+  which results in distorted label text and thus reduced ion-item width */
+  .list-item > ion-item {
+    width: 100%;
+  }
 </style>

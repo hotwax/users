@@ -13,12 +13,10 @@
   <ion-content>
     <form @keyup.enter="updateSecurityGroup()">
       <ion-item>
-        <ion-label>{{ translate("Name") }}</ion-label>
-        <ion-input v-model="group.groupName" />
+        <ion-input :label="translate('Name')" v-model="group.groupName" />
       </ion-item>
       <ion-item>
-        <ion-label>{{ translate("Description") }}</ion-label>
-        <ion-textarea v-model="group.description" />
+        <ion-textarea :label="translate('Description')" v-model="group.description" />
       </ion-item>
     </form>
   </ion-content>
@@ -41,7 +39,6 @@ import {
   IonIcon,
   IonInput,
   IonItem,
-  IonLabel,
   IonTextarea,
   IonTitle,
   IonToolbar,
@@ -68,7 +65,6 @@ export default defineComponent({
     IonIcon,
     IonInput,
     IonItem,
-    IonLabel,
     IonTextarea,
     IonTitle,
     IonToolbar
