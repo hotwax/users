@@ -89,7 +89,7 @@ export default defineComponent({
       await this.store.dispatch('permission/updateQuery', this.query)
     },
     async updatePermissionAssociation(event: any, permission: any) {
-      event.stopImmediatePropagation();
+      event.stopPropagation();
 
       let resp = {} as any;
       const payload = {
