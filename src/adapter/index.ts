@@ -8,7 +8,9 @@ import {
   resetConfig,
   setUserLocale,
   updateToken,
-  updateInstanceUrl
+  updateInstanceUrl,
+  setUserTimeZone,
+  getAvailableTimeZones
 } from '@hotwax/oms-api'
 
 export {
@@ -21,5 +23,7 @@ export {
   resetConfig,
   setUserLocale,
   updateToken,
-  updateInstanceUrl
+  updateInstanceUrl,
+  setUserTimeZone,
+  getAvailableTimeZones
 }
