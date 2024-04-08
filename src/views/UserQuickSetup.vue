@@ -10,41 +10,47 @@
       <main>
         <ion-item class="ion-margin-bottom" v-if="!isFacilityLogin()">
           <ion-icon slot="start" :icon="documentTextOutline"/>
-          <ion-label>
-            {{ translate("Select template") }}
-          </ion-label>
-          <ion-select interface="popover" v-model="userTemplateId" @ionChange="updateUserTemplate">
+          <ion-select :label="translate('Select template')" interface="popover" v-model="userTemplateId" @ionChange="updateUserTemplate">
             <ion-select-option v-for="userTemplate in userTemplates" :key="userTemplate.templateId" :value="userTemplate.templateId">{{ userTemplate.templateName }}</ion-select-option>
           </ion-select>
         </ion-item>
         <template v-if="(selectedUserTemplate && selectedUserTemplate.isUserLoginRequired || isFacilityLogin())">
           <ion-item>
-            <ion-label position="floating">{{ translate('Username') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.userLoginId"></ion-input>
+            <ion-input label-placement="floating" v-model="formData.userLoginId">
+              <div slot="label">{{ translate('Username') }} <ion-text color="danger">*</ion-text></div>
+            </ion-input>
           </ion-item>
-          <ion-item ref="password">
-            <ion-label position="floating">{{ translate('Password') }} <ion-text color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.currentPassword" :type="showPassword ? 'text' : 'password'" autocomplete="new-password" @ionInput="validatePassword" @ionBlur="markPasswordTouched"></ion-input>
-            <ion-button @click="showPassword = !showPassword" slot="end" fill="clear">
-              <ion-icon :icon="showPassword ? eyeOutline : eyeOffOutline" slot="icon-only" />
-            </ion-button>
-            <ion-note slot="helper">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
-            <ion-note slot="error">{{ translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.') }}</ion-note>
+          <ion-item lines="none">
+            <ion-input 
+              ref="password"
+              label-placement="floating" 
+              v-model="formData.currentPassword" 
+              :type="showPassword ? 'text' : 'password'"
+              autocomplete="new-password" 
+              @ionInput="validatePassword" 
+              @ionBlur="markPasswordTouched"
+              :helper-text="translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.')"
+              :error-text="translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.')"
+            >
+              <div slot="label">{{ translate("Password") }} <ion-text color="danger">*</ion-text></div>
+              <ion-button @click="showPassword = !showPassword" slot="end" fill="clear">
+                <ion-icon :icon="showPassword ? eyeOutline : eyeOffOutline" slot="icon-only" />
+              </ion-button>
+            </ion-input>
           </ion-item>
           <ion-item>
-            <ion-label position="floating">{{ isFacilityLogin() ? translate('Reset password email') : translate('Email') }} <ion-text v-if="selectedUserTemplate.templateId !== 'INTEGRATION'" color="danger">*</ion-text></ion-label>
-            <ion-input v-model="formData.emailAddress"></ion-input>
+            <ion-input label-placement="floating" v-model="formData.emailAddress">
+              <div slot="label">{{ isFacilityLogin() ? translate('Reset password email') : translate('Email') }} <ion-text v-if="selectedUserTemplate.templateId !== 'INTEGRATION'" color="danger">*</ion-text></div>
+            </ion-input>
           </ion-item>
           <ion-item ion-margin-top>
-            <ion-label>
+            <ion-toggle :disabled="selectedUserTemplate.isPasswordChangeDisabled" :checked="formData.requirePasswordChange" label-placement="start" justify="space-between">
               {{ translate("Require password reset on login") }}
-            </ion-label>
-            <ion-toggle :disabled="selectedUserTemplate.isPasswordChangeDisabled" v-model="formData.requirePasswordChange" slot="end" />
+            </ion-toggle>
           </ion-item>
         </template>
         <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isEmployeeIdRequired && !isFacilityLogin()">
-          <ion-label position="floating">{{ translate('Employee ID') }}</ion-label>
-          <ion-input v-model="formData.externalId"></ion-input>
+          <ion-input :label="translate('Employee ID')" label-placement="floating" v-model="formData.externalId"></ion-input>
         </ion-item>
 
         <ion-item v-if="selectedUserTemplate && selectedUserTemplate.isProductStoreRequired && !isFacilityLogin()">
@@ -65,11 +71,16 @@
             </ion-button>
           </ion-list-header>
           <ion-item v-for="facility in facilities" :key="facility.facilityId">
-            <ion-label>
+            <ion-checkbox v-if="!isFacilityLogin()" :checked="true" @ionChange="toggleFacilitySelection(facility)">
+              <ion-label>
+                {{ facility.facilityName }}
+                <p>{{ facility.facilityId }}</p>
+              </ion-label>
+            </ion-checkbox>
+            <ion-label v-else>
               {{ facility.facilityName }}
               <p>{{ facility.facilityId }}</p>
             </ion-label>
-            <ion-checkbox v-if="!isFacilityLogin" slot="end" :checked="true" @ionChange="toggleFacilitySelection(facility)" />
           </ion-item>
         </ion-list>
 
@@ -103,7 +114,6 @@ import {
   IonLabel,
   IonList,
   IonListHeader,
-  IonNote,
   IonPage,
   IonSelect,
   IonSelectOption,
@@ -146,7 +156,6 @@ export default defineComponent({
     IonLabel,
     IonList,
     IonListHeader,
-    IonNote,
     IonPage,
     IonSelect,
     IonSelectOption,

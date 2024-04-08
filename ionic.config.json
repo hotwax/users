@@ -1,5 +1,5 @@
 {
-  "name": "user-management",
+  "name": "users",
   "integrations": {
     "capacitor": {}
   },

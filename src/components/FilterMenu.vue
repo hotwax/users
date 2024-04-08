@@ -10,16 +10,14 @@
       <ion-list>
         <ion-item lines="none">
           <ion-icon :icon="idCardOutline" slot="start" />
-          <ion-label>{{ translate("Clearance") }}</ion-label>
-          <ion-select interface="popover" v-model="query.securityGroup" @ionChange="closeMenu">
+          <ion-select :label="translate('Clearance')" interface="popover" v-model="query.securityGroup" @ionChange="closeMenu">
             <ion-select-option value="">{{ translate("All") }}</ion-select-option>
             <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName }}</ion-select-option>
           </ion-select>
         </ion-item>
         <ion-item lines="none">
           <ion-icon :icon="toggleOutline" slot="start" />
-          <ion-label>{{ translate("Status") }}</ion-label>
-          <ion-select interface="popover" v-model="query.status" @ionChange="closeMenu">
+          <ion-select :label="translate('Status')" interface="popover" v-model="query.status" @ionChange="closeMenu">
             <ion-select-option value="">{{ translate("All") }}</ion-select-option>
             <ion-select-option value="Y">{{ translate("Active") }}</ion-select-option>
             <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
@@ -27,10 +25,9 @@
         </ion-item>
         <ion-item>
           <ion-icon slot="start" :icon="cloudyNightOutline"/>
-          <ion-label>
+          <ion-toggle v-model="query.hideDisabledUser" @ionChange="closeMenu">
             {{ translate("Hide disabled users") }}
-          </ion-label>
-          <ion-toggle v-model="query.hideDisabledUser" @ionChange="closeMenu" slot="end" />
+          </ion-toggle>
         </ion-item>
       </ion-list>
     </ion-content>
@@ -43,7 +40,6 @@ import {
   IonHeader,
   IonIcon,
   IonItem,
-  IonLabel,
   IonList,
   IonMenu,
   IonTitle,
@@ -64,7 +60,6 @@ export default defineComponent({
     IonHeader,
     IonIcon,
     IonItem,
-    IonLabel,
     IonList,
     IonMenu,
     IonTitle,
