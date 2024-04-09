@@ -123,7 +123,7 @@
                   <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
                 </ion-item>
                 <ion-item>
-                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'">
+                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click.prevent="updateUserLoginStatus($event)" :checked="blockLoginChecked || selectedUser.statusId === 'PARTY_ENABLED'">
                     {{ translate("Block login") }}
                   </ion-toggle>
                 </ion-item>
@@ -517,7 +517,8 @@ export default defineComponent({
       imageUrl: "",
       isUserFetched: false,
       showPassword: false,
-      shopifyShopsForProductStore: [] as any
+      shopifyShopsForProductStore: [] as any,
+      blockLoginChecked: false
     }
   },
  
@@ -773,6 +774,7 @@ export default defineComponent({
                 showToast(translate('User login status updated successfully.'))
                 // updating toggle state on success
                 event.target.checked = isChecked
+                this.blockLoginChecked = isChecked;
               } else {
                 throw resp.data
               }
@@ -1094,6 +1096,9 @@ export default defineComponent({
           showToast(translate("User status updated successfully."))
           await this.store.dispatch("user/updateSelectedUser", { ...this.selectedUser, ...payload });
           event.target.checked = isChecked
+          if (isChecked) {
+            this.blockLoginChecked = true;
+          } 
         }else {
           throw resp.data;
         }
