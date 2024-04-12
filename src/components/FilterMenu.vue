@@ -12,7 +12,7 @@
           <ion-icon :icon="idCardOutline" slot="start" />
           <ion-select :label="translate('Clearance')" interface="popover" v-model="query.securityGroup" @ionChange="closeMenu">
             <ion-select-option value="">{{ translate("All") }}</ion-select-option>
-            <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName }}</ion-select-option>
+            <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName || securityGroup.groupId }}</ion-select-option>
           </ion-select>
         </ion-item>
         <ion-item lines="none">

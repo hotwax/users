@@ -18,7 +18,7 @@
             <ion-icon slot="start" :icon="businessOutline"/>
             <ion-select interface="popover" v-model="formData.facilityId" @ionChange="updateGroupName">
               <div slot="label">{{ translate("Select facility") }} <ion-text color="danger">*</ion-text></div>
-              <ion-select-option v-for="facility in (facilities ? facilities : [])" :key="facility.facilityId" :value="facility.facilityId">{{ facility.facilityName }}</ion-select-option>
+              <ion-select-option v-for="facility in (facilities ? facilities : [])" :key="facility.facilityId" :value="facility.facilityId">{{ facility.facilityName || facility.facilityId }}</ion-select-option>
             </ion-select>
           </ion-item>
           <ion-item>

@@ -23,7 +23,7 @@
               <ion-icon :icon="idCardOutline" slot="start" />
               <ion-select :label="translate('Clearance')" interface="popover" v-model="query.securityGroup" @ionChange="updateQuery()">
                 <ion-select-option value="">{{ translate("All") }}</ion-select-option>
-                <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName }}</ion-select-option>
+                <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName || securityGroup.groupId }}</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item lines="none">
@@ -65,7 +65,7 @@
             <ion-item lines="none">
               <div class="tablet">
                 <ion-chip outline v-if="currentUser.securityGroupId">
-                  <ion-label>{{ currentUser.securityGroupName }}</ion-label>
+                  <ion-label>{{ currentUser.securityGroupName || currentUser.securityGroupId }}</ion-label>
                 </ion-chip>
                 <ion-label v-else>
                   {{ '-' }}
@@ -95,7 +95,7 @@
 
               <div class="tablet">
                 <ion-chip outline v-if="user.securityGroupId">
-                  <ion-label>{{ user.securityGroupName }}</ion-label>
+                  <ion-label>{{ user.securityGroupName || user.securityGroupId }}</ion-label>
                 </ion-chip>
                 <ion-label v-else>
                   {{ '-' }}
