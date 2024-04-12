@@ -123,7 +123,7 @@
                   <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
                 </ion-item>
                 <ion-item>
-                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click.prevent="updateUserLoginStatus($event)" :checked="blockLoginChecked || selectedUser.statusId === 'PARTY_ENABLED'">
+                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click.prevent="updateUserLoginStatus($event)" :checked="blockLoginChecked">
                     {{ translate("Block login") }}
                   </ion-toggle>
                 </ion-item>
