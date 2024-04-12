@@ -356,7 +356,7 @@
               <ion-item>
                 <ion-select :label="translate('Product store')" interface="popover" :value="selectedUser.favoriteProductStorePref?.userPrefValue ? selectedUser.favoriteProductStorePref?.userPrefValue : ''" @ionChange="updateFavoriteProductStore($event)">
                   <ion-select-option v-for="productStore in productStores" :key="productStore.productStoreId" :value="productStore.productStoreId">
-                    {{ productStore.storeName }}
+                    {{ productStore.storeName || productStore.productStoreId}}
                   </ion-select-option>
                   <ion-select-option value="">{{ translate("None") }}</ion-select-option>
                 </ion-select>
@@ -364,7 +364,7 @@
               <ion-item lines="none">
                 <ion-select :label="translate('Shopify shop')" interface="popover" :value="selectedUser.favoriteShopifyShopPref?.userPrefValue ? selectedUser.favoriteShopifyShopPref?.userPrefValue : ''" @ionChange="updateFavoriteShopifyShop($event)">
                   <ion-select-option v-for="shopifyShop in shopifyShopsForProductStore" :key="shopifyShop.shopId" :value="shopifyShop.shopId">
-                    {{ shopifyShop.name }}
+                    {{ shopifyShop.name || shopifyShop.shopId }}
                   </ion-select-option>
                   <ion-select-option value="">{{ translate("None") }}</ion-select-option>
                 </ion-select>

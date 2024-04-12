@@ -1,7 +1,7 @@
 <template>
   <ion-content>
     <ion-list>
-      <ion-list-header>{{ productStore.storeName }}</ion-list-header>
+      <ion-list-header>{{ productStore.storeName || productStore.productStoreId }}</ion-list-header>
       <ion-item button @click="selectProductStoreRole()">
         {{ translate("Edit") }}
       </ion-item>
