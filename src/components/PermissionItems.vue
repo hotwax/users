@@ -13,7 +13,7 @@
     <div v-for="(group, groupId) in filteredPermissions" :key="groupId">
       <ion-item-divider v-if="group.permissions.length" class="ion-margin-vertical" color="light">
         <ion-label>
-          {{ group.groupName }}
+          {{ group.groupName || group.groupId }}
         </ion-label>
       </ion-item-divider>
 
