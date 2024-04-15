@@ -63,7 +63,7 @@
             </div>
 
             <ion-item lines="none">
-              <div class="tablet">
+              <div class="tablet" slot="end">
                 <ion-chip outline v-if="currentUser.securityGroupId">
                   <ion-label>{{ currentUser.securityGroupName || currentUser.securityGroupId }}</ion-label>
                 </ion-chip>
