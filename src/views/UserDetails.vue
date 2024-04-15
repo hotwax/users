@@ -123,7 +123,7 @@
                   <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
                 </ion-item>
                 <ion-item>
-                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click.prevent="updateUserLoginStatus($event)" :checked="blockLoginChecked">
+                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click.prevent="updateUserLoginStatus($event)" :checked="blockLoginChecked || selectedUser.enabled == 'N'">
                     {{ translate("Block login") }}
                   </ion-toggle>
                 </ion-item>
@@ -1097,7 +1097,12 @@ export default defineComponent({
           await this.store.dispatch("user/updateSelectedUser", { ...this.selectedUser, ...payload });
           event.target.checked = isChecked
           if (isChecked) {
-            this.blockLoginChecked = true;
+            this.blockLoginChecked = true;      
+              await UserService.updateUserLoginStatus({
+                enabled: 'N',
+                partyId: this.partyId,
+                userLoginId: this.selectedUser.userLoginId
+            });   
           } 
         }else {
           throw resp.data;
