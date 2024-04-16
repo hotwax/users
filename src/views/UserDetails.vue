@@ -355,7 +355,7 @@
             <ion-list>
               <ion-item>
                 <ion-select :label="translate('Product store')" interface="popover" :value="selectedUser.favoriteProductStorePref?.userPrefValue ? selectedUser.favoriteProductStorePref?.userPrefValue : ''" @ionChange="updateFavoriteProductStore($event)" :disabled="!selectedUser?.userLoginId">
-                  <ion-select-option v-for="productStore in productStores" :key="productStore.productStoreId" :value="productStore.productStoreId">
+                  <ion-select-option v-for="productStore in userProductStores" :key="productStore.productStoreId" :value="productStore.productStoreId">
                     {{ productStore.storeName || productStore.productStoreId}}
                   </ion-select-option>
                   <ion-select-option value="">{{ translate("None") }}</ion-select-option>
@@ -492,7 +492,6 @@ export default defineComponent({
       securityGroups: 'util/getSecurityGroups',
       userProfile: 'user/getUserProfile',
       baseUrl: 'user/getBaseUrl',
-      productStores: 'util/getProductStores',
       shopifyShops: 'util/getShopifyShops'
     })
   },
