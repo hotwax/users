@@ -122,6 +122,7 @@ export default defineComponent({
   },
   async mounted() {
     await this.store.dispatch('util/getSecurityGroups')
+    await this.store.dispatch('util/getClassificationSecurityGroups')
     if(!this.allPermissions.length) await this.store.dispatch('permission/getAllPermissions')
     if(!Object.keys(this.permissionsByClassificationGroups).length) await this.store.dispatch('permission/getPermissionsByClassificationGroups')
     if(this.currentGroup.groupId) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
@@ -136,7 +137,7 @@ export default defineComponent({
       await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
       await this.store.dispatch('permission/checkAssociated')
       await this.getUsersCount()
-      await this.store.dispatch('permission/updateQuery', {queryString: '', showAllSelected: false})
+      await this.store.dispatch('permission/updateQuery', {queryString: '', showAllSelected: false, classificationSecurityGroupId: ''})
       emitter.emit('dismissLoader')
     },
     async editSecurityGroup() {

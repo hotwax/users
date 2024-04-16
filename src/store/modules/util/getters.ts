@@ -15,6 +15,9 @@ const getters: GetterTree<UtilState, RootState> = {
   getSecurityGroups(state) {
     return state.securityGroups
   },
+  getClassificationSecurityGroups(state) {
+    return state.classificationSecurityGroups
+  },
   getFacilities(state) {
     return state.facilities
   },
