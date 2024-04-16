@@ -7,6 +7,15 @@
         {{ translate("Only selected permissions") }}
       </ion-toggle>
     </ion-item>
+    <ion-item lines="none">
+      <ion-icon :icon="optionsOutline" slot="start" />
+      <ion-select :label="translate('Filters')" interface="popover" v-model="query.classificationSecurityGroupId" @ionChange="updateQuery()">
+        <ion-select-option value="">{{ translate("All") }}</ion-select-option>
+        <ion-select-option :value="classificationSecurityGroup.groupId" :key="classificationSecurityGroup.groupId" v-for="classificationSecurityGroup in classificationSecurityGroups">
+          {{ classificationSecurityGroup.groupName }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
   </div>
 
   <template v-if="arePermissionsAvailable()">
@@ -49,11 +58,13 @@ import {
   IonItemDivider,
   IonLabel,
   IonSearchbar,
+  IonSelect,
+  IonSelectOption,
   IonToggle
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { translate } from '@hotwax/dxp-components';
-import { shieldCheckmarkOutline } from 'ionicons/icons';
+import { optionsOutline, shieldCheckmarkOutline } from 'ionicons/icons';
 import { mapGetters, useStore } from 'vuex';
 import { PermissionService } from '@/services/PermissionService';
 import { showToast } from '@/utils';
@@ -75,6 +86,8 @@ export default defineComponent({
     IonItemDivider,
     IonLabel,
     IonSearchbar,
+    IonSelect,
+    IonSelectOption,
     IonToggle,
   },
   computed: {
@@ -82,7 +95,8 @@ export default defineComponent({
       query: 'permission/getQuery',
       currentGroupPermissions: 'permission/getCurrentGroupPermissions',
       currentGroup: "permission/getCurrentGroup",
-      filteredPermissions: "permission/getFilteredPermissions"
+      filteredPermissions: "permission/getFilteredPermissions",
+      classificationSecurityGroups: 'util/getClassificationSecurityGroups'
     })
   },
   methods: {
@@ -154,6 +168,7 @@ export default defineComponent({
     return {
       Actions,
       hasPermission,
+      optionsOutline,
       shieldCheckmarkOutline,
       store,
       translate

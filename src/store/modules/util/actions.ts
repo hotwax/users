@@ -116,6 +116,35 @@ const actions: ActionTree<UtilState, RootState> = {
     }
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, securityGroups);
   },
+  async getClassificationSecurityGroups({ commit }) {
+    const payload = {
+      entityName: "SecurityGroup",
+      viewSize: 250,
+      distinct: "Y",
+      noConditionFind: "Y",
+      fieldList: ["description", "groupId", "groupName"],
+      orderBy: 'groupName ASC',
+      inputFields: {
+        groupTypeEnumId: "PRM_CLASS_TYPE",
+        groupId: "SGC_HIDDEN",
+        groupId_op: "notEqual"
+      }
+    }
+    let securityGroups = []
+
+    try {
+      const resp = await UtilService.getSecurityGroups(payload)
+
+      if(!hasError(resp)) {
+        securityGroups = resp.data.docs
+      } else {
+        throw resp.data
+      }
+    } catch(error) {
+      logger.error(error);
+    }
+    commit(types.UTIL_CLASSIFICATION_SECURITY_GROUPS_UPDATED, securityGroups);
+  },
 
   async fetchFacilities({ commit }) {
     let facilities  = [];
