@@ -11,7 +11,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content id="filter-menu">
+    <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()" id="filter-menu">
       <div class="find">
         <section class="search">
           <ion-searchbar :placeholder="translate('Search users')" v-model="query.queryString" @keyup.enter="updateQuery()" />
@@ -117,18 +117,21 @@
 
       <!--
         When searching for a keyword, and if the user moves to the last item, then the didFire value inside infinite scroll becomes true and thus the infinite scroll does not trigger again on the same page(https://github.com/hotwax/users/issues/84).
+        Also if we are at the section that has been loaded by infinite-scroll and then move to the details page then the list infinite scroll does not work after coming back to the page
 
         In ionic v7.6.0, an issue related to infinite scroll has been fixed that when more items can be added to the DOM, but infinite scroll does not fire as the window is not completely filled with the content(https://github.com/ionic-team/ionic-framework/issues/18071).
         The above fix in ionic 7.6.0 is resulting in the issue of infinite scroll not being called again.
 
-        To fix this, we have added a key with value as queryString(searched keyword), so that the infinite scroll component can be re-rendered
-        whenever the searched string is changed resulting in the correct behaviour for infinite scroll
+        To fix this we have maintained another variable `isScrollingEnabled` to check whether the scrolling can be performed or not.
+        If we do not define an extra variable and just use v-show to check for `isScrollable` then when coming back to the page infinite-scroll is called programatically.
+
+        We have added an ionScroll event on ionContent to check whether the infiniteScroll can be enabled or not by toggling the value of isScrollingEnabled whenever the height < 0.
       -->
       <ion-infinite-scroll
         @ionInfinite="loadMoreUsers($event)"
         threshold="100px"
-        :disabled="!isScrollable"
-        :key="query.queryString"
+        v-show="isScrollingEnabled && isScrollable"
+        ref="infiniteScrollRef"
       >
         <ion-infinite-scroll-content
           loading-spinner="crescent"
@@ -221,16 +224,31 @@ export default defineComponent({
   },
   data() {
     return {
-      currentUser: {}
+      currentUser: {},
+      isScrollingEnabled: false
     }
   },
   async ionViewWillEnter() {
+    this.isScrollingEnabled = false;
     await this.fetchUsers()
   },
   async mounted() {
     await this.store.dispatch('util/getSecurityGroups')
   },
   methods: {
+    enableScrolling() {
+      const parentElement = (this as any).$refs.contentRef.$el
+      const scrollEl = parentElement.shadowRoot.querySelector("main[part='scroll']")
+
+      let scrollHeight = scrollEl.scrollHeight, infiniteHeight = (this as any).$refs.infiniteScrollRef.$el.offsetHeight, scrollTop = scrollEl.scrollTop, threshold = 100, height = scrollEl.offsetHeight
+      const distanceFromInfinite = scrollHeight - infiniteHeight - scrollTop - threshold - height
+
+      if(distanceFromInfinite < 0) {
+        this.isScrollingEnabled = false;
+      } else {
+        this.isScrollingEnabled = true;
+      }
+    },
     getDate(date: any) {
       return DateTime.fromMillis(date).toFormat('dd LLL yyyy')
     },
@@ -270,8 +288,8 @@ export default defineComponent({
         Math.ceil(
           this.users?.length / (process.env.VUE_APP_VIEW_SIZE as any)
         ).toString()
-      ).then(() => {
-        event.target.complete();
+      ).then(async () => {
+        await event.target.complete();
       });
     },
     async fetchLoggedInUserDetails() {
