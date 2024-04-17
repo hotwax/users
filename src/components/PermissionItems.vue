@@ -20,13 +20,13 @@
 
   <template v-if="arePermissionsAvailable()">
     <div v-for="(group, groupId) in filteredPermissions" :key="groupId">
-      <ion-item-divider v-if="group.permissions.length" class="ion-margin-vertical" color="light">
+      <ion-item-divider v-if="group.groupId !== 'SGC_HIDDEN' && group.permissions.length" class="ion-margin-vertical" color="light">
         <ion-label>
           {{ group.groupName || group.groupId }}
         </ion-label>
       </ion-item-divider>
 
-      <section>
+      <section v-if="group.groupId !== 'SGC_HIDDEN'">
         <ion-card v-for="permission in group.permissions" :key="permission.permissionId">
           <ion-card-header>
             <div>

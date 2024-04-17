@@ -53,9 +53,7 @@ const actions: ActionTree<PermissionState, RootState> = {
           viewSize: 250,
           viewIndex: viewIndex,
           inputFields: {
-            groupTypeEnumId: "PRM_CLASS_TYPE",
-            groupId: "SGC_HIDDEN",
-            groupId_op: "notEqual"
+            groupTypeEnumId: "PRM_CLASS_TYPE"
           }
         })
 
@@ -92,6 +90,20 @@ const actions: ActionTree<PermissionState, RootState> = {
         permission.description = allPermissions[permission.permissionId]?.description
       })
     })
+
+    const otherPermissions = JSON.parse(JSON.stringify(state.allPermissions))
+    Object.values(groupTypes).map((group: any) => {
+      group.permissions.map((permission: any) => {
+        delete otherPermissions[permission.permissionId]
+      })
+    })
+
+    // Others category for permissions not in any internal group.
+    groupTypes['OTHERS'] = {
+      groupId: 'OTHERS',
+      groupName: 'Others',
+      permissions: Object.values(otherPermissions)
+    }
 
     commit(types.PERMISSION_BY_CLASSIFICATION_GROUPS_UPDATED, groupTypes)
   },
