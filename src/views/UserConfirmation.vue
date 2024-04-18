@@ -69,6 +69,7 @@
     mailOutline
   } from 'ionicons/icons';
   import { translate } from "@hotwax/dxp-components";
+  import emitter from "@/event-bus";
   
   export default defineComponent({
     name: "UserConfirmation",
@@ -95,7 +96,10 @@
     },
     props: ['partyId'],
     async ionViewWillEnter() {
+      this.selectedUser = '';
+      emitter.emit('presentLoader')
       await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
+      emitter.emit('dismissLoader')
     },
     methods: {
       async quickSetup() {
