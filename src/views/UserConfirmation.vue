@@ -69,6 +69,7 @@
     mailOutline
   } from 'ionicons/icons';
   import { translate } from "@hotwax/dxp-components";
+  import { showToast } from "@/utils";
   
   export default defineComponent({
     name: "UserConfirmation",
@@ -96,6 +97,7 @@
     props: ['partyId'],
     async ionViewWillEnter() {
       await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
+      showToast(translate("User created successfully"))
     },
     methods: {
       async quickSetup() {
