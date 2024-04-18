@@ -350,21 +350,22 @@ const actions: ActionTree<UserState, RootState> = {
     }
 
     let users = JSON.parse(JSON.stringify(state.users.list)), total = 0;
-    
-    try {
-      const resp = await UserService.fetchUsers(params)
 
-      if(!hasError(resp) && resp.data.count) {
-        if(payload.viewIndex && payload.viewIndex > 0) users = users.concat(resp.data.docs)
-          else{
-            users = resp.data.docs
-          }
-        total = resp.data.count
+    try {
+      const resp = await UserService.fetchUsers(params);
+
+      if (!hasError(resp) && resp.data.count) {
+        if (payload.viewIndex && payload.viewIndex > 0) {
+          users = users.concat(resp.data.docs);
+        } else {
+          users = resp.data.docs;
+        }
+        total = resp.data.count;
       } else {
-        throw resp.data
+        throw resp.data;
       }
     } catch(error) {
-      logger.error(error)
+      logger.error(error);
     }
 
     emitter.emit("dismissLoader");
