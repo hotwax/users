@@ -96,7 +96,6 @@
     },
     props: ['partyId'],
     async ionViewWillEnter() {
-      this.selectedUser = '';
       emitter.emit('presentLoader')
       await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
       emitter.emit('dismissLoader')
