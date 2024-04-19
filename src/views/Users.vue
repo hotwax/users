@@ -110,7 +110,7 @@
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button :disabled="!hasPermission(Actions.APP_USER_CREATE)" @click="handleNewUser()">
+        <ion-fab-button :disabled="!hasPermission(Actions.APP_USER_CREATE)" @click="createUser()">
           <ion-icon :icon="addOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -206,8 +206,7 @@ export default defineComponent({
       securityGroups: 'util/getSecurityGroups',
       query: 'user/getQuery',
       isScrollable: "user/isScrollable",
-      userProfile: 'user/getUserProfile',
-      selectedUser: 'user/getSelectedUser'
+      userProfile: 'user/getUserProfile'
     })
   },
   data() {
@@ -222,8 +221,8 @@ export default defineComponent({
     await this.store.dispatch('util/getSecurityGroups')
   },
   methods: {
-    handleNewUser(){
-      this.selectedUser = '';
+    createUser(){
+      this.store.dispatch('user/clearSelectedUser');  
       this.router.push('/create-user');
     },
     getDate(date: any) {
