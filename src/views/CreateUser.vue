@@ -206,6 +206,7 @@ export default defineComponent({
           if (partyTypeId === "PARTY_GROUP" ) {
             await UserService.addPartyToFacility({"partyId": partyId, "facilityId": payload.facilityId, "roleTypeId": "WAREHOUSE_MANAGER"});
           }
+          showToast(translate("User created successfully"));
           this.$router.replace({ path: `/user-confirmation/${partyId}` })
         } else {
           throw resp.data;
