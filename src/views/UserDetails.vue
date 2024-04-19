@@ -1086,6 +1086,14 @@ export default defineComponent({
       emitter.emit('presentLoader')
 
       try {
+        if (isChecked) {   
+            this.blockLoginChecked = true;              
+              await UserService.updateUserLoginStatus({
+                enabled: 'N',
+                partyId: this.partyId,
+                userLoginId: this.selectedUser.userLoginId
+            });   
+          } 
         if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
           resp = await UserService.updatePartyGroup(payload)
         } else {
@@ -1096,14 +1104,6 @@ export default defineComponent({
           showToast(translate("User status updated successfully."))
           await this.store.dispatch("user/updateSelectedUser", { ...this.selectedUser, ...payload });
           event.target.checked = isChecked
-          if (isChecked) {
-            this.blockLoginChecked = true;      
-              await UserService.updateUserLoginStatus({
-                enabled: 'N',
-                partyId: this.partyId,
-                userLoginId: this.selectedUser.userLoginId
-            });   
-          } 
         }else {
           throw resp.data;
         }
