@@ -28,7 +28,8 @@
           v-model="newPassword" 
           id="newPassword" 
           :type="showNewPassword ? 'text' : 'password'"
-          :error-text="translate('Password requirements not fulfilled.')"/>
+          :error-text="translate('Password requirements not fulfilled.')"
+          autocomplete="new-password"/>
         <!-- <ion-button fill="clear" @click="showNewPassword = !showNewPassword">
           <ion-icon :icon="showNewPassword ? eyeOutline : eyeOffOutline"/>
         </ion-button> -->
