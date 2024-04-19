@@ -130,7 +130,7 @@
       <ion-infinite-scroll
         @ionInfinite="loadMoreUsers($event)"
         threshold="100px"
-        v-show="isScrollingEnabled && isScrollable"
+        v-show="isScrollable"
         ref="infiniteScrollRef"
       >
         <ion-infinite-scroll-content
@@ -283,6 +283,10 @@ export default defineComponent({
       this.router.push({ path: `/user-details/${user.partyId}` })
     },
     async loadMoreUsers(event: any) {
+      // Added this check here as if added on infinite-scroll component the Loading content does not gets displayed
+      if(!(this.isScrollingEnabled && this.isScrollable)) {
+        await event.target.complete();
+      }
       this.fetchUsers(
         undefined,
         Math.ceil(
