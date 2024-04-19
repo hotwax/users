@@ -69,7 +69,6 @@
     mailOutline
   } from 'ionicons/icons';
   import { translate } from "@hotwax/dxp-components";
-  import { showToast } from "@/utils";
   
   export default defineComponent({
     name: "UserConfirmation",
