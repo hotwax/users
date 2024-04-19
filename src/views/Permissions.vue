@@ -20,8 +20,8 @@
             <ion-item v-for="group in securityGroups" :key="group?.groupId" button detail @click="updateCurrentGroup(group)">
               <ion-label :color="group.groupId === currentGroup?.groupId ? 'primary' : ''">
                 <p class="overline">{{ group.groupId }}</p>
-                {{ group?.groupName }}
-              </ion-label>
+                {{ group?.groupName || group?.groupId }}
+              </ion-label> 
             </ion-item>
           </ion-list>
 
@@ -36,7 +36,7 @@
               <ion-icon :icon="idCardOutline" slot="start" />
               <ion-label>
                 <ion-note class="overline">{{ currentGroup.groupId }}</ion-note>
-                <h1>{{ currentGroup.groupName }}</h1>
+                <h1>{{ currentGroup.groupName || currentGroup.groupId }}</h1>
                 <p class="ion-text-wrap">{{ currentGroup.description }}</p>
               </ion-label>
               <ion-button slot="end" @click="editSecurityGroup()" fill="outline">{{ translate("Edit") }}</ion-button>
@@ -122,6 +122,7 @@ export default defineComponent({
   },
   async mounted() {
     await this.store.dispatch('util/getSecurityGroups')
+    await this.store.dispatch('util/getClassificationSecurityGroups')
     if(!this.allPermissions.length) await this.store.dispatch('permission/getAllPermissions')
     if(!Object.keys(this.permissionsByClassificationGroups).length) await this.store.dispatch('permission/getPermissionsByClassificationGroups')
     if(this.currentGroup.groupId) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
@@ -136,7 +137,7 @@ export default defineComponent({
       await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
       await this.store.dispatch('permission/checkAssociated')
       await this.getUsersCount()
-      await this.store.dispatch('permission/updateQuery', {queryString: '', showAllSelected: false})
+      await this.store.dispatch('permission/updateQuery', {queryString: '', showAllSelected: false, classificationSecurityGroupId: ''})
       emitter.emit('dismissLoader')
     },
     async editSecurityGroup() {

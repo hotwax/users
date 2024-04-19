@@ -11,6 +11,7 @@ const utilModule: Module<UtilState, RootState> = {
     roles: [],
     productStores: [],
     securityGroups: [],
+    classificationSecurityGroups: [],
     facilities: [],
     shopifyShops: []
   },

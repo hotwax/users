@@ -73,12 +73,12 @@
           <ion-item v-for="facility in facilities" :key="facility.facilityId">
             <ion-checkbox v-if="!isFacilityLogin()" :checked="true" @ionChange="toggleFacilitySelection(facility)">
               <ion-label>
-                {{ facility.facilityName }}
+                {{ facility.facilityName || facility.facilityId }}
                 <p>{{ facility.facilityId }}</p>
               </ion-label>
             </ion-checkbox>
             <ion-label v-else>
-              {{ facility.facilityName }}
+              {{ facility.facilityName || facility.facilityId }}
               <p>{{ facility.facilityId }}</p>
             </ion-label>
           </ion-item>

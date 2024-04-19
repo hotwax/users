@@ -15,7 +15,7 @@
       <ion-item v-for="facility in facilities" :key="facility.facilityId">
         <ion-checkbox :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)">
           <ion-label>
-            {{ facility.facilityName }}
+            {{ facility.facilityName || facility.facilityId }}
             <p>{{ facility.facilityId }}</p>
           </ion-label>
         </ion-checkbox>
@@ -27,7 +27,7 @@
         <ion-item v-for="facility in facilities" :key="facility.facilityId">
           <ion-radio :value="facility.facilityId">
             <ion-label>
-              {{ facility.facilityName }}
+              {{ facility.facilityName || facility.facilityId }}
               <p>{{ facility.facilityId }}</p>
             </ion-label>
           </ion-radio>
