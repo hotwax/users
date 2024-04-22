@@ -123,7 +123,7 @@
                   <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
                 </ion-item>
                 <ion-item>
-                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click.prevent="updateUserLoginStatus($event)" :checked="blockLoginChecked || selectedUser.enabled == 'N'">
+                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled == 'N'">
                     {{ translate("Block login") }}
                   </ion-toggle>
                 </ion-item>
@@ -519,7 +519,6 @@ export default defineComponent({
       isUserFetched: false,
       showPassword: false,
       shopifyShopsForProductStore: [] as any,
-      blockLoginChecked: false
     }
   },
  
@@ -775,7 +774,7 @@ export default defineComponent({
                 showToast(translate('User login status updated successfully.'))
                 // updating toggle state on success
                 event.target.checked = isChecked
-                this.blockLoginChecked = isChecked;
+                this.selectedUser.enabled = isChecked ? 'N' : 'Y'
               } else {
                 throw resp.data
               }
@@ -1088,13 +1087,13 @@ export default defineComponent({
 
       try {
         if (isChecked) {   
-          this.blockLoginChecked = true;              
-            await UserService.updateUserLoginStatus({
-              enabled: 'N',
-              partyId: this.partyId,
-              userLoginId: this.selectedUser.userLoginId
-            });   
-          } 
+          await UserService.updateUserLoginStatus({
+            enabled: 'N',
+            partyId: this.partyId,
+            userLoginId: this.selectedUser.userLoginId
+          });   
+          this.selectedUser.enabled = 'N';         
+        }
         if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
           resp = await UserService.updatePartyGroup(payload)
         } else {
