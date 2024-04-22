@@ -11,7 +11,8 @@ const permissionModule: Module<PermissionState, RootState> = {
     permissionsByClassificationGroups: {},
     query: {
       queryString: '',
-      showSelected: false
+      showSelected: false,
+      classificationSecurityGroupId: ''
     },
     currentGroup: {},
     permissionsByGroup: {},

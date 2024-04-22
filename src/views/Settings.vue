@@ -47,21 +47,7 @@
       </div>
 
       <section>
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>
-              {{ translate('Timezone') }}
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            {{ translate('The timezone you select is used to ensure automations you schedule are always accurate to the time you select.') }}
-          </ion-card-content>
-          <ion-item lines="none">
-            <ion-label> {{ userProfile && userProfile.userTimeZone ? userProfile.userTimeZone : '-' }} </ion-label>
-            <ion-button @click="changeTimeZone()" slot="end" fill="outline" color="dark">{{ translate("Change") }}</ion-button>
-          </ion-item>
-        </ion-card>
-
+        <DxpTimeZoneSwitcher @timeZoneUpdated="timeZoneUpdated" />
         <DxpLanguageSwitcher />
       </section>
     </ion-content>
@@ -73,7 +59,6 @@ import {
   IonAvatar,
   IonButton,
   IonCard,
-  IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
@@ -81,11 +66,9 @@ import {
   IonHeader,
   IonIcon,
   IonItem,
-  IonLabel,
   IonPage,
   IonTitle,
   IonToolbar,
-  modalController,
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import {
@@ -102,7 +85,6 @@ import Image from '@/components/Image.vue';
 import { translate } from "@hotwax/dxp-components";
 import { Actions, hasPermission } from '@/authorization'
 import { DateTime } from 'luxon';
-import TimezoneModal from '@/components/TimezoneModal.vue';
 
 export default defineComponent({
   name: 'Settings',
@@ -110,7 +92,6 @@ export default defineComponent({
     IonAvatar,
     IonButton, 
     IonCard,
-    IonCardContent,
     IonCardHeader,
     IonCardSubtitle,
     IonCardTitle,
@@ -118,7 +99,6 @@ export default defineComponent({
     IonHeader, 
     IonIcon,
     IonItem, 
-    IonLabel,
     IonPage, 
     IonTitle,
     IonToolbar,
@@ -166,12 +146,9 @@ export default defineComponent({
     getDateTime(time: any) {
       return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
     },
-    async changeTimeZone() {
-      const timeZoneModal = await modalController.create({
-        component: TimezoneModal,
-      });
-      return timeZoneModal.present();
-    }
+    async timeZoneUpdated(tzId: string) {
+      await this.store.dispatch("user/setUserTimeZone", tzId)
+    },
   },
   setup () {
     const store = useStore();

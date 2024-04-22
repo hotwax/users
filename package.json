@@ -1,8 +1,8 @@
 {
   "name": "users",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "private": true,
-  "description": "User Management App",
+  "description": "Users",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -17,8 +17,8 @@
     "@casl/ability": "^6.0.0",
     "@hotwax/app-version-info": "^1.0.0",
     "@hotwax/apps-theme": "^1.2.6",
-    "@hotwax/dxp-components": "^1.12.2",
-    "@hotwax/oms-api": "^1.13.0",
+    "@hotwax/dxp-components": "1.13.0",
+    "@hotwax/oms-api": "1.14.0",
     "@ionic/core": "^7.6.0",
     "@ionic/vue": "^7.6.0",
     "@ionic/vue-router": "^7.6.0",

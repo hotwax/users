@@ -7,8 +7,16 @@ const getters: GetterTree<PermissionState, RootState> = {
     return state.permissionsByClassificationGroups
   },
   getFilteredPermissions(state) {
-    const groupType = JSON.parse(JSON.stringify(state.permissionsByClassificationGroups))
+    let groupType = JSON.parse(JSON.stringify(state.permissionsByClassificationGroups))
     const query = state.query
+
+    if (query.classificationSecurityGroupId) {
+      const filteredGroupType = {} as any;
+      if (groupType[query.classificationSecurityGroupId]) {
+          filteredGroupType[query.classificationSecurityGroupId] = groupType[query.classificationSecurityGroupId];
+      }
+      groupType = filteredGroupType;
+    }
 
     if(query.showSelected) {
       Object.values(groupType).map((group: any) => {

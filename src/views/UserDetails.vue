@@ -265,7 +265,7 @@
               </template>
               <ion-select v-else :label="translate('Security Group')" interface="popover" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
                 <ion-select-option v-for="securityGroup in getSecurityGroups(securityGroups)" :key="securityGroup.groupId" :value="securityGroup.groupId">
-                  {{ securityGroup.groupName }}
+                  {{ securityGroup.groupName || securityGroup.groupId}}
                 </ion-select-option>
                 <ion-select-option value="">{{ translate("None") }}</ion-select-option>
               </ion-select>
@@ -284,7 +284,7 @@
               </ion-list-header>
               <ion-item :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-for="store in userProductStores" :key="store.productStoreId">
                 <ion-label>
-                  <h2>{{ store.storeName }}</h2>
+                  <h2>{{ store.storeName || store.productStoreId }}</h2>
                   <p>{{ getRoleTypeDesc(store.roleTypeId) }}</p>
                 </ion-label>
                 <ion-button slot="end" fill="clear" color="medium" @click="openProductStoreActionsPopover($event, store)">
@@ -354,17 +354,17 @@
           </ion-card-content>
             <ion-list>
               <ion-item>
-                <ion-select :label="translate('Product store')" interface="popover" :value="selectedUser.favoriteProductStorePref?.userPrefValue ? selectedUser.favoriteProductStorePref?.userPrefValue : ''" @ionChange="updateFavoriteProductStore($event)">
-                  <ion-select-option v-for="productStore in productStores" :key="productStore.productStoreId" :value="productStore.productStoreId">
-                    {{ productStore.storeName }}
+                <ion-select :label="translate('Product store')" interface="popover" :value="selectedUser.favoriteProductStorePref?.userPrefValue ? selectedUser.favoriteProductStorePref?.userPrefValue : ''" @ionChange="updateFavoriteProductStore($event)" :disabled="!selectedUser?.userLoginId">
+                  <ion-select-option v-for="productStore in userProductStores" :key="productStore.productStoreId" :value="productStore.productStoreId">
+                    {{ productStore.storeName || productStore.productStoreId}}
                   </ion-select-option>
                   <ion-select-option value="">{{ translate("None") }}</ion-select-option>
                 </ion-select>
               </ion-item>
               <ion-item lines="none">
-                <ion-select :label="translate('Shopify shop')" interface="popover" :value="selectedUser.favoriteShopifyShopPref?.userPrefValue ? selectedUser.favoriteShopifyShopPref?.userPrefValue : ''" @ionChange="updateFavoriteShopifyShop($event)">
+                <ion-select :label="translate('Shopify shop')" interface="popover" :value="selectedUser.favoriteShopifyShopPref?.userPrefValue ? selectedUser.favoriteShopifyShopPref?.userPrefValue : ''" @ionChange="updateFavoriteShopifyShop($event)" :disabled="!selectedUser?.userLoginId">
                   <ion-select-option v-for="shopifyShop in shopifyShopsForProductStore" :key="shopifyShop.shopId" :value="shopifyShop.shopId">
-                    {{ shopifyShop.name }}
+                    {{ shopifyShop.name || shopifyShop.shopId }}
                   </ion-select-option>
                   <ion-select-option value="">{{ translate("None") }}</ion-select-option>
                 </ion-select>
@@ -414,6 +414,7 @@ import {
   IonSelect,
   IonSelectOption,
   IonSkeletonText,
+  IonSpinner,
   IonText,
   IonTitle,
   IonToggle,
@@ -476,6 +477,7 @@ export default defineComponent({
     IonSelect,
     IonSelectOption,
     IonSkeletonText,
+    IonSpinner,
     IonText,
     IonTitle,
     IonToggle,
@@ -490,7 +492,6 @@ export default defineComponent({
       securityGroups: 'util/getSecurityGroups',
       userProfile: 'user/getUserProfile',
       baseUrl: 'user/getBaseUrl',
-      productStores: 'util/getProductStores',
       shopifyShops: 'util/getShopifyShops'
     })
   },
