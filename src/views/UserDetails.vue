@@ -122,8 +122,8 @@
                   <ion-label>{{ translate('Username') }}</ion-label>
                   <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
                 </ion-item>
-                <ion-item>
-                  <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'">
+                <ion-item :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" >
+                  <ion-toggle @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'">
                     {{ translate("Block login") }}
                   </ion-toggle>
                 </ion-item>
@@ -317,8 +317,8 @@
               </ion-card-title>
             </ion-card-header>
             <ion-list>
-              <ion-item>
-                <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)" @click.prevent="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true">
+              <ion-item :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)">
+                <ion-toggle @click.prevent="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true">
                   {{ translate("Show as picker") }}
                 </ion-toggle>
               </ion-item>
