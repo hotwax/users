@@ -1,13 +1,13 @@
 <template>
   <div class="search-permissions">
     <ion-searchbar :placeholder="translate('Search permissions')" v-model="query.queryString" @ionInput="updateQuery()" />
-    <ion-item lines="none">
+    <ion-item lines="full">
       <ion-icon :icon="shieldCheckmarkOutline" slot="start" />
       <ion-toggle v-model="query.showSelected" @ionChange="updateQuery()">
         {{ translate("Only selected permissions") }}
       </ion-toggle>
     </ion-item>
-    <ion-item lines="none">
+    <ion-item lines="full">
       <ion-icon :icon="optionsOutline" slot="start" />
       <ion-select :label="translate('Filters')" interface="popover" v-model="query.classificationSecurityGroupId" @ionChange="updateQuery()">
         <ion-select-option value="">{{ translate("All") }}</ion-select-option>
@@ -24,6 +24,7 @@
         <ion-label>
           {{ group.groupName || group.groupId }}
         </ion-label>
+        <ion-note slot="end">{{ group.permissions.length }}</ion-note>
       </ion-item-divider>
 
       <section v-if="group.groupId !== 'SGC_HIDDEN'">
@@ -57,6 +58,7 @@ import {
   IonItem,
   IonItemDivider,
   IonLabel,
+  IonNote,
   IonSearchbar,
   IonSelect,
   IonSelectOption,
@@ -85,6 +87,7 @@ export default defineComponent({
     IonItem,
     IonItemDivider,
     IonLabel,
+    IonNote,
     IonSearchbar,
     IonSelect,
     IonSelectOption,
