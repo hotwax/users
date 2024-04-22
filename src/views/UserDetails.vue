@@ -1087,11 +1087,11 @@ export default defineComponent({
 
       try {
         if (isChecked) {   
-            this.blockLoginChecked = true;              
-              await UserService.updateUserLoginStatus({
-                enabled: 'N',
-                partyId: this.partyId,
-                userLoginId: this.selectedUser.userLoginId
+          this.blockLoginChecked = true;              
+            await UserService.updateUserLoginStatus({
+              enabled: 'N',
+              partyId: this.partyId,
+              userLoginId: this.selectedUser.userLoginId
             });   
           } 
         if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
