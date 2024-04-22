@@ -14,6 +14,7 @@
         <ion-select-option :value="classificationSecurityGroup.groupId" :key="classificationSecurityGroup.groupId" v-for="classificationSecurityGroup in classificationSecurityGroups">
           {{ classificationSecurityGroup.groupName }}
         </ion-select-option>
+        <ion-select-option value="OTHERS">{{ translate("Others") }}</ion-select-option>
       </ion-select>
     </ion-item>
   </div>
