@@ -63,7 +63,10 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Settings.vue')
       },{
         path: 'permissions',
-        component: () => import('@/views/Permissions.vue')
+        component: () => import('@/views/Permissions.vue'),
+        meta: {
+          permissionId: "APP_PERMISSION_VIEW"
+        }
       },
     ],
     beforeEnter: authGuard,
