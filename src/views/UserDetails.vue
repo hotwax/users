@@ -139,7 +139,7 @@
                     <div slot="label">{{ translate("Username") }} <ion-text color="danger">*</ion-text></div>
                   </ion-input>
                 </ion-item>
-                <ion-item ref="password">
+                <ion-item ref="password" lines="none">
                   <ion-input 
                     label-placement="fixed" 
                     :placeholder="translate('Default password')" 
@@ -149,7 +149,7 @@
                     :type="showPassword ? 'text' : 'password'" 
                     @ionInput="validatePassword" 
                     @ionBlur="markPasswordTouched"
-                    :helper-text="translate('will be asked to reset their password when they login', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName })"
+                    :helper-text="translate('will be asked to reset their password when they login to OMS.', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName })"
                     :error-text="translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.')"
                   >
                     <div slot="label">{{ translate("Password") }} <ion-text color="danger">*</ion-text></div>
