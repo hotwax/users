@@ -110,7 +110,7 @@
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button :disabled="!hasPermission(Actions.APP_USER_CREATE)" @click="router.push('/create-user')">
+        <ion-fab-button :disabled="!hasPermission(Actions.APP_USER_CREATE)" @click="createUser()">
           <ion-icon :icon="addOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -236,6 +236,10 @@ export default defineComponent({
     await this.store.dispatch('util/getSecurityGroups')
   },
   methods: {
+    createUser(){
+      this.store.dispatch('user/clearSelectedUser');  
+      this.router.push('/create-user');
+    },
     enableScrolling() {
       const parentElement = (this as any).$refs.contentRef.$el
       const scrollEl = parentElement.shadowRoot.querySelector("main[part='scroll']")
