@@ -35,7 +35,7 @@
               <ion-card-title>{{ permission.permissionId }}</ion-card-title>
               <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
             </div>
-            <ion-checkbox :disabled="!hasPermission(Actions.APP_PERMISSION_UPDATE)" :checked="permission.isChecked" @click="updatePermissionAssociation($event, permission)" />
+            <ion-checkbox :disabled="permission.isChecked ? !hasPermission(Actions.APP_PERMISSION_UPDATE) : !hasPermission(Actions.APP_PERMISSION_CREATE)" :checked="permission.isChecked" @click="updatePermissionAssociation($event, permission)" />
           </ion-card-header>
         </ion-card>
       </section>
