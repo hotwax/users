@@ -39,7 +39,8 @@ import { getConfig, initialise, setUserLocale, setUserTimeZone, getAvailableTime
 
 const app = createApp(App)
   .use(IonicVue, {
-    mode: 'md'
+    mode: 'md',
+    innerHTMLTemplatesEnabled: true
   })
   .use(router)
   .use(store)
