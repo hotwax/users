@@ -35,7 +35,7 @@
               <ion-card-title>{{ permission.permissionId }}</ion-card-title>
               <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
             </div>
-            <ion-checkbox :disabled="permission.isChecked ? !hasPermission(Actions.APP_PERMISSION_UPDATE) : !hasPermission(Actions.APP_PERMISSION_CREATE)" :checked="permission.isChecked" @click="updatePermissionAssociation($event, permission)" />
+            <ion-checkbox :disabled="permission.isChecked ? !hasPermission(Actions.APP_PERMISSION_UPDATE) : !hasPermission(Actions.APP_PERMISSION_CREATE)" :checked="permission.isChecked" @click.prevent="updatePermissionAssociation($event, permission)" />
           </ion-card-header>
         </ion-card>
       </section>
@@ -108,7 +108,7 @@ export default defineComponent({
       await this.store.dispatch('permission/updateQuery', this.query)
     },
     async updatePermissionAssociation(event: any, permission: any) {
-      event.stopPropagation();
+      event.stopImmediatePropagation();
 
       let resp = {} as any;
       const payload = {
