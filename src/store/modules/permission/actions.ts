@@ -49,6 +49,7 @@ const actions: ActionTree<PermissionState, RootState> = {
           entityName: "SecurityGroupAndPermission",
           distinct: "Y",
           noConditionFind: "Y",
+          filterByDate: "Y",
           fieldList: ["description", "permissionId", "groupId", "groupName"],
           viewSize: 250,
           viewIndex: viewIndex,
