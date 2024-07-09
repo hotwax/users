@@ -346,16 +346,17 @@ const actions: ActionTree<UserState, RootState> = {
       "viewSize": payload.viewSize
     }
 
-    let users = JSON.parse(JSON.stringify(state.users.list)), total = 0;
+    const users = JSON.parse(JSON.stringify(state.users.list));
+    let total = 0 , usersList = [] as any;
 
     try {
       const resp = await UserService.fetchUsers(params);
 
       if (!hasError(resp) && resp.data.count) {
         if (payload.viewIndex && payload.viewIndex > 0) {
-          users = users.concat(resp.data.docs);
+          usersList = users.concat(resp.data.docs);
         } else {
-          users = resp.data.docs;
+          usersList = resp.data.docs;
         }
         total = resp.data.count;
       } else {
@@ -366,7 +367,7 @@ const actions: ActionTree<UserState, RootState> = {
     }
 
     emitter.emit("dismissLoader");
-    commit(types.USER_LIST_UPDATED, { users, total });
+    commit(types.USER_LIST_UPDATED, { users: usersList, total });
   },
 
   updateQuery({ commit }, query) {
