@@ -359,9 +359,11 @@ const deletePartyRole = async (payload: any): Promise <any> => {
 }
 
 const createCommercePartyRelationshipFrom = async (payload: any): Promise <any> => {
+  const organizationPartyId = store.getters['util/getOrganizationPartyId'];
+
   payload = {
     ...payload,
-    "partyIdFrom": "COMPANY",
+    "partyIdFrom": organizationPartyId,
     "roleTypeIdFrom": "INTERNAL_ORGANIZATIO",
     "partyRelationshipTypeId": "OWNER",
     "statusId": "ACCOUNT_CREATED",
@@ -508,6 +510,8 @@ const isUserLoginIdAlreadyExists = async(username: string): Promise<any> => {
 }
 
 const finishSetup = async (payload: any): Promise <any> => {
+  const organizationPartyId = store.getters['util/getOrganizationPartyId'];
+
   try {
     const selectedUser = payload.selectedUser;
     const selectedTemplate = payload.selectedTemplate;
@@ -528,7 +532,7 @@ const finishSetup = async (payload: any): Promise <any> => {
         "requirePasswordChange": payload.formData.requirePasswordChange ? "Y" : "N",
         "enabled": "Y",
         "userPrefTypeId": "ORGANIZATION_PARTY",
-        "userPrefValue": "COMPANY"
+        "userPrefValue": organizationPartyId
       });
       if (!hasError(resp)) {
         addUserToSecurityGroup({

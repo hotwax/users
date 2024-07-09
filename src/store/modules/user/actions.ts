@@ -72,6 +72,7 @@ const actions: ActionTree<UserState, RootState> = {
       commit(types.USER_INFO_UPDATED, userProfile);
       commit(types.USER_PERMISSIONS_UPDATED, appPermissions);
       commit(types.USER_TOKEN_CHANGED, { newToken: token })
+      this.dispatch('util/fetchOrganizationPartyId')
 
       const partyId = router.currentRoute.value.query.partyId
       if (partyId) {

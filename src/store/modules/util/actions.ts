@@ -194,6 +194,32 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_PRODUCT_STORES_UPDATED, stores)
   },
 
+  async fetchOrganizationPartyId({ commit }) {
+    let partyId = ""
+
+    const params = {
+      entityName: "PartyRole",
+      inputFields: {
+        roleTypeId: 'INTERNAL_ORGANIZATIO'
+      },
+      noConditionFind: 'Y',
+      fieldList: ["partyId"],
+      viewSize: 1
+    }
+
+    try {
+      const resp = await UtilService.fetchOrganizationPartyId(params)
+      if (!hasError(resp)) {
+        partyId = resp.data.docs[0]?.partyId
+      } else {
+        throw resp.data
+      }
+    } catch (error) {
+      logger.error(error)
+    }
+    commit(types.UTIL_ORGANIZATION_PARTY_ID_UPDATED, partyId)
+  },
+
   updateSecurityGroup({commit}, payload) {
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, payload)
   },
@@ -202,6 +228,7 @@ const actions: ActionTree<UtilState, RootState> = {
     commit(types.UTIL_FACILITIES_UPDATED, [])
     commit(types.UTIL_SECURITY_GROUPS_UPDATED, []);
     commit(types.UTIL_PRODUCT_STORES_UPDATED, [])
+    commit(types.UTIL_ORGANIZATION_PARTY_ID_UPDATED, "")
   },
 }
 

@@ -19,6 +19,9 @@ const mutations: MutationTree<UtilState> = {
     state.shopifyShops = payload
   },[types.UTIL_CLASSIFICATION_SECURITY_GROUPS_UPDATED](state, payload) {
     state.classificationSecurityGroups = payload
+  },
+  [types.UTIL_ORGANIZATION_PARTY_ID_UPDATED](state, payload) {
+    state.organizationPartyId = payload
   }
 }
 export default mutations;

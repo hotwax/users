@@ -5,4 +5,5 @@ export default interface UtilState {
   classificationSecurityGroups: any[];
   facilities: any[];
   shopifyShops: any[];
+  organizationPartyId: string;
 }
