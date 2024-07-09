@@ -492,7 +492,8 @@ export default defineComponent({
       securityGroups: 'util/getSecurityGroups',
       userProfile: 'user/getUserProfile',
       baseUrl: 'user/getBaseUrl',
-      shopifyShops: 'util/getShopifyShops'
+      shopifyShops: 'util/getShopifyShops',
+      organizationPartyId: 'util/getOrganizationPartyId'
     })
   },
   props: ['partyId'],
@@ -724,7 +725,7 @@ export default defineComponent({
           userLoginId: this.username,
           enabled: 'Y',
           userPrefTypeId: 'ORGANIZATION_PARTY',
-          userPrefValue: 'COMPANY',
+          userPrefValue: this.organizationPartyId,
         })
         if (!hasError(resp)) {
           await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });

@@ -23,6 +23,9 @@ const getters: GetterTree<UtilState, RootState> = {
   },
   getShopifyShops(state) {
     return state.shopifyShops;
+  },
+  getOrganizationPartyId(state) {
+    return state.organizationPartyId;
   }
 }
 export default getters;
