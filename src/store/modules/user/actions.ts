@@ -347,27 +347,35 @@ const actions: ActionTree<UserState, RootState> = {
     }
 
     const users = JSON.parse(JSON.stringify(state.users.list));
-    let total = 0 , usersList = [] as any;
+    let total = state.users.total , usersList = users; //initialize usersList with current state of users
 
     try {
       const resp = await UserService.fetchUsers(params);
 
-      if (!hasError(resp) && resp.data.count) {
-        if (payload.viewIndex && payload.viewIndex > 0) {
-          usersList = users.concat(resp.data.docs);
-        } else {
-          usersList = resp.data.docs;
-        }
-        total = resp.data.count;
+      if (!hasError(resp)) {
+        if (resp.data.count > 0) {
+          if (payload.viewIndex && payload.viewIndex > 0) {
+            usersList = users.concat(resp.data.docs);
+          } else {
+            usersList = resp.data.docs;
+          }
+          total = resp.data.count;
+        } 
+        // Update the state only if the API call is successful
+        commit(types.USER_LIST_UPDATED, { users: usersList, total });
       } else {
         throw resp.data;
       }
     } catch(error) {
-      logger.error(error);
+      if(payload.viewIndex === 0) {
+        commit(types.USER_LIST_UPDATED, { users: [], total: 0 });
+      }
+      else{
+        commit(types.USER_LIST_UPDATED, { users: users, total: total });
+      }
     }
 
     emitter.emit("dismissLoader");
-    commit(types.USER_LIST_UPDATED, { users: usersList, total });
   },
 
   updateQuery({ commit }, query) {
