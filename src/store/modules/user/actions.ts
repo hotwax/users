@@ -346,35 +346,35 @@ const actions: ActionTree<UserState, RootState> = {
       "viewSize": payload.viewSize
     }
 
-    const users = JSON.parse(JSON.stringify(state.users.list));
-    let total = state.users.total , usersList = users; //initialize usersList with current state of users
-
+    let users = JSON.parse(JSON.stringify(state.users.list)); // Initialize users with the current state of users
+    let total = state.users.total;
+    
     try {
-      const resp = await UserService.fetchUsers(params);
-
-      if (!hasError(resp)) {
-        if (resp.data.count > 0) {
-          if (payload.viewIndex && payload.viewIndex > 0) {
-            usersList = users.concat(resp.data.docs);
+      const resp = await UserService.fetchUsers(params); // Fetch users from the service
+      if (!hasError(resp)) { 
+        if (resp.data.count > 0) { 
+          if (payload.viewIndex && payload.viewIndex > 0) { 
+            users = users.concat(resp.data.docs); 
           } else {
-            usersList = resp.data.docs;
+            users = resp.data.docs; // Replace the users list with the new users
           }
-          total = resp.data.count;
-        } 
-        // Update the state only if the API call is successful
-        commit(types.USER_LIST_UPDATED, { users: usersList, total });
+          total = resp.data.count; // Update the total number of users
+        }
       } else {
-        throw resp.data;
+        throw resp.data; 
       }
-    } catch(error) {
-      if(payload.viewIndex === 0) {
-        commit(types.USER_LIST_UPDATED, { users: [], total: 0 });
-      }
-      else{
-        commit(types.USER_LIST_UPDATED, { users: users, total: total });
+    } catch (error) {
+      if (payload.viewIndex === 0) { 
+        users = []; 
+        total = 0; 
+      } else {
+        users = state.users.list;
+        total = state.users.total;
       }
     }
-
+    
+    // Update the state only once
+    commit(types.USER_LIST_UPDATED, { users, total });
     emitter.emit("dismissLoader");
   },
 
