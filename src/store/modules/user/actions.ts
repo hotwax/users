@@ -367,9 +367,6 @@ const actions: ActionTree<UserState, RootState> = {
       if (payload.viewIndex === 0) { 
         users = []; 
         total = 0; 
-      } else {
-        users = state.users.list;
-        total = state.users.total;
       }
     }
     
