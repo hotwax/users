@@ -270,8 +270,12 @@ export default defineComponent({
       this.fetchUsers();
     },
     async fetchUsers(vSize?: any, vIndex?: any) {
-      if(!this.query.queryString) await this.fetchLoggedInUserDetails()
-      else this.currentUser = {}
+      if(!this.query.queryString) {
+        // Do not fetch the current user information again when vIndex is passed(as we only pass vIndex in case of infinite scroll call), as we already have information for current user
+        !vIndex && await this.fetchLoggedInUserDetails()
+      } else {
+        this.currentUser = {}
+      }
 
       const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
       const viewIndex = vIndex ? vIndex : 0;
