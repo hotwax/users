@@ -1026,7 +1026,6 @@ export default defineComponent({
         }
       } catch (error) {
         showToast(translate('Failed to update user role.'))
-        console.log(error)
         logger.error(error)
       }
     },
@@ -1089,7 +1088,7 @@ export default defineComponent({
       alert.present()
     },
     async updateUserStatus(event: any) {
-      
+      event.stopImmediatePropagation();
 
       const isChecked = !event.target.checked
       let resp;
