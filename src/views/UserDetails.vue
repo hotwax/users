@@ -319,7 +319,7 @@
             <ion-list>
               <ion-item :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)">
                 <ion-toggle @click.prevent="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true">
-                  {{ translate("Show as picker") }}
+                  {{ translate("Show as picker") }} 
                 </ion-toggle>
               </ion-item>
               <ion-item lines="none" button detail :disabled="!hasPermission(Actions.APP_UPDT_FULFILLMENT_FACILITY) || selectedUser.securityGroup.groupId === 'INTEGRATION'" @click="selectFacility()">
@@ -998,8 +998,22 @@ export default defineComponent({
             "roleTypeIdTo": "WAREHOUSE_PICKER"
           })
         } else {
+          const response = await UserService.fetchPartyRelationship({
+            inputFields: {
+            partyIdTo: this.selectedUser.partyId,
+            roleTypeIdTo: 'WAREHOUSE_PICKER',
+            roleTypeIdTo_op: 'equals'
+          },
+          filterByDate: 'Y',
+          viewSize: 1,
+          entityName: 'PartyRelationship',
+          fieldList: ['partyIdTo', 'roleTypeIdTo', "partyIdFrom", "roleTypeIdFrom", "fromDate"]
+        })
+        const fetchedRelationShip = response.data.docs[0]
+        console.log(fetchedRelationShip)
+        
           resp = await UserService.updatePartyRelationship({
-            ...this.selectedUser?.pickerRelationship,
+            ...fetchedRelationShip,
             "thruDate": DateTime.now().toMillis()
           })
         }
@@ -1012,6 +1026,7 @@ export default defineComponent({
         }
       } catch (error) {
         showToast(translate('Failed to update user role.'))
+        console.log(error)
         logger.error(error)
       }
     },
@@ -1074,7 +1089,7 @@ export default defineComponent({
       alert.present()
     },
     async updateUserStatus(event: any) {
-      event.stopImmediatePropagation();
+      
 
       const isChecked = !event.target.checked
       let resp;
