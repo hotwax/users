@@ -178,11 +178,11 @@ export default defineComponent({
         header: translate(this.OPTIONS[this.type].removeHeader),
         message: translate(message),
         buttons: [{
-          text: translate('Cancel'),
+          text: translate('No'),
           role: "cancel"
         },
         {
-          text: translate('Save'),
+          text: translate('Yes'),
           handler: async () => {
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
             try {
