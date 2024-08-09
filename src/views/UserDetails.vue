@@ -998,25 +998,24 @@ export default defineComponent({
             "roleTypeIdTo": "WAREHOUSE_PICKER"
           })
         } else {
-          const response = await UserService.fetchPartyRelationship({
-            inputFields: {
-            partyIdTo: this.selectedUser.partyId,
-            roleTypeIdTo: 'WAREHOUSE_PICKER',
-            roleTypeIdTo_op: 'equals'
-          },
-          filterByDate: 'Y',
-          viewSize: 1,
-          entityName: 'PartyRelationship',
-          fieldList: ['partyIdTo', 'roleTypeIdTo', "partyIdFrom", "roleTypeIdFrom", "fromDate"]
-        })
-        const fetchedRelationShip = response.data.docs[0]
-        console.log(fetchedRelationShip)
+            const response = await UserService.fetchPartyRelationship({
+              inputFields: {
+                partyIdTo: this.selectedUser.partyId,
+                roleTypeIdTo: 'WAREHOUSE_PICKER',
+                roleTypeIdTo_op: 'equals'
+              },
+              filterByDate: 'Y',
+              viewSize: 1,
+              entityName: 'PartyRelationship',
+              fieldList: ['partyIdTo', 'roleTypeIdTo', "partyIdFrom", "roleTypeIdFrom", "fromDate"]
+            })
+            const fetchedRelationShip = response.data.docs[0]
         
-          resp = await UserService.updatePartyRelationship({
-            ...fetchedRelationShip,
-            "thruDate": DateTime.now().toMillis()
-          })
-        }
+            resp = await UserService.updatePartyRelationship({
+              ...fetchedRelationShip,
+              "thruDate": DateTime.now().toMillis()
+            })
+          }
         if (!hasError(resp)) {
           showToast(translate('User picker role updated successfully.'))
           // updating toggle state on success
