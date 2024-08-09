@@ -277,9 +277,9 @@
             <ion-list v-else>
               <ion-list-header color="light">
                 <ion-label>{{ translate('Product stores') }}</ion-label>
-                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" @click="selectProductStore()">
-                  {{ translate('Add') }}
-                  <ion-icon slot="end" :icon="addCircleOutline" />
+                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" size="small" @click="selectProductStore()">
+                  {{ translate('Edit') }}
+                  <ion-icon slot="end" :icon="pencilOutline" />
                 </ion-button>
               </ion-list-header>
               <ion-item :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-for="store in userProductStores" :key="store.productStoreId">
@@ -287,8 +287,8 @@
                   <h2>{{ store.storeName || store.productStoreId }}</h2>
                   <p>{{ getRoleTypeDesc(store.roleTypeId) }}</p>
                 </ion-label>
-                <ion-button slot="end" fill="clear" color="medium" @click="openProductStoreActionsPopover($event, store)">
-                  <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
+                <ion-button slot="end" fill="clear" color="danger" size="small" @click="removeProductStore(store)">
+                  <ion-icon slot="icon-only" :icon="trashOutline" />
                 </ion-button>
               </ion-item>
             </ion-list>
@@ -437,11 +437,12 @@ import {
   eyeOffOutline,
   eyeOutline,
   mailOutline,
+  pencilOutline,
+  trashOutline,
   warningOutline
 } from 'ionicons/icons';
 import { translate } from '@hotwax/dxp-components';
 import ContactActionsPopover from '@/components/ContactActionsPopover.vue'
-import ProductStoreActionsPopover from '@/components/ProductStoreActionsPopover.vue'
 import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
 import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
@@ -789,16 +790,43 @@ export default defineComponent({
 
       await alert.present();
     },
-    async openProductStoreActionsPopover(event: Event, store: any) {
-      const productStoreActionsPopover = await popoverController.create({
-        component: ProductStoreActionsPopover,
-        componentProps: {
-          productStore: store
-        },
-        event,
-        showBackdrop: false,
+    async removeProductStore(productStore: any) {
+      const message = 'Are you sure you want to perform this action?'
+      const alert = await alertController.create({
+        header: translate("Remove product store role"),
+        message: translate(message),
+        buttons: [
+          {
+            text: translate("No"),
+          },
+          {
+            text: translate("Yes"),
+            handler: async () => {
+              await this.removeProductStoreRole(productStore);
+            }
+          }
+        ],
       });
-      return productStoreActionsPopover.present();
+      return alert.present();
+    },
+    async removeProductStoreRole(productStore: any) {
+      try {
+        const resp = await UserService.updateProductStoreRole({
+          partyId: this.selectedUser.partyId,
+          productStoreId: productStore.productStoreId,
+          roleTypeId: productStore.roleTypeId,
+          fromDate: this.userProductStores.find((store: any) => productStore.productStoreId === store.productStoreId).fromDate,
+          thruDate: DateTime.now().toMillis()
+        })
+        if (hasError(resp)) throw resp.data
+        showToast(translate('Role removed successfully.'))
+      } catch (error) {
+        showToast(translate('Something went wrong.'));
+        logger.error(error)
+      }
+      // refetching product stores with updated roles
+      const userProductStores = await UserService.getUserProductStores(this.selectedUser.partyId)
+      this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, productStores: userProductStores })
     },
     async selectFacility() {
       let componentProps = {
@@ -1212,9 +1240,11 @@ export default defineComponent({
       eyeOutline,
       hasPermission,
       mailOutline,
+      pencilOutline,
       router,
       store,
       translate,
+      trashOutline,
       warningOutline,
       Actions
     }
