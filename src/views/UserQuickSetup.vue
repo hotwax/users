@@ -66,17 +66,20 @@
           <ion-list-header>
             <ion-label>{{ translate('Select Facilities') }}</ion-label>
             <ion-button fill="clear" @click="addFacilities()">
-              {{ translate("Add") }}
-              <ion-icon slot="end" :icon="addCircleOutline"></ion-icon>
+              {{ translate(selectedFacilities.length ? "Manage" : "Add") }}
+              <ion-icon slot="end" :icon="selectedFacilities.length ? settingsOutline : addCircleOutline"></ion-icon>
             </ion-button>
           </ion-list-header>
-          <ion-item v-for="facility in facilities" :key="facility.facilityId">
-            <ion-checkbox v-if="!isFacilityLogin()" :checked="true" @ionChange="toggleFacilitySelection(facility)">
+          <ion-item v-for="facility in selectedFacilities" :key="facility.facilityId">
+            <template v-if="!isFacilityLogin()">
               <ion-label>
                 {{ facility.facilityName || facility.facilityId }}
                 <p>{{ facility.facilityId }}</p>
               </ion-label>
-            </ion-checkbox>
+              <ion-button slot="end" fill="clear" color="danger"  @click="toggleFacilitySelection(facility)">
+                <ion-icon :icon="closeOutline" slot="icon-only" />
+              </ion-button>
+            </template>
             <ion-label v-else>
               {{ facility.facilityName || facility.facilityId }}
               <p>{{ facility.facilityId }}</p>
@@ -105,7 +108,6 @@
 import {
   IonBackButton,
   IonButton,
-  IonCheckbox,
   IonContent,
   IonHeader,
   IonIcon,
@@ -131,9 +133,11 @@ import {
   addCircleOutline,
   arrowForwardOutline,
   caretDownOutline,
+  closeOutline,
   documentTextOutline,
   eyeOffOutline,
-  eyeOutline
+  eyeOutline,
+  settingsOutline
 } from 'ionicons/icons';
 import { copyToClipboard, showToast, isValidPassword, isValidEmail } from '@/utils'
 import { translate } from "@hotwax/dxp-components";
@@ -147,7 +151,6 @@ export default defineComponent({
   components: {
     IonBackButton,
     IonButton,
-    IonCheckbox,
     IonContent,
     IonHeader,
     IonIcon,
@@ -176,7 +179,6 @@ export default defineComponent({
     return {
       userTemplateId: "FULFILLMENT",
       selectedUserTemplate: {} as any,
-      facilities: [] as any,
       selectedFacilities: [] as any,
       selectedProductStores: [] as any,
       showPassword: false,
@@ -279,7 +281,6 @@ export default defineComponent({
     if (this.isFacilityLogin()) {
       const addedFacilityIds = this.selectedUser.facilities.map((facility: any) => facility.facilityId);
       const addedFacilities = this.allFacilities.filter((facility: any) =>  addedFacilityIds.includes(facility.facilityId));
-      this.facilities = addedFacilities;
       this.selectedFacilities = addedFacilities;
     }
     await this.initializeFormData();
@@ -467,7 +468,6 @@ export default defineComponent({
 
       selectFacilityModal.onDidDismiss().then((result) => {
         if (result.data && result.data.value) {
-          this.facilities = result.data.value.selectedFacilities;
           this.selectedFacilities = result.data.value.selectedFacilities;
         }
       })
@@ -505,9 +505,11 @@ export default defineComponent({
       addCircleOutline,
       arrowForwardOutline,
       caretDownOutline,
+      closeOutline,
       documentTextOutline,
       eyeOffOutline,
       eyeOutline,
+      settingsOutline,
       translate
     };
   }
