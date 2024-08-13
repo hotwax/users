@@ -76,7 +76,7 @@
                 {{ facility.facilityName || facility.facilityId }}
                 <p>{{ facility.facilityId }}</p>
               </ion-label>
-              <ion-button slot="end" fill="clear" color="danger"  @click="toggleFacilitySelection(facility)">
+              <ion-button slot="end" fill="clear" color="danger" @click="toggleFacilitySelection(facility)">
                 <ion-icon :icon="closeOutline" slot="icon-only" />
               </ion-button>
             </template>
