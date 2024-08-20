@@ -279,6 +279,36 @@ const actions: ActionTree<UserState, RootState> = {
     }
     commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
   },
+
+  async fetchUserPickerRoleStatus({ commit, state }) {
+    const currentSelectedUser = JSON.parse(JSON.stringify(state.selectedUser))
+
+    try {
+      const resp = await UserService.fetchPartyRelationship({
+        inputFields: {
+          partyIdTo: currentSelectedUser.partyId,
+          roleTypeIdTo: 'WAREHOUSE_PICKER',
+          roleTypeIdTo_op: 'equals'
+        },
+        filterByDate: 'Y',
+        viewSize: 1,
+        entityName: 'PartyRelationship',
+        fieldList: ['partyIdTo', 'roleTypeIdTo', "partyIdFrom", "roleTypeIdFrom", "fromDate"]
+      })
+
+      if (!hasError(resp)) {
+        const pickerRelationship = resp.data.docs[0];
+        currentSelectedUser.isWarehousePicker = pickerRelationship ? true : false,
+        currentSelectedUser.pickerRelationship = pickerRelationship;
+      } else {
+        throw resp.data;
+      }
+    } catch(error: any) {
+      console.error(error);
+    }
+    commit(types.USER_SELECTED_USER_UPDATED, currentSelectedUser)
+  },
+
   updateSelectedUser({ commit }, selectedUser) {
     commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
   },
