@@ -304,7 +304,7 @@ const actions: ActionTree<UserState, RootState> = {
         throw resp.data;
       }
     } catch(error: any) {
-      console.error(error);
+      logger.error(error);
     }
     commit(types.USER_SELECTED_USER_UPDATED, currentSelectedUser)
   },
