@@ -22,7 +22,7 @@
             </ion-select>
           </ion-item>
           <ion-item>
-            <ion-input label-placement="floating">
+            <ion-input label-placement="floating" v-model="formData.groupName">
               <div slot="label">{{ translate('Name') }} <ion-text color="danger">*</ion-text></div>
             </ion-input>
           </ion-item>
