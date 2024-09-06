@@ -129,7 +129,7 @@ const router = createRouter({
 router.beforeEach((to, from) => {
   const permissionId = to.meta.permissionId;
   if (permissionId && !hasPermission(permissionId)) {
-    showToast(translate('You do not have permission to access this page'));
+    showToast(translate('The requested page was not available to your user. Please contact your administrator to update your permissions.'));
     if (from.path === '/login' || from.path === '/') {
       return { path: '/tabs/settings' };
     }
