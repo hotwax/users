@@ -258,7 +258,40 @@
                 {{ translate('Clearance') }}
               </ion-card-title>
             </ion-card-header>
-            <ion-item lines="none">
+
+            <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE)" v-if="!userSecurityGroups.length" @click="selectSecurityGroup()" fill="outline" expand="block">
+              <ion-icon :icon="addOutline" slot='start' />
+              {{ translate('Add to security group') }}
+            </ion-button>
+            <ion-list v-else>
+              <ion-list-header color="light">
+                <ion-label>{{ translate('Security Group') }}</ion-label>
+                <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" @click="selectSecurityGroup()">
+                  {{ translate('Add') }}
+                  <ion-icon slot="end" :icon="addCircleOutline" />
+                </ion-button>
+              </ion-list-header>
+              <template v-if="!hasPermission(Actions.APP_SUPER_USER) && checkUserAssociatedSecurityGroup('SUPER')">
+                <ion-item lines="none" :disabled="true">
+                  <ion-label slot="end">{{ translate('Super') }}</ion-label>
+                  <ion-button slot="end" fill="clear" color="medium">
+                    <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
+                  </ion-button>
+                </ion-item>
+              </template>
+              <template v-else>
+                <ion-item :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE)" v-for="securityGroup in userSecurityGroups" :key="securityGroup.groupId">
+                  <ion-label>
+                    {{ getSecurityGroupName(securityGroup.groupId) }}
+                  </ion-label>
+                  <ion-button slot="end" fill="clear" color="medium" @click="openSecurityGroupActionsPopover($event, securityGroup)">
+                    <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
+                  </ion-button>
+                </ion-item>
+              </template>
+            </ion-list>
+
+            <!--<ion-item lines="none">
               <template v-if="!hasPermission(Actions.APP_SUPER_USER) && selectedUser.securityGroup?.groupId === 'SUPER'">
                 <ion-label>{{ translate('Security Group') }}</ion-label>        
                 <ion-label slot="end">{{ translate('Super') }}</ion-label>
@@ -269,7 +302,8 @@
                 </ion-select-option>
                 <ion-select-option value="">{{ translate("None") }}</ion-select-option>
               </ion-select>
-            </ion-item>
+            </ion-item>-->
+            
             <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block">
               <ion-icon :icon="addOutline" slot='start' />
               {{ translate('Add to a product store') }}
@@ -292,6 +326,7 @@
                 </ion-button>
               </ion-item>
             </ion-list>
+
           </ion-card>
           <ion-card v-else>
             <ion-card-header>
@@ -322,7 +357,7 @@
                   {{ translate("Show as picker") }}
                 </ion-toggle>
               </ion-item>
-              <ion-item lines="none" button detail :disabled="!hasPermission(Actions.APP_UPDT_FULFILLMENT_FACILITY) || selectedUser.securityGroup.groupId === 'INTEGRATION'" @click="selectFacility()">
+              <ion-item lines="none" button detail :disabled="!hasPermission(Actions.APP_UPDT_FULFILLMENT_FACILITY) || checkUserAssociatedSecurityGroup('INTEGRATION')" @click="selectFacility()">
                 <ion-label>{{  getUserFacilities().length === 1 ? translate('Added to 1 facility') : translate('Added to facilities', { count: getUserFacilities().length }) }}</ion-label>
               </ion-item>
             </ion-list>
@@ -442,9 +477,11 @@ import {
 import { translate } from '@hotwax/dxp-components';
 import ContactActionsPopover from '@/components/ContactActionsPopover.vue'
 import ProductStoreActionsPopover from '@/components/ProductStoreActionsPopover.vue'
+import SecurityGroupActionsPopover from '@/components/SecurityGroupActionsPopover.vue'
 import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
 import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
+import SelectSecurityGroupModal from '@/components/SelectSecurityGroupModal.vue'
 import { UserService } from "@/services/UserService";
 import { isValidEmail, isValidPassword, showToast } from "@/utils";
 import { hasError } from '@/adapter';
@@ -488,6 +525,7 @@ export default defineComponent({
     ...mapGetters({
       selectedUser: 'user/getSelectedUser',
       userProductStores: 'user/getUserProductStores',
+      userSecurityGroups: 'user/getUserSecurityGroups',
       getRoleTypeDesc: 'util/getRoleTypeDesc',
       securityGroups: 'util/getSecurityGroups',
       userProfile: 'user/getUserProfile',
@@ -538,6 +576,13 @@ export default defineComponent({
     this.username = this.selectedUser.groupName ? (this.selectedUser.groupName)?.toLowerCase() : (`${this.selectedUser.firstName}.${this.selectedUser.lastName}`?.toLowerCase())
   },
   methods: {
+    checkUserAssociatedSecurityGroup(securityGroupId: any) {
+      return this.userSecurityGroups?.some((userSecurityGroup:any) => userSecurityGroup.groupId === securityGroupId)
+    },
+    getSecurityGroupName(securityGroupId: any) {
+      const group = this.securityGroups.find((group: any) => group.groupId === securityGroupId);
+      return group?.groupName || group?.groupId || null;
+    },
     getShopifyShops(productStoreId: string) {
       this.shopifyShopsForProductStore = this.shopifyShops.filter((shopifyShop:any) => shopifyShop.productStoreId === productStoreId);
     },
@@ -789,6 +834,17 @@ export default defineComponent({
 
       await alert.present();
     },
+    async openSecurityGroupActionsPopover(event: Event, securityGroup: any) {
+      const securityGroupActionsPopover = await popoverController.create({
+        component: SecurityGroupActionsPopover,
+        componentProps: {
+          securityGroup : {...securityGroup, groupName: this.getSecurityGroupName(securityGroup.groupId)}
+        },
+        event,
+        showBackdrop: false,
+      });
+      return securityGroupActionsPopover.present();
+    },
     async openProductStoreActionsPopover(event: Event, store: any) {
       const productStoreActionsPopover = await popoverController.create({
         component: ProductStoreActionsPopover,
@@ -868,6 +924,43 @@ export default defineComponent({
       })
       return selectFacilityModal.present();
     },
+    async selectSecurityGroup() {
+      const selectSecurityGroupModal = await modalController.create({
+        component: SelectSecurityGroupModal,
+        componentProps: { selectedSecurityGroups: this.userSecurityGroups }
+      });
+
+      selectSecurityGroupModal.onDidDismiss().then(async (result) => {
+        if (result.data && result.data.value) {
+          const securityGroupsToCreate = result.data.value.securityGroupsToCreate
+          const securityGroupsToRemove = result.data.value.securityGroupsToRemove
+
+          const updateResponses = await Promise.allSettled(securityGroupsToRemove
+            .map(async (payload: any) => await UserService.removeUserSecurityGroup({
+              groupId: payload.groupId,
+              userLoginId: this.selectedUser.userLoginId
+            }))
+          )
+
+          const createResponse = await UserService.addUserToSecurityGroup({
+            groupIds: securityGroupsToCreate?.map((group: any) => group.groupId),
+            userLoginId: this.selectedUser.userLoginId
+          })
+
+          const hasFailedResponse = [...updateResponses, createResponse].some((response: any) => response.status === 'rejected')
+          if (hasFailedResponse) {
+            showToast(translate('Failed to update some security group(s).'))
+          } else {
+            showToast(translate('Security group(s) updated successfully.'))
+          }
+          // refetching security groups
+          const userSecurityGroups = await UserService.getUserSecurityGroups(this.selectedUser.userLoginId)
+          this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroups: userSecurityGroups })
+        }
+      })
+
+      return selectSecurityGroupModal.present();
+    },
     async selectProductStore() {
       const selectProductStoreModal = await modalController.create({
         component: SelectProductStoreModal,
@@ -928,63 +1021,6 @@ export default defineComponent({
       })
 
       return selectProductStoreModal.present();
-    },
-    async updateSecurityGroup(event: CustomEvent) {
-      const groupId = event.detail.value
-      // stop programmatic update as ion-change is triggered on page mount automatically
-      if (groupId === this.selectedUser.securityGroup.groupId) {
-        return
-      }
-
-      let resp = {} as any
-      try {
-        // delete if none (empty groupId) selected 
-        if (!groupId) {
-          resp = await UserService.removeUserSecurityGroup({
-            groupId: this.selectedUser.securityGroup.groupId,
-            userLoginId: this.selectedUser.userLoginId
-          })
-          if (!hasError(resp)) {
-            showToast(translate('Security group updated successfully.'))
-            const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
-            this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
-          } else {
-            throw resp.data
-          }
-        } else if (this.selectedUser.securityGroup.groupId) {
-            //update if already associated, this will expire existing user security groups and associate the new one.
-            resp = await UserService.addUserToSecurityGroup({
-              securityGroupId: groupId,
-              partyIdTo: this.selectedUser.partyId
-            })
-            if (hasError(resp)) throw resp.data
-            showToast(translate('Security group updated successfully.'))
-            const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
-            this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
-          
-        } else {
-          // create if not associated
-          resp = await UserService.addUserToSecurityGroup({
-            securityGroupId: groupId,
-            partyIdTo: this.selectedUser.partyId
-          })
-          if (!hasError(resp)) {
-            showToast(translate('Security group updated successfully.'))
-            const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
-            this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
-          } else {
-            throw resp.data
-          }
-        }
-      } catch (error: any) {
-        const errorMessage = error?.response?.data?.error.message;
-        if (errorMessage && errorMessage?.startsWith('Security Error:')) {
-          showToast(translate(translate("You don't have permission to update the security group.")))
-        } else {
-          showToast(translate('Something went wrong.'))
-        }
-        logger.error(error)
-      }
     },
     async updatePickerRoleStatus(event: any) {
       event.stopImmediatePropagation();
@@ -1178,15 +1214,17 @@ export default defineComponent({
 
     getSecurityGroups(securityGroups: any) {
       const excludedSecurityGroups = JSON.parse(process.env.VUE_APP_EXCLUDED_SECURITY_GROUPS as string)
-      const selectedSecurityGroup = this.selectedUser.securityGroup.groupId
+      const selectedSecurityGroupIds = this.selectedUser.securityGroups.map((securityGroup: any) => securityGroup.groupId)
 
       if(!hasPermission(Actions.APP_SUPER_USER)) excludedSecurityGroups.push('SUPER')
 
       // We have some excluded security groups that can't be created by any users,
       // But if a user exists of these excluded security groups, we will show them in the select option.
-      if(excludedSecurityGroups.includes(selectedSecurityGroup)) {
-        excludedSecurityGroups.splice(excludedSecurityGroups.indexOf(selectedSecurityGroup), 1)
-      }
+      selectedSecurityGroupIds.map((selectedSecurityGroupId:any) => {
+        if(excludedSecurityGroups.includes(selectedSecurityGroupId)) {
+          excludedSecurityGroups.splice(excludedSecurityGroups.indexOf(selectedSecurityGroupId), 1)
+        }
+      })
 
       return securityGroups.filter((group: any) => !excludedSecurityGroups.includes(group.groupId))
     },
