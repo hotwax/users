@@ -322,7 +322,7 @@
                   {{ translate("Show as picker") }}
                 </ion-toggle>
               </ion-item>
-              <ion-item lines="none" v-if="isUserAdmin.length">
+              <ion-item lines="none" v-if="isUserFulfillmentAdmin.length">
                 <ion-label>{{ translate("This user has 'STOREFULFILLMENT_ADMIN' permission, enabling access to all facilities.") }}</ion-label>
               </ion-item>
               <ion-item lines="none" button detail v-else @click="selectFacility()" :disabled="selectedUser.securityGroup.groupId === 'INTEGRATION'">
@@ -522,7 +522,7 @@ export default defineComponent({
       isUserFetched: false,
       showPassword: false,
       shopifyShopsForProductStore: [] as any,
-      isUserAdmin: []
+      isUserFulfillmentAdmin: []
     }
   },
  
@@ -536,7 +536,7 @@ export default defineComponent({
     if (productStoreId) {
       this.getShopifyShops(productStoreId);
     }
-    this.isUserAdmin = await UserService.isUserAdminAndSuper(this.selectedUser.userLoginId)
+    this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(this.selectedUser.userLoginId)
     this.isUserFetched = true
     this.username = this.selectedUser.groupName ? (this.selectedUser.groupName)?.toLowerCase() : (`${this.selectedUser.firstName}.${this.selectedUser.lastName}`?.toLowerCase())
   },

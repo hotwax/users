@@ -326,7 +326,7 @@ const getUserSecurityGroup = async (userLoginId: string): Promise<any> => {
 
   return userSecurityGroup
 }
-const isUserAdminAndSuper = async (userLoginId: string): Promise<any> => {
+const isUserFulfillmentAdmin = async (userLoginId: string): Promise<any> => {
   const payload = {
     inputFields: {
       userLoginId,
@@ -811,7 +811,7 @@ export const UserService = {
   getUserFacilities,
   getUserProductStores,
   getUserSecurityGroup,
-  isUserAdminAndSuper,
+  isUserFulfillmentAdmin,
   isUserLoginIdAlreadyExists,
   isRoleTypeExists,
   login,
