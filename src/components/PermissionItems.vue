@@ -29,13 +29,13 @@
       </ion-item-divider>
 
       <section v-if="group.groupId !== 'SGC_HIDDEN'">
-        <ion-card v-for="permission in group.permissions" :key="permission.permissionId">
+        <ion-card v-for="permission in group.permissions" :key="permission.permissionId" button @click="updatePermissionAssociation(permission)">
           <ion-card-header>
             <div>
               <ion-card-title>{{ permission.permissionId }}</ion-card-title>
               <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
             </div>
-            <ion-checkbox :disabled="!hasPermission(Actions.APP_PERMISSION_UPDATE)" :checked="permission.isChecked" @click="updatePermissionAssociation($event, permission)" />
+            <ion-checkbox :disabled="permission.isChecked ? !hasPermission(Actions.APP_PERMISSION_UPDATE) : !hasPermission(Actions.APP_PERMISSION_CREATE)" :checked="permission.isChecked" />
           </ion-card-header>
         </ion-card>
       </section>
@@ -107,9 +107,7 @@ export default defineComponent({
     async updateQuery() {
       await this.store.dispatch('permission/updateQuery', this.query)
     },
-    async updatePermissionAssociation(event: any, permission: any) {
-      event.stopPropagation();
-
+    async updatePermissionAssociation(permission: any) {
       let resp = {} as any;
       const payload = {
         groupId: this.currentGroup.groupId,
@@ -153,7 +151,6 @@ export default defineComponent({
           showToast(translate("Security group permission association successfully updated."))
           await this.store.dispatch('permission/updateCurrentGroupPermissions', { groupId: this.currentGroup.groupId, currentPermissions})
           this.store.dispatch('permission/checkAssociated')
-          event.target.checked = !permission.isChecked
         } else {
           throw resp.data
         }

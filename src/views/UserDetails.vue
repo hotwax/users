@@ -123,7 +123,7 @@
                   <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
                 </ion-item>
                 <ion-item :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" >
-                  <ion-toggle @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled === 'N'">
+                  <ion-toggle @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled == 'N'">
                     {{ translate("Block login") }}
                   </ion-toggle>
                 </ion-item>
@@ -139,7 +139,7 @@
                     <div slot="label">{{ translate("Username") }} <ion-text color="danger">*</ion-text></div>
                   </ion-input>
                 </ion-item>
-                <ion-item ref="password">
+                <ion-item ref="password" lines="none">
                   <ion-input 
                     label-placement="fixed" 
                     :placeholder="translate('Default password')" 
@@ -149,7 +149,7 @@
                     :type="showPassword ? 'text' : 'password'" 
                     @ionInput="validatePassword" 
                     @ionBlur="markPasswordTouched"
-                    :helper-text="translate('will be asked to reset their password when they login', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName })"
+                    :helper-text="translate('will be asked to reset their password when they login to OMS.', { name: selectedUser.firstName ? selectedUser.firstName : selectedUser.groupName })"
                     :error-text="translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.')"
                   >
                     <div slot="label">{{ translate("Password") }} <ion-text color="danger">*</ion-text></div>
@@ -495,7 +495,8 @@ export default defineComponent({
       securityGroups: 'util/getSecurityGroups',
       userProfile: 'user/getUserProfile',
       baseUrl: 'user/getBaseUrl',
-      shopifyShops: 'util/getShopifyShops'
+      shopifyShops: 'util/getShopifyShops',
+      organizationPartyId: 'util/getOrganizationPartyId'
     })
   },
   props: ['partyId'],
@@ -728,7 +729,7 @@ export default defineComponent({
           userLoginId: this.username,
           enabled: 'Y',
           userPrefTypeId: 'ORGANIZATION_PARTY',
-          userPrefValue: 'COMPANY',
+          userPrefValue: this.organizationPartyId,
         })
         if (!hasError(resp)) {
           await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
@@ -778,6 +779,7 @@ export default defineComponent({
                 showToast(translate('User login status updated successfully.'))
                 // updating toggle state on success
                 event.target.checked = isChecked
+                this.selectedUser.enabled = isChecked ? 'N' : 'Y'
               } else {
                 throw resp.data
               }
@@ -1089,6 +1091,14 @@ export default defineComponent({
       emitter.emit('presentLoader')
 
       try {
+        if (isChecked) {   
+          await UserService.updateUserLoginStatus({
+            enabled: 'N',
+            partyId: this.partyId,
+            userLoginId: this.selectedUser.userLoginId
+          });   
+          this.selectedUser.enabled = 'N';         
+        }
         if(this.selectedUser.partyTypeId === 'PARTY_GROUP') {
           resp = await UserService.updatePartyGroup(payload)
         } else {

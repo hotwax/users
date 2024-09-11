@@ -16,8 +16,8 @@
           <ion-item ref="groupId" lines="none">
             <ion-input :label="translate('Internal ID')" label-placement="floating" @ionChange="validateGroupId" @ionBlur="markGroupIdTouched" v-model="formData.groupId" :errorText="translate('Internal ID cannot be more than 20 characters.')" />
           </ion-item>
-          <ion-item>
-            <ion-textarea :label="translate('Description')" label-placement="floating" v-model="formData.description" />
+          <ion-item lines="none">
+            <ion-textarea :label="translate('Description')" label-placement="floating" v-model="formData.description" :counter="true" :maxlength="255"/>
           </ion-item>
         </ion-list>
   

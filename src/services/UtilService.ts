@@ -60,8 +60,17 @@ const getShopifyConfigs = async (): Promise <any>  => {
   });
 }
 
+const fetchOrganizationPartyId = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "POST",
+    data: payload
+  })
+}
+
 export const UtilService = {
   fetchFacilities,
+  fetchOrganizationPartyId,
   fetchProductStores,
   getSecurityGroups,
   getShopifyConfigs,

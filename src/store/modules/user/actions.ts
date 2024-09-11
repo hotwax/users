@@ -72,6 +72,7 @@ const actions: ActionTree<UserState, RootState> = {
       commit(types.USER_INFO_UPDATED, userProfile);
       commit(types.USER_PERMISSIONS_UPDATED, appPermissions);
       commit(types.USER_TOKEN_CHANGED, { newToken: token })
+      this.dispatch('util/fetchOrganizationPartyId')
 
       const partyId = router.currentRoute.value.query.partyId
       if (partyId) {
@@ -345,27 +346,33 @@ const actions: ActionTree<UserState, RootState> = {
       "viewSize": payload.viewSize
     }
 
-    let users = JSON.parse(JSON.stringify(state.users.list)), total = 0;
-
+    let users = JSON.parse(JSON.stringify(state.users.list)); // Initialize users with the current state of users
+    let total = state.users.total;
+    
     try {
-      const resp = await UserService.fetchUsers(params);
-
-      if (!hasError(resp) && resp.data.count) {
-        if (payload.viewIndex && payload.viewIndex > 0) {
-          users = users.concat(resp.data.docs);
-        } else {
-          users = resp.data.docs;
+      const resp = await UserService.fetchUsers(params); // Fetch users from the service
+      if (!hasError(resp)) { 
+        if (resp.data.count > 0) { 
+          if (payload.viewIndex && payload.viewIndex > 0) { 
+            users = users.concat(resp.data.docs); 
+          } else {
+            users = resp.data.docs; // Replace the users list with the new users
+          }
+          total = resp.data.count; // Update the total number of users
         }
-        total = resp.data.count;
       } else {
-        throw resp.data;
+        throw resp.data; 
       }
-    } catch(error) {
-      logger.error(error);
+    } catch (error) {
+      if (payload.viewIndex === 0) { 
+        users = []; 
+        total = 0; 
+      }
     }
-
-    emitter.emit("dismissLoader");
+    
+    // Update the state only once
     commit(types.USER_LIST_UPDATED, { users, total });
+    emitter.emit("dismissLoader");
   },
 
   updateQuery({ commit }, query) {

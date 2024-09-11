@@ -22,7 +22,7 @@
             </ion-select>
           </ion-item>
           <ion-item>
-            <ion-input label-placement="floating">
+            <ion-input label-placement="floating" v-model="formData.groupName">
               <div slot="label">{{ translate('Name') }} <ion-text color="danger">*</ion-text></div>
             </ion-input>
           </ion-item>
@@ -115,7 +115,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      facilities: 'util/getFacilities'
+      facilities: 'util/getFacilities',
+      organizationPartyId: 'util/getOrganizationPartyId'
     })
   },
   data() {
@@ -194,7 +195,7 @@ export default defineComponent({
         const payload = {
           ...this.formData,
           partyTypeId,
-          "partyIdFrom": "COMPANY",
+          "partyIdFrom": this.organizationPartyId,
           "roleTypeIdFrom": "INTERNAL_ORGANIZATIO",
           "roleTypeIdTo": "APPLICATION_USER",
           "partyRelationshipTypeId": "EMPLOYMENT",

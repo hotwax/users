@@ -228,7 +228,7 @@
   "User not found": "User not found",
   "Verify password": "Verify password",
   "View product store": "View product store",
-  "will be asked to reset their password when they login": "{name} will be asked to reset their password when they login",
+  "will be asked to reset their password when they login to OMS.": "{name} will be asked to reset their password when they login to OMS.",
   "Yes": "Yes",
   "You don't have permission to update the security group.": "You don't have permission to update the security group.",
   "Your user": "Your user"
