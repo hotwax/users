@@ -204,6 +204,7 @@
   "The timezone you select is used to ensure automations you schedule are always accurate to the time you select.": "The timezone you select is used to ensure automations you schedule are always accurate to the time you select.",
   "This is the name of the OMS you are connected to right now. Make sure that you are connected to the right instance before proceeding.": "This is the name of the OMS you are connected to right now. Make sure that you are connected to the right instance before proceeding.",
   "This user was disabled due to repeated failed password attempts": "This user was disabled due to repeated failed password attempts",
+  "This user has 'STOREFULFILLMENT_ADMIN' permission, enabling access to all facilities.": "This user has 'STOREFULFILLMENT_ADMIN' permission, enabling access to all facilities.",
   "Unblock user login": "Unblock user login",
   "Unblocking a user will allow them to login to the OMS again with their credentials.": "Unblocking a user will allow them to login to the OMS again with their credentials.",
   "Update product store role": "Update product store role",

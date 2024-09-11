@@ -326,6 +326,34 @@ const getUserSecurityGroup = async (userLoginId: string): Promise<any> => {
 
   return userSecurityGroup
 }
+const isUserAdminAndSuper = async (userLoginId: string): Promise<any> => {
+  const payload = {
+    inputFields: {
+      userLoginId,
+      permissionId: ['STOREFULFILLMENT_ADMIN']
+    },
+    entityName: "UserLoginSecurityGroupAndPermission",
+    filterByDate: "Y",
+    viewSize: 10,
+  };
+
+  try {
+    const resp: any = await api({
+      url: "performFind",
+      method: "POST",
+      data: payload,
+    });
+
+    if (!hasError(resp)) {
+      return resp.data.docs;
+    } else {
+      throw resp.data;
+    }
+  } catch (error) {
+    logger.error(error);
+    return []; 
+  }
+};
 
 const removeUserSecurityGroup = async (payload: any): Promise <any> => {
   return api({
@@ -783,6 +811,7 @@ export const UserService = {
   getUserFacilities,
   getUserProductStores,
   getUserSecurityGroup,
+  isUserAdminAndSuper,
   isUserLoginIdAlreadyExists,
   isRoleTypeExists,
   login,
