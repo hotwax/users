@@ -154,13 +154,18 @@ export default defineComponent({
 
       try {
         const resp = await PermissionService.getSecurityGroupUsers({
-          entityName: "UserLoginAndSecurityGroup",
-          distinct: "Y",
+          entityName: "PartyAndUserLoginSecurityGroupDetails",
           noConditionFind: "Y",
+          fromDateName: "relationshipFromDate",
+          thruDateName: "relationshipThruDate",
           filterByDate: "Y",
-          viewSize: 100,
+          distinct: "Y",
+          viewSize: 1,
+          viewIndex: 0,
+          fieldList: ['partyId','securityGroupName'],
           inputFields: {
-            groupId: this.currentGroup.groupId
+            securityGroupId: this.currentGroup.groupId,
+            roleTypeIdTo: "APPLICATION_USER"
           }
         })
 
