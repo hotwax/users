@@ -965,7 +965,7 @@ export default defineComponent({
             if (hasError(resp)) throw resp.data
             showToast(translate('Security group updated successfully.'))
             const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
-            this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(this.selectedUser.securityGroup?.groupId)
+            this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(groupId)
             this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
           
         } else {
@@ -977,7 +977,7 @@ export default defineComponent({
           if (!hasError(resp)) {
             showToast(translate('Security group updated successfully.'))
             const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
-            this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(this.selectedUser.securityGroup?.groupId)
+            this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(groupId)
             this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
           } else {
             throw resp.data
