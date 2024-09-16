@@ -322,7 +322,7 @@
                   {{ translate("Show as picker") }}
                 </ion-toggle>
               </ion-item>
-              <ion-item lines="none" v-if="isUserFulfillmentAdmin.length">
+              <ion-item lines="none" v-if="isUserFulfillmentAdmin">
                 <ion-label>{{ translate("This user has 'STOREFULFILLMENT_ADMIN' permission, enabling access to all facilities.") }}</ion-label>
               </ion-item>
               <ion-item lines="none" button detail v-else @click="selectFacility()" :disabled="selectedUser.securityGroup.groupId === 'INTEGRATION'">
@@ -523,7 +523,7 @@ export default defineComponent({
       isUserFetched: false,
       showPassword: false,
       shopifyShopsForProductStore: [] as any,
-      isUserFulfillmentAdmin: []
+      isUserFulfillmentAdmin: false
     }
   },
  
@@ -537,7 +537,7 @@ export default defineComponent({
     if (productStoreId) {
       this.getShopifyShops(productStoreId);
     }
-    this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(this.selectedUser.userLoginId)
+    this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(this.selectedUser.securityGroup?.groupId)
     this.isUserFetched = true
     this.username = this.selectedUser.groupName ? (this.selectedUser.groupName)?.toLowerCase() : (`${this.selectedUser.firstName}.${this.selectedUser.lastName}`?.toLowerCase())
   },
@@ -951,6 +951,7 @@ export default defineComponent({
           if (!hasError(resp)) {
             showToast(translate('Security group updated successfully.'))
             const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
+            this.isUserFulfillmentAdmin = false
             this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
           } else {
             throw resp.data
@@ -964,6 +965,7 @@ export default defineComponent({
             if (hasError(resp)) throw resp.data
             showToast(translate('Security group updated successfully.'))
             const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
+            this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(this.selectedUser.securityGroup?.groupId)
             this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
           
         } else {
@@ -975,6 +977,7 @@ export default defineComponent({
           if (!hasError(resp)) {
             showToast(translate('Security group updated successfully.'))
             const userSecurityGroup = await UserService.getUserSecurityGroup(this.selectedUser.userLoginId)
+            this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(this.selectedUser.securityGroup?.groupId)
             this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroup: userSecurityGroup })
           } else {
             throw resp.data

@@ -326,15 +326,17 @@ const getUserSecurityGroup = async (userLoginId: string): Promise<any> => {
 
   return userSecurityGroup
 }
-const isUserFulfillmentAdmin = async (userLoginId: string): Promise<any> => {
+
+const isUserFulfillmentAdmin = async (groupId: string): Promise<any> => {
   const payload = {
     inputFields: {
-      userLoginId,
-      permissionId: ['STOREFULFILLMENT_ADMIN']
+      groupId,
+      permissionId: "STOREFULFILLMENT_ADMIN"
     },
-    entityName: "UserLoginSecurityGroupAndPermission",
+    entityName: "SecurityGroupPermission",
     filterByDate: "Y",
-    viewSize: 10,
+    viewSize: 1,
+    fieldList: ["groupId", "permissionId", "fromDate"]
   };
 
   try {
@@ -343,17 +345,14 @@ const isUserFulfillmentAdmin = async (userLoginId: string): Promise<any> => {
       method: "POST",
       data: payload,
     });
-
-    if (!hasError(resp)) {
-      return resp.data.docs;
-    } else {
-      throw resp.data;
+    if(!hasError(resp) && resp.data.docs.length) {
+      return true
     }
-  } catch (error) {
-    logger.error(error);
-    return []; 
+    return false
+  } catch(err) {
+    return false
   }
-};
+}
 
 const removeUserSecurityGroup = async (payload: any): Promise <any> => {
   return api({
