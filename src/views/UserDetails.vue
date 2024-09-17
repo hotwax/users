@@ -1005,6 +1005,7 @@ export default defineComponent({
         }
         if (!hasError(resp)) {
           showToast(translate('User picker role updated successfully.'))
+          await this.store.dispatch("user/fetchUserPickerRoleStatus");
           // updating toggle state on success
           event.target.checked = isChecked
         } else {
