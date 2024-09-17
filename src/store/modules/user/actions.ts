@@ -232,7 +232,7 @@ const actions: ActionTree<UserState, RootState> = {
 
     if (Object.keys(selectedUser).length) {
       selectedUser.facilities = await UserService.getUserFacilities(selectedUser.partyId)
-      selectedUser.securityGroup = await UserService.getUserSecurityGroup(selectedUser.userLoginId)
+      selectedUser.securityGroups = await UserService.getUserSecurityGroups(selectedUser.userLoginId)
       selectedUser.productStores = await UserService.getUserProductStores(selectedUser.partyId)
       if (selectedUser.userLoginId) {
         const userFavorites = await UserService.getUserFavorites({userLoginId: selectedUser.userLoginId})
