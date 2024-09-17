@@ -35,7 +35,8 @@
               <ion-card-title>{{ permission.permissionId }}</ion-card-title>
               <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
             </div>
-            <ion-checkbox :disabled="permission.isChecked ? !hasPermission(Actions.APP_PERMISSION_UPDATE) : !hasPermission(Actions.APP_PERMISSION_CREATE)" :checked="permission.isChecked" />
+            <ion-spinner v-if="permission.isStatusUpdating" name="crescent" data-spinner-size="medium" />
+            <ion-checkbox v-else :disabled="permission.isChecked ? !hasPermission(Actions.APP_PERMISSION_UPDATE) : !hasPermission(Actions.APP_PERMISSION_CREATE)" :checked="permission.isChecked" />
           </ion-card-header>
         </ion-card>
       </section>
@@ -63,6 +64,7 @@ import {
   IonSearchbar,
   IonSelect,
   IonSelectOption,
+  IonSpinner,
   IonToggle
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
@@ -92,6 +94,7 @@ export default defineComponent({
     IonSearchbar,
     IonSelect,
     IonSelectOption,
+    IonSpinner,
     IonToggle,
   },
   computed: {
@@ -100,7 +103,8 @@ export default defineComponent({
       currentGroupPermissions: 'permission/getCurrentGroupPermissions',
       currentGroup: "permission/getCurrentGroup",
       filteredPermissions: "permission/getFilteredPermissions",
-      classificationSecurityGroups: 'util/getClassificationSecurityGroups'
+      classificationSecurityGroups: 'util/getClassificationSecurityGroups',
+      permissionsByClassificationGroups: 'permission/getPermissionsByClassificationGroups'
     })
   },
   methods: {
@@ -115,6 +119,7 @@ export default defineComponent({
       }
 
       let currentPermissions = JSON.parse(JSON.stringify(this.currentGroupPermissions))
+      this.updatePermissionStatus(permission, true);
 
       try {
         if(permission.isChecked) {
@@ -158,9 +163,22 @@ export default defineComponent({
         showToast(translate("Failed to update security group permission association."))
         logger.error(err)
       }
+      this.updatePermissionStatus(permission, false);
     },
     arePermissionsAvailable() {
       return Object.values(this.filteredPermissions).some((groupType: any) => groupType.permissions.length)
+    },
+    updatePermissionStatus(currentPermission: any, status: boolean) {
+      const permissionsByGroup = JSON.parse(JSON.stringify(this.permissionsByClassificationGroups));
+
+      Object.values(permissionsByGroup).map((group: any) => {
+        const permission = group.permissions.find((permission: any) => permission.permissionId === currentPermission.permissionId)
+        if(permission) {
+          permission["isStatusUpdating"] = status
+        }
+      })
+
+      this.store.dispatch('permission/updatePermissionsByClassificationGroups', permissionsByGroup)
     }
   },
   setup() {
