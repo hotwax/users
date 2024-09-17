@@ -2,12 +2,12 @@
   <ion-content>
     <ion-list>
       <ion-list-header>{{ productStore.storeName || productStore.productStoreId }}</ion-list-header>
-      <ion-item button @click="selectProductStoreRole()">
-        {{ translate("Edit") }}
+      <ion-item>
+        <ion-label>
+          {{ getDateTime(productStore.fromDate) }}
+          <p>{{ translate("added to product store") }}</p>
+        </ion-label>
       </ion-item>
-      <!-- <ion-item button>
-        {{ translate("View product store") }}
-      </ion-item> -->
       <ion-item button @click="confirmRemove()" lines="none">
         {{ translate("Remove") }}
       </ion-item>
@@ -20,15 +20,14 @@ import {
   alertController,
   IonContent,
   IonItem,
+  IonLabel,
   IonList,
   IonListHeader,
-  modalController,
   popoverController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 import { translate } from "@hotwax/dxp-components";
 import { mapGetters, useStore } from 'vuex';
-import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
 import { UserService } from "@/services/UserService";
 import { DateTime } from "luxon";
 import { showToast } from "@/utils";
@@ -40,6 +39,7 @@ export default defineComponent({
   components: {
     IonContent,
     IonItem,
+    IonLabel,
     IonList,
     IonListHeader
   },
@@ -54,67 +54,8 @@ export default defineComponent({
     closePopover() {
       popoverController.dismiss();
     },
-    async selectProductStoreRole() {
-      const selectProductStoreModal = await modalController.create({
-        component: SelectProductStoreModal,
-        componentProps: { selectedProductStores: this.userProductStores }
-      });
-
-      selectProductStoreModal.onDidDismiss().then(async (result) => {
-        if (result.data && result.data.value) {
-          const productStoresToCreate = result.data.value.productStoresToCreate
-          const productStoresToRemove = result.data.value.productStoresToRemove
-
-          const updateResponses = await Promise.allSettled(productStoresToRemove
-            .map(async (payload: any) => await UserService.updateProductStoreRole({
-              partyId: this.selectedUser.partyId,
-              productStoreId: payload.productStoreId,
-              roleTypeId: payload.roleTypeId,
-              fromDate: this.userProductStores.find((store: any) => payload.productStoreId === store.productStoreId).fromDate,
-              thruDate: DateTime.now().toMillis()
-            }))
-          )
-
-          // explicitly calling ensurePartyRole (ensurePartyRole) as addToPartyTole
-          // and removeFromPartyRole are running in parallel on the server causing issues
-          if (productStoresToCreate.length) {
-            try {
-              const resp = await UserService.ensurePartyRole({
-                partyId: this.selectedUser.partyId,
-                roleTypeId: "APPLICATION_USER",
-              })
-              if (hasError(resp)) {
-                showToast(translate('Something went wrong.'));
-                throw resp.data
-              }
-            } catch (error) {
-              logger.error(error)
-              return
-            }
-          }
-
-          const createResponses = await Promise.allSettled(productStoresToCreate
-            .map(async (payload: any) => await UserService.createProductStoreRole({
-              productStoreId: payload.productStoreId,
-              partyId: this.selectedUser.partyId,
-              roleTypeId: "APPLICATION_USER",
-            }))
-          )
-
-          const hasFailedResponse = [...updateResponses, ...createResponses].some((response: any) => response.status === 'rejected')
-          if (hasFailedResponse) {
-            showToast(translate('Failed to update some role(s).'))
-          } else {
-            showToast(translate('Role(s) updated successfully.'))
-          }
-          // refetching product stores with updated roles
-          const userProductStores = await UserService.getUserProductStores(this.selectedUser.partyId)
-          this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, productStores: userProductStores })
-        }
-      })
-
-      this.closePopover()
-      return selectProductStoreModal.present();
+    getDateTime(time: any) {
+      return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
     },
     async removeProductStoreRole() {
       try {
@@ -139,7 +80,7 @@ export default defineComponent({
     async confirmRemove() {
       const message = 'Are you sure you want to perform this action?'
       const alert = await alertController.create({
-        header: translate("Remove product store role"),
+        header: translate("Remove product store"),
         message: translate(message),
         buttons: [
           {

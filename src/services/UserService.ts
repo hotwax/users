@@ -292,15 +292,15 @@ const sendResetPasswordEmail = async (payload: any): Promise <any> => {
 } 
 
 
-const getUserSecurityGroup = async (userLoginId: string): Promise<any> => {
-  let userSecurityGroup = {} as any
+const getUserSecurityGroups = async (userLoginId: string): Promise<any> => {
+  let userSecurityGroups = [] as any
   const payload = {
     inputFields: {
       userLoginId,
     },
     entityName: "UserLoginSecurityGroup",
     filterByDate: "Y",
-    viewSize: 10,
+    viewSize: 20, //Don't think there will be more than 20 security groups associated with any user
     fieldList: ["groupId", "userLoginId", "fromDate"]
   }
 
@@ -313,18 +313,15 @@ const getUserSecurityGroup = async (userLoginId: string): Promise<any> => {
 
 
     if (!hasError(resp) || resp.data.error === 'No record found') {
-      userSecurityGroup = {
-        groupId: resp.data.docs ? resp.data.docs[0].groupId : '',
-        fromDate: resp.data.docs && resp.data.docs[0].fromDate
-      }
+      userSecurityGroups = resp.data.docs ? resp.data.docs : []
     } else {
       throw resp.data
     }
   } catch (error) {
-    logger.error('Failed to fetch user associated security group.', error)
+    logger.error('Failed to fetch user associated security groups.', error)
   }
 
-  return userSecurityGroup
+  return userSecurityGroups
 }
 
 const isUserFulfillmentAdmin = async (groupId: string): Promise<any> => {
@@ -364,7 +361,7 @@ const removeUserSecurityGroup = async (payload: any): Promise <any> => {
 
 const addUserToSecurityGroup = async (payload: any): Promise <any> => {
   return api({
-    url: "service/addSecurityGroupToUserLogin", 
+    url: "service/addPartyUserPermission", 
     method: "post",
     data: payload
   });
@@ -563,8 +560,8 @@ const finishSetup = async (payload: any): Promise <any> => {
       });
       if (!hasError(resp)) {
         addUserToSecurityGroup({
-          "partyIdTo": partyId,
-          "securityGroupId": payload.selectedTemplate.securityGroupId ? payload.selectedTemplate.securityGroupId : "STORE_MANAGER",
+          "userLoginId": payload.formData.userLoginId,
+          "groupIds": payload.selectedTemplate.securityGroupId ? [payload.selectedTemplate.securityGroupId] : ["STORE_MANAGER"],
         });
       } else {
         throw resp.data;
@@ -813,7 +810,7 @@ export const UserService = {
   getUserProfile,
   getUserFacilities,
   getUserProductStores,
-  getUserSecurityGroup,
+  getUserSecurityGroups,
   isUserFulfillmentAdmin,
   isUserLoginIdAlreadyExists,
   isRoleTypeExists,

@@ -11,6 +11,7 @@
   "Add permissions": "Add permissions",
   "Add phone number": "Add phone number",
   "Add profile picture": "Add profile picture",
+  "added to product store": "added to product store",
   "Add to a product store": "Add to a product store",
   "All": "All",
   "App": "App",
@@ -120,6 +121,7 @@
   "Login": "Login",
   "Login details": "Login details",
   "Logout": "Logout",
+  "Manage": "Manage",
   "Name": "Name",
   "Name is required.": "Name is required.",
   "New password": "New password",
@@ -157,7 +159,7 @@
   "Remove email": "Remove email",
   "Remove external ID": "Remove external ID",
   "Remove phone number": "Remove phone number",
-  "Remove product store role": "Remove product store role",
+  "Remove product store": "Remove product store",
   "Remove users": "Remove users",
   "Rename Security Group": "Rename Security Group",
   "Require password reset on login": "Require password reset on login",
@@ -231,5 +233,6 @@
   "will be asked to reset their password when they login to OMS.": "{name} will be asked to reset their password when they login to OMS.",
   "Yes": "Yes",
   "You don't have permission to update the security group.": "You don't have permission to update the security group.",
+  "The requested page was not available to your user. Please contact your administrator to update your permissions.": "The requested page was not available to your user. Please contact your administrator to update your permissions.",
   "Your user": "Your user"
 }
