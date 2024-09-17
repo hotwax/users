@@ -259,18 +259,20 @@
               </ion-card-title>
             </ion-card-header>
 
-            <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE)" v-if="!userSecurityGroups.length" @click="selectSecurityGroup()" fill="outline" expand="block">
-              <ion-icon :icon="addOutline" slot='start' />
-              {{ translate('Add to security group') }}
-            </ion-button>
-            <ion-list v-else>
+            <ion-list>
               <ion-list-header color="light">
                 <ion-label>{{ translate('Security Group') }}</ion-label>
-                <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" @click="selectSecurityGroup()">
-                  {{ translate('Add') }}
-                  <ion-icon slot="end" :icon="addCircleOutline" />
+                <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" @click="selectSecurityGroup()" v-if="userSecurityGroups.length">
+                  {{ translate('Edit') }}
+                  <ion-icon slot="end" :icon="pencilOutline" />
                 </ion-button>
               </ion-list-header>
+
+              <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE)" v-if="!userSecurityGroups.length" @click="selectSecurityGroup()" fill="outline" expand="block" class="ion-margin">
+                <ion-icon :icon="addOutline" slot='start' />
+                {{ translate('Add to security group') }}
+              </ion-button>
+
               <template v-if="!hasPermission(Actions.APP_SUPER_USER) && checkUserAssociatedSecurityGroup('SUPER')">
                 <ion-item lines="none" :disabled="true">
                   <ion-label slot="end">{{ translate('Super') }}</ion-label>
@@ -289,7 +291,6 @@
                   </ion-button>
                 </ion-item>
               </template>
-            </ion-list>
 
             <!--<ion-item lines="none">
               <template v-if="!hasPermission(Actions.APP_SUPER_USER) && selectedUser.securityGroup?.groupId === 'SUPER'">
@@ -303,19 +304,20 @@
                 <ion-select-option value="">{{ translate("None") }}</ion-select-option>
               </ion-select>
             </ion-item>-->
-            
-            <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block">
-              <ion-icon :icon="addOutline" slot='start' />
-              {{ translate('Add to a product store') }}
-            </ion-button>
-            <ion-list v-else>
+
               <ion-list-header color="light">
                 <ion-label>{{ translate('Product stores') }}</ion-label>
-                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" @click="selectProductStore()">
-                  {{ translate('Add') }}
-                  <ion-icon slot="end" :icon="addCircleOutline" />
+                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" @click="selectProductStore()" v-if="userProductStores.length">
+                  {{ translate('Edit') }}
+                  <ion-icon slot="end" :icon="pencilOutline" />
                 </ion-button>
               </ion-list-header>
+
+              <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block" class="ion-margin">
+                <ion-icon :icon="addOutline" slot='start' />
+                {{ translate('Add to a product store') }}
+              </ion-button>
+
               <ion-item :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-for="store in userProductStores" :key="store.productStoreId">
                 <ion-label>
                   <h2>{{ store.storeName || store.productStoreId }}</h2>
@@ -472,7 +474,8 @@ import {
   eyeOffOutline,
   eyeOutline,
   mailOutline,
-  warningOutline
+  warningOutline,
+  pencilOutline
 } from 'ionicons/icons';
 import { translate } from '@hotwax/dxp-components';
 import ContactActionsPopover from '@/components/ContactActionsPopover.vue'
@@ -1251,6 +1254,7 @@ export default defineComponent({
       eyeOutline,
       hasPermission,
       mailOutline,
+      pencilOutline,
       router,
       store,
       translate,
