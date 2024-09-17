@@ -5,7 +5,7 @@
       <ion-item>
         <ion-label>
           {{ getDateTime(productStore.fromDate) }}
-          <p>{{ translate('added to product store') }}</p>
+          <p>{{ translate("added to product store") }}</p>
         </ion-label>
       </ion-item>
       <ion-item button @click="confirmRemove()" lines="none">
@@ -20,6 +20,7 @@ import {
   alertController,
   IonContent,
   IonItem,
+  IonLabel,
   IonList,
   IonListHeader,
   popoverController,
@@ -38,6 +39,7 @@ export default defineComponent({
   components: {
     IonContent,
     IonItem,
+    IonLabel,
     IonList,
     IonListHeader
   },
