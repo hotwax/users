@@ -230,5 +230,6 @@
   "will be asked to reset their password when they login to OMS.": "{name} will be asked to reset their password when they login to OMS.",
   "Yes": "Yes",
   "You don't have permission to update the security group.": "You don't have permission to update the security group.",
+  "The requested page was not available to your user. Please contact your administrator to update your permissions.": "The requested page was not available to your user. Please contact your administrator to update your permissions.",
   "Your user": "Your user"
 }
