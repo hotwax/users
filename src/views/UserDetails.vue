@@ -275,7 +275,7 @@
 
               <template v-if="!hasPermission(Actions.APP_SUPER_USER) && checkUserAssociatedSecurityGroup('SUPER')">
                 <ion-item lines="none" :disabled="true">
-                  <ion-label slot="end">{{ translate('Super') }}</ion-label>
+                  <ion-label>{{ translate('Super') }}</ion-label>
                   <ion-button slot="end" fill="clear" color="medium">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
@@ -578,7 +578,7 @@ export default defineComponent({
     if (productStoreId) {
       this.getShopifyShops(productStoreId);
     }
-    this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(this.selectedUser.securityGroup?.groupId)
+    this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(this.selectedUser.securityGroups?.map((group: any) => group.groupId))
     this.isUserFetched = true
     this.username = this.selectedUser.groupName ? (this.selectedUser.groupName)?.toLowerCase() : (`${this.selectedUser.firstName}.${this.selectedUser.lastName}`?.toLowerCase())
   },
@@ -963,6 +963,7 @@ export default defineComponent({
           // refetching security groups
           const userSecurityGroups = await UserService.getUserSecurityGroups(this.selectedUser.userLoginId)
           this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroups: userSecurityGroups })
+          this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(userSecurityGroups.map((group: any) => group.groupId))
         }
       })
 

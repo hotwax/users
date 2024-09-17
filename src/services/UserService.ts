@@ -324,11 +324,11 @@ const getUserSecurityGroups = async (userLoginId: string): Promise<any> => {
   return userSecurityGroups
 }
 
-const isUserFulfillmentAdmin = async (groupId: string): Promise<any> => {
+const isUserFulfillmentAdmin = async (groupIds: string): Promise<any> => {
   const payload = {
     inputFields: {
-      groupId,
-      permissionId: groupId ? "STOREFULFILLMENT_ADMIN" : ""
+      groupId: groupIds,
+      permissionId: groupIds.length ? "STOREFULFILLMENT_ADMIN" : ""
     },
     entityName: "SecurityGroupPermission",
     filterByDate: "Y",
