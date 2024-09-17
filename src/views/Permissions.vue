@@ -204,8 +204,8 @@ export default defineComponent({
           permissionsJson.push({
             "Group ID": permission.groupId,
             "Permission ID": permission.permissionId,
-            "Permission Desc": permission.description,
-            "Member Created Date": DateTime.fromMillis(permission.fromDate).toFormat('dd-MM-yyyy')
+            "Permission Desc": permission.permissionDescription,
+            "Association date": DateTime.fromMillis(permission.fromDate).toFormat('dd-MM-yyyy')
           })
         })
       } else {
@@ -240,8 +240,8 @@ export default defineComponent({
                 permissionsByGroup.push({
                   "Group Id": permission.groupId,
                   "Permission ID": permission.permissionId,
-                  "Permission Desc": permission.description,
-                  "Member Created Date": DateTime.fromMillis(permission.fromDate).toFormat('dd-MM-yyyy')
+                  "Permission Desc": permission.permissionDescription,
+                  "Association date": DateTime.fromMillis(permission.fromDate).toFormat('dd-MM-yyyy')
                 });
               });
               viewIndex++;
