@@ -329,7 +329,7 @@ const isUserFulfillmentAdmin = async (groupIds: string): Promise<any> => {
     inputFields: {
       groupId: groupIds,
       groupId_op: "in",
-      permissionId: groupIds.length ? "STOREFULFILLMENT_ADMIN" : ""
+      permissionId: "STOREFULFILLMENT_ADMIN"
     },
     entityName: "SecurityGroupPermission",
     filterByDate: "Y",

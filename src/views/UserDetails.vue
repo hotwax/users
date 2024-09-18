@@ -578,7 +578,7 @@ export default defineComponent({
     if (productStoreId) {
       this.getShopifyShops(productStoreId);
     }
-    this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(this.selectedUser.securityGroups?.map((group: any) => group.groupId))
+    this.isUserFulfillmentAdmin = this.selectedUser.securityGroups?.length ? await UserService.isUserFulfillmentAdmin(this.selectedUser.securityGroups.map((group: any) => group.groupId)) : false
     this.isUserFetched = true
     this.username = this.selectedUser.groupName ? (this.selectedUser.groupName)?.toLowerCase() : (`${this.selectedUser.firstName}.${this.selectedUser.lastName}`?.toLowerCase())
   },
@@ -963,7 +963,7 @@ export default defineComponent({
           // refetching security groups
           const userSecurityGroups = await UserService.getUserSecurityGroups(this.selectedUser.userLoginId)
           this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroups: userSecurityGroups })
-          this.isUserFulfillmentAdmin = await UserService.isUserFulfillmentAdmin(userSecurityGroups.map((group: any) => group.groupId))
+          this.isUserFulfillmentAdmin = userSecurityGroups.length ? await UserService.isUserFulfillmentAdmin(userSecurityGroups.map((group: any) => group.groupId)) : false
         }
       })
 
