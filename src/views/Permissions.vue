@@ -125,7 +125,10 @@ export default defineComponent({
     await this.store.dispatch('util/getClassificationSecurityGroups')
     if(!this.allPermissions.length) await this.store.dispatch('permission/getAllPermissions')
     if(!Object.keys(this.permissionsByClassificationGroups).length) await this.store.dispatch('permission/getPermissionsByClassificationGroups')
-    if(this.currentGroup.groupId) await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
+    if(this.currentGroup.groupId) {
+      await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
+      await this.getUsersCount()
+    }
   },
   methods: {
     createGroup() {
