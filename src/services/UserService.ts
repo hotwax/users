@@ -324,6 +324,34 @@ const getUserSecurityGroups = async (userLoginId: string): Promise<any> => {
   return userSecurityGroups
 }
 
+const isUserFulfillmentAdmin = async (groupIds: string): Promise<any> => {
+  const payload = {
+    inputFields: {
+      groupId: groupIds,
+      groupId_op: "in",
+      permissionId: "STOREFULFILLMENT_ADMIN"
+    },
+    entityName: "SecurityGroupPermission",
+    filterByDate: "Y",
+    viewSize: 1,
+    fieldList: ["groupId", "permissionId", "fromDate"]
+  };
+
+  try {
+    const resp: any = await api({
+      url: "performFind",
+      method: "POST",
+      data: payload,
+    });
+    if(!hasError(resp) && resp.data.docs.length) {
+      return true
+    }
+    return false
+  } catch(err) {
+    return false
+  }
+}
+
 const removeUserSecurityGroup = async (payload: any): Promise <any> => {
   return api({
     url: "service/removePartyUserPermission", 
@@ -784,6 +812,7 @@ export const UserService = {
   getUserFacilities,
   getUserProductStores,
   getUserSecurityGroups,
+  isUserFulfillmentAdmin,
   isUserLoginIdAlreadyExists,
   isRoleTypeExists,
   login,

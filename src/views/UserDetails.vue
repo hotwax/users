@@ -275,7 +275,7 @@
 
               <template v-if="!hasPermission(Actions.APP_SUPER_USER) && checkUserAssociatedSecurityGroup('SUPER')">
                 <ion-item lines="none" :disabled="true">
-                  <ion-label slot="end">{{ translate('Super') }}</ion-label>
+                  <ion-label>{{ translate('Super') }}</ion-label>
                   <ion-button slot="end" fill="clear" color="medium">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
@@ -359,8 +359,11 @@
                   {{ translate("Show as picker") }}
                 </ion-toggle>
               </ion-item>
-              <ion-item lines="none" button detail :disabled="!hasPermission(Actions.APP_UPDT_FULFILLMENT_FACILITY) || checkUserAssociatedSecurityGroup('INTEGRATION')" @click="selectFacility()">
-                <ion-label>{{  getUserFacilities().length === 1 ? translate('Added to 1 facility') : translate('Added to facilities', { count: getUserFacilities().length }) }}</ion-label>
+              <ion-item lines="none" v-if="isUserFulfillmentAdmin">
+                <ion-label>{{ translate("This user has 'STOREFULFILLMENT_ADMIN' permission, enabling access to all facilities.") }}</ion-label>
+              </ion-item>
+              <ion-item lines="none" button detail v-else @click="selectFacility()" :disabled="!hasPermission(Actions.APP_UPDT_FULFILLMENT_FACILITY) || checkUserAssociatedSecurityGroup('INTEGRATION')">
+                <ion-label>{{ getUserFacilities().length === 1 ? translate('Added to 1 facility') : translate('Added to facilities', { count: getUserFacilities().length }) }}</ion-label>
               </ion-item>
             </ion-list>
           </ion-card>
@@ -561,6 +564,7 @@ export default defineComponent({
       isUserFetched: false,
       showPassword: false,
       shopifyShopsForProductStore: [] as any,
+      isUserFulfillmentAdmin: false
     }
   },
  
@@ -574,7 +578,7 @@ export default defineComponent({
     if (productStoreId) {
       this.getShopifyShops(productStoreId);
     }
-    
+    this.isUserFulfillmentAdmin = this.selectedUser.securityGroups?.length ? await UserService.isUserFulfillmentAdmin(this.selectedUser.securityGroups.map((group: any) => group.groupId)) : false
     this.isUserFetched = true
     this.username = this.selectedUser.groupName ? (this.selectedUser.groupName)?.toLowerCase() : (`${this.selectedUser.firstName}.${this.selectedUser.lastName}`?.toLowerCase())
   },
@@ -959,6 +963,7 @@ export default defineComponent({
           // refetching security groups
           const userSecurityGroups = await UserService.getUserSecurityGroups(this.selectedUser.userLoginId)
           this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroups: userSecurityGroups })
+          this.isUserFulfillmentAdmin = userSecurityGroups.length ? await UserService.isUserFulfillmentAdmin(userSecurityGroups.map((group: any) => group.groupId)) : false
         }
       })
 
