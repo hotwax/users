@@ -356,7 +356,7 @@
             <ion-list>
               <ion-item :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)">
                 <ion-toggle @click.prevent="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true">
-                  {{ translate("Show as picker") }}
+                  {{ translate("Show as picker") }} 
                 </ion-toggle>
               </ion-item>
               <ion-item lines="none" v-if="isUserFulfillmentAdmin">
@@ -1042,11 +1042,24 @@ export default defineComponent({
             "roleTypeIdTo": "WAREHOUSE_PICKER"
           })
         } else {
-          resp = await UserService.updatePartyRelationship({
-            ...this.selectedUser?.pickerRelationship,
-            "thruDate": DateTime.now().toMillis()
-          })
-        }
+            const response = await UserService.fetchPartyRelationship({
+              inputFields: {
+                partyIdTo: this.selectedUser.partyId,
+                roleTypeIdTo: 'WAREHOUSE_PICKER',
+                roleTypeIdTo_op: 'equals'
+              },
+              filterByDate: 'Y',
+              viewSize: 1,
+              entityName: 'PartyRelationship',
+              fieldList: ['partyIdTo', 'roleTypeIdTo', "partyIdFrom", "roleTypeIdFrom", "fromDate"]
+            })
+            const fetchedRelationShip = response.data.docs[0]
+        
+            resp = await UserService.updatePartyRelationship({
+              ...fetchedRelationShip,
+              "thruDate": DateTime.now().toMillis()
+            })
+          }
         if (!hasError(resp)) {
           showToast(translate('User picker role updated successfully.'))
           await this.store.dispatch("user/fetchUserPickerRoleStatus");
