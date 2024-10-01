@@ -850,7 +850,10 @@ export default defineComponent({
         event,
         showBackdrop: false,
       });
-      return securityGroupActionsPopover.present();
+      securityGroupActionsPopover.present();
+
+      const result = await securityGroupActionsPopover.onDidDismiss();
+      this.isUserFulfillmentAdmin = result.data.length ? await UserService.isUserFulfillmentAdmin(result.data.map((group: any) => group.groupId)) : false
     },
     async openProductStoreActionsPopover(event: Event, store: any) {
       const productStoreActionsPopover = await popoverController.create({
