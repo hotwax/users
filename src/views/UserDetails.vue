@@ -267,8 +267,7 @@
                   <ion-icon slot="end" :icon="pencilOutline" />
                 </ion-button>
               </ion-list-header>
-
-              <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE)" v-if="!userSecurityGroups.length" @click="selectSecurityGroup()" fill="outline" expand="block" class="ion-margin">
+              <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" v-if="!userSecurityGroups.length" @click="selectSecurityGroup()" fill="outline" expand="block" class="ion-margin">
                 <ion-icon :icon="addOutline" slot='start' />
                 {{ translate('Add to security group') }}
               </ion-button>
