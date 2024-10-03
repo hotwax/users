@@ -339,16 +339,19 @@ const actions: ActionTree<UserState, RootState> = {
     }
 
     if(state.query.queryString) {
-      filters['groupName_value'] = state.query.queryString
-      filters['groupName_op'] = 'contains'
+      //Using only first keyword for search due to the limitation of searching firstName and lastName together
+      const keyword = state.query.queryString.split(' ')[0]
+
+      filters['groupName_value'] = keyword
+      filters['groupName_op'] = 'like'
       filters['groupName_ic'] = 'Y'
       filters['groupName_grp'] = '1'
-      filters['firstName_value'] = state.query.queryString
-      filters['firstName_op'] = 'contains'
+      filters['firstName_value'] = keyword
+      filters['firstName_op'] = 'like'
       filters['firstName_ic'] = 'Y'
       filters['firstName_grp'] = '2'
-      filters['lastName_value'] = state.query.queryString
-      filters['lastName_op'] = 'contains'
+      filters['lastName_value'] = keyword
+      filters['lastName_op'] = 'like'
       filters['lastName_ic'] = 'Y'
       filters['lastName_grp'] = '3'
     }
