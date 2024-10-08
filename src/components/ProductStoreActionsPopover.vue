@@ -4,8 +4,7 @@
       <ion-list-header>{{ productStore.storeName || productStore.productStoreId }}</ion-list-header>
       <ion-item>
         <ion-label>
-          {{ getDateTime(productStore.fromDate) }}
-          <p>{{ translate("added to product store") }}</p>
+          {{ translate("View product store") }}
         </ion-label>
       </ion-item>
       <ion-item button @click="confirmRemove()" lines="none">
@@ -53,9 +52,6 @@ export default defineComponent({
   methods: {
     closePopover() {
       popoverController.dismiss();
-    },
-    getDateTime(time: any) {
-      return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
     },
     async removeProductStoreRole() {
       try {
