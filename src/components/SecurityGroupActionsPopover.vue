@@ -51,8 +51,8 @@
       })
     },
     methods: {
-      closePopover() {
-        popoverController.dismiss();
+      closePopover(userSecurityGroups: any) {
+        popoverController.dismiss(userSecurityGroups);
       },
       getDateTime(time: any) {
         return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
@@ -73,7 +73,7 @@
         // refetching security groups
         const userSecurityGroups = await UserService.getUserSecurityGroups(this.selectedUser.userLoginId)
         this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroups: userSecurityGroups })
-        this.closePopover()
+        this.closePopover(userSecurityGroups)
       },
       async confirmRemove() {
         const message = 'Are you sure you want to perform this action?'
