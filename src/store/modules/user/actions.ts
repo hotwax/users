@@ -30,8 +30,9 @@ const actions: ActionTree<UserState, RootState> = {
  */
   async login({ commit, dispatch }, payload) {
     try {
-      const { token, oms } = payload;
+      const { token, oms, omsRedirectionUrl } = payload;
       dispatch("setUserInstanceUrl", oms);
+      dispatch("setOmsRedirectionInfo", { url: omsRedirectionUrl, token: "" })
 
       // Getting the permissions list from server
       const permissionId = process.env.VUE_APP_PERMISSION_ID;
@@ -90,7 +91,7 @@ const actions: ActionTree<UserState, RootState> = {
   /**
    * Logout user
    */
-  async logout({ commit }, payload) {
+  async logout({ commit, dispatch }, payload) {
     // store the url on which we need to redirect the user after logout api completes in case of SSO enabled
     let redirectionUrl = ''
 
@@ -122,6 +123,7 @@ const actions: ActionTree<UserState, RootState> = {
     commit(types.USER_END_SESSION)
     this.dispatch('util/clearUtilState')
     this.dispatch('permission/clearPermissionState')
+    dispatch("setOmsRedirectionInfo", { url: "", token: "" })
 
     resetPermissions();
     resetConfig();
@@ -155,6 +157,10 @@ const actions: ActionTree<UserState, RootState> = {
     current.userTimeZone = timeZoneId;
     commit(types.USER_INFO_UPDATED, current);
     Settings.defaultZone = current.userTimeZone;
+  },
+
+  setOmsRedirectionInfo({ commit }, payload) {
+    commit(types.USER_OMS_REDIRECTION_INFO_UPDATED, payload)
   },
 
   async getSelectedUserDetails({ commit, state }, payload) {

@@ -2,7 +2,7 @@
   <ion-content>
     <ion-list>
       <ion-list-header>{{ productStore.storeName || productStore.productStoreId }}</ion-list-header>
-      <ion-item>
+      <ion-item button @click="redirectToStore()">
         <ion-label>
           {{ translate("View product store") }}
         </ion-label>
@@ -25,7 +25,7 @@ import {
   popoverController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
-import { translate } from "@hotwax/dxp-components";
+import { translate, useAuthStore } from "@hotwax/dxp-components";
 import { mapGetters, useStore } from 'vuex';
 import { UserService } from "@/services/UserService";
 import { DateTime } from "luxon";
@@ -47,6 +47,7 @@ export default defineComponent({
     ...mapGetters({
       selectedUser: 'user/getSelectedUser',
       userProductStores: 'user/getUserProductStores',
+      omsRedirectionInfo: 'user/getOmsRedirectionInfo',
     })
   },
   methods: {
@@ -91,12 +92,18 @@ export default defineComponent({
         ],
       });
       return alert.present();
+    },
+    redirectToStore() {
+      const companyDetailUrl = `http://localhost:8102/login?oms=${this.omsRedirectionInfo.url}&token=${this.authStore.token.value}&expirationTime=${this.authStore.token}&productStoreId=${this.productStore.productStoreId}`
+      window.location.href = (companyDetailUrl)
     }
   },
   setup() {
+    const authStore = useAuthStore();
     const store = useStore();
 
     return {
+      authStore,
       store,
       translate
     }

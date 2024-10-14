@@ -14,11 +14,10 @@
     <ion-list v-if="userGroupAssocHistories.length">
       <ion-item v-for="assocHistory in userGroupAssocHistories" :key="assocHistory.groupId">
         <ion-label>
-          {{ assocHistory.groupName }}
+          {{ assocHistory.groupName ? assocHistory.groupName : assocHistory.groupId }}
           <p>{{ assocHistory.groupId }}</p>
         </ion-label>
-
-        <ion-badge color="dark" v-if="assocHistory.thruDate">{{ timeTillRun(assocHistory.thruDate) }}</ion-badge>
+        <ion-note slot="end">{{ getDateWithOrdinalSuffix(assocHistory.fromDate) }} - {{ getDateWithOrdinalSuffix(assocHistory.thruDate) }}</ion-note>
       </ion-item>
     </ion-list>
     <div class="empty-state" v-else>
@@ -52,7 +51,7 @@ import {
 } from "ionicons/icons";
 import { mapGetters, useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components'
-import { isValidPassword, showToast } from "@/utils";
+import { getDateWithOrdinalSuffix } from "@/utils";
 import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
 import { Actions, hasPermission } from '@/authorization'
@@ -81,7 +80,6 @@ export default defineComponent({
     }
   },
   mounted() {
-    console.log(this.selectedUser);
     this.fetchUserSecurityGroupAssoHistory()
   },
   methods: {
@@ -95,9 +93,9 @@ export default defineComponent({
         const resp = await UserService.fetchUserSecurityGroupAssocHistory({
           entityName: "UserLoginAndSecurityGroup",
           inputFields: {
-            userLoginId: this.selectedUser.userLoginId
+            userLoginId: this.selectedUser.userLoginId,
+            thruDate_op: "not-empty"
           },
-          filterByDate: "N",
           orderBy: "thruDate DESC",
           viewSize: 250
         })
@@ -126,6 +124,7 @@ export default defineComponent({
       closeOutline,
       eyeOutline,
       eyeOffOutline,
+      getDateWithOrdinalSuffix,
       hasPermission,
       lockClosedOutline,
       mailOutline,

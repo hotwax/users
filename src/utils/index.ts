@@ -3,6 +3,17 @@ import { Plugins } from '@capacitor/core';
 import { translate } from '@hotwax/dxp-components';
 import Papa from 'papaparse'
 import saveAs from "file-saver";
+import { DateTime } from 'luxon';
+
+const dateOrdinalSuffix = {
+  1: 'st',
+  21: 'st',
+  31: 'st',
+  2: 'nd',
+  22: 'nd',
+  3: 'rd',
+  23: 'rd'
+} as any
 
 const showToast = async (message: string, configButtons?: any) => {
   const defaultButtons = [{
@@ -75,4 +86,12 @@ const jsonToCsv = (file: any, options: JsonToCsvOption = {}) => {
   return blob;
 }
 
-export { copyToClipboard, showToast, generateInternalId, isValidEmail, isValidPassword, jsonToCsv }
+
+function getDateWithOrdinalSuffix(time: any) {
+  if (!time) return "-";
+  const dateTime = DateTime.fromMillis(time);
+  const suffix = dateOrdinalSuffix[dateTime.day] || "th"
+  return `${dateTime.day}${suffix} ${dateTime.toFormat("MMM yyyy")}`;
+}
+
+export { copyToClipboard, showToast, generateInternalId, getDateWithOrdinalSuffix, isValidEmail, isValidPassword, jsonToCsv }
