@@ -33,10 +33,10 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
-  IonInput,
   IonItem,
   IonLabel,
   IonList,
+  IonNote,
   IonTitle,
   IonToolbar,
   modalController
@@ -55,8 +55,6 @@ import { getDateWithOrdinalSuffix } from "@/utils";
 import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
 import { Actions, hasPermission } from '@/authorization'
-import logger from '@/logger';
-import { DateTime } from "luxon";
 export default defineComponent({
   name: "UserSecurityGroupAssocModal",
   components: { 
@@ -65,6 +63,10 @@ export default defineComponent({
     IonContent,
     IonHeader,
     IonIcon,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonNote,
     IonTitle,
     IonToolbar,
   },
@@ -112,10 +114,6 @@ export default defineComponent({
         console.error(error);
       }
       this.userGroupAssocHistories = userGroupAssocHistories
-    },
-    timeTillRun(endTime: any) {
-      const timeDiff = DateTime.fromMillis(endTime).diff(DateTime.local());
-      return DateTime.local().plus(timeDiff).toRelative();
     }
   },
   setup() {

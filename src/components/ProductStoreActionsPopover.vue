@@ -94,8 +94,8 @@ export default defineComponent({
       return alert.present();
     },
     redirectToStore() {
-      const companyDetailUrl = `http://localhost:8102/login?oms=${this.omsRedirectionInfo.url}&token=${this.authStore.token.value}&expirationTime=${this.authStore.token}&productStoreId=${this.productStore.productStoreId}`
-      window.location.href = (companyDetailUrl)
+      const companyDetailUrl = `http://localhost:8102/login?oms=${this.omsRedirectionInfo.url}&token=${this.authStore.token.value}&expirationTime=${this.authStore.token.expiration}&productStoreId=${this.productStore.productStoreId}`
+      window.open(companyDetailUrl, "_blank");
     }
   },
   setup() {
