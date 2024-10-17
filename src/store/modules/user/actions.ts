@@ -36,7 +36,7 @@ const actions: ActionTree<UserState, RootState> = {
       if(omsRedirectionUrl) {
         dispatch("setOmsRedirectionInfo", { url: omsRedirectionUrl, token: "" })
       } else {
-        showToast(translate("Some of the app functionality will not work due to some missing configuration."))
+        showToast(translate("Some of the app functionality will not work due to missing configuration."))
       }
 
       // Getting the permissions list from server

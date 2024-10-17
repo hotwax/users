@@ -94,7 +94,7 @@ export default defineComponent({
       return alert.present();
     },
     redirectToStore() {
-      const companyDetailUrl = `http://localhost:8102/login?oms=${this.omsRedirectionInfo.url}&token=${this.authStore.token.value}&expirationTime=${this.authStore.token.expiration}&productStoreId=${this.productStore.productStoreId}`
+      const companyDetailUrl = `${process.env.VUE_APP_COMPANY_LOGIN_URL}?oms=${this.omsRedirectionInfo.url}&token=${this.authStore.token.value}&expirationTime=${this.authStore.token.expiration}&omsRedirectionUrl=${this.authStore.getOms}&productStoreId=${this.productStore.productStoreId}`
       window.open(companyDetailUrl, "_blank");
     }
   },

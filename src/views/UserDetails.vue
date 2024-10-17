@@ -1249,7 +1249,7 @@ export default defineComponent({
     getUserFacilities() {
       return this.selectedUser.facilities.filter((facility: any) => facility.roleTypeId === 'WAREHOUSE_MANAGER')
     },
-    async openUserSecurityGroupAssocHistoryModal(event: any) {
+    async openUserSecurityGroupAssocHistoryModal() {
       const userSecurityGroupAssocHistoryModal = await modalController.create({
         component: UserSecurityGroupAssocHistoryModal,
       });

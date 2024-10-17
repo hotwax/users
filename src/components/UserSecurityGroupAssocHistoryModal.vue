@@ -56,7 +56,7 @@ import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
 import { Actions, hasPermission } from '@/authorization'
 export default defineComponent({
-  name: "UserSecurityGroupAssocModal",
+  name: "UserSecurityGroupAssocHistoryModal",
   components: { 
     IonButtons,
     IonButton,
