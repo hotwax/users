@@ -2,10 +2,9 @@
   <ion-content>
     <ion-list>
       <ion-list-header>{{ productStore.storeName || productStore.productStoreId }}</ion-list-header>
-      <ion-item>
+      <ion-item button @click="redirectToStore()">
         <ion-label>
-          {{ getDateTime(productStore.fromDate) }}
-          <p>{{ translate("added to product store") }}</p>
+          {{ translate("View product store") }}
         </ion-label>
       </ion-item>
       <ion-item button @click="confirmRemove()" lines="none">
@@ -26,7 +25,7 @@ import {
   popoverController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
-import { translate } from "@hotwax/dxp-components";
+import { translate, useAuthStore } from "@hotwax/dxp-components";
 import { mapGetters, useStore } from 'vuex';
 import { UserService } from "@/services/UserService";
 import { DateTime } from "luxon";
@@ -48,14 +47,12 @@ export default defineComponent({
     ...mapGetters({
       selectedUser: 'user/getSelectedUser',
       userProductStores: 'user/getUserProductStores',
+      omsRedirectionInfo: 'user/getOmsRedirectionInfo',
     })
   },
   methods: {
     closePopover() {
       popoverController.dismiss();
-    },
-    getDateTime(time: any) {
-      return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
     },
     async removeProductStoreRole() {
       try {
@@ -95,12 +92,18 @@ export default defineComponent({
         ],
       });
       return alert.present();
+    },
+    redirectToStore() {
+      const companyDetailUrl = `${process.env.VUE_APP_COMPANY_LOGIN_URL}?oms=${this.omsRedirectionInfo.url}&token=${this.authStore.token.value}&expirationTime=${this.authStore.token.expiration}&omsRedirectionUrl=${this.authStore.getOms}&productStoreId=${this.productStore.productStoreId}`
+      window.open(companyDetailUrl, "_blank");
     }
   },
   setup() {
+    const authStore = useAuthStore();
     const store = useStore();
 
     return {
+      authStore,
       store,
       translate
     }

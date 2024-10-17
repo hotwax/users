@@ -11,4 +11,8 @@ export default interface UserState {
     };
     selectedUser: any;
     users: any;
+    omsRedirectionInfo: {
+      url: string;
+      token: string;
+    }
 }

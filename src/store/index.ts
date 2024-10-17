@@ -16,7 +16,7 @@ import { setPermissions } from '@/authorization'
 const state: any = {}
 
 const persistState = createPersistedState({
-  paths: ['user.current', 'user.token', 'user.instanceUrl', 'user.permissions', 'util'],
+  paths: ['user.current', 'user.token', 'user.instanceUrl', 'user.permissions', 'user.omsRedirectionInfo', 'util'],
   fetchBeforeUse: true
 })
 

@@ -263,14 +263,21 @@
               <ion-list-header color="light">
                 <ion-label>{{ translate('Security Group') }}</ion-label>
                 <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" @click="selectSecurityGroup()" v-if="userSecurityGroups.length">
-                  {{ translate('Edit') }}
-                  <ion-icon slot="end" :icon="pencilOutline" />
+                  {{ translate('Add') }}
+                  <ion-icon slot="end" :icon="addCircleOutline" />
                 </ion-button>
               </ion-list-header>
               <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" v-if="!userSecurityGroups.length" @click="selectSecurityGroup()" fill="outline" expand="block" class="ion-margin">
                 <ion-icon :icon="addOutline" slot='start' />
                 {{ translate('Add to security group') }}
               </ion-button>
+
+              <ion-item>
+                <ion-label>{{ translate("View history") }}</ion-label>
+                <ion-button slot="end" fill="clear" color="medium" @click="openUserSecurityGroupAssocHistoryModal($event)">
+                  <ion-icon slot="icon-only" :icon="timeOutline" />
+                </ion-button>
+              </ion-item>
 
               <template v-if="!hasPermission(Actions.APP_SUPER_USER) && checkUserAssociatedSecurityGroup('SUPER')">
                 <ion-item lines="none" :disabled="true">
@@ -307,8 +314,8 @@
               <ion-list-header color="light">
                 <ion-label>{{ translate('Product stores') }}</ion-label>
                 <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" @click="selectProductStore()" v-if="userProductStores.length">
-                  {{ translate('Edit') }}
-                  <ion-icon slot="end" :icon="pencilOutline" />
+                  {{ translate('Add') }}
+                  <ion-icon slot="end" :icon="addCircleOutline" />
                 </ion-button>
               </ion-list-header>
 
@@ -476,8 +483,8 @@ import {
   eyeOffOutline,
   eyeOutline,
   mailOutline,
+  timeOutline,
   warningOutline,
-  pencilOutline
 } from 'ionicons/icons';
 import { translate } from '@hotwax/dxp-components';
 import ContactActionsPopover from '@/components/ContactActionsPopover.vue'
@@ -487,6 +494,7 @@ import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
 import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue'
 import SelectSecurityGroupModal from '@/components/SelectSecurityGroupModal.vue'
+import UserSecurityGroupAssocHistoryModal from '@/components/UserSecurityGroupAssocHistoryModal.vue'
 import { UserService } from "@/services/UserService";
 import { isValidEmail, isValidPassword, showToast } from "@/utils";
 import { hasError } from '@/adapter';
@@ -1240,6 +1248,13 @@ export default defineComponent({
     // And here we only want to show records of 'WAREHOUSE_MANAGER'
     getUserFacilities() {
       return this.selectedUser.facilities.filter((facility: any) => facility.roleTypeId === 'WAREHOUSE_MANAGER')
+    },
+    async openUserSecurityGroupAssocHistoryModal() {
+      const userSecurityGroupAssocHistoryModal = await modalController.create({
+        component: UserSecurityGroupAssocHistoryModal,
+      });
+
+      return userSecurityGroupAssocHistoryModal.present();
     }
   },
   setup() {
@@ -1258,9 +1273,9 @@ export default defineComponent({
       eyeOutline,
       hasPermission,
       mailOutline,
-      pencilOutline,
       router,
       store,
+      timeOutline,
       translate,
       warningOutline,
       Actions
