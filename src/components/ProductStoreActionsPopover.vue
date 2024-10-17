@@ -2,7 +2,7 @@
   <ion-content>
     <ion-list>
       <ion-list-header>{{ productStore.storeName || productStore.productStoreId }}</ion-list-header>
-      <ion-item button @click="redirectToStore()">
+      <ion-item button @click="redirectToStore()" :disabled="!omsRedirectionInfo.url">
         <ion-label>
           {{ translate("View product store") }}
         </ion-label>
