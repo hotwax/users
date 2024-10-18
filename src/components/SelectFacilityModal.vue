@@ -11,8 +11,14 @@
   </ion-header>
 
   <ion-content>
+    <ion-searchbar :placeholder="translate('Search facilities')" v-model="queryString" @keyup.enter="search()"/>
+    <ion-row>
+      <ion-chip v-for="selectedFacility in selectedFacilityValues" outline :key="selectedFacility.facilityId">
+        <ion-label>{{ selectedFacility.facilityName }}</ion-label>
+      </ion-chip>
+    </ion-row>
     <ion-list v-if="!isFacilityLogin">
-      <ion-item v-for="facility in facilities" :key="facility.facilityId">
+      <ion-item v-for="facility in filteredFacilities" :key="facility.facilityId">
         <ion-checkbox :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)">
           <ion-label>
             {{ facility.facilityName || facility.facilityId }}
@@ -24,7 +30,7 @@
 
     <ion-list v-else>
       <ion-radio-group :value="selectedFacilities[0]?.facilityId" @ionChange="updateSelectedFacility($event)">
-        <ion-item v-for="facility in facilities" :key="facility.facilityId">
+        <ion-item v-for="facility in filteredFacilities" :key="facility.facilityId">
           <ion-radio :value="facility.facilityId">
             <ion-label>
               {{ facility.facilityName || facility.facilityId }}
@@ -48,6 +54,7 @@ import {
   IonButtons,
   IonButton,
   IonCheckbox,
+  IonChip,
   IonContent,
   IonFab,
   IonFabButton,
@@ -58,6 +65,8 @@ import {
   IonList,
   IonRadio,
   IonRadioGroup,
+  IonRow,
+  IonSearchbar,
   IonTitle,
   IonToolbar,
   modalController
@@ -73,6 +82,7 @@ export default defineComponent({
     IonButtons,
     IonButton,
     IonCheckbox,
+    IonChip,
     IonContent,
     IonFab,
     IonFabButton,
@@ -83,12 +93,16 @@ export default defineComponent({
     IonList,
     IonRadio,
     IonRadioGroup,
+    IonRow,
+    IonSearchbar,
     IonTitle,
     IonToolbar,
   },
   props: ["selectedFacilities", "isFacilityLogin"],
   data() {
     return {
+      queryString: '',
+      filteredFacilities: [] as any,
       selectedFacilityValues: JSON.parse(JSON.stringify(this.selectedFacilities)),
     }
   },
@@ -99,10 +113,16 @@ export default defineComponent({
   },
   async mounted() {
     await this.store.dispatch('util/fetchFacilities');
+    this.filteredFacilities = this.facilities
+    const selectedFacilityIds = this.selectedFacilityValues.map((selectedFacility: any) => selectedFacility.facilityId);
+    this.selectedFacilityValues = this.facilities.filter((facility: any) => selectedFacilityIds.includes(facility.facilityId))
   },
   methods: {
     closeModal() {
       modalController.dismiss({ dismissed: true });
+    },
+    search() {
+      this.filteredFacilities = this.facilities.filter((facility: any) => (facility.facilityId.toLowerCase().includes(this.queryString.toLowerCase())) || (facility.facilityName && facility.facilityName.toLowerCase().includes(this.queryString.toLowerCase())))
     },
     saveFacilities() {
       // taking out the difference of selected facilities and the originally

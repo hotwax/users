@@ -11,8 +11,14 @@
     </ion-header>
     
     <ion-content>
+      <ion-searchbar :placeholder="translate('Search security groups')" v-model="queryString" @keyup.enter="search()"/>
+      <ion-row>
+        <ion-chip v-for="selectedSecurityGroup in selectedSecurityGroupValues" outline :key="selectedSecurityGroup.groupId">
+          <ion-label>{{ selectedSecurityGroup.groupName }}</ion-label>
+        </ion-chip>
+      </ion-row>
       <ion-list>
-        <ion-item v-for="securityGroup in securityGroups" :key="securityGroup.groupId">
+        <ion-item v-for="securityGroup in fileteredSecurityGroups" :key="securityGroup.groupId">
           <ion-checkbox :checked="isSelected(securityGroup.groupId)" @ionChange="toggleSecurityGroupSelection(securityGroup)">
             <ion-label>
               {{ securityGroup.groupName || securityGroup.groupId }}
@@ -35,6 +41,7 @@
     IonButtons,
     IonButton,
     IonCheckbox,
+    IonChip,
     IonContent,
     IonFab,
     IonFabButton,
@@ -43,9 +50,11 @@
     IonItem,
     IonLabel,
     IonList,
+    IonRow,
+    IonSearchbar,
     IonTitle,
     IonToolbar,
-    modalController
+    modalController,
   } from "@ionic/vue";
   import { defineComponent } from "vue";
   import { closeOutline, saveOutline } from "ionicons/icons";
@@ -58,6 +67,7 @@
       IonButtons,
       IonButton,
       IonCheckbox,
+      IonChip,
       IonContent,
       IonFab,
       IonFabButton,
@@ -66,12 +76,16 @@
       IonItem,
       IonLabel,
       IonList,
+      IonRow,
+      IonSearchbar,
       IonTitle,
       IonToolbar,
     },
     props: ["selectedSecurityGroups"],
     data() {
       return {
+        queryString: '',
+        fileteredSecurityGroups: [] as any,
         selectedSecurityGroupValues: JSON.parse(JSON.stringify(this.selectedSecurityGroups)),
       }
     },
@@ -80,9 +94,17 @@
         securityGroups: 'util/getSecurityGroups'
       })
     },
+    async mounted() {
+      this.fileteredSecurityGroups = this.securityGroups
+      const selectedGroupIds = this.selectedSecurityGroupValues.map((selectedSecurityGroupValue:any) => selectedSecurityGroupValue.groupId);
+      this.selectedSecurityGroupValues = this.securityGroups.filter((securityGroup: any) => selectedGroupIds.includes(securityGroup.groupId))
+    },
     methods: {
       closeModal() {
         modalController.dismiss({ dismissed: true});
+      },
+      search() {
+        this.fileteredSecurityGroups = this.securityGroups.filter((securityGroup: any) => (securityGroup.groupId.toLowerCase().includes(this.queryString.toLowerCase())) || (securityGroup.groupName && securityGroup.groupName.toLowerCase().includes(this.queryString.toLowerCase())))
       },
       saveSecurityGroups() {
         const securityGroupsToCreate = this.selectedSecurityGroupValues.filter((selectedGroup: any) => !this.selectedSecurityGroups.some((group: any) => group.groupId === selectedGroup.groupId))
