@@ -253,22 +253,18 @@ const actions: ActionTree<UserState, RootState> = {
         }
       }
 
-      const resp = await UserService.fetchPartyRelationship({
+      const resp = await UserService.getPartyRole({
         inputFields: {
-          partyIdTo: selectedUser.partyId,
-          roleTypeIdTo: 'WAREHOUSE_PICKER',
-          roleTypeIdTo_op: 'equals'
+          partyId: selectedUser.partyId,
+          roleTypeId: 'WAREHOUSE_PICKER'
         },
-        filterByDate: 'Y',
         viewSize: 1,
-        entityName: 'PartyRelationship',
-        fieldList: ['partyIdTo', 'roleTypeIdTo', "partyIdFrom", "roleTypeIdFrom", "fromDate"]
+        entityName: 'PartyRole',
+        fieldList: ['partyId', 'roleTypeId']
       })
 
-      if (!hasError(resp)) {
-        const pickerRelationship = resp.data.docs[0];
-        selectedUser.isWarehousePicker = pickerRelationship ? true : false,
-        selectedUser.pickerRelationship = pickerRelationship;
+      if(!hasError(resp) && resp.data.docs.length) {
+        selectedUser.isWarehousePicker = true;
       }
     }
 
@@ -289,35 +285,6 @@ const actions: ActionTree<UserState, RootState> = {
       }
     }
     commit(types.USER_SELECTED_USER_UPDATED, selectedUser)
-  },
-
-  async fetchUserPickerRoleStatus({ commit, state }) {
-    const currentSelectedUser = JSON.parse(JSON.stringify(state.selectedUser))
-
-    try {
-      const resp = await UserService.fetchPartyRelationship({
-        inputFields: {
-          partyIdTo: currentSelectedUser.partyId,
-          roleTypeIdTo: 'WAREHOUSE_PICKER',
-          roleTypeIdTo_op: 'equals'
-        },
-        filterByDate: 'Y',
-        viewSize: 1,
-        entityName: 'PartyRelationship',
-        fieldList: ['partyIdTo', 'roleTypeIdTo', "partyIdFrom", "roleTypeIdFrom", "fromDate"]
-      })
-
-      if (!hasError(resp)) {
-        const pickerRelationship = resp.data.docs[0];
-        currentSelectedUser.isWarehousePicker = pickerRelationship ? true : false,
-        currentSelectedUser.pickerRelationship = pickerRelationship;
-      } else {
-        throw resp.data;
-      }
-    } catch(error: any) {
-      logger.error(error);
-    }
-    commit(types.USER_SELECTED_USER_UPDATED, currentSelectedUser)
   },
 
   updateSelectedUser({ commit }, selectedUser) {

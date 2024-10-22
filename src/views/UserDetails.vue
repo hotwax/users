@@ -361,7 +361,7 @@
             </ion-card-header>
             <ion-list>
               <ion-item :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)">
-                <ion-toggle @click.prevent="updatePickerRoleStatus($event)" :checked="selectedUser.isWarehousePicker === true">
+                <ion-toggle @click.prevent="updatePickerRoleStatus($event)" :checked="selectedUser?.isWarehousePicker">
                   {{ translate("Show as picker") }}
                 </ion-toggle>
               </ion-item>
@@ -1044,19 +1044,22 @@ export default defineComponent({
       try {
         let resp;
         if (isChecked) {
-          resp = await UserService.createCommercePartyRelationshipFrom({
-            "partyIdTo": this.partyId,
-            "roleTypeIdTo": "WAREHOUSE_PICKER"
+          resp = await UserService.ensurePartyRole({
+            partyId: this.selectedUser?.partyId,
+            roleTypeId: "WAREHOUSE_PICKER"
           })
         } else {
-          resp = await UserService.updatePartyRelationship({
-            ...this.selectedUser?.pickerRelationship,
-            "thruDate": DateTime.now().toMillis()
+          resp = await UserService.deletePartyRole({
+            partyId: this.selectedUser?.partyId,
+            roleTypeId: "WAREHOUSE_PICKER"
           })
         }
         if (!hasError(resp)) {
           showToast(translate('User picker role updated successfully.'))
-          await this.store.dispatch("user/fetchUserPickerRoleStatus");
+
+          const currentUser = JSON.parse(JSON.stringify(this.selectedUser))
+          currentUser.isWarehousePicker = isChecked
+          await this.store.dispatch("user/updateSelectedUser", currentUser);
           // updating toggle state on success
           event.target.checked = isChecked
         } else {
