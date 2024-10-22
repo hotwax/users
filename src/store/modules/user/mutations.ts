@@ -44,5 +44,8 @@ const mutations: MutationTree <UserState> = {
     [types.USER_CLEAR_SELECTED_USER] (state) {
       state.selectedUser = {}
     },
+    [types.USER_OMS_REDIRECTION_INFO_UPDATED](state, payload) {
+      state.omsRedirectionInfo = payload;
+    }
 }
 export default mutations;

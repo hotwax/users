@@ -22,6 +22,10 @@ const userModule: Module<UserState, RootState> = {
       users: {
         list: [],
         total: 0
+      },
+      omsRedirectionInfo: {
+        url: "",
+        token: ""
       }
     },
     getters,

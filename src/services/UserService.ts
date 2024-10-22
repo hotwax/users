@@ -785,6 +785,14 @@ const setUserPreference = async (payload: any): Promise<any> => {
   });
 }
 
+const fetchUserSecurityGroupAssocHistory = async (payload: any): Promise<any> => {
+  return api({
+    url: "performFind",
+    method: "post",
+    data: payload
+  });
+}
+
 export const UserService = {
   addPartyToFacility,
   addUserToSecurityGroup,
@@ -802,6 +810,7 @@ export const UserService = {
   getAvailableTimeZones,
   fetchLogoImageForParty,
   fetchPartyRelationship,
+  fetchUserSecurityGroupAssocHistory,
   fetchUsers,
   getPartyRole,
   getUserContactDetails,

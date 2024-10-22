@@ -46,6 +46,9 @@ const getters: GetterTree<UserState, RootState> = {
   },
   getUserSecurityGroups(state) {
     return state.selectedUser.securityGroups;
+  },
+  getOmsRedirectionInfo(state) {
+    return state.omsRedirectionInfo
   }
 }
 export default getters;
