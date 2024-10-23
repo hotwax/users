@@ -12,11 +12,6 @@
     
     <ion-content>
       <ion-searchbar :placeholder="translate('Search security groups')" v-model="queryString" @keyup.enter="search()"/>
-      <ion-row>
-        <ion-chip v-for="selectedSecurityGroup in selectedSecurityGroupValues" outline :key="selectedSecurityGroup.groupId">
-          <ion-label>{{ selectedSecurityGroup.groupName }}</ion-label>
-        </ion-chip>
-      </ion-row>
       <ion-list>
         <ion-item v-for="securityGroup in fileteredSecurityGroups" :key="securityGroup.groupId">
           <ion-checkbox :checked="isSelected(securityGroup.groupId)" @ionChange="toggleSecurityGroupSelection(securityGroup)">
@@ -41,7 +36,6 @@
     IonButtons,
     IonButton,
     IonCheckbox,
-    IonChip,
     IonContent,
     IonFab,
     IonFabButton,
@@ -50,7 +44,6 @@
     IonItem,
     IonLabel,
     IonList,
-    IonRow,
     IonSearchbar,
     IonTitle,
     IonToolbar,
@@ -67,7 +60,6 @@
       IonButtons,
       IonButton,
       IonCheckbox,
-      IonChip,
       IonContent,
       IonFab,
       IonFabButton,
@@ -76,7 +68,6 @@
       IonItem,
       IonLabel,
       IonList,
-      IonRow,
       IonSearchbar,
       IonTitle,
       IonToolbar,
@@ -96,8 +87,6 @@
     },
     async mounted() {
       this.fileteredSecurityGroups = this.securityGroups
-      const selectedGroupIds = this.selectedSecurityGroupValues.map((selectedSecurityGroupValue:any) => selectedSecurityGroupValue.groupId);
-      this.selectedSecurityGroupValues = this.securityGroups.filter((securityGroup: any) => selectedGroupIds.includes(securityGroup.groupId))
     },
     methods: {
       closeModal() {

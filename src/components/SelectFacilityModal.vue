@@ -12,11 +12,6 @@
 
   <ion-content>
     <ion-searchbar :placeholder="translate('Search facilities')" v-model="queryString" @keyup.enter="search()"/>
-    <ion-row>
-      <ion-chip v-for="selectedFacility in selectedFacilityValues" outline :key="selectedFacility.facilityId">
-        <ion-label>{{ selectedFacility.facilityName }}</ion-label>
-      </ion-chip>
-    </ion-row>
     <ion-list v-if="!isFacilityLogin">
       <ion-item v-for="facility in filteredFacilities" :key="facility.facilityId">
         <ion-checkbox :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)">
@@ -54,7 +49,6 @@ import {
   IonButtons,
   IonButton,
   IonCheckbox,
-  IonChip,
   IonContent,
   IonFab,
   IonFabButton,
@@ -65,7 +59,6 @@ import {
   IonList,
   IonRadio,
   IonRadioGroup,
-  IonRow,
   IonSearchbar,
   IonTitle,
   IonToolbar,
@@ -82,7 +75,6 @@ export default defineComponent({
     IonButtons,
     IonButton,
     IonCheckbox,
-    IonChip,
     IonContent,
     IonFab,
     IonFabButton,
@@ -93,7 +85,6 @@ export default defineComponent({
     IonList,
     IonRadio,
     IonRadioGroup,
-    IonRow,
     IonSearchbar,
     IonTitle,
     IonToolbar,
@@ -114,8 +105,6 @@ export default defineComponent({
   async mounted() {
     await this.store.dispatch('util/fetchFacilities');
     this.filteredFacilities = this.facilities
-    const selectedFacilityIds = this.selectedFacilityValues.map((selectedFacility: any) => selectedFacility.facilityId);
-    this.selectedFacilityValues = this.facilities.filter((facility: any) => selectedFacilityIds.includes(facility.facilityId))
   },
   methods: {
     closeModal() {
