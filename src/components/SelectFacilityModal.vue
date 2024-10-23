@@ -11,8 +11,9 @@
   </ion-header>
 
   <ion-content>
+    <ion-searchbar :placeholder="translate('Search facilities')" v-model="queryString" @keyup.enter="search()"/>
     <ion-list v-if="!isFacilityLogin">
-      <ion-item v-for="facility in facilities" :key="facility.facilityId">
+      <ion-item v-for="facility in filteredFacilities" :key="facility.facilityId">
         <ion-checkbox :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)">
           <ion-label>
             {{ facility.facilityName || facility.facilityId }}
@@ -24,7 +25,7 @@
 
     <ion-list v-else>
       <ion-radio-group :value="selectedFacilities[0]?.facilityId" @ionChange="updateSelectedFacility($event)">
-        <ion-item v-for="facility in facilities" :key="facility.facilityId">
+        <ion-item v-for="facility in filteredFacilities" :key="facility.facilityId">
           <ion-radio :value="facility.facilityId">
             <ion-label>
               {{ facility.facilityName || facility.facilityId }}
@@ -58,6 +59,7 @@ import {
   IonList,
   IonRadio,
   IonRadioGroup,
+  IonSearchbar,
   IonTitle,
   IonToolbar,
   modalController
@@ -83,12 +85,15 @@ export default defineComponent({
     IonList,
     IonRadio,
     IonRadioGroup,
+    IonSearchbar,
     IonTitle,
     IonToolbar,
   },
   props: ["selectedFacilities", "isFacilityLogin"],
   data() {
     return {
+      queryString: '',
+      filteredFacilities: [] as any,
       selectedFacilityValues: JSON.parse(JSON.stringify(this.selectedFacilities)),
     }
   },
@@ -99,10 +104,14 @@ export default defineComponent({
   },
   async mounted() {
     await this.store.dispatch('util/fetchFacilities');
+    this.filteredFacilities = this.facilities
   },
   methods: {
     closeModal() {
       modalController.dismiss({ dismissed: true });
+    },
+    search() {
+      this.filteredFacilities = this.facilities.filter((facility: any) => (facility.facilityId.toLowerCase().includes(this.queryString.toLowerCase())) || (facility.facilityName && facility.facilityName.toLowerCase().includes(this.queryString.toLowerCase())))
     },
     saveFacilities() {
       // taking out the difference of selected facilities and the originally
