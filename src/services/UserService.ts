@@ -406,13 +406,6 @@ const updatePartyRelationship = async (payload: any): Promise <any> => {
     data: payload
   });
 }
-const fetchPartyRelationship = async (payload: any): Promise<any> => {
-  return api({
-    url: 'performFind',
-    method: 'POST',
-    data: payload
-  })
-}
 
 const getUserFacilities = async (partyId: string): Promise<any> => {
   let facilities = []
@@ -809,7 +802,6 @@ export const UserService = {
   ensurePartyRole,
   getAvailableTimeZones,
   fetchLogoImageForParty,
-  fetchPartyRelationship,
   fetchUserSecurityGroupAssocHistory,
   fetchUsers,
   getPartyRole,
