@@ -89,6 +89,8 @@ export default defineComponent({
       modalController.dismiss({ dismissed: true});
     },
     async fetchUserSecurityGroupAssoHistory() {
+      if(!this.selectedUser.userLoginId) return;
+
       const securityGroupNameByGroupId = {} as any;
       let userGroupAssocHistories = [] as any;
       try {
