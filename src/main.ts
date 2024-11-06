@@ -27,7 +27,7 @@ import '@hotwax/apps-theme';
 
 import store from './store'
 
-import permissionPlugin from '@/authorization';
+import permissionPlugin, { Actions, hasPermission } from '@/authorization';
 import permissionRules from '@/authorization/Rules';
 import permissionActions from '@/authorization/Actions';
 
@@ -52,6 +52,7 @@ const app = createApp(App)
     level: process.env.VUE_APP_DEFAULT_LOG_LEVEL
   })
   .use(dxpComponents, {
+    Actions,
     appLoginUrl: process.env.VUE_APP_LOGIN_URL as string,
     defaultImgUrl: require("@/assets/images/defaultImage.png"),
     getConfig,
@@ -62,7 +63,8 @@ const app = createApp(App)
     localeMessages,
     setUserLocale,
     setUserTimeZone,
-    getAvailableTimeZones
+    getAvailableTimeZones,
+    hasPermission
   });
 
 router.isReady().then(() => {
