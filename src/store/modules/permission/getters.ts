@@ -36,6 +36,9 @@ const getters: GetterTree<PermissionState, RootState> = {
       })
     }
 
+    // Remove the hidden permissions so to not display them on the UI
+    delete groupType["SGC_HIDDEN"];
+
     return groupType
   },
   getQuery(state) {
