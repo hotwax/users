@@ -21,14 +21,14 @@
 
   <template v-if="arePermissionsAvailable()">
     <div v-for="(group, groupId) in filteredPermissions" :key="groupId">
-      <ion-item-divider v-if="group.groupId !== 'SGC_HIDDEN' && group.permissions.length" class="ion-margin-vertical" color="light">
+      <ion-item-divider v-if="group.permissions.length" class="ion-margin-vertical" color="light">
         <ion-label>
           {{ group.groupName || group.groupId }}
         </ion-label>
         <ion-note slot="end">{{ group.permissions.length }}</ion-note>
       </ion-item-divider>
 
-      <section v-if="group.groupId !== 'SGC_HIDDEN'">
+      <section>
         <ion-card v-for="permission in group.permissions" :key="permission.permissionId" button @click="updatePermissionAssociation(permission)">
           <ion-card-header>
             <div>
