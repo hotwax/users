@@ -12,29 +12,34 @@
 
   <ion-content>
     <ion-searchbar :placeholder="translate('Search facilities')" v-model="queryString" @keyup.enter="search()"/>
-    <ion-list v-if="!isFacilityLogin">
-      <ion-item v-for="facility in filteredFacilities" :key="facility.facilityId">
-        <ion-checkbox :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)">
-          <ion-label>
-            {{ facility.facilityName || facility.facilityId }}
-            <p>{{ facility.facilityId }}</p>
-          </ion-label>
-        </ion-checkbox>
-      </ion-item>
-    </ion-list>
-
-    <ion-list v-else>
-      <ion-radio-group :value="selectedFacilities[0]?.facilityId" @ionChange="updateSelectedFacility($event)">
+    <template v-if="filteredFacilities.length">
+      <ion-list v-if="!isFacilityLogin">
         <ion-item v-for="facility in filteredFacilities" :key="facility.facilityId">
-          <ion-radio :value="facility.facilityId">
+          <ion-checkbox :checked="isSelected(facility.facilityId)" @ionChange="toggleFacilitySelection(facility)">
             <ion-label>
               {{ facility.facilityName || facility.facilityId }}
               <p>{{ facility.facilityId }}</p>
             </ion-label>
-          </ion-radio>
+          </ion-checkbox>
         </ion-item>
-      </ion-radio-group>
-    </ion-list>
+      </ion-list>
+
+      <ion-list v-else>
+        <ion-radio-group :value="selectedFacilities[0]?.facilityId" @ionChange="updateSelectedFacility($event)">
+          <ion-item v-for="facility in filteredFacilities" :key="facility.facilityId">
+            <ion-radio :value="facility.facilityId">
+              <ion-label>
+                {{ facility.facilityName || facility.facilityId }}
+                <p>{{ facility.facilityId }}</p>
+              </ion-label>
+            </ion-radio>
+          </ion-item>
+        </ion-radio-group>
+      </ion-list>
+    </template>
+    <div v-else class="empty-state">
+      <p>{{ translate("No facilities found") }}</p>
+    </div>
 
     <ion-fab @click="saveFacilities()" vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button>
