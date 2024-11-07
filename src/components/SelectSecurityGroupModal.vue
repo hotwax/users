@@ -12,6 +12,7 @@
     
     <ion-content>
       <ion-searchbar :placeholder="translate('Search security groups')" v-model="queryString" @keyup.enter="search()"/>
+      <template v-if="fileteredSecurityGroups.length">
       <ion-list>
         <ion-item v-for="securityGroup in fileteredSecurityGroups" :key="securityGroup.groupId">
           <ion-checkbox :checked="isSelected(securityGroup.groupId)" @ionChange="toggleSecurityGroupSelection(securityGroup)">
@@ -22,6 +23,10 @@
           </ion-checkbox>
         </ion-item>
       </ion-list>
+      </template>
+      <div v-else class="empty-state">
+        <p>{{ translate("No security groups found") }}</p>
+      </div>
     
       <ion-fab @click="saveSecurityGroups()" vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button>
