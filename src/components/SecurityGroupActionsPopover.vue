@@ -76,16 +76,16 @@
         this.closePopover(userSecurityGroups)
       },
       async confirmRemove() {
-        const message = 'Are you sure you want to perform this action?'
+        const message = `Removing this security group may limit user's access to certain features. Are you sure you want to continue?`
         const alert = await alertController.create({
           header: translate("Remove security group"),
           message: translate(message),
           buttons: [
             {
-              text: translate("No"),
+              text: translate("Keep Group"),
             },
             {
-              text: translate("Yes"),
+              text: translate("Remove"),
               handler: async () => {
                 await this.removeUserSecurityGroup();
               }
