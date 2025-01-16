@@ -164,7 +164,7 @@
   "Remove phone number": "Remove phone number",
   "Remove product store": "Remove product store",
   "Remove users": "Remove users",
-  "Removing this security group may limit 's access to certain features or data. Are you sure you want to continue?": "Removing this security group may limit {username}'s access to certain features or data. Are you sure you want to continue?`",
+  "Removing this security group may limit user's access to certain features. Are you sure you want to continue?":"Removing this security group may limit user's access to certain features. Are you sure you want to continue?",
   "Rename Security Group": "Rename Security Group",
   "Require password reset on login": "Require password reset on login",
   "Reset password": "Reset password",
