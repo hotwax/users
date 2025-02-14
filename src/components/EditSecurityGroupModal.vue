@@ -16,7 +16,7 @@
         <ion-input :label="translate('Name')" v-model="group.groupName" />
       </ion-item>
       <ion-item lines="none">
-        <ion-textarea :label="translate('Description')" :counter="true" :maxlength="255" v-model="group.description" />
+        <ion-textarea :label="translate('Description')" :counter="true" :maxlength="255" :auto-grow="true" v-model="group.description" />
       </ion-item>
     </form>
   </ion-content>
