@@ -38,7 +38,7 @@ const getters: GetterTree<UserState, RootState> = {
   },
   isScrollable(state) {
     return (
-      state.users.list?.length > 0 && state.users.list?.length < state.users.total
+      state.users.list?.length > 0 && (state.users.list?.length % Number(process.env.VUE_APP_VIEW_SIZE) === 0)
     );
   },
   getUserProductStores(state) {
