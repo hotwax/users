@@ -47,7 +47,7 @@
                 <input @change="uploadImage" class="ion-hide" type="file" accept="image/*" id="profilePic"/>
                 <label for="profilePic">{{ translate("Upload") }}</label>
               </ion-item>
-              <ion-item lines="none">
+              <ion-item lines="none" :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
                 <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click.prevent="updateUserStatus($event)">
                   {{ translate("Disable user") }}
@@ -159,7 +159,7 @@
                   </ion-input>
                 </ion-item>
               </ion-list>
-              <ion-button @click="createNewUserLogin()" fill="outline" expand="block">
+              <ion-button @click="createNewUserLogin()" :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" fill="outline" expand="block">
                 {{ translate('Add credentials') }}
               </ion-button>
             </template>
