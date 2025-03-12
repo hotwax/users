@@ -15,4 +15,5 @@ export default interface UserState {
       url: string;
       token: string;
     }
+    redirectedFrom: string;
 }

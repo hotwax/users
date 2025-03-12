@@ -49,6 +49,9 @@ const getters: GetterTree<UserState, RootState> = {
   },
   getOmsRedirectionInfo(state) {
     return state.omsRedirectionInfo
+  },
+  getRedirectedFromUrl(state) {
+    return state.redirectedFrom
   }
 }
 export default getters;

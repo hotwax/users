@@ -46,6 +46,9 @@ const mutations: MutationTree <UserState> = {
     },
     [types.USER_OMS_REDIRECTION_INFO_UPDATED](state, payload) {
       state.omsRedirectionInfo = payload;
+    },
+    [types.USER_REDIRECTED_FROM_URL_UPDATED](state, url) {
+      state.redirectedFrom = url
     }
 }
 export default mutations;
