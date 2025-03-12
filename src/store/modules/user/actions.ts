@@ -81,6 +81,10 @@ const actions: ActionTree<UserState, RootState> = {
       this.dispatch('util/fetchOrganizationPartyId')
 
       const partyId = router.currentRoute.value.query.partyId
+      if(router.currentRoute.value.query.redirectedFrom) {
+        dispatch("updateRedirectedFromUrl", router.currentRoute.value.query.redirectedFrom)
+      }
+
       if (partyId) {
         return `/user-details/${partyId}`;
       }
@@ -432,6 +436,9 @@ const actions: ActionTree<UserState, RootState> = {
       logger.error(error);
       return Promise.reject(error)
     }
+  },
+  async updateRedirectedFromUrl({ commit }, url) {
+    commit(types.USER_REDIRECTED_FROM_URL_UPDATED, url)
   }
 }
 export default actions;
