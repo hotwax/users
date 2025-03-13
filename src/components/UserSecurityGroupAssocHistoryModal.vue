@@ -17,7 +17,7 @@
           {{ assocHistory.groupName ? assocHistory.groupName : assocHistory.groupId }}
           <p>{{ assocHistory.groupId }}</p>
         </ion-label>
-        <ion-note slot="end">{{ getDateWithOrdinalSuffix(assocHistory.fromDate) }} - {{ getDateWithOrdinalSuffix(assocHistory.thruDate) }}</ion-note>
+        <ion-note slot="end">{{ getDateWithOrdinalSuffix(assocHistory.fromDate) }} - {{ assocHistory.thruDate ? getDateWithOrdinalSuffix(assocHistory.thruDate) : translate('Current') }}</ion-note>
       </ion-item>
     </ion-list>
     <div class="empty-state" v-else>
@@ -98,7 +98,6 @@ export default defineComponent({
           entityName: "UserLoginAndSecurityGroup",
           inputFields: {
             userLoginId: this.selectedUser.userLoginId,
-            thruDate_op: "not-empty"
           },
           orderBy: "thruDate DESC",
           viewSize: 250
@@ -109,6 +108,9 @@ export default defineComponent({
           userGroupAssocHistories.map((history: any) => {
             history["groupName"] = securityGroupNameByGroupId[history.groupId]
           })
+          const currentSecurityGroups = userGroupAssocHistories.filter((history: any) => !history.thruDate);
+          const expiredSecurityGroups = userGroupAssocHistories.filter((history: any) => history.thruDate);
+          userGroupAssocHistories = currentSecurityGroups.concat(expiredSecurityGroups);
         } else {
           throw resp.data;
         }
