@@ -467,8 +467,7 @@ import {
   IonToggle,
   IonToolbar,
   modalController,
-  popoverController,
-  openURL
+  popoverController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 import { useRouter } from 'vue-router';
