@@ -2,7 +2,8 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-back-button slot="start" default-href="/tabs/users" />
+        <ion-back-button v-if="redirectedFromUrl" @click="goBack($event)" slot="start" default-href="/tabs/users" />
+        <ion-back-button v-else slot="start" default-href="/tabs/users" />
         <ion-title>{{ translate("User details") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -544,7 +545,8 @@ export default defineComponent({
       userProfile: 'user/getUserProfile',
       baseUrl: 'user/getBaseUrl',
       shopifyShops: 'util/getShopifyShops',
-      organizationPartyId: 'util/getOrganizationPartyId'
+      organizationPartyId: 'util/getOrganizationPartyId',
+      redirectedFromUrl: 'user/getRedirectedFromUrl'
     })
   },
   props: ['partyId'],
@@ -574,7 +576,9 @@ export default defineComponent({
       isUserFulfillmentAdmin: false
     }
   },
- 
+  async ionViewWillLeave() {
+    await this.store.dispatch("user/updateRedirectedFromUrl", "")
+  },
   async ionViewWillEnter() {
     this.isUserFetched = false
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
@@ -611,6 +615,11 @@ export default defineComponent({
           showToast(translate("Failed to set favorite product store."));
         })
       }
+    },
+    goBack($event: any) {
+      $event.preventDefault();
+      // Going 2 routes back, as we have login route as well in the history causing error when using back method or -1
+      window.history.go(-2)
     },
     updateFavoriteShopifyShop(event: any) {
       const selectedShopId = event.target.value;
