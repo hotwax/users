@@ -272,6 +272,9 @@
                 <ion-icon :icon="addOutline" slot='start' />
                 {{ translate('Add to security group') }}
               </ion-button>
+              <ion-card-content v-if="!selectedUser.userLoginId">
+                {{ translate('Select security groups to grant access to different parts of the application.') }}
+              </ion-card-content>
 
               <ion-item>
                 <ion-label>{{ translate("View history") }}</ion-label>
