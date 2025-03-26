@@ -276,7 +276,7 @@
                 {{ translate('Select security groups to grant access to different parts of the application.') }}
               </ion-card-content>
 
-              <ion-item>
+              <ion-item v-if="selectedUser.userLoginId && userGroupAssocHistories.length">
                 <ion-label>{{ translate("View history") }}</ion-label>
                 <ion-button slot="end" fill="clear" color="medium" @click="openUserSecurityGroupAssocHistoryModal($event)">
                   <ion-icon slot="icon-only" :icon="timeOutline" />
@@ -576,7 +576,8 @@ export default defineComponent({
       isUserFetched: false,
       showPassword: false,
       shopifyShopsForProductStore: [] as any,
-      isUserFulfillmentAdmin: false
+      isUserFulfillmentAdmin: false,
+      userGroupAssocHistories: [] as any[]
     }
   },
   async ionViewWillLeave() {
@@ -587,7 +588,8 @@ export default defineComponent({
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
     await this.fetchProfileImage()
     await Promise.all([this.store.dispatch('util/getSecurityGroups'), this.store.dispatch('util/fetchShopifyShopConfigs')]);
-    
+    await this.fetchUserSecurityGroupAssoHistory();
+
     const productStoreId = this.selectedUser.favoriteProductStorePref?.userPrefValue;
     if (productStoreId) {
       this.getShopifyShops(productStoreId);
@@ -1273,6 +1275,50 @@ export default defineComponent({
       });
 
       return userSecurityGroupAssocHistoryModal.present();
+    },
+    async fetchUserSecurityGroupAssoHistory() {
+      if (!this.selectedUser.userLoginId) return;
+
+      const securityGroupNameByGroupId = {} as any;
+      let userGroupAssocHistories = [] as any;
+
+      try {
+        const resp = await UserService.fetchUserSecurityGroupAssocHistory({
+          entityName: "UserLoginAndSecurityGroup",
+          inputFields: {
+            userLoginId: this.selectedUser.userLoginId,
+          },
+          orderBy: "thruDate DESC",
+          viewSize: 250,
+        });
+
+        if (!hasError(resp)) {
+          userGroupAssocHistories = resp.data.docs;
+          this.securityGroups.forEach((group: any) => {
+            securityGroupNameByGroupId[group.groupId] = group.groupName;
+          });
+          userGroupAssocHistories.forEach((history: any) => {
+            history["groupName"] = securityGroupNameByGroupId[history.groupId];
+          });
+
+          const currentSecurityGroups = userGroupAssocHistories.filter(
+            (history: any) => !history.thruDate
+          );
+          const expiredSecurityGroups = userGroupAssocHistories.filter(
+            (history: any) => history.thruDate
+          );
+          userGroupAssocHistories = currentSecurityGroups.concat(
+            expiredSecurityGroups
+          );
+        } else {
+          throw resp.data;
+        }
+      } catch (error) {
+        console.error("Error fetching user security group association history:", error);
+      }
+
+      this.userGroupAssocHistories = userGroupAssocHistories; // Store in local variable
+      console.log("Fetched userGroupAssocHistories:", userGroupAssocHistories);
     }
   },
   setup() {
