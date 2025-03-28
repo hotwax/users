@@ -1314,11 +1314,10 @@ export default defineComponent({
           throw resp.data;
         }
       } catch (error) {
-        console.error("Error fetching user security group association history:", error);
+        logger.error("Error fetching user security group association history:", error);
       }
 
-      this.userGroupAssocHistories = userGroupAssocHistories; // Store in local variable
-      console.log("Fetched userGroupAssocHistories:", userGroupAssocHistories);
+      this.userGroupAssocHistories = userGroupAssocHistories;
     }
   },
   setup() {

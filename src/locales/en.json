@@ -177,7 +177,7 @@
   "Security Group": "Security Group", 
   "Security Groups": "Security Groups", 
   "Security group updated successfully.": "Security group updated successfully.", 
-  "Select security groups to grant access to different parts of the application.": "Select security groups to grant access to different parts of the application.",
+  "Security groups can only be assigned after a login is created. Please add login credentials for above.": "Security groups can only be assigned after a login is created. Please add login credentials for above.",
   "Replace profile picture": "Replace profile picture",
   "Reset password email": "Reset password email",
   "Save": "Save",
