@@ -1154,7 +1154,7 @@ export default defineComponent({
       emitter.emit('presentLoader')
 
       try {
-        if (isChecked) {   
+        if (isChecked && this.selectedUser.userLoginId) {   
           await UserService.updateUserLoginStatus({
             enabled: 'N',
             partyId: this.partyId,
