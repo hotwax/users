@@ -273,7 +273,7 @@
                 {{ translate('Add to security group') }}
               </ion-button>
               <ion-card-content v-if="!selectedUser.userLoginId">
-                {{ translate('Select security groups to grant access to different parts of the application.') }}
+                {{ translate('Security groups can only be assigned after a login is created. Please add login credentials for above.') }}
               </ion-card-content>
 
               <ion-item v-if="selectedUser.userLoginId && userGroupAssocHistories.length">
