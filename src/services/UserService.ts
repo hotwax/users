@@ -383,22 +383,6 @@ const deletePartyRole = async (payload: any): Promise <any> => {
   });
 }
 
-const createCommercePartyRelationshipFrom = async (payload: any): Promise <any> => {
-  const organizationPartyId = store.getters['util/getOrganizationPartyId'];
-
-  payload = {
-    ...payload,
-    "partyIdFrom": organizationPartyId,
-    "roleTypeIdFrom": "INTERNAL_ORGANIZATIO",
-    "partyRelationshipTypeId": "OWNER",
-    "statusId": "ACCOUNT_CREATED",
-  }
-  return api({
-    url: "service/createCommercePartyRelationshipFrom", 
-    method: "post",
-    data: payload
-  });
-}
 const updatePartyRelationship = async (payload: any): Promise <any> => {
   return api({
     url: "service/updatePartyRelationship", 
@@ -791,7 +775,6 @@ export const UserService = {
   addUserToSecurityGroup,
   checkUserLoginId,
   createUser,
-  createCommercePartyRelationshipFrom,
   createNewUserLogin,
   createUpdatePartyEmailAddress,
   createUpdatePartyTelecomNumber,
