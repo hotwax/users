@@ -590,9 +590,9 @@ const finishSetup = async (payload: any): Promise <any> => {
     }
 
     if (payload.selectedTemplate.roleTypeId) {
-      promises.push(createCommercePartyRelationshipFrom({
-        "partyIdTo": partyId,
-        "roleTypeIdTo": payload.selectedTemplate.roleTypeId
+      promises.push(ensurePartyRole({
+        "partyId": partyId,
+        "roleTypeId": payload.selectedTemplate.roleTypeId
       }));
     }
 
