@@ -44,7 +44,7 @@
             </ion-input>
           </ion-item>
           <ion-item ion-margin-top>
-            <ion-toggle :disabled="selectedUserTemplate.isPasswordChangeDisabled" :checked="formData.requirePasswordChange" label-placement="start" justify="space-between">
+            <ion-toggle :disabled="selectedUserTemplate.isPasswordChangeDisabled" :checked="formData.requirePasswordChange" label-placement="start" justify="space-between" @ionChange="toggleRequirePasswordChange">
               {{ translate("Require password reset on login") }}
             </ion-toggle>
           </ion-item>
@@ -493,6 +493,9 @@ export default defineComponent({
         }
       })
       return selectProductStoreModal.present();
+    },
+    toggleRequirePasswordChange() {
+      this.formData.requirePasswordChange = !this.formData.requirePasswordChange;
     }
   },
   setup() {
