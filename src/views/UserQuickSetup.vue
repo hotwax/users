@@ -379,7 +379,7 @@ export default defineComponent({
         }
       } catch (err) {
         logger.error('error', err)
-        showToast(translate('Failed to quick setup user.'))
+        showToast(err ? translate(err) : translate('Failed to quick setup user.'));
       }
     },
     async finishSetupAlert(userLoginId:  any) {
