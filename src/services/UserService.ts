@@ -523,7 +523,9 @@ const finishSetup = async (payload: any): Promise <any> => {
     if (selectedTemplate.isUserLoginRequired || selectedUser.partyTypeId === "PARTY_GROUP") {
 
       if(await isUserLoginIdAlreadyExists(payload.formData.userLoginId)) {
-        throw `Could not create login user: user with ID ${payload.formData.userLoginId} already exists.`
+        throw {
+          errorMessage: translate('Could not create login user: user with ID already exists.', { userLoginId: payload.formData.userLoginId }),
+        }
       }
 
       const resp = await createNewUserLogin({
