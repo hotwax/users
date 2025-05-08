@@ -439,6 +439,7 @@
   </ion-page>
 </template>
 <script lang="ts">
+import * as yup from 'yup';
 import {
   alertController,
   IonAvatar,
@@ -661,10 +662,23 @@ export default defineComponent({
       return !this.selectedUser.createdByUserLogin || this.selectedUser.createdByUserLogin === 'system'
     },
     async addContactField(type: string) {
+
+      // Define validation schemas
+      const validationSchemas: Record<string, yup.StringSchema<string>> = {
+        email: yup.string().email(translate('Invalid email address')).required(translate('Email is required')),
+        phoneNumber: yup
+          .string()
+          .required(translate('Phone number is required'))
+          .test('no-symbols-or-spaces', translate('Phone number must not contain any alphabets, symbols or spaces'), (value) => {
+            return /^[0-9]+$/.test(value || '');
+          })
+          .matches(/^\d{10}$/, translate('Phone number must be exactly 10 digits')),
+        externalId: yup.string().required(translate('External ID is required')),
+      };
+
       const contactUpdateAlert = await alertController.create({
         header: translate(this.OPTIONS[type].header),
         inputs:  [{
-          // TODO add validation for phone
           name: "input",
           placeholder: translate(this.OPTIONS[type].placeholder),
         }],
@@ -676,25 +690,22 @@ export default defineComponent({
           text: translate('Save'),
           handler: async (result) => {
             const input = result.input.trim()
-            if (!input) {
-              showToast(translate('Please enter a value'))
+            try {
+              await validationSchemas[type].validate(input); // Validate input using yup
+            } catch (error) {
+              const validationError = error as yup.ValidationError; 
+              showToast(validationError.message)
               return false // returning false will not close the input
             }
-
             let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
             try {
               if (type === 'email') {
-                if (!isValidEmail(input)) {
-                  showToast(translate('Invalid email address.'))
-                  return false
-                }
-
                 const resp = await UserService.createUpdatePartyEmailAddress({
                   emailAddress: input,
                   partyId: this.selectedUser.partyId,
                   contactMechPurposeTypeId: 'PRIMARY_EMAIL'
                 })
-                if (hasError(resp)) resp.data 
+                if (hasError(resp)) throw resp.data
                 selectedUser = {
                   ...selectedUser,
                   emailDetails: {
@@ -708,7 +719,7 @@ export default defineComponent({
                   partyId: this.selectedUser.partyId,
                   contactMechPurposeTypeId: 'PRIMARY_PHONE'
                 })
-                if (hasError(resp)) resp.data
+                if (hasError(resp)) throw resp.data
                 selectedUser = {
                   ...selectedUser,
                   phoneNumberDetails: {
@@ -732,7 +743,7 @@ export default defineComponent({
                     groupName: this.selectedUser.groupName
                   })
                 }
-                if (hasError(resp)) resp.data
+                if (hasError(resp)) throw resp.data
                 selectedUser = {
                   ...selectedUser,
                   externalId: input
