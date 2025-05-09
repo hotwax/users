@@ -28,7 +28,7 @@
                 </ion-avatar>
                 <ion-label class="ion-margin-start">
                   <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
-                  <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
+                  <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser?.lastName }}</h1>
                   <p>{{ selectedUser.userLoginId }}</p>
                   <ion-badge v-if="selectedUser.userLoginId === userProfile.userLoginId">{{ translate("Your user") }}</ion-badge>
                 </ion-label>
