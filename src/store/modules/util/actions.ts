@@ -147,7 +147,7 @@ const actions: ActionTree<UtilState, RootState> = {
   },
 
   async fetchFacilities({ commit }) {
-    let facilities  = [];
+    let facilities: Array<any> = [];
     let viewIndex = 0
     // Used separate variable to check whether the response data length is equal to the viewSize passed
     // Not using resp.data.count for checking the condition as we have observed some cases where the count in the resp is not correct
@@ -171,7 +171,7 @@ const actions: ActionTree<UtilState, RootState> = {
         const resp = await UtilService.fetchFacilities(payload)
 
         if (!hasError(resp) && resp.data?.docs?.length > 0) {
-          facilities = resp.data.docs
+          facilities = facilities.concat(resp.data.docs)
           respCount = resp.data.docs.length
           viewIndex++;
         } else {
