@@ -272,8 +272,10 @@
                 <ion-icon :icon="addOutline" slot='start' />
                 {{ translate('Add to security group') }}
               </ion-button>
-
-              <ion-item>
+              <ion-item v-if="!selectedUser.userLoginId">
+                <ion-label>{{ translate('Security groups can only be assigned after a login is created. Please add login credentials for above.') }}</ion-label>
+              </ion-item>
+              <ion-item v-else>
                 <ion-label>{{ translate("View history") }}</ion-label>
                 <ion-button slot="end" fill="clear" color="medium" @click="openUserSecurityGroupAssocHistoryModal($event)">
                   <ion-icon slot="icon-only" :icon="timeOutline" />
@@ -584,7 +586,6 @@ export default defineComponent({
     await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
     await this.fetchProfileImage()
     await Promise.all([this.store.dispatch('util/getSecurityGroups'), this.store.dispatch('util/fetchShopifyShopConfigs')]);
-    
     const productStoreId = this.selectedUser.favoriteProductStorePref?.userPrefValue;
     if (productStoreId) {
       this.getShopifyShops(productStoreId);
