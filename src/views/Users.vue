@@ -45,7 +45,7 @@
           <ion-card class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser)>
             <ion-item lines="none">
               <ion-label>
-                {{ currentUser.groupName ? currentUser.groupName : `${currentUser.firstName} ${currentUser.lastName}` }}
+                {{ currentUser.groupName ?? `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}` }}
                 <p>{{ currentUser.userLoginId }}</p>
                 <p>{{ currentUser.infoString }}</p>
                 <ion-badge>{{ translate("Your user") }}</ion-badge>
@@ -77,7 +77,7 @@
             <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user)>
               <ion-item lines="none">
                 <ion-label>
-                  {{ user.groupName ? user.groupName : `${user.firstName} ${user.lastName}` }}
+                  {{ user.groupName ?? `${user.firstName ?? ''} ${user.lastName ?? ''}` }}
                   <p>{{ user.userLoginId }}</p>
                   <p>{{ user.infoString }}</p>
                 </ion-label>

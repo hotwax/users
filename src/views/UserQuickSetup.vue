@@ -377,9 +377,9 @@ export default defineComponent({
         } else {
           this.$router.replace({ path: `/user-details/${this.partyId}` });
         }
-      } catch (err) {
+      } catch (err: any) {
         logger.error('error', err)
-        showToast(translate('Failed to quick setup user.'))
+        showToast(err.errorMessage ? err.errorMessage : translate('Failed to quick setup user.'));
       }
     },
     async finishSetupAlert(userLoginId:  any) {

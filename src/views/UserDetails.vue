@@ -964,28 +964,33 @@ export default defineComponent({
           const securityGroupsToCreate = result.data.value.securityGroupsToCreate
           const securityGroupsToRemove = result.data.value.securityGroupsToRemove
 
-          const updateResponses = await Promise.allSettled(securityGroupsToRemove
-            .map(async (payload: any) => await UserService.removeUserSecurityGroup({
-              groupId: payload.groupId,
+          try {
+            const updateResponses = await Promise.allSettled(securityGroupsToRemove
+              .map(async (payload: any) => await UserService.removeUserSecurityGroup({
+                groupId: payload.groupId,
+                userLoginId: this.selectedUser.userLoginId
+              }))
+            )
+
+            const createResponse = await UserService.addUserToSecurityGroup({
+              groupIds: securityGroupsToCreate?.map((group: any) => group.groupId),
               userLoginId: this.selectedUser.userLoginId
-            }))
-          )
+            })
 
-          const createResponse = await UserService.addUserToSecurityGroup({
-            groupIds: securityGroupsToCreate?.map((group: any) => group.groupId),
-            userLoginId: this.selectedUser.userLoginId
-          })
-
-          const hasFailedResponse = [...updateResponses, createResponse].some((response: any) => response.status === 'rejected')
-          if (hasFailedResponse) {
+            const hasFailedResponse = [...updateResponses, createResponse].some((response: any) => response.status === 'rejected')
+            if (hasFailedResponse) {
+              showToast(translate('Failed to update some security group(s).'))
+            } else {
+              showToast(translate('Security group(s) updated successfully.'))
+            }
+            // refetching security groups
+            const userSecurityGroups = await UserService.getUserSecurityGroups(this.selectedUser.userLoginId)
+            this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroups: userSecurityGroups })
+            this.isUserFulfillmentAdmin = userSecurityGroups.length ? await UserService.isUserFulfillmentAdmin(userSecurityGroups.map((group: any) => group.groupId)) : false
+          } catch (error) {
+            logger.error(error)
             showToast(translate('Failed to update some security group(s).'))
-          } else {
-            showToast(translate('Security group(s) updated successfully.'))
           }
-          // refetching security groups
-          const userSecurityGroups = await UserService.getUserSecurityGroups(this.selectedUser.userLoginId)
-          this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, securityGroups: userSecurityGroups })
-          this.isUserFulfillmentAdmin = userSecurityGroups.length ? await UserService.isUserFulfillmentAdmin(userSecurityGroups.map((group: any) => group.groupId)) : false
         }
       })
 
@@ -1157,7 +1162,7 @@ export default defineComponent({
       emitter.emit('presentLoader')
 
       try {
-        if (isChecked) {   
+        if (isChecked && this.selectedUser.userLoginId) {   
           await UserService.updateUserLoginStatus({
             enabled: 'N',
             partyId: this.partyId,

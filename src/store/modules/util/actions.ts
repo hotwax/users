@@ -147,29 +147,40 @@ const actions: ActionTree<UtilState, RootState> = {
   },
 
   async fetchFacilities({ commit }) {
-    let facilities  = [];
-    try {
-      const payload = {
-        "inputFields": {
-          "parentTypeId": "VIRTUAL_FACILITY",
-          "parentTypeId_op": "notEqual",
-          "facilityTypeId": "VIRTUAL_FACILITY",
-          "facilityTypeId_op": "notEqual"
-        },
-        "entityName": "FacilityAndType",
-        "viewSize": 100 // keeping view size 100 as considering that we will have max 100 facilities
-      }
+    let facilities: Array<any> = [];
+    let viewIndex = 0
+    // Used separate variable to check whether the response data length is equal to the viewSize passed
+    // Not using resp.data.count for checking the condition as we have observed some cases where the count in the resp is not correct
+    let respCount = 0
+    const viewSize = 100
 
-      const resp = await UtilService.fetchFacilities(payload)
+    do {
+      try {
+        const payload = {
+          "inputFields": {
+            "parentTypeId": "VIRTUAL_FACILITY",
+            "parentTypeId_op": "notEqual",
+            "facilityTypeId": "VIRTUAL_FACILITY",
+            "facilityTypeId_op": "notEqual"
+          },
+          "entityName": "FacilityAndType",
+          viewSize,
+          viewIndex
+        }
 
-      if (!hasError(resp) && resp.data.count > 0) {
-        facilities = resp.data.docs
-      } else {
-        throw resp.data
+        const resp = await UtilService.fetchFacilities(payload)
+
+        if (!hasError(resp) && resp.data?.docs?.length > 0) {
+          facilities = facilities.concat(resp.data.docs)
+          respCount = resp.data.docs.length
+          viewIndex++;
+        } else {
+          throw resp.data
+        }
+      } catch (err) {
+        logger.error('Failed to fetch facilities', err)
       }
-    } catch (err) {
-      logger.error('Failed to fetch facilities', err)
-    }
+    } while(respCount >= viewSize)
     commit(types.UTIL_FACILITIES_UPDATED, facilities)
   },
 
