@@ -229,7 +229,7 @@ export default defineComponent({
           "isUserLoginRequired": true,
           "isEmployeeIdRequired": true,
           "isFacilityRequired": true,
-          "facilityRoleTypeId": "WAREHOUSE_MANAGER",
+          "facilityRoleTypeId": "WAREHOUSE_PICKER",
           "isProductStoreRequired": false,
           "productStoreRoleTypeId": ""
         },

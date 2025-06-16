@@ -575,20 +575,31 @@ const finishSetup = async (payload: any): Promise <any> => {
       }));
     }
 
-    if (payload.selectedTemplate.roleTypeId) {
-      promises.push(ensurePartyRole({
-        "partyId": partyId,
-        "roleTypeId": payload.selectedTemplate.roleTypeId
-      }));
+    // This is to ensure that party have required role before associating it in ProductStoreRole, FacilityParty. Because below logic is executing in parallel.
+    const roleTypeIdSet = new Set<string>();
+    if (payload.selectedTemplate.roleTypeId) {roleTypeIdSet.add(payload.selectedTemplate.roleTypeId)}
+    if (payload.selectedTemplate.productStoreRoleTypeId && payload.productStores.length > 0 && selectedTemplate.isProductStoreRequired) {roleTypeIdSet.add(payload.selectedTemplate.productStoreRoleTypeId)}
+
+    if (payload.facilities.length > 0) {
+      roleTypeIdSet.add(payload.selectedTemplate.facilityRoleTypeId || "WAREHOUSE_PICKER");
+
+      if (selectedUser.partyTypeId === "PARTY_GROUP") { roleTypeIdSet.add("FAC_LOGIN")}
+    }
+
+    // Ensure each unique roleTypeId one by one (awaited in order)
+    for (const roleTypeId of roleTypeIdSet) {
+      const result = await ensurePartyRole({
+        partyId,
+        roleTypeId,
+      });
+
+      // Handle if ensurePartyRole fails internally or returns error
+      if (hasError(result)) {
+        throw result.data;
+      }
     }
 
     if (payload.productStores.length > 0 && selectedTemplate.isProductStoreRequired) {
-      //This is ensure that party have required role before associating it in ProductStoreRole. Because below logic is executing in parallel.
-      await ensurePartyRole({
-        "partyId": partyId,
-        "roleTypeId": payload.selectedTemplate.productStoreRoleTypeId
-      })
-
       payload.productStores?.forEach((store : any) => {
         promises.push(createProductStoreRole({
           "partyId": partyId,
@@ -604,12 +615,6 @@ const finishSetup = async (payload: any): Promise <any> => {
       const facilitiesToAdd = payload.facilities.filter((facility: any) => !selectedUser.facilities?.some((fac: any) => fac.facilityId === facility.facilityId));
       const facilitiestoDelete = selectedUser.facilities?.filter((facility: any) => !selectedFacilityIds.has(facility.facilityId));
 
-      //This is ensure that party have required role before associating it in FacilityParty. Because below logic is executing in parallel.
-      await ensurePartyRole({
-        "partyId": partyId,
-        "roleTypeId": payload.selectedTemplate.facilityRoleTypeId ? payload.selectedTemplate.facilityRoleTypeId : "WAREHOUSE_MANAGER"
-      });
-
       facilitiestoDelete?.forEach((facility : any) => {
         promises.push(removePartyFromFacility({
           partyId: partyId,
@@ -624,7 +629,7 @@ const finishSetup = async (payload: any): Promise <any> => {
         promises.push(addPartyToFacility({
           "partyId": partyId,
           "facilityId": facility.facilityId,
-          "roleTypeId" : payload.selectedTemplate.facilityRoleTypeId ? payload.selectedTemplate.facilityRoleTypeId :  "WAREHOUSE_MANAGER",
+          "roleTypeId" : payload.selectedTemplate.facilityRoleTypeId ? payload.selectedTemplate.facilityRoleTypeId :  "WAREHOUSE_PICKER",
         }));
       });
 
