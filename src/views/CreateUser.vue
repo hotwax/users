@@ -205,7 +205,7 @@ export default defineComponent({
         if (resp.status === 200 && !hasError(resp) && resp.data.partyId) {
           const partyId = resp.data.partyId;
           if (partyTypeId === "PARTY_GROUP" ) {
-            await UserService.addPartyToFacility({"partyId": partyId, "facilityId": payload.facilityId, "roleTypeId": "WAREHOUSE_MANAGER"});
+            await UserService.addPartyToFacility({"partyId": partyId, "facilityId": payload.facilityId, "roleTypeId": "WAREHOUSE_PICKER"});
           }
           showToast(translate("User created successfully"));
           this.$router.replace({ path: `/user-confirmation/${partyId}` })

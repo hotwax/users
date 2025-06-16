@@ -918,7 +918,7 @@ export default defineComponent({
             try {
               const resp = await UserService.ensurePartyRole({
                 partyId: this.partyId,
-                roleTypeId: 'WAREHOUSE_MANAGER',
+                roleTypeId: 'WAREHOUSE_PICKER',
               })
               if (hasError(resp)) {
                 showToast(translate('Something went wrong.'));
@@ -934,7 +934,7 @@ export default defineComponent({
             .map(async (payload: any) => await UserService.addPartyToFacility({
               partyId: this.selectedUser.partyId,
               facilityId: payload.facilityId,
-              roleTypeId: 'WAREHOUSE_MANAGER',
+              roleTypeId: 'WAREHOUSE_PICKER',
             }))
           )
 
@@ -1265,10 +1265,10 @@ export default defineComponent({
 
       return securityGroups.filter((group: any) => !excludedSecurityGroups.includes(group.groupId))
     },
-    // Currently a user is getting associated with two roles at a time i.e., 'WAREHOUSE_MANAGER' and 'FAC_LOGIN'
-    // And here we only want to show records of 'WAREHOUSE_MANAGER'
+    // Currently a user is getting associated with two roles at a time i.e., 'WAREHOUSE_PICKER' and 'FAC_LOGIN'
+    // And here we only want to show records of 'WAREHOUSE_PICKER'
     getUserFacilities() {
-      return this.selectedUser.facilities.filter((facility: any) => facility.roleTypeId === 'WAREHOUSE_MANAGER')
+      return this.selectedUser.facilities.filter((facility: any) => facility.roleTypeId === 'WAREHOUSE_PICKER')
     },
     async openUserSecurityGroupAssocHistoryModal() {
       const userSecurityGroupAssocHistoryModal = await modalController.create({
