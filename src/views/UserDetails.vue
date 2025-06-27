@@ -129,12 +129,15 @@
                   </ion-toggle>
                 </ion-item>
               </ion-list>
-              <ion-button @click="resetPassword()" fill="outline" color="warning">
-                {{ translate('Reset password') }}
-              </ion-button>
-              <ion-button :disabled="selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
-                {{ translate('Force logout') }}
-              </ion-button>
+              <div class="login-detail-actions">
+                <ion-button @click="resetPassword()" fill="outline" color="warning">
+                  {{ translate('Reset password') }}
+                </ion-button>
+                <ion-button :disabled="selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
+                  {{ translate('Force logout') }}
+                </ion-button>
+              </div>
+                  
             </template>
             <template v-else>
               <ion-list>
@@ -1342,6 +1345,10 @@ export default defineComponent({
 })
 </script>
 <style scoped>
+.login-detail-actions {
+  padding: var(--spacer-xs) 10px 10px;
+}
+
 .user-details {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
