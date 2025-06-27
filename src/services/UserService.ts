@@ -210,6 +210,13 @@ const resetPassword = async (payload: any): Promise <any> => {
     data: payload
   });
 }
+const forceLogout = async (payload: any): Promise <any> => {
+  return api({
+    url: "service/forceLogout", 
+    method: "post",
+    data: payload
+  });
+}
 
 const updateUserLoginStatus = async (payload: any): Promise <any> => {
   return api({
@@ -794,6 +801,7 @@ export const UserService = {
   fetchLogoImageForParty,
   fetchUserSecurityGroupAssocHistory,
   fetchUsers,
+  forceLogout,
   getPartyRole,
   getUserContactDetails,
   getUserFavorites,

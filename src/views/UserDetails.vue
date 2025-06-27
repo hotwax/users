@@ -129,8 +129,11 @@
                   </ion-toggle>
                 </ion-item>
               </ion-list>
-              <ion-button @click="resetPassword()" fill="outline" color="warning" expand="block">
+              <ion-button @click="resetPassword()" fill="outline" color="warning">
                 {{ translate('Reset password') }}
+              </ion-button>
+              <ion-button :disabled="selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
+                {{ translate('Force logout') }}
               </ion-button>
             </template>
             <template v-else>
@@ -816,6 +819,40 @@ export default defineComponent({
       });
 
       return resetPasswordModal.present();
+    },
+    async confirmForceLogout() {
+      const message = 'Are you sure you want to perform this action?'
+      const alert = await alertController.create({
+        header: translate("Force logout user"),
+        message: translate(message),
+        buttons: [
+          {
+            text: translate("No"),
+          },
+          {
+            text: translate("Yes"),
+            handler: async () => {
+              await this.forceLogout();
+            }
+          }
+        ],
+      });
+      return alert.present();
+    },
+    async forceLogout() {
+      try {
+        const resp = await UserService.forceLogout({
+          userLoginId: this.selectedUser.userLoginId
+        })
+        if (hasError(resp)) {
+          throw resp
+        }
+        await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId, isFetchRequired: true });
+        showToast(translate('User has been logged out.'));
+      } catch (error) {
+        showToast(translate('Failed to perform force logout.'));
+        logger.error(error)
+      }
     },
     async updateUserLoginStatus(event: any) {
       event.stopImmediatePropagation();
