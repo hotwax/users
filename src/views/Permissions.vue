@@ -183,7 +183,7 @@ export default defineComponent({
     },
     async openCurrentGroupUsers() {
       await this.store.dispatch('user/updateQuery', {queryString: '', securityGroup: this.currentGroup.groupId, status: '', hideDisabledUser: true})
-      this.router.replace('users')
+      this.router.push('users')
     },
     async downloadCSVForPermissions() {
       if(this.currentGroup.groupId && !Object.keys(this.currentGroupPermissions).length) {
