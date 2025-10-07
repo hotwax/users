@@ -160,7 +160,7 @@
                     :error-text="translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.')"
                   >
                     <div slot="label">{{ translate("Password") }} <ion-text color="danger">*</ion-text></div>
-                    <ion-button @click="showPassword = !showPassword" slot="end" fill="clear">
+                    <ion-button size="default" @click="showPassword = !showPassword" slot="end" fill="clear">
                       <ion-icon :icon="showPassword ? eyeOutline : eyeOffOutline" slot="icon-only" />
                     </ion-button>
                   </ion-input>
@@ -202,30 +202,30 @@
               <ion-item>
                 <ion-icon :icon="mailOutline" slot="start" />
                 <ion-label class="ion-text-wrap">{{ selectedUser?.emailDetails ? selectedUser.emailDetails.email : translate('Email') }}</ion-label>
-                <ion-button v-if="selectedUser?.emailDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'email', selectedUser.emailDetails.email)">
+                <ion-button size="default" v-if="selectedUser?.emailDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'email', selectedUser.emailDetails.email)">
                   <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                 </ion-button>
-                <ion-button v-else @click="addContactField('email')" slot="end" fill="clear">
+                <ion-button  size="default" v-else @click="addContactField('email')" slot="end" fill="clear">
                   <ion-icon slot="icon-only" :icon="addCircleOutline" />
                 </ion-button>
               </ion-item>
               <ion-item>
                 <ion-icon :icon="callOutline" slot="start" />
                 <ion-label class="ion-text-wrap">{{ selectedUser?.phoneNumberDetails ? selectedUser.phoneNumberDetails.contactNumber : translate('Phone number') }}</ion-label>
-                <ion-button v-if="selectedUser?.phoneNumberDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'phoneNumber', selectedUser.phoneNumberDetails.contactNumber)">
+                <ion-button size="default" v-if="selectedUser?.phoneNumberDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'phoneNumber', selectedUser.phoneNumberDetails.contactNumber)">
                   <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                 </ion-button>
-                <ion-button v-else @click="addContactField('phoneNumber')" slot="end" fill="clear">
+                <ion-button size="default" v-else @click="addContactField('phoneNumber')" slot="end" fill="clear">
                   <ion-icon slot="icon-only" :icon="addCircleOutline" />
                 </ion-button>
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="businessOutline" slot="start" />
                 <ion-label class="ion-text-wrap">{{ selectedUser.externalId ? selectedUser.externalId : translate('External ID') }}</ion-label>
-                <ion-button v-if="selectedUser.externalId" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'externalId', selectedUser.externalId)">
+                <ion-button size="default" v-if="selectedUser.externalId" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'externalId', selectedUser.externalId)">
                   <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                 </ion-button>
-                <ion-button v-else @click="addContactField('externalId')" slot="end" fill="clear">
+                <ion-button size="default" v-else @click="addContactField('externalId')" slot="end" fill="clear">
                   <ion-icon slot="icon-only" :icon="addCircleOutline" />
                 </ion-button>
               </ion-item>
@@ -283,7 +283,7 @@
               </ion-item>
               <ion-item v-else>
                 <ion-label>{{ translate("View history") }}</ion-label>
-                <ion-button slot="end" fill="clear" color="medium" @click="openUserSecurityGroupAssocHistoryModal($event)">
+                <ion-button  size="default" slot="end" fill="clear" color="medium" @click="openUserSecurityGroupAssocHistoryModal($event)">
                   <ion-icon slot="icon-only" :icon="timeOutline" />
                 </ion-button>
               </ion-item>
@@ -291,7 +291,7 @@
               <template v-if="!hasPermission(Actions.APP_SUPER_USER) && checkUserAssociatedSecurityGroup('SUPER')">
                 <ion-item lines="none" :disabled="true">
                   <ion-label>{{ translate('Super') }}</ion-label>
-                  <ion-button slot="end" fill="clear" color="medium">
+                  <ion-button  size="default" slot="end" fill="clear" color="medium">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
                 </ion-item>
@@ -301,7 +301,7 @@
                   <ion-label>
                     {{ getSecurityGroupName(securityGroup.groupId) }}
                   </ion-label>
-                  <ion-button slot="end" fill="clear" color="medium" @click="openSecurityGroupActionsPopover($event, securityGroup)">
+                  <ion-button size="default" slot="end" fill="clear" color="medium" @click="openSecurityGroupActionsPopover($event, securityGroup)">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
                 </ion-item>
@@ -338,7 +338,7 @@
                   <h2>{{ store.storeName || store.productStoreId }}</h2>
                   <p>{{ getRoleTypeDesc(store.roleTypeId) }}</p>
                 </ion-label>
-                <ion-button slot="end" fill="clear" color="medium" @click="openProductStoreActionsPopover($event, store)">
+                <ion-button size="default" slot="end" fill="clear" color="medium" @click="openProductStoreActionsPopover($event, store)">
                   <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                 </ion-button>
               </ion-item>
