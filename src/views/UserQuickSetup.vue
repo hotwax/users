@@ -33,7 +33,7 @@
               :error-text="translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.')"
             >
               <div slot="label">{{ translate("Password") }} <ion-text color="danger">*</ion-text></div>
-              <ion-button @click="showPassword = !showPassword" slot="end" fill="clear">
+              <ion-button size="default" @click="showPassword = !showPassword" slot="end" fill="clear">
                 <ion-icon :icon="showPassword ? eyeOutline : eyeOffOutline" slot="icon-only" />
               </ion-button>
             </ion-input>

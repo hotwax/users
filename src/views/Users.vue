@@ -11,7 +11,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content ref="contentRef" :scroll-events="true" @ionScroll="enableScrolling()" id="filter-menu">
+    <ion-content id="filter-menu">
       <div class="find">
         <section class="search">
           <ion-searchbar :placeholder="translate('Search users')" v-model="query.queryString" @keyup.enter="updateQuery()" />
@@ -130,8 +130,7 @@
       <ion-infinite-scroll
         @ionInfinite="loadMoreUsers($event)"
         threshold="100px"
-        v-show="isScrollable"
-        ref="infiniteScrollRef"
+        v-if="isScrollable"
       >
         <ion-infinite-scroll-content
           loading-spinner="crescent"
@@ -225,11 +224,9 @@ export default defineComponent({
   data() {
     return {
       currentUser: {},
-      isScrollingEnabled: false
     }
   },
   async ionViewWillEnter() {
-    this.isScrollingEnabled = false;
     await this.fetchUsers()
   },
   async mounted() {
@@ -239,19 +236,6 @@ export default defineComponent({
     createUser(){
       this.store.dispatch('user/clearSelectedUser');  
       this.router.push('/create-user');
-    },
-    enableScrolling() {
-      const parentElement = (this as any).$refs.contentRef.$el
-      const scrollEl = parentElement.shadowRoot.querySelector("main[part='scroll']")
-
-      let scrollHeight = scrollEl.scrollHeight, infiniteHeight = (this as any).$refs.infiniteScrollRef.$el.offsetHeight, scrollTop = scrollEl.scrollTop, threshold = 100, height = scrollEl.offsetHeight
-      const distanceFromInfinite = scrollHeight - infiniteHeight - scrollTop - threshold - height
-
-      if(distanceFromInfinite < 0) {
-        this.isScrollingEnabled = false;
-      } else {
-        this.isScrollingEnabled = true;
-      }
     },
     getDate(date: any) {
       return DateTime.fromMillis(date).toFormat('dd LLL yyyy')
@@ -292,9 +276,6 @@ export default defineComponent({
     },
     async loadMoreUsers(event: any) {
       // Added this check here as if added on infinite-scroll component the Loading content does not gets displayed
-      if(!(this.isScrollingEnabled && this.isScrollable)) {
-        await event.target.complete();
-      }
       this.fetchUsers(
         undefined,
         Math.ceil(
