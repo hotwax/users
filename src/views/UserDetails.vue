@@ -66,7 +66,7 @@
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
-                <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click.prevent="updateUserStatus($event)">
+                <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click.prevent="updateUserStatus($event)">
                   {{ translate("Disable user") }}
                 </ion-toggle>
               </ion-item>
@@ -130,10 +130,10 @@
                 </ion-item>
               </ion-list>
               <div class="login-detail-actions">
-                <ion-button @click="resetPassword()" fill="outline" color="warning">
+                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PASSWORD)" @click="resetPassword()" fill="outline" color="warning">
                   {{ translate('Reset password') }}
                 </ion-button>
-                <ion-button :disabled="selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
+                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN) || selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
                   {{ translate('Force logout') }}
                 </ion-button>
               </div>
