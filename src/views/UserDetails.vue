@@ -130,7 +130,7 @@
                 </ion-item>
               </ion-list>
               <div class="login-detail-actions">
-                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" @click="resetPassword()" fill="outline" color="warning">
+                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PASSWORD)" @click="resetPassword()" fill="outline" color="warning">
                   {{ translate('Reset password') }}
                 </ion-button>
                 <ion-button :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN) || selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
