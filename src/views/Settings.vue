@@ -193,10 +193,4 @@ export default defineComponent({
   ion-content {
     --padding-bottom: 80px;
   }
-  /* Added conditional hiding in standalone mode that respects user permissions */
-  @media (display-mode: standalone) {
-    [standalone-hidden] {
-      display: none;
-    }
-  }
 </style>
