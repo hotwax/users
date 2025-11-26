@@ -1237,6 +1237,8 @@ export default defineComponent({
           img.onload = () => {
             if (validImageTypes.includes(file.type)) {
               resolve(true);
+            } else {
+              reject(false);
             }
           };
           img.onerror = () => {
@@ -1259,7 +1261,7 @@ export default defineComponent({
       try {
         await this.validateImageType(selectedFile, validImageTypes);
       } catch (error) {
-        showToast(translate("Please upload a valid image file"));
+        showToast(translate("Please upload a valid image file, supported types: jpg/jpeg, png, gif, svg"));
         return;
       }
 
