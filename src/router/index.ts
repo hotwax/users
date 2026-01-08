@@ -44,7 +44,6 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     redirect: () => {
-      const user = store.getters['user/getUserProfile'] || {};
       if (hasPermission('USERS_LIST_VIEW')) {
         return '/tabs/users';
       }
