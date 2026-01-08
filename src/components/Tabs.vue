@@ -3,15 +3,15 @@
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button v-if="hasPermission(Actions.USERS_LIST_VIEW)" tab="users" href="/tabs/users">
+        <ion-tab-button v-if="hasPermission(Actions.APP_USERS_LIST_VIEW)" tab="users" href="/tabs/users">
           <ion-icon :icon="personOutline" />
           <ion-label>{{ translate("Users") }}</ion-label>
         </ion-tab-button>
-        <ion-tab-button v-if="hasPermission(Actions.USERS_LIST_VIEW)" tab="permissions" href="/tabs/permissions">
+        <ion-tab-button v-if="hasPermission(Actions.APP_USERS_LIST_VIEW)" tab="permissions" href="/tabs/permissions">
           <ion-icon :icon="idCardOutline" />
           <ion-label>{{ translate("Permissions") }}</ion-label>
         </ion-tab-button>
-        <ion-tab-button v-if="!hasPermission(Actions.USERS_LIST_VIEW)" tab="me" :href="`/tabs/me`">
+        <ion-tab-button v-if="!hasPermission(Actions.APP_USERS_LIST_VIEW)" tab="me" :href="`/tabs/me`">
           <ion-icon :icon="personOutline" />
           <ion-label>{{ translate("Me") }}</ion-label>
         </ion-tab-button>

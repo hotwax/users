@@ -249,5 +249,6 @@
   "Yes": "Yes",
   "You don't have permission to update the security group.": "You don't have permission to update the security group.",
   "The requested page was not available to your user. Please contact your administrator to update your permissions.": "The requested page was not available to your user. Please contact your administrator to update your permissions.",
-  "Your user": "Your user"
+  "Your user": "Your user",
+  "Me": "Me"
 }

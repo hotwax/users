@@ -17,7 +17,8 @@ import {
   hasPermission,
   prepareAppPermissions,
   resetPermissions,
-  setPermissions
+  setPermissions,
+  Actions
 } from '@/authorization'
 import { translate, useAuthStore, useUserStore } from '@hotwax/dxp-components'
 import emitter from '@/event-bus'
@@ -86,7 +87,7 @@ const actions: ActionTree<UserState, RootState> = {
         dispatch("updateRedirectedFromUrl", router.currentRoute.value.query.redirectedFrom)
       }
 
-      if (partyId && hasPermission('USERS_LIST_VIEW')) {
+      if (partyId && hasPermission(Actions.APP_USERS_LIST_VIEW)) {
         return `/user-details/${partyId}`;
       } else if (partyId) {
         showToast(translate('The requested page was not available to your user. Please contact your administrator to update your permissions.'));

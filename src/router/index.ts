@@ -6,7 +6,7 @@ import { loader } from '@/utils/user';
 import store from '@/store'
 import { showToast } from '@/utils'
 import { translate } from '@hotwax/dxp-components'
-import { hasPermission } from '@/authorization';
+import { Actions, hasPermission } from '@/authorization';
 import Tabs from '@/components/Tabs.vue'
 import CreateUser from '@/views/CreateUser.vue'
 import UserConfirmation from '@/views/UserConfirmation.vue'
@@ -44,7 +44,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     redirect: () => {
-      if (hasPermission('USERS_LIST_VIEW')) {
+      if (hasPermission(Actions.APP_USERS_LIST_VIEW)) {
         return '/tabs/users';
       }
       return '/tabs/me';
