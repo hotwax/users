@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button v-if="redirectedFromUrl" @click="goBack($event)" slot="start" default-href="/tabs/users" />
-        <ion-back-button v-else slot="start" default-href="/tabs/users" />
+        <ion-back-button v-else-if="hasPermission('USERS_LIST_VIEW')" slot="start" default-href="/tabs/users" />
         <ion-title>{{ translate("User details") }}</ion-title>
       </ion-toolbar>
     </ion-header>
