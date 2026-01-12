@@ -62,7 +62,7 @@
 
     <!-- TODO improve disable button logic -->
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button :disabled="!hasPermission(Actions.APP_UPDT_PASSWORD) || checkResetButtonStatus()" @click="resetPassword()">
+      <ion-fab-button :disabled="(!hasPermission(Actions.APP_UPDT_PASSWORD) && userProfile?.userLoginId !== userLoginId) || checkResetButtonStatus()" @click="resetPassword()">
         <ion-icon :icon="lockClosedOutline" />  
       </ion-fab-button>
     </ion-fab>
@@ -127,7 +127,7 @@ export default defineComponent({
       showNewPassword: false,
     }
   },
-  props: ["email", "userLoginId"],
+  props: ["email", "userLoginId", "userProfile"],
   methods: {
     closeModal() {
       modalController.dismiss({ dismissed: true});

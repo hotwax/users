@@ -130,7 +130,7 @@
                 </ion-item>
               </ion-list>
               <div class="login-detail-actions">
-                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PASSWORD)" @click="resetPassword()" fill="outline" color="warning">
+                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PASSWORD) && selectedUser.userLoginId !== userProfile.userLoginId" @click="resetPassword()" fill="outline" color="warning">
                   {{ translate('Reset password') }}
                 </ion-button>
                 <ion-button :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN) || selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
@@ -817,7 +817,8 @@ export default defineComponent({
         component: ResetPasswordModal,
         componentProps: {
           email: this.selectedUser.emailDetails?.email,
-          userLoginId: this.selectedUser.userLoginId
+          userLoginId: this.selectedUser.userLoginId,
+          userProfile: this.userProfile // Passing profile to modal as we need to check if user is resetting their own password
         }
       });
 
