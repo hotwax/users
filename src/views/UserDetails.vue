@@ -817,8 +817,7 @@ export default defineComponent({
         component: ResetPasswordModal,
         componentProps: {
           email: this.selectedUser.emailDetails?.email,
-          userLoginId: this.selectedUser.userLoginId,
-          userProfile: this.userProfile // Passing profile to modal as we need to check if user is resetting their own password
+          userLoginId: this.selectedUser.userLoginId
         }
       });
 

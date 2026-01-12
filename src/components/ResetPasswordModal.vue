@@ -94,7 +94,7 @@ import {
   lockClosedOutline,
   mailOutline
 } from "ionicons/icons";
-import { useStore } from "vuex";
+import { mapGetters, useStore } from 'vuex';
 import { translate } from '@hotwax/dxp-components'
 import { isValidPassword, showToast } from "@/utils";
 import { hasError } from "@/adapter";
@@ -127,7 +127,12 @@ export default defineComponent({
       showNewPassword: false,
     }
   },
-  props: ["email", "userLoginId", "userProfile"],
+  props: ["email", "userLoginId"],
+  computed: {
+    ...mapGetters({
+      userProfile: 'user/getUserProfile',
+    })
+  },
   methods: {
     closeModal() {
       modalController.dismiss({ dismissed: true});
