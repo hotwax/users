@@ -94,7 +94,7 @@ import {
   lockClosedOutline,
   mailOutline
 } from "ionicons/icons";
-import { mapGetters, useStore } from 'vuex';
+import { mapGetters, useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components'
 import { isValidPassword, showToast } from "@/utils";
 import { hasError } from "@/adapter";
