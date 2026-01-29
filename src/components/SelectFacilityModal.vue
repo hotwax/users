@@ -8,10 +8,12 @@
       </ion-buttons>
       <ion-title>{{ translate("Select facilities") }}</ion-title>
     </ion-toolbar>
+    <ion-toolbar>
+      <ion-searchbar :placeholder="translate('Search facilities')" v-model="queryString" @keyup.enter="search()"/>
+    </ion-toolbar>
   </ion-header>
 
   <ion-content>
-    <ion-searchbar :placeholder="translate('Search facilities')" v-model="queryString" @keyup.enter="search()"/>
     <template v-if="filteredFacilities.length">
       <ion-list v-if="!isFacilityLogin">
         <ion-item v-for="facility in filteredFacilities" :key="facility.facilityId">
