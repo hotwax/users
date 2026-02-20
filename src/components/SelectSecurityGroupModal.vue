@@ -8,10 +8,12 @@
         </ion-buttons>
         <ion-title>{{ translate("Select security groups") }}</ion-title>
       </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar :placeholder="translate('Search security groups')" v-model="queryString" @keyup.enter="search()"/>
+      </ion-toolbar>
     </ion-header>
     
     <ion-content>
-      <ion-searchbar :placeholder="translate('Search security groups')" v-model="queryString" @keyup.enter="search()"/>
       <template v-if="fileteredSecurityGroups.length">
       <ion-list>
         <ion-item v-for="securityGroup in fileteredSecurityGroups" :key="securityGroup.groupId">
