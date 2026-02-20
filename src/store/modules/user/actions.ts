@@ -89,9 +89,6 @@ const actions: ActionTree<UserState, RootState> = {
 
       if (partyId && hasPermission(Actions.APP_USERS_LIST_VIEW)) {
         return `/user-details/${partyId}`;
-      } else if (partyId) {
-        showToast(translate('The requested page was not available to your user. Please contact your administrator to update your permissions.'));
-        return '/tabs/me';
       }
     } catch (err: any) {
       // If any of the API call in try block has status code other than 2xx it will be handled in common catch block.
