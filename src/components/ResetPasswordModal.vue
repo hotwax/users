@@ -62,7 +62,7 @@
 
     <!-- TODO improve disable button logic -->
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button :disabled="!hasPermission(Actions.APP_UPDT_PASSWORD) || checkResetButtonStatus()" @click="resetPassword()">
+      <ion-fab-button :disabled="(!hasPermission(Actions.APP_UPDT_PASSWORD) && userProfile?.userLoginId !== userLoginId) || checkResetButtonStatus()" @click="resetPassword()">
         <ion-icon :icon="lockClosedOutline" />  
       </ion-fab-button>
     </ion-fab>
@@ -94,7 +94,7 @@ import {
   lockClosedOutline,
   mailOutline
 } from "ionicons/icons";
-import { useStore } from "vuex";
+import { mapGetters, useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components'
 import { isValidPassword, showToast } from "@/utils";
 import { hasError } from "@/adapter";
@@ -128,6 +128,11 @@ export default defineComponent({
     }
   },
   props: ["email", "userLoginId"],
+  computed: {
+    ...mapGetters({
+      userProfile: 'user/getUserProfile',
+    })
+  },
   methods: {
     closeModal() {
       modalController.dismiss({ dismissed: true});

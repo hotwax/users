@@ -6,7 +6,7 @@ import { loader } from '@/utils/user';
 import store from '@/store'
 import { showToast } from '@/utils'
 import { translate } from '@hotwax/dxp-components'
-import { hasPermission } from '@/authorization';
+import { Actions, hasPermission } from '@/authorization';
 import Tabs from '@/components/Tabs.vue'
 import CreateUser from '@/views/CreateUser.vue'
 import UserConfirmation from '@/views/UserConfirmation.vue'
@@ -43,7 +43,12 @@ const loginGuard = (to: any, from: any, next: any) => {
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/tabs/users'
+    redirect: () => {
+      if (hasPermission(Actions.APP_USERS_LIST_VIEW)) {
+        return '/tabs/users';
+      }
+      return '/tabs/me';
+    },
   },
   {
     path: '/login',
@@ -62,6 +67,13 @@ const routes: Array<RouteRecordRaw> = [
         path: 'settings',
         component: () => import('@/views/Settings.vue')
       },{
+        path: 'me',
+        component: () => import('@/views/UserDetails.vue'),
+        props: () => {
+          const user = store.getters['user/getUserProfile'] || {};
+          return { partyId: user.partyId };
+        }
+      },{
         path: 'permissions',
         component: () => import('@/views/Permissions.vue'),
         meta: {
@@ -76,6 +88,9 @@ const routes: Array<RouteRecordRaw> = [
     name: 'UserDetails',
     component: UserDetails,
     beforeEnter: authGuard,
+    meta: {
+      permissionId: "USERS_LIST_VIEW"
+    },
     props: true
   },
   {

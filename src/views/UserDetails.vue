@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button v-if="redirectedFromUrl" @click="goBack($event)" slot="start" default-href="/tabs/users" />
-        <ion-back-button v-else slot="start" default-href="/tabs/users" />
+        <ion-back-button v-else-if="hasPermission(Actions.APP_USERS_LIST_VIEW)" slot="start" default-href="/tabs/users" />
         <ion-title>{{ translate("User details") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -130,7 +130,7 @@
                 </ion-item>
               </ion-list>
               <div class="login-detail-actions">
-                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PASSWORD)" @click="resetPassword()" fill="outline" color="warning">
+                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PASSWORD) && selectedUser.userLoginId !== userProfile.userLoginId" @click="resetPassword()" fill="outline" color="warning">
                   {{ translate('Reset password') }}
                 </ion-button>
                 <ion-button :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN) || selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
