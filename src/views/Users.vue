@@ -288,16 +288,13 @@ export default defineComponent({
     async fetchLoggedInUserDetails() {
       const params = {
         inputFields: {
-          roleTypeIdTo: 'APPLICATION_USER',
+          roleTypeId: 'APPLICATION_USER',
           partyId: this.userProfile.partyId
         },
-        fromDateName: 'relationshipFromDate',
-        thruDateName: 'relationshipThruDate',
-        filterByDate: 'Y',
         entityName: 'PartyAndUserLoginSecurityGroupDetails',
         noConditionFind: 'Y',
         distinct: 'Y',
-        fieldList: ['createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
+        fieldList: ['createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId', 'roleTypeId'],
       }
 
       try {
