@@ -182,15 +182,12 @@ const actions: ActionTree<UserState, RootState> = {
 
     let userResp = {} as any, selectedUser = {} as any, params = {
       inputFields: {
-        "roleTypeIdTo": "APPLICATION_USER",
+        "roleTypeId": "APPLICATION_USER",
         partyId: payload.partyId,
       },
-      fromDateName: "relationshipFromDate",
-      thruDateName: "relationshipThruDate",
-      filterByDate: "Y",
       viewSize: 1,
       entityName: 'PartyAndUserLoginSecurityGroupDetails',
-      fieldList: ['createdByUserLogin', 'userLoginId', 'enabled', "hasLoggedOut", 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName', 'externalId', 'statusId'],
+      fieldList: ['createdByUserLogin', 'userLoginId', 'enabled', "hasLoggedOut", 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName', 'externalId', 'statusId', 'roleTypeId'],
     }
 
     try {
@@ -349,16 +346,13 @@ const actions: ActionTree<UserState, RootState> = {
 
     const params = {
       "inputFields": {
-        "roleTypeIdTo": "APPLICATION_USER", 
+        "roleTypeId": "APPLICATION_USER", 
         ...filters
       },
-      "fromDateName": "relationshipFromDate",
-      "thruDateName": "relationshipThruDate",
-      "filterByDate": "Y",
       "entityName": "PartyAndUserLoginSecurityGroupDetails",
       "noConditionFind": "Y",
       "distinct": "Y",
-      "fieldList": ['partyId', 'createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
+      "fieldList": ['partyId', 'createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'roleTypeId', 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
       "viewIndex": payload.viewIndex,
       "viewSize": payload.viewSize
     }
