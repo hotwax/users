@@ -47,7 +47,7 @@
       </div>
 
       <section>
-        <DxpTimeZoneSwitcher @timeZoneUpdated="timeZoneUpdated" />
+        <DxpTimeZoneSwitcher />
         <DxpLanguageSwitcher />
       </section>
     </ion-content>
@@ -63,6 +63,10 @@ import { translate } from "@hotwax/dxp-components";
 import { Actions, hasPermission } from '@/authorization'
 import { DateTime } from 'luxon';
 import { useUserStore } from '@/store/user';
+import DxpOmsInstanceNavigator from "@/components/DxpOmsInstanceNavigator.vue";
+import DxpTimeZoneSwitcher from "@/components/DxpTimeZoneSwitcher.vue";
+import DxpLanguageSwitcher from "@/components/DxpLanguageSwitcher.vue";
+
 
 const userStore = useUserStore();
 
