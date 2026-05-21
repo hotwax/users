@@ -51,115 +51,81 @@
   </ion-content>
 </template>
   
-<script lang="ts">
-import {
-  IonButtons,
-  IonButton,
-  IonCheckbox,
-  IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonRadio,
-  IonRadioGroup,
-  IonSearchbar,
-  IonTitle,
-  IonToolbar,
-  modalController
-} from "@ionic/vue";
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { IonButtons, IonButton, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonRadio, IonRadioGroup, IonSearchbar, IonTitle, IonToolbar, modalController } from "@ionic/vue";
+import { ref, computed, onMounted } from "vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { mapGetters, useStore } from "vuex";
-import { translate } from '@hotwax/dxp-components'
+import { translate } from '@hotwax/dxp-components';
+import { useUtilStore } from "@/store/util";
 
-export default defineComponent({
-  name: "SelectFacilityModal",
-  components: {
-    IonButtons,
-    IonButton,
-    IonCheckbox,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonRadio,
-    IonRadioGroup,
-    IonSearchbar,
-    IonTitle,
-    IonToolbar,
+const props = defineProps({
+  selectedFacilities: {
+    type: Array,
+    required: true
   },
-  props: ["selectedFacilities", "isFacilityLogin"],
-  data() {
-    return {
-      queryString: '',
-      filteredFacilities: [] as any,
-      selectedFacilityValues: JSON.parse(JSON.stringify(this.selectedFacilities)),
-    }
-  },
-  computed: {
-    ...mapGetters({
-      facilities: 'util/getFacilities'
-    })
-  },
-  async mounted() {
-    await this.store.dispatch('util/fetchFacilities');
-    this.filteredFacilities = this.facilities
-  },
-  methods: {
-    closeModal() {
-      modalController.dismiss({ dismissed: true });
-    },
-    search() {
-      this.filteredFacilities = this.facilities.filter((facility: any) => (facility.facilityId.toLowerCase().includes(this.queryString.toLowerCase())) || (facility.facilityName && facility.facilityName.toLowerCase().includes(this.queryString.toLowerCase())))
-    },
-    saveFacilities() {
-      // taking out the difference of selected facilities and the originally
-      // user associated facilities for adding and removing facilities
-      const facilitiesToAdd = this.selectedFacilityValues.filter((selectedFacility: any) => !this.selectedFacilities.some((facility: any) => facility.facilityId === selectedFacility.facilityId))
-      const facilitiesToRemove = this.selectedFacilities.filter((facility: any) => !this.selectedFacilityValues.some((selectedFacility: any) => facility.facilityId === selectedFacility.facilityId))
-      modalController.dismiss({
-        dismissed: true,
-        value: {
-          selectedFacilities: this.selectedFacilityValues,
-          facilitiesToAdd,
-          facilitiesToRemove
-        }
-      });
-    },
-    toggleFacilitySelection(updatedFacility: any) {
-      const selectedFacility = this.selectedFacilityValues.some((facility: any) => facility.facilityId === updatedFacility.facilityId);
-      if (selectedFacility) {
-        this.selectedFacilityValues = this.selectedFacilityValues.filter((facility: any) => facility.facilityId !== updatedFacility.facilityId);
-      } else {
-        this.selectedFacilityValues.push(updatedFacility);
-      }
-    },
-    isSelected(facilityId: any) {
-      return this.selectedFacilityValues.some((facility: any) => facility.facilityId === facilityId);
-    },
-    updateSelectedFacility(event: CustomEvent) {
-      this.selectedFacilityValues = this.facilities.filter((facility: any) => facility.facilityId === event.detail.value)
-    }
-  },
-  setup() {
-    const store = useStore();
-
-    return {
-      closeOutline,
-      saveOutline,
-      store,
-      translate
-    };
-  },
+  isFacilityLogin: {
+    type: Boolean,
+    default: false
+  }
 });
+
+const utilStore = useUtilStore();
+
+const queryString = ref('');
+const filteredFacilities = ref<any[]>([]);
+const selectedFacilityValues = ref<any[]>(JSON.parse(JSON.stringify(props.selectedFacilities)));
+
+const facilities = computed(() => utilStore.getFacilities);
+
+onMounted(async () => {
+  await utilStore.fetchFacilities();
+  filteredFacilities.value = facilities.value;
+});
+
+const closeModal = () => {
+  modalController.dismiss({ dismissed: true });
+};
+
+const search = () => {
+  filteredFacilities.value = facilities.value.filter((facility: any) => 
+    facility.facilityId.toLowerCase().includes(queryString.value.toLowerCase()) || 
+    (facility.facilityName && facility.facilityName.toLowerCase().includes(queryString.value.toLowerCase()))
+  );
+};
+
+const saveFacilities = () => {
+  const facilitiesToAdd = selectedFacilityValues.value.filter(
+    (selectedFacility: any) => !props.selectedFacilities.some((facility: any) => (facility as any).facilityId === selectedFacility.facilityId)
+  );
+  const facilitiesToRemove = props.selectedFacilities.filter(
+    (facility: any) => !selectedFacilityValues.value.some((selectedFacility: any) => selectedFacility.facilityId === facility.facilityId)
+  );
+  modalController.dismiss({
+    dismissed: true,
+    value: {
+      selectedFacilities: selectedFacilityValues.value,
+      facilitiesToAdd,
+      facilitiesToRemove
+    }
+  });
+};
+
+const toggleFacilitySelection = (updatedFacility: any) => {
+  const hasFacility = selectedFacilityValues.value.some((facility: any) => facility.facilityId === updatedFacility.facilityId);
+  if (hasFacility) {
+    selectedFacilityValues.value = selectedFacilityValues.value.filter((facility: any) => facility.facilityId !== updatedFacility.facilityId);
+  } else {
+    selectedFacilityValues.value.push(updatedFacility);
+  }
+};
+
+const isSelected = (facilityId: any) => {
+  return selectedFacilityValues.value.some((facility: any) => facility.facilityId === facilityId);
+};
+
+const updateSelectedFacility = (event: CustomEvent) => {
+  selectedFacilityValues.value = facilities.value.filter((facility: any) => facility.facilityId === event.detail.value);
+};
 </script>
 
 <style scoped>

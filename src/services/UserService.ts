@@ -1,7 +1,8 @@
 import { api, client, hasError } from '@/adapter';
 import { DateTime } from "luxon";
 
-import store from '@/store';
+import { useUserStore } from '@/store/user';
+import { useUtilStore } from '@/store/util';
 import { showToast } from '@/utils';
 import { translate } from '@hotwax/dxp-components';
 import logger from '@/logger';
@@ -18,7 +19,7 @@ const login = async (username: string, password: string): Promise<any> => {
 }
 
 const getUserProfile = async (token: any): Promise<any> => {
-  const baseURL = store.getters['user/getBaseUrl'];
+  const baseURL = useUserStore().getBaseUrl;
   try {
     const resp = await client({
       url: "user-profile",
@@ -61,7 +62,7 @@ const setUserTimeZone = async (payload: any): Promise<any> => {
 }
 
 const getUserPermissions = async (payload: any, token: any): Promise<any> => {
-  const baseURL = store.getters['user/getBaseUrl'];
+  const baseURL = useUserStore().getBaseUrl;
   let serverPermissions = [] as any;
 
   // If the server specific permission list doesn't exist, getting server permissions will be of no use
@@ -467,7 +468,8 @@ const getUserProductStores = async (partyId: string): Promise<any> => {
 
     // fetching stores and roles first as storeName and role description
     // are required in the UI
-    Promise.allSettled([store.dispatch('util/getProductStores'), store.dispatch('util/fetchRoles')])
+    const utilStore = useUtilStore();
+    Promise.allSettled([utilStore.getProductStores(), utilStore.fetchRoles()])
 
     if (!hasError(resp) || resp.data.error === 'No record found') {
       productStores = resp.data.docs ? resp.data.docs : []
@@ -519,7 +521,7 @@ const isUserLoginIdAlreadyExists = async(username: string): Promise<any> => {
 }
 
 const finishSetup = async (payload: any): Promise <any> => {
-  const organizationPartyId = store.getters['util/getOrganizationPartyId'];
+  const organizationPartyId = useUtilStore().getOrganizationPartyId;
 
   try {
     const selectedUser = payload.selectedUser;
@@ -710,7 +712,7 @@ const isRoleTypeExists = async (roleTypeId: string): Promise<any> => {
 }
 
 const uploadPartyImage = async (payload: any): Promise <any> => {
-  const baseURL = store.getters['user/getBaseUrl'];
+  const baseURL = useUserStore().getBaseUrl;
   return client({
     url: 'service/uploadPartyLogoImage',
     method: 'POST',

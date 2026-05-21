@@ -34,60 +34,22 @@
   </ion-menu>
 </template>
 
-<script lang="ts">
-import {
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonItem,
-  IonList,
-  IonMenu,
-  IonTitle,
-  IonToggle,
-  IonToolbar,
-  IonSelect,
-  IonSelectOption,
-  menuController
-} from '@ionic/vue'
+<script setup lang="ts">
+import { computed } from 'vue';
+import { IonContent, IonHeader, IonIcon, IonItem, IonList, IonMenu, IonTitle, IonToggle, IonToolbar, IonSelect, IonSelectOption, menuController } from '@ionic/vue'
 import { cloudyNightOutline, idCardOutline, toggleOutline } from 'ionicons/icons'
-import { defineComponent } from 'vue';
-import { mapGetters } from 'vuex';
 import { translate } from '@hotwax/dxp-components'
-export default defineComponent({
-  name: 'FilterMenu',
-  components: {
-    IonContent,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonList,
-    IonMenu,
-    IonTitle,
-    IonToggle,
-    IonToolbar,
-    IonSelect,
-    IonSelectOption
-  },
-  computed: {
-    ...mapGetters({
-      query: 'user/getQuery',
-      securityGroups: 'util/getSecurityGroups'
-    })
-  },
-  methods: {
-    closeMenu() {
-      // Query Updation and fetchUsers action automatically gets handled by the event handlers on Users page
-      // Hence, we don't need to call query updation action and just need to close the menu.
-      menuController.close()
-    }
-  },
-  setup() {
-    return {
-      cloudyNightOutline,
-      idCardOutline,
-      toggleOutline,
-      translate
-    };    
-  }
-})
+import { useUserStore } from '@/store/user';
+import { useUtilStore } from '@/store/util';
+
+const userStore = useUserStore();
+const utilStore = useUtilStore();
+
+const query = computed(() => userStore.getQuery);
+const securityGroups = computed(() => utilStore.getSecurityGroups);
+
+const closeMenu = () => {
+  // Query updation and fetchUsers action automatically gets handled by the event handlers on Users page.
+  menuController.close();
+};
 </script>

@@ -25,9 +25,10 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 import '@hotwax/apps-theme';
 
-import store from './store'
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
-import permissionPlugin, { Actions, hasPermission } from '@/authorization';
+import permissionPlugin, { Actions, hasPermission, setPermissions } from '@/authorization';
 import permissionRules from '@/authorization/Rules';
 import permissionActions from '@/authorization/Actions';
 
@@ -35,15 +36,18 @@ import { dxpComponents } from '@hotwax/dxp-components'
 import { login, logout, loader } from '@/utils/user';
 import localeMessages from '@/locales';
 import { getConfig, initialise, setUserLocale, setUserTimeZone, getAvailableTimeZones } from '@/adapter';
+import { useUserStore } from '@/store/user';
 
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
 
 const app = createApp(App)
   .use(IonicVue, {
     mode: 'md',
     innerHTMLTemplatesEnabled: true
   })
+  .use(pinia)
   .use(router)
-  .use(store)
   .use(permissionPlugin, {
     rules: permissionRules,
     actions: permissionActions
@@ -66,6 +70,8 @@ const app = createApp(App)
     getAvailableTimeZones,
     hasPermission
   });
+
+setPermissions(useUserStore(pinia).getUserPermissions);
 
 router.isReady().then(() => {
   app.mount('#app');

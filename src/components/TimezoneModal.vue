@@ -46,128 +46,84 @@
   </ion-content>
 </template>
 
-<script lang="ts">
-import { 
-  IonButtons,
-  IonButton,
-  IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
-  IonItem,
-  IonIcon,
-  IonList,
-  IonRadioGroup,
-  IonRadio,
-  IonSearchbar,
-  IonSpinner,
-  IonTitle,
-  IonToolbar,
-  modalController,
-  alertController } from "@ionic/vue";
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { onBeforeMount, ref } from "vue";
+import { IonButtons, IonButton, IonContent, IonFab, IonFabButton, IonHeader, IonItem, IonIcon, IonList, IonRadioGroup, IonRadio, IonSearchbar, IonSpinner, IonTitle, IonToolbar, modalController, alertController } from "@ionic/vue";
 import { close, save } from "ionicons/icons";
-import { useStore } from "@/store";
 import { UserService } from "@/services/UserService";
 import { hasError } from '@/adapter'
 import { DateTime } from 'luxon';
 import { translate } from "@hotwax/dxp-components";
+import { useUserStore } from "@/store/user";
 
-export default defineComponent({
-  name: "TimeZoneModal",
-  components: { 
-    IonButtons,
-    IonButton,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonList,
-    IonRadioGroup,
-    IonRadio,
-    IonSearchbar,
-    IonSpinner,
-    IonTitle,
-    IonToolbar 
-  },
-  data() {
-    return {
-      queryString: '',
-      filteredTimeZones: [],
-      timeZones: [],
-      timeZoneId: '',
-      isLoading: false
-    }
-  },
-  methods: {
-    closeModal() {
-      modalController.dismiss({ dismissed: true });
-    },
-    async saveAlert() {
-      const message = translate("Are you sure you want to change the time zone to?", { timeZoneId: this.timeZoneId });
-      const alert = await alertController.create({
-        header: translate("Update time zone"),
-        message,
-        buttons: [
-          {
-            text: translate("Cancel"),
-          },
-          {
-            text: translate("Confirm"),
-            handler: () => {
-              this.setUserTimeZone();
-            }
-          }
-        ],
-      });
-      return alert.present();
-    },
-    preventSpecialCharacters($event: any) {
-      // Searching special characters fails the API, hence, they must be omitted
-      if(/[`!@#$%^&*()_+\-=\\|,.<>?~]/.test($event.key)) $event.preventDefault();
-    },
-    findTimeZone() { 
-      const queryString = this.queryString.toLowerCase();
-      this.filteredTimeZones = this.timeZones.filter((timeZone: any) => {
-        return timeZone.id.toLowerCase().match(queryString) || timeZone.label.toLowerCase().match(queryString);
-      });
-    },
-    async getAvailableTimeZones() {
-      this.isLoading = true;
-      const resp = await UserService.getAvailableTimeZones()
-      if(resp.status === 200 && !hasError(resp)) {
-        // We are filtering valid the timeZones coming with response here
-        this.timeZones = resp.data.filter((timeZone: any) => {
-          return DateTime.local().setZone(timeZone.id).isValid;
-        });
-        this.findTimeZone();
+const userStore = useUserStore();
+
+const queryString = ref('');
+const filteredTimeZones = ref<any[]>([]);
+const timeZones = ref<any[]>([]);
+const timeZoneId = ref('');
+const isLoading = ref(false);
+
+const closeModal = () => {
+  modalController.dismiss({ dismissed: true });
+};
+
+const saveAlert = async () => {
+  const message = translate("Are you sure you want to change the time zone to?", { timeZoneId: timeZoneId.value });
+  const alert = await alertController.create({
+    header: translate("Update time zone"),
+    message,
+    buttons: [
+      {
+        text: translate("Cancel"),
+      },
+      {
+        text: translate("Confirm"),
+        handler: () => {
+          setUserTimeZone();
+        }
       }
-      this.isLoading = false;
-    },
-    async selectSearchBarText(event: any) {
-      const element = await event.target.getInputElement()
-      element.select();
-    },
-    async setUserTimeZone() {
-      await this.store.dispatch("user/setUserTimeZone", {
-        "timeZoneId": this.timeZoneId
-      })
-      this.closeModal()
-    }
-  },
-  beforeMount () {
-    this.getAvailableTimeZones();
-  },
-  setup() {
-    const store = useStore();
-    return {
-      close,
-      save,
-      store,
-      translate
-    };
+    ],
+  });
+  return alert.present();
+};
+
+const preventSpecialCharacters = ($event: any) => {
+  // Searching special characters fails the API, hence, they must be omitted
+  if(/[`!@#$%^&*()_+\-=\\|,.<>?~]/.test($event.key)) $event.preventDefault();
+};
+
+const findTimeZone = () => { 
+  const query = queryString.value.toLowerCase();
+  filteredTimeZones.value = timeZones.value.filter((timeZone: any) => {
+    return timeZone.id.toLowerCase().match(query) || timeZone.label.toLowerCase().match(query);
+  });
+};
+
+const getAvailableTimeZones = async () => {
+  isLoading.value = true;
+  const resp = await UserService.getAvailableTimeZones();
+  if (resp.status === 200 && !hasError(resp)) {
+    // We are filtering valid the timeZones coming with response here
+    timeZones.value = resp.data.filter((timeZone: any) => {
+      return DateTime.local().setZone(timeZone.id).isValid;
+    });
+    findTimeZone();
   }
+  isLoading.value = false;
+};
+
+const selectSearchBarText = async (event: any) => {
+  const element = await event.target.getInputElement();
+  element.select();
+};
+
+const setUserTimeZone = async () => {
+  await userStore.setUserTimeZone(timeZoneId.value);
+  closeModal();
+};
+
+onBeforeMount(() => {
+  getAvailableTimeZones();
 });
 </script>

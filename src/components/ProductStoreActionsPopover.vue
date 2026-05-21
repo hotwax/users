@@ -14,99 +14,78 @@
   </ion-content>
 </template>
 
-<script lang="ts">
-import {
-  alertController,
-  IonContent,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonListHeader,
-  popoverController,
-} from "@ionic/vue";
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { computed } from "vue";
+import { alertController, IonContent, IonItem, IonLabel, IonList, IonListHeader, popoverController } from "@ionic/vue";
 import { translate, useAuthStore } from "@hotwax/dxp-components";
-import { mapGetters, useStore } from 'vuex';
+import { useUserStore } from "@/store/user";
 import { UserService } from "@/services/UserService";
 import { DateTime } from "luxon";
 import { showToast } from "@/utils";
 import { hasError } from "@/adapter";
 import logger from '@/logger';
 
-export default defineComponent({
-  name: "ProductStoreActionsPopover",
-  components: {
-    IonContent,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonListHeader
-  },
-  props: ['productStore'],
-  computed: {
-    ...mapGetters({
-      selectedUser: 'user/getSelectedUser',
-      userProductStores: 'user/getUserProductStores',
-      omsRedirectionInfo: 'user/getOmsRedirectionInfo',
-    })
-  },
-  methods: {
-    closePopover() {
-      popoverController.dismiss();
-    },
-    async removeProductStoreRole() {
-      try {
-        const resp = await UserService.updateProductStoreRole({
-          partyId: this.selectedUser.partyId,
-          productStoreId: this.productStore.productStoreId,
-          roleTypeId: this.productStore.roleTypeId,
-          fromDate: this.userProductStores.find((store: any) => this.productStore.productStoreId === store.productStoreId).fromDate,
-          thruDate: DateTime.now().toMillis()
-        })
-        if (hasError(resp)) throw resp.data
-        showToast(translate('Role removed successfully.'))
-      } catch (error) {
-        showToast(translate('Something went wrong.'));
-        logger.error(error)
-      }
-      // refetching product stores with updated roles
-      const userProductStores = await UserService.getUserProductStores(this.selectedUser.partyId)
-      this.store.dispatch('user/updateSelectedUser', { ...this.selectedUser, productStores: userProductStores })
-      this.closePopover()
-    },
-    async confirmRemove() {
-      const message = 'Are you sure you want to perform this action?'
-      const alert = await alertController.create({
-        header: translate("Remove product store"),
-        message: translate(message),
-        buttons: [
-          {
-            text: translate("No"),
-          },
-          {
-            text: translate("Yes"),
-            handler: async () => {
-              await this.removeProductStoreRole();
-            }
-          }
-        ],
-      });
-      return alert.present();
-    },
-    redirectToStore() {
-      const companyDetailUrl = `${process.env.VUE_APP_COMPANY_LOGIN_URL}?oms=${this.omsRedirectionInfo.url}&token=${this.authStore.token.value}&expirationTime=${this.authStore.token.expiration}&omsRedirectionUrl=${this.authStore.getOms}&productStoreId=${this.productStore.productStoreId}`
-      window.open(companyDetailUrl, "_blank");
-    }
-  },
-  setup() {
-    const authStore = useAuthStore();
-    const store = useStore();
-
-    return {
-      authStore,
-      store,
-      translate
-    }
+const props = defineProps({
+  productStore: {
+    type: Object,
+    required: true
   }
 });
+
+const authStore = useAuthStore();
+const userStore = useUserStore();
+
+const selectedUser = computed(() => userStore.selectedUser);
+const userProductStores = computed(() => userStore.getUserProductStores);
+const omsRedirectionInfo = computed(() => userStore.getOmsRedirectionInfo);
+
+const closePopover = () => {
+  popoverController.dismiss();
+};
+
+const removeProductStoreRole = async () => {
+  try {
+    const resp = await UserService.updateProductStoreRole({
+      partyId: selectedUser.value.partyId,
+      productStoreId: props.productStore.productStoreId,
+      roleTypeId: props.productStore.roleTypeId,
+      fromDate: userProductStores.value.find((store: any) => props.productStore.productStoreId === store.productStoreId).fromDate,
+      thruDate: DateTime.now().toMillis()
+    });
+    if (hasError(resp)) throw resp.data;
+    showToast(translate('Role removed successfully.'));
+  } catch (error) {
+    showToast(translate('Something went wrong.'));
+    logger.error(error);
+  }
+  
+  const updatedUserProductStores = await UserService.getUserProductStores(selectedUser.value.partyId);
+  userStore.updateSelectedUser({ ...selectedUser.value, productStores: updatedUserProductStores });
+  closePopover();
+};
+
+const confirmRemove = async () => {
+  const message = 'Are you sure you want to perform this action?';
+  const alert = await alertController.create({
+    header: translate("Remove product store"),
+    message: translate(message),
+    buttons: [
+      {
+        text: translate("No"),
+      },
+      {
+        text: translate("Yes"),
+        handler: async () => {
+          await removeProductStoreRole();
+        }
+      }
+    ],
+  });
+  return alert.present();
+};
+
+const redirectToStore = () => {
+  const companyDetailUrl = `${process.env.VUE_APP_COMPANY_LOGIN_URL}?oms=${omsRedirectionInfo.value.url}&token=${authStore.token.value}&expirationTime=${authStore.token.expiration}&omsRedirectionUrl=${authStore.getOms}&productStoreId=${props.productStore.productStoreId}`;
+  window.open(companyDetailUrl, "_blank");
+};
 </script>

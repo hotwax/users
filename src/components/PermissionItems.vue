@@ -49,151 +49,105 @@
 
 </template>
 
-<script lang="ts">
-import {
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonCheckbox,
-  IonIcon,
-  IonItem,
-  IonItemDivider,
-  IonLabel,
-  IonNote,
-  IonSearchbar,
-  IonSelect,
-  IonSelectOption,
-  IonSpinner,
-  IonToggle
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonIcon, IonItem, IonItemDivider, IonLabel, IonNote, IonSearchbar, IonSelect, IonSelectOption, IonSpinner, IonToggle } from '@ionic/vue';
 import { translate } from '@hotwax/dxp-components';
 import { optionsOutline, shieldCheckmarkOutline } from 'ionicons/icons';
-import { mapGetters, useStore } from 'vuex';
 import { PermissionService } from '@/services/PermissionService';
 import { showToast } from '@/utils';
 import { hasError } from '@/adapter';
 import { DateTime } from 'luxon';
 import { Actions, hasPermission } from '@/authorization'
 import logger from '@/logger';
+import { usePermissionStore } from '@/store/permission';
+import { useUtilStore } from '@/store/util';
 
-export default defineComponent({
-  name: 'PermissionItems',
-  components: {
-    IonCard,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonCheckbox,
-    IonIcon,
-    IonItem,
-    IonItemDivider,
-    IonLabel,
-    IonNote,
-    IonSearchbar,
-    IonSelect,
-    IonSelectOption,
-    IonSpinner,
-    IonToggle,
-  },
-  computed: {
-    ...mapGetters({
-      query: 'permission/getQuery',
-      currentGroupPermissions: 'permission/getCurrentGroupPermissions',
-      currentGroup: "permission/getCurrentGroup",
-      filteredPermissions: "permission/getFilteredPermissions",
-      classificationSecurityGroups: 'util/getClassificationSecurityGroups',
-      permissionsByClassificationGroups: 'permission/getPermissionsByClassificationGroups'
-    })
-  },
-  methods: {
-    async updateQuery() {
-      await this.store.dispatch('permission/updateQuery', this.query)
-    },
-    async updatePermissionAssociation(permission: any) {
-      let resp = {} as any;
-      const payload = {
-        groupId: this.currentGroup.groupId,
-        permissionId: permission.permissionId
+const permissionStore = usePermissionStore();
+const utilStore = useUtilStore();
+
+const query = computed(() => permissionStore.getQuery);
+const currentGroupPermissions = computed(() => permissionStore.getCurrentGroupPermissions);
+const currentGroup = computed(() => permissionStore.getCurrentGroup);
+const filteredPermissions = computed(() => permissionStore.getFilteredPermissions);
+const classificationSecurityGroups = computed(() => utilStore.getClassificationSecurityGroups);
+const permissionsByClassificationGroups = computed(() => permissionStore.getPermissionsByClassificationGroups);
+
+const updateQuery = async () => {
+  await permissionStore.updateQuery(query.value);
+};
+
+const updatePermissionAssociation = async (permission: any) => {
+  let resp = {} as any;
+  const payload = {
+    groupId: currentGroup.value.groupId,
+    permissionId: permission.permissionId
+  };
+
+  const currentPermissions = JSON.parse(JSON.stringify(currentGroupPermissions.value));
+  updatePermissionStatus(permission, true);
+
+  try {
+    if (permission.isChecked) {
+      const fromDate = currentGroupPermissions.value[permission.permissionId].fromDate;
+
+      resp = await PermissionService.removeSecurityPermissionFromSecurityGroup({
+        ...payload,
+        thruDate: DateTime.now().toMillis(),
+        fromDate
+      });
+
+      if (hasError(resp)) {
+        throw resp.data;
       }
 
-      let currentPermissions = JSON.parse(JSON.stringify(this.currentGroupPermissions))
-      this.updatePermissionStatus(permission, true);
+      delete currentPermissions[permission.permissionId];
+    } else {
+      const time = DateTime.now().toMillis();
+      const params = {
+        ...payload,
+        fromDate: time
+      };
 
-      try {
-        if(permission.isChecked) {
-          const fromDate = this.currentGroupPermissions[permission.permissionId].fromDate
+      resp = await PermissionService.addSecurityPermissionToSecurityGroup(params);
 
-          resp = await PermissionService.removeSecurityPermissionFromSecurityGroup({
-            ...payload,
-            thruDate: DateTime.now().toMillis(),
-            fromDate
-          })
-
-          if(hasError(resp)) {
-            throw resp.data;
-          }
-
-          delete currentPermissions[permission.permissionId]
-        } else {
-          const time = DateTime.now().toMillis()
-          const params = {
-            ...payload,
-            fromDate: time
-          }
-
-          resp = await PermissionService.addSecurityPermissionToSecurityGroup(params)
-
-          if(hasError(resp)) {
-            throw resp.data;
-          }
-
-          currentPermissions[permission.permissionId] = params
-        }
-
-        if(!hasError(resp)) {
-          showToast(translate("Security group permission association successfully updated."))
-          await this.store.dispatch('permission/updateCurrentGroupPermissions', { groupId: this.currentGroup.groupId, currentPermissions})
-          this.store.dispatch('permission/checkAssociated')
-        } else {
-          throw resp.data
-        }
-      } catch(err) {
-        showToast(translate("Failed to update security group permission association."))
-        logger.error(err)
+      if (hasError(resp)) {
+        throw resp.data;
       }
-      this.updatePermissionStatus(permission, false);
-    },
-    arePermissionsAvailable() {
-      return Object.values(this.filteredPermissions).some((groupType: any) => groupType.permissions.length)
-    },
-    updatePermissionStatus(currentPermission: any, status: boolean) {
-      const permissionsByGroup = JSON.parse(JSON.stringify(this.permissionsByClassificationGroups));
 
-      Object.values(permissionsByGroup).map((group: any) => {
-        const permission = group.permissions.find((permission: any) => permission.permissionId === currentPermission.permissionId)
-        if(permission) {
-          permission["isStatusUpdating"] = status
-        }
-      })
-
-      this.store.dispatch('permission/updatePermissionsByClassificationGroups', permissionsByGroup)
+      currentPermissions[permission.permissionId] = params;
     }
-  },
-  setup() {
-    const store = useStore();
 
-    return {
-      Actions,
-      hasPermission,
-      optionsOutline,
-      shieldCheckmarkOutline,
-      store,
-      translate
+    if (!hasError(resp)) {
+      showToast(translate("Security group permission association successfully updated."));
+      await permissionStore.updateCurrentGroupPermissions({ groupId: currentGroup.value.groupId, currentPermissions});
+      permissionStore.checkAssociated();
+    } else {
+      throw resp.data;
     }
+  } catch (err) {
+    showToast(translate("Failed to update security group permission association."));
+    logger.error(err);
   }
-});
+  updatePermissionStatus(permission, false);
+};
+
+const arePermissionsAvailable = () => {
+  return Object.values(filteredPermissions.value).some((groupType: any) => groupType.permissions.length);
+};
+
+const updatePermissionStatus = (currentPermission: any, status: boolean) => {
+  const permissionsByGroup = JSON.parse(JSON.stringify(permissionsByClassificationGroups.value));
+
+  Object.values(permissionsByGroup).map((group: any) => {
+    const permission = group.permissions.find((permission: any) => permission.permissionId === currentPermission.permissionId);
+    if (permission) {
+      permission["isStatusUpdating"] = status;
+    }
+  });
+
+  permissionStore.updatePermissionsByClassificationGroups(permissionsByGroup);
+};
 </script>
 
 <style scoped>

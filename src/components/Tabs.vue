@@ -24,30 +24,11 @@
   </ion-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs, IonRouterOutlet } from "@ionic/vue";
-import {
-  settingsOutline,
-  personOutline,
-  idCardOutline
-} from "ionicons/icons";
+import { settingsOutline, personOutline, idCardOutline } from "ionicons/icons";
 import { translate } from "@hotwax/dxp-components";
 import { Actions, hasPermission } from '@/authorization'
-
-export default {
-  name: "Tabs",
-  components: { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs, IonRouterOutlet },
-  setup() {
-    return {
-      settingsOutline,
-      personOutline,
-      idCardOutline,
-      translate,
-      hasPermission,
-      Actions
-    };
-  }
-};
 </script>
 
 <style scoped>

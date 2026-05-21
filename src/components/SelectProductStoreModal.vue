@@ -30,95 +30,51 @@
   </ion-content>
 </template>
   
-<script lang="ts">
-import { 
-  IonButtons,
-  IonButton,
-  IonCheckbox,
-  IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonTitle,
-  IonToolbar,
-  modalController
-} from "@ionic/vue";
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { computed, ref } from "vue";
+import { IonButtons, IonButton, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { mapGetters, useStore } from "vuex";
 import { translate } from '@hotwax/dxp-components'
+import { useUtilStore } from "@/store/util";
 
-export default defineComponent({
-  name: "SelectProductStoreModal",
-  components: { 
-    IonButtons,
-    IonButton,
-    IonCheckbox,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonTitle,
-    IonToolbar,
-  },
-  props: ["selectedProductStores"],
-  data() {
-    return {
-      selectedProductStoreValues: JSON.parse(JSON.stringify(this.selectedProductStores)),
+const props = defineProps<{
+  selectedProductStores: any[]
+}>();
+
+const utilStore = useUtilStore();
+
+const productStores = computed(() => utilStore.getProductStores);
+const selectedProductStoreValues = ref<any[]>(JSON.parse(JSON.stringify(props.selectedProductStores || [])));
+
+const closeModal = () => {
+  modalController.dismiss({ dismissed: true});
+};
+
+const saveProductStores = () => {
+  const productStoresToCreate = selectedProductStoreValues.value.filter((selectedStore: any) => !props.selectedProductStores.some((store: any) => store.productStoreId === selectedStore.productStoreId))
+  const productStoresToRemove = props.selectedProductStores.filter((store: any) => !selectedProductStoreValues.value.some((selectedStore: any) => store.productStoreId === selectedStore.productStoreId))
+
+  modalController.dismiss({
+    dismissed: true,
+    value: {
+      selectedProductStores: selectedProductStoreValues.value,
+      productStoresToCreate,
+      productStoresToRemove
     }
-  },
-  computed: {
-    ...mapGetters({
-      productStores: 'util/getProductStores'
-    })
-  },
-  methods: {
-    closeModal() {
-      modalController.dismiss({ dismissed: true});
-    },
-    saveProductStores() {
-      const productStoresToCreate = this.selectedProductStoreValues.filter((selectedStore: any) => !this.selectedProductStores.some((store: any) => store.productStoreId === selectedStore.productStoreId))
-      const productStoresToRemove = this.selectedProductStores.filter((store: any) => !this.selectedProductStoreValues.some((selectedStore: any) => store.productStoreId === selectedStore.productStoreId))
+  });
+};
 
-      modalController.dismiss({
-        dismissed: true,
-        value: {
-          selectedProductStores: this.selectedProductStoreValues,
-          productStoresToCreate,
-          productStoresToRemove
-        }
-      });
-    },
-    toggleProductStoreSelection(updatedStore: any) {
-      let selectedStore = this.selectedProductStoreValues.some((store :any) => store.productStoreId === updatedStore.productStoreId);
-      if (selectedStore) {
-        this.selectedProductStoreValues = this.selectedProductStoreValues.filter((store :any) => store.productStoreId !== updatedStore.productStoreId);
-      } else {
-        this.selectedProductStoreValues.push(updatedStore);
-      }
-    },
-    isSelected (productStoreId: any) {
-      return this.selectedProductStoreValues.some((productStore :any) => productStore.productStoreId === productStoreId);
-    }
-  },
-  setup() {
-    const store = useStore();
+const toggleProductStoreSelection = (updatedStore: any) => {
+  const selectedStore = selectedProductStoreValues.value.some((store :any) => store.productStoreId === updatedStore.productStoreId);
+  if (selectedStore) {
+    selectedProductStoreValues.value = selectedProductStoreValues.value.filter((store :any) => store.productStoreId !== updatedStore.productStoreId);
+  } else {
+    selectedProductStoreValues.value.push(updatedStore);
+  }
+};
 
-    return {
-      closeOutline,
-      saveOutline,
-      store,
-      translate
-    };
-  },
-});
+const isSelected = (productStoreId: any) => {
+  return selectedProductStoreValues.value.some((productStore :any) => productStore.productStoreId === productStoreId);
+};
 </script>
     

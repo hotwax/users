@@ -3,7 +3,7 @@ import { RouteRecordRaw } from 'vue-router';
 import UserDetails from '@/views/UserDetails.vue'
 import { DxpLogin, useAuthStore } from '@hotwax/dxp-components';
 import { loader } from '@/utils/user';
-import store from '@/store'
+import { useUserStore } from '@/store/user'
 import { showToast } from '@/utils'
 import { translate } from '@hotwax/dxp-components'
 import { Actions, hasPermission } from '@/authorization';
@@ -22,7 +22,7 @@ declare module 'vue-router' {
 
 const authGuard = async (to: any, from: any, next: any) => {
   const authStore = useAuthStore()
-  if (!authStore.isAuthenticated || !store.getters['user/isAuthenticated']) {
+  if (!authStore.isAuthenticated || !useUserStore().isAuthenticated) {
     await loader.present('Authenticating')
     // TODO use authenticate() when support is there
     const redirectUrl = window.location.origin + '/login'
@@ -70,7 +70,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'me',
         component: () => import('@/views/UserDetails.vue'),
         props: () => {
-          const user = store.getters['user/getUserProfile'] || {};
+          const user = useUserStore().getUserProfile || {};
           return { partyId: user.partyId };
         }
       },{

@@ -41,111 +41,63 @@
   </ion-page>
 </template>
   
-<script lang="ts">
-  import {
-    IonBackButton,
-    IonButton,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonContent,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonNote,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-    alertController
-  } from "@ionic/vue";
-  import { defineComponent } from "vue";
-  import { mapGetters, useStore } from "vuex";
-  import { useRouter } from 'vue-router'
-  import {
-    arrowForwardOutline,
-    businessOutline,
-    callOutline,
-    mailOutline
-  } from 'ionicons/icons';
-  import { translate } from "@hotwax/dxp-components";
-  import emitter from "@/event-bus";
-  
-  export default defineComponent({
-    name: "UserConfirmation",
-    components: {
-      IonBackButton,
-      IonButton,
-      IonCard,
-      IonCardHeader,
-      IonCardTitle,
-      IonContent,
-      IonHeader,
-      IonIcon,
-      IonItem,
-      IonLabel,
-      IonNote,
-      IonPage,
-      IonTitle,
-      IonToolbar,
-    },
-    computed: {
-      ...mapGetters({
-        selectedUser: 'user/getSelectedUser'
-      })
-    },
-    props: ['partyId'],
-    async ionViewWillEnter() {
-      emitter.emit('presentLoader')
-      await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
-      emitter.emit('dismissLoader')
-    },
-    methods: {
-      async quickSetup() {
-        await this.$router.replace({ path: `/user-quick-setup/${this.partyId}` })
+<script setup lang="ts">
+import { computed } from "vue";
+import { IonBackButton, IonButton, IonCard, IonCardHeader, IonCardTitle, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonNote, IonPage, IonTitle, IonToolbar, alertController, onIonViewWillEnter } from "@ionic/vue";
+import { useRouter } from 'vue-router';
+import { useUserStore } from "@/store/user";
+import { arrowForwardOutline, businessOutline, callOutline, mailOutline } from 'ionicons/icons';
+import { translate } from "@hotwax/dxp-components";
+import emitter from "@/event-bus";
+
+const props = defineProps({
+  partyId: {
+    type: String,
+    required: true
+  }
+});
+
+const router = useRouter();
+const userStore = useUserStore();
+
+const selectedUser = computed(() => userStore.selectedUser);
+
+onIonViewWillEnter(async () => {
+  emitter.emit('presentLoader');
+  await userStore.getSelectedUserDetails({ partyId: props.partyId });
+  emitter.emit('dismissLoader');
+});
+
+const quickSetup = async () => {
+  await router.replace({ path: `/user-quick-setup/${props.partyId}` });
+};
+
+const setupManually = async () => {
+  await router.replace({ path: `/user-details/${props.partyId}` });
+};
+
+const confirmSetupManually = async () => {
+  const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?';
+  const alert = await alertController.create({
+    header: translate("Setup manually"),
+    message: translate(message),
+    buttons: [
+      {
+        text: translate("Cancel"),
       },
-      async setupManually() {
-        await this.$router.replace({ path: `/user-details/${this.partyId}` })
-      },
-      async confirmSetupManually() {
-        const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?'
-        const alert = await alertController.create({
-          header: translate("Setup manually"),
-          message: translate(message),
-          buttons: [
-            {
-              text: translate("Cancel"),
-            },
-            {
-              text: translate("Setup manually"),
-              handler: async () => {
-                await this.setupManually();
-              }
-            }
-          ],
-        });
-        return alert.present();
+      {
+        text: translate("Setup manually"),
+        handler: async () => {
+          await setupManually();
+        }
       }
-    },
-    setup() {
-      const store = useStore();
-      const router = useRouter();
-  
-      return {
-        store,
-        router,
-        arrowForwardOutline,
-        businessOutline,
-        callOutline,
-        mailOutline,
-        translate
-      };
-    }
+    ],
   });
+  return alert.present();
+};
 </script>
 
 <style scoped>
-
   ion-card-header {
     display: flex;
     justify-content: space-between;

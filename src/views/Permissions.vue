@@ -57,226 +57,182 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import {
-  IonButton,
-  IonButtons,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonNote,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-  alertController,
-  modalController
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonNote, IonPage, IonTitle, IonToolbar, alertController, modalController } from '@ionic/vue';
 import { translate } from '@hotwax/dxp-components';
 import { addOutline, downloadOutline, idCardOutline, openOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
-import PermissionItems from '@/components/PermissionItems.vue'
-import { mapGetters, useStore } from 'vuex';
+import PermissionItems from '@/components/PermissionItems.vue';
+import { useUtilStore } from '@/store/util';
+import { usePermissionStore } from '@/store/permission';
+import { useUserStore } from '@/store/user';
 import { jsonToCsv } from '@/utils';
 import { hasError } from '@/adapter';
 import emitter from "@/event-bus";
 import { PermissionService } from '@/services/PermissionService';
 import { DateTime } from 'luxon';
 import EditSecurityGroupModal from '@/components/EditSecurityGroupModal.vue';
-import { Actions, hasPermission } from '@/authorization'
+import { Actions, hasPermission } from '@/authorization';
 import logger from '@/logger';
 
-export default defineComponent({
-  name: 'Permissions',
-  components: {
-    IonButton,
-    IonButtons,
-    IonContent,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonNote,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-    PermissionItems
-  },
-  data() {
-    return {
-      securityGroupUsers: {} as any
-    }
-  },
-  computed: {
-    ...mapGetters({
-      securityGroups: 'util/getSecurityGroups',
-      permissionsByClassificationGroups: 'permission/getPermissionsByClassificationGroups',
-      currentGroupPermissions: 'permission/getCurrentGroupPermissions',
-      currentGroup: 'permission/getCurrentGroup',
-      allPermissions: 'permission/getAllPermissions'
-    })
-  },
-  async mounted() {
-    await this.store.dispatch('util/getSecurityGroups')
-    await this.store.dispatch('util/getClassificationSecurityGroups')
-    if(!this.allPermissions.length) await this.store.dispatch('permission/getAllPermissions')
-    if(!Object.keys(this.permissionsByClassificationGroups).length) await this.store.dispatch('permission/getPermissionsByClassificationGroups')
-    if(this.currentGroup.groupId) {
-      await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
-      await this.getUsersCount()
-    }
-  },
-  methods: {
-    createGroup() {
-      this.$router.replace({ path: `/create-security-group/` })
-    },
-    async updateCurrentGroup(group: any) {
-      emitter.emit('presentLoader')
-      await this.store.dispatch('permission/updateCurrentGroup', group)
-      await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId)
-      await this.store.dispatch('permission/checkAssociated')
-      await this.getUsersCount()
-      await this.store.dispatch('permission/updateQuery', {queryString: '', showAllSelected: false, classificationSecurityGroupId: ''})
-      emitter.emit('dismissLoader')
-    },
-    async editSecurityGroup() {
-      const editSecurityGroupModal = await modalController.create({
-        component: EditSecurityGroupModal
-      })
+const router = useRouter();
+const utilStore = useUtilStore();
+const permissionStore = usePermissionStore();
+const userStore = useUserStore();
 
-      editSecurityGroupModal.present()
-    },
-    async getUsersCount() {
-      if(this.securityGroupUsers[this.currentGroup.groupId]) {
-        return;
+const securityGroupUsers = ref<any>({});
+
+const securityGroups = computed(() => utilStore.getSecurityGroups);
+const permissionsByClassificationGroups = computed(() => permissionStore.getPermissionsByClassificationGroups);
+const currentGroupPermissions = computed(() => permissionStore.getCurrentGroupPermissions);
+const currentGroup = computed(() => permissionStore.getCurrentGroup);
+const allPermissions = computed(() => permissionStore.getAllPermissions);
+
+onMounted(async () => {
+  await utilStore.getSecurityGroups();
+  await utilStore.getClassificationSecurityGroups();
+  if (!Object.keys(allPermissions.value).length) await permissionStore.fetchAllPermissions();
+  if (!Object.keys(permissionsByClassificationGroups.value).length) await permissionStore.getPermissionsByClassificationGroups();
+  if (currentGroup.value?.groupId) {
+    await permissionStore.getPermissionsByGroup(currentGroup.value.groupId);
+    await getUsersCount();
+  }
+});
+
+const createGroup = () => {
+  router.replace({ path: `/create-security-group/` });
+};
+
+const updateCurrentGroup = async (group: any) => {
+  emitter.emit('presentLoader');
+  permissionStore.updateCurrentGroup(group);
+  await permissionStore.getPermissionsByGroup(currentGroup.value.groupId);
+  await permissionStore.checkAssociated();
+  await getUsersCount();
+  permissionStore.updateQuery({ queryString: '', showSelected: false, classificationSecurityGroupId: '' });
+  emitter.emit('dismissLoader');
+};
+
+const editSecurityGroup = async () => {
+  const editSecurityGroupModal = await modalController.create({
+    component: EditSecurityGroupModal
+  });
+  editSecurityGroupModal.present();
+};
+
+const getUsersCount = async () => {
+  if (securityGroupUsers.value[currentGroup.value.groupId]) {
+    return;
+  }
+
+  try {
+    const resp = await PermissionService.getSecurityGroupUsers({
+      entityName: "PartyAndUserLoginSecurityGroupDetails",
+      noConditionFind: "Y",
+      fromDateName: "relationshipFromDate",
+      thruDateName: "relationshipThruDate",
+      filterByDate: "Y",
+      distinct: "Y",
+      viewSize: 1,
+      viewIndex: 0,
+      fieldList: ['partyId', 'securityGroupName'],
+      inputFields: {
+        securityGroupId: currentGroup.value.groupId,
+        roleTypeIdTo: "APPLICATION_USER"
       }
+    });
 
-      try {
-        const resp = await PermissionService.getSecurityGroupUsers({
-          entityName: "PartyAndUserLoginSecurityGroupDetails",
-          noConditionFind: "Y",
-          fromDateName: "relationshipFromDate",
-          thruDateName: "relationshipThruDate",
-          filterByDate: "Y",
+    if (!hasError(resp)) {
+      securityGroupUsers.value[currentGroup.value.groupId] = resp.data.count;
+    } else {
+      throw resp.data;
+    }
+  } catch (err) {
+    logger.error(err);
+  }
+};
+
+const openCurrentGroupUsers = async () => {
+  userStore.updateQuery({ queryString: '', securityGroup: currentGroup.value.groupId, status: '', hideDisabledUser: true });
+  router.push('users');
+};
+
+const downloadCSVForPermissions = async () => {
+  if (currentGroup.value.groupId && !Object.keys(currentGroupPermissions.value).length) {
+    const alert = await alertController.create({
+      header: translate("No permissions associated"),
+      message: translate("No permissions have been linked to this group yet. Permissions for a group cannot be downloaded."),
+      buttons: [
+        {
+          text: translate("Dismiss"),
+          role: "cancel"
+        }
+      ],
+    });
+    return alert.present();
+  }
+
+  let permissionsJson = [] as any;
+
+  if (currentGroup.value.groupId) {
+    Object.values(currentGroupPermissions.value).map((permission: any) => {
+      permissionsJson.push({
+        "Group ID": permission.groupId,
+        "Permission ID": permission.permissionId,
+        "Permission Desc": permission.permissionDescription,
+        "Association date": DateTime.fromMillis(permission.fromDate).toFormat('dd-MM-yyyy')
+      });
+    });
+  } else {
+    permissionsJson = await downloadCSVForAllPermissionsCSV();
+  }
+
+  const fileName = `HotWaxSecurityGroupExport_${DateTime.now().toFormat('yyyy_MM_dd_HH:mm')}`;
+
+  await jsonToCsv(permissionsJson, { download: true, name: fileName });
+};
+
+const downloadCSVForAllPermissionsCSV = async () => {
+  const permissionsByGroup = [] as any;
+
+  try {
+    await Promise.allSettled(securityGroups.value.map(async (group: any) => {
+      let viewIndex = 0, resp;
+      do {
+        resp = await PermissionService.getPermissionsByGroup({
+          entityName: "SecurityGroupAndPermission",
           distinct: "Y",
-          viewSize: 1,
-          viewIndex: 0,
-          fieldList: ['partyId','securityGroupName'],
+          noConditionFind: "Y",
+          filterByDate: "Y",
+          viewSize: 250,
+          viewIndex: viewIndex,
           inputFields: {
-            securityGroupId: this.currentGroup.groupId,
-            roleTypeIdTo: "APPLICATION_USER"
+            groupId: group.groupId
           }
-        })
+        });
 
-        if(!hasError(resp)) {
-          this.securityGroupUsers[this.currentGroup.groupId] = resp.data.count
+        if (!hasError(resp) && resp.data.count) {
+          resp.data.docs.map((permission: any) => {
+            permissionsByGroup.push({
+              "Group Id": permission.groupId,
+              "Permission ID": permission.permissionId,
+              "Permission Desc": permission.permissionDescription,
+              "Association date": DateTime.fromMillis(permission.fromDate).toFormat('dd-MM-yyyy')
+            });
+          });
+          viewIndex++;
         } else {
           throw resp.data;
         }
-      } catch(err) {
-        logger.error(err)
-      }
-    },
-    async openCurrentGroupUsers() {
-      await this.store.dispatch('user/updateQuery', {queryString: '', securityGroup: this.currentGroup.groupId, status: '', hideDisabledUser: true})
-      this.router.push('users')
-    },
-    async downloadCSVForPermissions() {
-      if(this.currentGroup.groupId && !Object.keys(this.currentGroupPermissions).length) {
-        const alert = await alertController.create({
-          header: translate("No permissions associated"),
-          message: translate("No permissions have been linked to this group yet. Permissions for a group cannot be downloaded."),
-          buttons: [
-            {
-              text: translate("Dismiss"),
-              role: "cancel"
-            }
-          ],
-        });
-        return alert.present();
-      }
-
-      let permissionsJson = [] as any
-
-      if(this.currentGroup.groupId) {
-        Object.values(this.currentGroupPermissions).map((permission: any) => {
-          permissionsJson.push({
-            "Group ID": permission.groupId,
-            "Permission ID": permission.permissionId,
-            "Permission Desc": permission.permissionDescription,
-            "Association date": DateTime.fromMillis(permission.fromDate).toFormat('dd-MM-yyyy')
-          })
-        })
-      } else {
-        permissionsJson =  await this.downloadCSVForAllPermissionsCSV()
-      }
-
-      const fileName = `HotWaxSecurityGroupExport_${DateTime.now().toFormat('yyyy_MM_dd_HH:mm')}`
-
-      await jsonToCsv(permissionsJson, { download: true, name: fileName })
-    },
-    async downloadCSVForAllPermissionsCSV() {
-     let permissionsByGroup = [] as any;
-
-      try {
-        await Promise.allSettled(this.securityGroups.map(async (group: any) => {
-          let viewIndex = 0, resp;
-          do {
-            resp = await PermissionService.getPermissionsByGroup({
-              entityName: "SecurityGroupAndPermission",
-              distinct: "Y",
-              noConditionFind: "Y",
-              filterByDate: "Y",
-              viewSize: 250,
-              viewIndex: viewIndex,
-              inputFields: {
-                groupId: group.groupId
-              }
-            });
-
-            if (!hasError(resp) && resp.data.count) {
-              resp.data.docs.map((permission: any) => {
-                permissionsByGroup.push({
-                  "Group Id": permission.groupId,
-                  "Permission ID": permission.permissionId,
-                  "Permission Desc": permission.permissionDescription,
-                  "Association date": DateTime.fromMillis(permission.fromDate).toFormat('dd-MM-yyyy')
-                });
-              });
-              viewIndex++;
-            } else {
-              throw resp.data;
-            }
-          } while (resp.data.docs.length >= 250);
-        }));
-      } catch (err) {
-        logger.error(err);
-      }
-
-      return permissionsByGroup;
-    }
-  },
-  setup() {
-    const router = useRouter();
-    const store = useStore();
-
-    return {
-      Actions,
-      addOutline,
-      downloadOutline,
-      hasPermission,
-      idCardOutline,
-      openOutline,
-      router,
-      store,
-      translate
-    }
+      } while (resp.data.docs.length >= 250);
+    }));
+  } catch (err) {
+    logger.error(err);
   }
-});
+
+  return permissionsByGroup;
+};
 </script>
 
 <style scoped>

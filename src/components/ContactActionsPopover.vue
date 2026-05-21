@@ -15,227 +15,206 @@
   </ion-content>
 </template>
 
-<script lang="ts">
-import {
-  alertController,
-  IonContent,
-  IonItem,
-  IonList,
-  IonListHeader,
-  popoverController,
-} from "@ionic/vue";
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { computed } from "vue";
+import { alertController, IonContent, IonItem, IonList, IonListHeader, popoverController } from "@ionic/vue";
 import { translate } from "@hotwax/dxp-components";
-import { mapGetters, useStore } from 'vuex';
 import { hasError } from "@/adapter";
 import { copyToClipboard, isValidEmail, showToast } from "@/utils";
 import { UserService } from "@/services/UserService";
 import logger from '@/logger';
+import { useUserStore } from "@/store/user";
 
-export default defineComponent({
-  name: "ContactActionsPopover",
-  components: {
-    IonContent,
-    IonItem,
-    IonList,
-    IonListHeader
+const props = defineProps<{
+  type: string;
+  placeholder: string;
+  value: string;
+  contactMechId?: string;
+}>();
+
+const userStore = useUserStore();
+
+const selectedUser = computed(() => userStore.getSelectedUser);
+
+const OPTIONS = {
+  email: {
+    removeHeader: 'Remove email',
+    editHeader: 'Edit email',
+    placeholder: 'Email'
   },
-  props: ["type", "placeholder", "value", "contactMechId"],
-  computed: {
-    ...mapGetters({
-      selectedUser: 'user/getSelectedUser'
-    })
+  phoneNumber: {
+    removeHeader: 'Remove phone number',
+    editHeader: 'Edit phone number',
+    placeholder: 'Phone number'
   },
-  data() {
-    return {
-      OPTIONS: {
-        email: {
-          removeHeader: 'Remove email',
-          editHeader: 'Edit email',
-          placeholder: 'Email'
-        },
-        phoneNumber: {
-          removeHeader: 'Remove phone number',
-          editHeader: 'Edit phone number',
-          placeholder: 'Phone number'
-        },
-        externalId: {
-          removeHeader: 'Remove external ID',
-          editHeader: 'Edit external ID',
-          placeholder: 'External ID'
-        }
-      } as any
-    }
-  },
-  methods: {
-    closePopover() {
-      popoverController.dismiss();
-    },
-    copyInfo() {
-      copyToClipboard(this.value, 'Copied to clipboard')
-      this.closePopover();
-    },
-    async updateContactField() {
-      const contactUpdateAlert = await alertController.create({
-        header: translate(this.OPTIONS[this.type].editHeader),
-        inputs:  [{
-          // TODO add validation for phone
-          name: "input",
-          placeholder: translate(this.OPTIONS[this.type].placeholder),
-          value: this.value
-        }],
-        buttons: [{
-          text: translate('Cancel'),
-          role: "cancel"
-        },
-        {
-          text: translate('Save'),
-          handler: async (result) => {
-            const input = result.input.trim()
-            // if initial and new value are same, return
-            if (!input || input === this.value) {
-              if (!input) {
-                showToast(translate('Please enter a value'))
-                return false
-              }
-              return true
-            }
-
-            let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
-            try {
-              if (this.type === 'email') {
-                if (!isValidEmail(input)) {
-                  showToast(translate('Invalid email address.'))
-                  return false
-                }
-
-                const resp = await UserService.createUpdatePartyEmailAddress({
-                  contactMechId: this.contactMechId,
-                  emailAddress: input,
-                  partyId: this.selectedUser.partyId
-                })
-                if (hasError(resp)) throw resp.data
-                selectedUser = {
-                  ...selectedUser,
-                  emailDetails: {
-                    email: input,
-                    contactMechId: this.contactMechId
-                  }
-                }
-              } else if (this.type === 'phoneNumber') {
-                const resp = await UserService.createUpdatePartyTelecomNumber({
-                  contactMechId: this.contactMechId,
-                  contactNumber: input,
-                  partyId: this.selectedUser.partyId
-                })
-                if (hasError(resp)) throw resp.data
-                selectedUser = {
-                  ...selectedUser,
-                  phoneNumberDetails: {
-                    contactNumber: input,
-                    contactMechId: this.contactMechId
-                  }
-                }
-              } else {
-                let resp = {} as any
-                if (this.selectedUser.partyTypeId === 'PERSON') {
-                  resp = await UserService.updatePerson({
-                    externalId: input,
-                    partyId: this.selectedUser.partyId,
-                    firstName: this.selectedUser.firstName,
-                    lastName: this.selectedUser.lastName
-                  })
-                } else {
-                  resp = await UserService.updatePartyGroup({
-                    externalId: input,
-                    partyId: this.selectedUser.partyId,
-                    groupName: this.selectedUser.groupName
-                  })
-                }
-                if (hasError(resp)) throw resp.data
-                selectedUser = {
-                  ...selectedUser,
-                  externalId: input
-                }
-              }
-              this.store.dispatch('user/updateSelectedUser', selectedUser)
-              showToast(translate(`${this.OPTIONS[this.type].placeholder} updated successfully.`))
-            } catch (error) {
-              showToast(translate(`Failed to update ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
-              logger.error(error)
-            }
-            return true
-          }
-        }]
-      })
-      await contactUpdateAlert.present()
-      this.closePopover()
-    },
-    async deleteContactField() {
-      const message = `Are you sure you want to remove the ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.?`
-
-      const contactUpdateAlert = await alertController.create({
-        header: translate(this.OPTIONS[this.type].removeHeader),
-        message: translate(message),
-        buttons: [{
-          text: translate('No'),
-          role: "cancel"
-        },
-        {
-          text: translate('Yes'),
-          handler: async () => {
-            let selectedUser = JSON.parse(JSON.stringify(this.selectedUser))
-            try {
-              if (this.type === 'email') {
-                const resp = await UserService.deletePartyContactMech({
-                  contactMechId: this.contactMechId,
-                  partyId: this.selectedUser.partyId
-                })
-                if (hasError(resp)) throw resp.data
-                delete selectedUser.emailDetails
-              } else if (this.type === 'phoneNumber') {
-                const resp = await UserService.deletePartyContactMech({
-                  contactMechId: this.contactMechId,
-                  partyId: this.selectedUser.partyId
-                })
-                if (hasError(resp)) throw resp.data
-                delete selectedUser.phoneNumberDetails
-              } else {
-                let resp = {} as any
-                if (this.selectedUser.partyTypeId === 'PERSON') {
-                  resp = await UserService.updatePerson({
-                    externalId: '',
-                    partyId: this.selectedUser.partyId
-                  })
-                } else {
-                  resp = await UserService.updatePartyGroup({
-                    externalId: '',
-                    partyId: this.selectedUser.partyId
-                  })
-                }
-                if (hasError(resp)) throw resp.data
-                delete selectedUser.externalId
-              }
-              this.store.dispatch('user/updateSelectedUser', selectedUser)
-              showToast(translate(`${this.OPTIONS[this.type].placeholder} removed successfully.`))
-            } catch (error) {
-              showToast(translate(`Failed to remove ${this.type === 'email' ? 'email' : (this.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`))
-              logger.error(error)
-            }
-          }
-        }]
-      })
-      await contactUpdateAlert.present()
-      this.closePopover();
-    }
-  },
-  setup() {
-    const store = useStore();
-
-    return {
-      store,
-      translate
-    }
+  externalId: {
+    removeHeader: 'Remove external ID',
+    editHeader: 'Edit external ID',
+    placeholder: 'External ID'
   }
-});
+} as any;
+
+const closePopover = () => {
+  popoverController.dismiss();
+};
+
+const copyInfo = () => {
+  copyToClipboard(props.value, 'Copied to clipboard');
+  closePopover();
+};
+
+const updateContactField = async () => {
+  const contactUpdateAlert = await alertController.create({
+    header: translate(OPTIONS[props.type].editHeader),
+    inputs:  [{
+      // TODO add validation for phone
+      name: "input",
+      placeholder: translate(OPTIONS[props.type].placeholder),
+      value: props.value
+    }],
+    buttons: [{
+      text: translate('Cancel'),
+      role: "cancel"
+    },
+    {
+      text: translate('Save'),
+      handler: async (result) => {
+        const input = result.input.trim();
+        // if initial and new value are same, return
+        if (!input || input === props.value) {
+          if (!input) {
+            showToast(translate('Please enter a value'));
+            return false;
+          }
+          return true;
+        }
+
+        let updatedSelectedUser = JSON.parse(JSON.stringify(selectedUser.value));
+        try {
+          if (props.type === 'email') {
+            if (!isValidEmail(input)) {
+              showToast(translate('Invalid email address.'));
+              return false;
+            }
+
+            const resp = await UserService.createUpdatePartyEmailAddress({
+              contactMechId: props.contactMechId,
+              emailAddress: input,
+              partyId: selectedUser.value.partyId
+            });
+            if (hasError(resp)) throw resp.data;
+            updatedSelectedUser = {
+              ...updatedSelectedUser,
+              emailDetails: {
+                email: input,
+                contactMechId: props.contactMechId
+              }
+            };
+          } else if (props.type === 'phoneNumber') {
+            const resp = await UserService.createUpdatePartyTelecomNumber({
+              contactMechId: props.contactMechId,
+              contactNumber: input,
+              partyId: selectedUser.value.partyId
+            });
+            if (hasError(resp)) throw resp.data;
+            updatedSelectedUser = {
+              ...updatedSelectedUser,
+              phoneNumberDetails: {
+                contactNumber: input,
+                contactMechId: props.contactMechId
+              }
+            };
+          } else {
+            let resp = {} as any;
+            if (selectedUser.value.partyTypeId === 'PERSON') {
+              resp = await UserService.updatePerson({
+                externalId: input,
+                partyId: selectedUser.value.partyId,
+                firstName: selectedUser.value.firstName,
+                lastName: selectedUser.value.lastName
+              });
+            } else {
+              resp = await UserService.updatePartyGroup({
+                externalId: input,
+                partyId: selectedUser.value.partyId,
+                groupName: selectedUser.value.groupName
+              });
+            }
+            if (hasError(resp)) throw resp.data;
+            updatedSelectedUser = {
+              ...updatedSelectedUser,
+              externalId: input
+            };
+          }
+          userStore.updateSelectedUser(updatedSelectedUser);
+          showToast(translate(`${OPTIONS[props.type].placeholder} updated successfully.`));
+        } catch (error) {
+          showToast(translate(`Failed to update ${props.type === 'email' ? 'email' : (props.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`));
+          logger.error(error);
+        }
+        return true;
+      }
+    }]
+  });
+  await contactUpdateAlert.present();
+  closePopover();
+};
+
+const deleteContactField = async () => {
+  const message = `Are you sure you want to remove the ${props.type === 'email' ? 'email' : (props.type === 'phoneNumber' ? 'phone number' : 'external ID')}.?`;
+
+  const contactUpdateAlert = await alertController.create({
+    header: translate(OPTIONS[props.type].removeHeader),
+    message: translate(message),
+    buttons: [{
+      text: translate('No'),
+      role: "cancel"
+    },
+    {
+      text: translate('Yes'),
+      handler: async () => {
+        const updatedSelectedUser = JSON.parse(JSON.stringify(selectedUser.value));
+        try {
+          if (props.type === 'email') {
+            const resp = await UserService.deletePartyContactMech({
+              contactMechId: props.contactMechId,
+              partyId: selectedUser.value.partyId
+            });
+            if (hasError(resp)) throw resp.data;
+            delete updatedSelectedUser.emailDetails;
+          } else if (props.type === 'phoneNumber') {
+            const resp = await UserService.deletePartyContactMech({
+              contactMechId: props.contactMechId,
+              partyId: selectedUser.value.partyId
+            });
+            if (hasError(resp)) throw resp.data;
+            delete updatedSelectedUser.phoneNumberDetails;
+          } else {
+            let resp = {} as any;
+            if (selectedUser.value.partyTypeId === 'PERSON') {
+              resp = await UserService.updatePerson({
+                externalId: '',
+                partyId: selectedUser.value.partyId
+              });
+            } else {
+              resp = await UserService.updatePartyGroup({
+                externalId: '',
+                partyId: selectedUser.value.partyId
+              });
+            }
+            if (hasError(resp)) throw resp.data;
+            delete updatedSelectedUser.externalId;
+          }
+          userStore.updateSelectedUser(updatedSelectedUser);
+          showToast(translate(`${OPTIONS[props.type].placeholder} removed successfully.`));
+        } catch (error) {
+          showToast(translate(`Failed to remove ${props.type === 'email' ? 'email' : (props.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`));
+          logger.error(error);
+        }
+      }
+    }]
+  });
+  await contactUpdateAlert.present();
+  closePopover();
+};
 </script>

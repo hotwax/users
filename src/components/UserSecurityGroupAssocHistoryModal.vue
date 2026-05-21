@@ -26,114 +26,62 @@
   </ion-content>
 </template>
 
-<script lang="ts">
-import { 
-  IonButtons,
-  IonButton,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonNote,
-  IonTitle,
-  IonToolbar,
-  modalController
-} from "@ionic/vue";
-import { defineComponent } from "vue";
-import {
-  closeOutline,
-  eyeOutline,
-  eyeOffOutline,
-  lockClosedOutline,
-  mailOutline
-} from "ionicons/icons";
-import { mapGetters, useStore } from "vuex";
-import { translate } from '@hotwax/dxp-components'
+<script setup lang="ts">
+import { IonButtons, IonButton, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonNote, IonTitle, IonToolbar, modalController } from "@ionic/vue";
+import { ref, computed, onMounted } from "vue";
+import { closeOutline } from "ionicons/icons";
+import { translate } from '@hotwax/dxp-components';
+import { useUserStore } from "@/store/user";
+import { useUtilStore } from "@/store/util";
 import { getDateWithOrdinalSuffix } from "@/utils";
 import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
-import { Actions, hasPermission } from '@/authorization'
-export default defineComponent({
-  name: "UserSecurityGroupAssocHistoryModal",
-  components: { 
-    IonButtons,
-    IonButton,
-    IonContent,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonNote,
-    IonTitle,
-    IonToolbar,
-  },
-  computed: {
-    ...mapGetters({
-      selectedUser: 'user/getSelectedUser',
-      securityGroups: 'util/getSecurityGroups',
-    })
-  },
-  data() {
-    return {
-      userGroupAssocHistories: [] as any
-    }
-  },
-  mounted() {
-    this.fetchUserSecurityGroupAssoHistory()
-  },
-  methods: {
-    closeModal() {
-      modalController.dismiss({ dismissed: true});
-    },
-    async fetchUserSecurityGroupAssoHistory() {
-      if(!this.selectedUser.userLoginId) return;
 
-      const securityGroupNameByGroupId = {} as any;
-      let userGroupAssocHistories = [] as any;
-      try {
-        const resp = await UserService.fetchUserSecurityGroupAssocHistory({
-          entityName: "UserLoginAndSecurityGroup",
-          inputFields: {
-            userLoginId: this.selectedUser.userLoginId,
-          },
-          orderBy: "thruDate DESC",
-          viewSize: 250
-        })
-        if(!hasError(resp)) {
-          userGroupAssocHistories = resp.data.docs
-          this.securityGroups.map((group: any) => securityGroupNameByGroupId[group.groupId] = group.groupName);
-          userGroupAssocHistories.map((history: any) => {
-            history["groupName"] = securityGroupNameByGroupId[history.groupId]
-          })
-          const currentSecurityGroups = userGroupAssocHistories.filter((history: any) => !history.thruDate);
-          const expiredSecurityGroups = userGroupAssocHistories.filter((history: any) => history.thruDate);
-          userGroupAssocHistories = currentSecurityGroups.concat(expiredSecurityGroups);
-        } else {
-          throw resp.data;
-        }
-      } catch(error: any) {
-        console.error(error);
-      }
-      this.userGroupAssocHistories = userGroupAssocHistories
+const userStore = useUserStore();
+const utilStore = useUtilStore();
+
+const selectedUser = computed(() => userStore.getSelectedUser);
+const securityGroups = computed(() => utilStore.getSecurityGroups);
+
+const userGroupAssocHistories = ref<any[]>([]);
+
+const closeModal = () => {
+  modalController.dismiss({ dismissed: true });
+};
+
+const fetchUserSecurityGroupAssoHistory = async () => {
+  if (!selectedUser.value.userLoginId) return;
+
+  const securityGroupNameByGroupId = {} as any;
+  let histories = [] as any;
+  try {
+    const resp = await UserService.fetchUserSecurityGroupAssocHistory({
+      entityName: "UserLoginAndSecurityGroup",
+      inputFields: {
+        userLoginId: selectedUser.value.userLoginId,
+      },
+      orderBy: "thruDate DESC",
+      viewSize: 250
+    });
+    if (!hasError(resp)) {
+      histories = resp.data.docs;
+      securityGroups.value.forEach((group: any) => securityGroupNameByGroupId[group.groupId] = group.groupName);
+      histories.forEach((history: any) => {
+        history["groupName"] = securityGroupNameByGroupId[history.groupId];
+      });
+      const currentSecurityGroups = histories.filter((history: any) => !history.thruDate);
+      const expiredSecurityGroups = histories.filter((history: any) => history.thruDate);
+      histories = currentSecurityGroups.concat(expiredSecurityGroups);
+    } else {
+      throw resp.data;
     }
-  },
-  setup() {
-    const store = useStore();
-    return {
-      closeOutline,
-      eyeOutline,
-      eyeOffOutline,
-      getDateWithOrdinalSuffix,
-      hasPermission,
-      lockClosedOutline,
-      mailOutline,
-      store,
-      translate,
-      Actions
-    };
-  },
+  } catch (error: any) {
+    console.error(error);
+  }
+  userGroupAssocHistories.value = histories;
+};
+
+onMounted(() => {
+  fetchUserSecurityGroupAssoHistory();
 });
 </script>

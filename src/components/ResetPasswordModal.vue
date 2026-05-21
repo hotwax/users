@@ -36,7 +36,7 @@
       </ion-item>
       <ion-item lines="none">
         <ion-input 
-          ref="confirmPassword" 
+          ref="confirmPasswordInput" 
           :label="translate('Verify password')" 
           @keyup="validateConfirmPassword()" 
           @ionBlur="markConfirmPasswordTouched" 
@@ -69,155 +69,112 @@
   </ion-content>
 </template>
 
-<script lang="ts">
-import { 
-  IonButtons,
-  IonButton,
-  IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
-  IonIcon,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonTitle,
-  IonToolbar,
-  modalController
-} from "@ionic/vue";
-import { defineComponent } from "vue";
-import {
-  closeOutline,
-  eyeOutline,
-  eyeOffOutline,
-  lockClosedOutline,
-  mailOutline
-} from "ionicons/icons";
-import { mapGetters, useStore } from "vuex";
+<script setup lang="ts">
+import { computed, ref } from "vue";
+import { IonButtons, IonButton, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonList, IonTitle, IonToolbar, modalController } from "@ionic/vue";
+import { closeOutline, lockClosedOutline, mailOutline } from "ionicons/icons";
 import { translate } from '@hotwax/dxp-components'
 import { isValidPassword, showToast } from "@/utils";
 import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
 import { Actions, hasPermission } from '@/authorization'
 import logger from '@/logger';
+import { useUserStore } from "@/store/user";
 
-export default defineComponent({
-  name: "CustomFieldModal",
-  components: { 
-    IonButtons,
-    IonButton,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonInput,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonTitle,
-    IonToolbar,
-  },
-  data() {
-    return {
-      newPassword: '',
-      confirmPassword: '',
-      showConfirmPassword: false,
-      showNewPassword: false,
+const props = defineProps<{
+  email?: string;
+  userLoginId?: string;
+}>();
+
+const userStore = useUserStore();
+
+const newPassword = ref('');
+const confirmPassword = ref('');
+const showConfirmPassword = ref(false);
+const showNewPassword = ref(false);
+const password = ref<any>(null);
+const confirmPasswordInput = ref<any>(null);
+
+const userProfile = computed(() => userStore.getUserProfile);
+
+const inputElement = (inputRef: any) => inputRef.value?.$el || inputRef.value;
+
+const closeModal = () => {
+  modalController.dismiss({ dismissed: true});
+};
+
+const resetPassword = async () => {
+  try {
+    const resp = await UserService.resetPassword({
+      newPassword: newPassword.value,
+      newPasswordVerify: confirmPassword.value,
+      userLoginId: props.userLoginId
+    });
+    if (!hasError(resp)) {
+      showToast(translate('Password reset successful.'));
+    } else {
+      throw resp.data;
     }
-  },
-  props: ["email", "userLoginId"],
-  computed: {
-    ...mapGetters({
-      userProfile: 'user/getUserProfile',
-    })
-  },
-  methods: {
-    closeModal() {
-      modalController.dismiss({ dismissed: true});
-    },
-    async resetPassword() {
-      try {
-        const resp = await UserService.resetPassword({
-          newPassword: this.newPassword,
-          newPasswordVerify: this.confirmPassword,
-          userLoginId: this.userLoginId
-        })
-        if (!hasError(resp)) {
-          showToast(translate('Password reset successful.'))
-        } else {
-          throw resp.data
-        }
-      } catch (error) {
-        showToast(translate('Failed to reset password.'))
-        logger.error(error)
-      }
-      this.closeModal()
-    },
-    checkResetButtonStatus() {
-      // TODO add check for length and other requirements(
-      return ((!this.newPassword.length || !this.confirmPassword.length)
-        || (this.newPassword !== this.confirmPassword)
-        || (!isValidPassword(this.newPassword) || !isValidPassword(this.confirmPassword)))
-    },
-    validatePassword(event: any) {
-      const value = event.target.value;
-      (this as any).$refs.password.$el.classList.remove('ion-valid');
-      (this as any).$refs.password.$el.classList.remove('ion-invalid');
+  } catch (error) {
+    showToast(translate('Failed to reset password.'));
+    logger.error(error);
+  }
+  closeModal();
+};
 
-      if (value === '') return;
+const checkResetButtonStatus = () => {
+  // TODO add check for length and other requirements(
+  return ((!newPassword.value.length || !confirmPassword.value.length)
+    || (newPassword.value !== confirmPassword.value)
+    || (!isValidPassword(newPassword.value) || !isValidPassword(confirmPassword.value)));
+};
 
-      isValidPassword(value)
-        ? (this as any).$refs.password.$el.classList.add('ion-valid')
-        : (this as any).$refs.password.$el.classList.add('ion-invalid');
-    },
-    validateConfirmPassword() {
-      (this as any).$refs.confirmPassword.$el.classList.remove('ion-valid');
-      (this as any).$refs.confirmPassword.$el.classList.remove('ion-invalid');
-      
-      (this.newPassword === this.confirmPassword)
-      ? (this as any).$refs.confirmPassword.$el.classList.add('ion-valid')
-      : (this as any).$refs.confirmPassword.$el.classList.add('ion-invalid');
-    },
-    async sendResetPasswordEmail() {
-      try {
-        const resp = await UserService.sendResetPasswordEmail({
-          emailAddress: this.email,
-          userName: this.userLoginId
-        })
-        if (!hasError(resp)) {
-          showToast(translate('Password reset email sent successfully.'))
-        } else {
-          throw resp.data
-        }
-      } catch (error) {
-        showToast(translate('Failed to send password reset email.'))
-        logger.error(error)
-      }
-      this.closeModal()
-    },
-    markPasswordTouched() {
-      (this as any).$refs.password.$el.classList.add('ion-touched');
-    },
-    markConfirmPasswordTouched() {
-      (this as any).$refs.confirmPassword.$el.classList.add('ion-touched');
-    },
-  },
-  setup() {
-    const store = useStore();
+const validatePassword = (event: any) => {
+  const value = event.target.value;
+  const element = inputElement(password);
+  element?.classList.remove('ion-valid');
+  element?.classList.remove('ion-invalid');
 
-    return {
-      closeOutline,
-      eyeOutline,
-      eyeOffOutline,
-      hasPermission,
-      lockClosedOutline,
-      mailOutline,
-      store,
-      translate,
-      Actions
-    };
-  },
-});
+  if (value === '') return;
+
+  isValidPassword(value)
+    ? element?.classList.add('ion-valid')
+    : element?.classList.add('ion-invalid');
+};
+
+const validateConfirmPassword = () => {
+  const element = inputElement(confirmPasswordInput);
+  element?.classList.remove('ion-valid');
+  element?.classList.remove('ion-invalid');
+  
+  (newPassword.value === confirmPassword.value)
+    ? element?.classList.add('ion-valid')
+    : element?.classList.add('ion-invalid');
+};
+
+const sendResetPasswordEmail = async () => {
+  try {
+    const resp = await UserService.sendResetPasswordEmail({
+      emailAddress: props.email,
+      userName: props.userLoginId
+    });
+    if (!hasError(resp)) {
+      showToast(translate('Password reset email sent successfully.'));
+    } else {
+      throw resp.data;
+    }
+  } catch (error) {
+    showToast(translate('Failed to send password reset email.'));
+    logger.error(error);
+  }
+  closeModal();
+};
+
+const markPasswordTouched = () => {
+  inputElement(password)?.classList.add('ion-touched');
+};
+
+const markConfirmPasswordTouched = () => {
+  inputElement(confirmPasswordInput)?.classList.add('ion-touched');
+};
 </script>

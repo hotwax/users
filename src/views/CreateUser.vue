@@ -64,187 +64,134 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import {
-  IonBackButton,
-  IonButton,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonItem,
-  IonPage,
-  IonText,
-  IonTitle,
-  IonToolbar,
-  IonToggle,
-  IonInput,
-  IonSelect,
-  IonSelectOption
-} from "@ionic/vue";
-import { defineComponent } from "vue";
-import { mapGetters, useStore } from "vuex";
-import { useRouter } from 'vue-router'
-import {
-  businessOutline,
-  desktopOutline,
-  arrowForwardOutline
-} from 'ionicons/icons';
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import { IonBackButton, IonButton, IonContent, IonHeader, IonIcon, IonItem, IonPage, IonText, IonTitle, IonToolbar, IonToggle, IonInput, IonSelect, IonSelectOption, onIonViewWillEnter } from "@ionic/vue";
+import { useRouter } from 'vue-router';
+import { useUtilStore } from '@/store/util';
+import { businessOutline, desktopOutline, arrowForwardOutline } from 'ionicons/icons';
 import { translate } from "@hotwax/dxp-components";
-import { showToast, isValidEmail } from '@/utils'
-import { UserService } from '@/services/UserService'
-import { hasError } from '@/adapter'
+import { showToast, isValidEmail } from '@/utils';
+import { UserService } from '@/services/UserService';
+import { hasError } from '@/adapter';
 import logger from '@/logger';
 
-export default defineComponent({
-  name: "CreateUser",
-  components: {
-    IonBackButton,
-    IonButton,
-    IonContent,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonPage,
-    IonText,
-    IonTitle,
-    IonToolbar,
-    IonToggle,
-    IonInput,
-    IonSelect,
-    IonSelectOption
-  },
-  computed: {
-    ...mapGetters({
-      facilities: 'util/getFacilities',
-      organizationPartyId: 'util/getOrganizationPartyId'
-    })
-  },
-  data() {
-    return {
-      isFacilityLogin: false,
-      formData: {
-        firstName: '',
-        lastName: '',
-        groupName: '',
-        facilityId: '',
-        externalId: '',
-        emailAddress: '',
-        contactNumber: '',
-      }
-    }
-  },
-  async ionViewWillEnter() {
-    this.clearFormData()
-    await this.store.dispatch('util/fetchFacilities')
-  },
-  methods: {
-    clearFormData() {
-      this.formData = {
-        firstName: '',
-        lastName: '',
-        groupName: '',
-        facilityId: '',
-        externalId: '',
-        emailAddress: '',
-        contactNumber: '',
-      }
-    },
-    updateFacilityLogin(event: CustomEvent) {
-      this.clearFormData()
-      this.isFacilityLogin = event.detail.checked;
-    },
-    updateGroupName(event: CustomEvent) {
-      const selectedFacilityId = event.detail.value;
-      const selectedFacility = this.facilities.find((facility: any) => facility.facilityId === selectedFacilityId);
-      this.formData.groupName = selectedFacility?.facilityName ? selectedFacility?.facilityName : selectedFacilityId;
-    },
-    validateCreateUserDetail (data: any) {
-      const validationErrors = [];
-      if (data.partyTypeId === 'PARTY_GROUP') {
-        if (!data.groupName) {
-          validationErrors.push(translate('Name is required.'));
-        }
-        if (this.isFacilityLogin && !data.facilityId) {
-          validationErrors.push(translate('Facility is required.'));
-        }
-      } else {
-        if (!data.firstName) {
-          validationErrors.push(translate('First name is required.'));
-        }
-        if (!data.lastName) {
-          validationErrors.push(translate('Last name is required.'));
-        }
-      }
-      if (data.emailAddress && !isValidEmail(data.emailAddress)) {
-        validationErrors.push(translate('Invalid email address.'));
-      }
-      return validationErrors; 
-    },
-    async createUser() {
-      let partyTypeId = this.isFacilityLogin ? "PARTY_GROUP" : "PERSON";
-      
-      try {
-        const validationErrors = this.validateCreateUserDetail({...this.formData, partyTypeId});
-        if (validationErrors.length > 0) {
-          const errorMessages = validationErrors.join(" ");
-          logger.error(errorMessages);
-          showToast(translate(errorMessages));
-          return;
-        }
+const router = useRouter();
+const utilStore = useUtilStore();
 
-        const payload = {
-          ...this.formData,
-          partyTypeId,
-          "partyIdFrom": this.organizationPartyId,
-          "roleTypeIdFrom": "INTERNAL_ORGANIZATIO",
-          "roleTypeIdTo": "APPLICATION_USER",
-          "partyRelationshipTypeId": "EMPLOYMENT",
-        }
-
-        const resp = await UserService.createUser(payload);
-        if (resp.status === 200 && !hasError(resp) && resp.data.partyId) {
-          const partyId = resp.data.partyId;
-          if (partyTypeId === "PARTY_GROUP" ) {
-            await UserService.addPartyToFacility({"partyId": partyId, "facilityId": payload.facilityId, "roleTypeId": "WAREHOUSE_PICKER"});
-          }
-          showToast(translate("User created successfully"));
-          this.$router.replace({ path: `/user-confirmation/${partyId}` })
-        } else {
-          throw resp.data;
-        }
-      } catch (err:any) {
-        let errorMessage = translate('Failed to create user.');
-        if (err?.response?.data?.error?.message) {
-          errorMessage = err.response.data.error.message
-        }
-        logger.error('error', err)
-        showToast(errorMessage);
-      }
-    },
-  },
-  setup() {
-    const store = useStore();
-    const router = useRouter();
-
-    return {
-      store,
-      router,
-      businessOutline,
-      desktopOutline,
-      arrowForwardOutline,
-      translate
-    };
-  }
+const isFacilityLogin = ref(false);
+const formData = ref({
+  firstName: '',
+  lastName: '',
+  groupName: '',
+  facilityId: '',
+  externalId: '',
+  emailAddress: '',
+  contactNumber: '',
 });
+
+const facilities = computed(() => utilStore.getFacilities);
+const organizationPartyId = computed(() => utilStore.getOrganizationPartyId);
+
+onIonViewWillEnter(async () => {
+  clearFormData();
+  await utilStore.fetchFacilities();
+});
+
+const clearFormData = () => {
+  formData.value = {
+    firstName: '',
+    lastName: '',
+    groupName: '',
+    facilityId: '',
+    externalId: '',
+    emailAddress: '',
+    contactNumber: '',
+  };
+};
+
+const updateFacilityLogin = (event: CustomEvent) => {
+  clearFormData();
+  isFacilityLogin.value = event.detail.checked;
+};
+
+const updateGroupName = (event: CustomEvent) => {
+  const selectedFacilityId = event.detail.value;
+  const selectedFacility = facilities.value.find((facility: any) => facility.facilityId === selectedFacilityId);
+  formData.value.groupName = selectedFacility?.facilityName ? selectedFacility?.facilityName : selectedFacilityId;
+};
+
+const validateCreateUserDetail = (data: any) => {
+  const validationErrors = [];
+  if (data.partyTypeId === 'PARTY_GROUP') {
+    if (!data.groupName) {
+      validationErrors.push(translate('Name is required.'));
+    }
+    if (isFacilityLogin.value && !data.facilityId) {
+      validationErrors.push(translate('Facility is required.'));
+    }
+  } else {
+    if (!data.firstName) {
+      validationErrors.push(translate('First name is required.'));
+    }
+    if (!data.lastName) {
+      validationErrors.push(translate('Last name is required.'));
+    }
+  }
+  if (data.emailAddress && !isValidEmail(data.emailAddress)) {
+    validationErrors.push(translate('Invalid email address.'));
+  }
+  return validationErrors; 
+};
+
+const createUser = async () => {
+  const partyTypeId = isFacilityLogin.value ? "PARTY_GROUP" : "PERSON";
+  
+  try {
+    const validationErrors = validateCreateUserDetail({ ...formData.value, partyTypeId });
+    if (validationErrors.length > 0) {
+      const errorMessages = validationErrors.join(" ");
+      logger.error(errorMessages);
+      showToast(translate(errorMessages));
+      return;
+    }
+
+    const payload = {
+      ...formData.value,
+      partyTypeId,
+      "partyIdFrom": organizationPartyId.value,
+      "roleTypeIdFrom": "INTERNAL_ORGANIZATIO",
+      "roleTypeIdTo": "APPLICATION_USER",
+      "partyRelationshipTypeId": "EMPLOYMENT",
+    };
+
+    const resp = await UserService.createUser(payload);
+    if (resp.status === 200 && !hasError(resp) && resp.data.partyId) {
+      const partyId = resp.data.partyId;
+      if (partyTypeId === "PARTY_GROUP") {
+        await UserService.addPartyToFacility({ "partyId": partyId, "facilityId": payload.facilityId, "roleTypeId": "WAREHOUSE_PICKER" });
+      }
+      showToast(translate("User created successfully"));
+      router.replace({ path: `/user-confirmation/${partyId}` });
+    } else {
+      throw resp.data;
+    }
+  } catch (err: any) {
+    let errorMessage = translate('Failed to create user.');
+    if (err?.response?.data?.error?.message) {
+      errorMessage = err.response.data.error.message;
+    }
+    logger.error('error', err);
+    showToast(errorMessage);
+  }
+};
 </script>
 
 <style scoped>
-
   @media (min-width: 700px) {
     main {
       max-width: 375px;
       margin: auto;
     }
   }
-
 </style>

@@ -22,7 +22,7 @@
           </ion-item>
           <ion-item lines="none">
             <ion-input 
-              ref="password"
+              ref="passwordRef"
               label-placement="floating" 
               v-model="formData.currentPassword" 
               :type="showPassword ? 'text' : 'password'"
@@ -43,7 +43,7 @@
               <div slot="label">{{ isFacilityLogin() ? translate('Reset password email') : translate('Email') }} <ion-text v-if="selectedUserTemplate.templateId !== 'INTEGRATION'" color="danger">*</ion-text></div>
             </ion-input>
           </ion-item>
-          <ion-item ion-margin-top>
+          <ion-item class="ion-margin-top">
             <ion-toggle :disabled="selectedUserTemplate.isPasswordChangeDisabled" :checked="formData.requirePasswordChange" label-placement="start" justify="space-between" @ionChange="toggleRequirePasswordChange">
               {{ translate("Require password reset on login") }}
             </ion-toggle>
@@ -101,424 +101,379 @@
   </ion-page>
 </template>
   
-<script lang="ts">
-import {
-  IonBackButton,
-  IonButton,
-  IonCheckbox,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonListHeader,
-  IonPage,
-  IonSelect,
-  IonSelectOption,
-  IonText,
-  IonTitle,
-  IonToggle,
-  IonToolbar,
-  alertController,
-  modalController
-} from "@ionic/vue";
-import { defineComponent } from "vue";
-import { mapGetters, useStore } from "vuex";
-import { useRouter } from 'vue-router'
-import {
-  addCircleOutline,
-  arrowForwardOutline,
-  caretDownOutline,
-  documentTextOutline,
-  eyeOffOutline,
-  eyeOutline
-} from 'ionicons/icons';
-import { copyToClipboard, showToast, isValidPassword, isValidEmail } from '@/utils'
+<script setup lang="ts">
+import { ref, computed, onMounted } from "vue";
+import { IonBackButton, IonButton, IonCheckbox, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonList, IonListHeader, IonPage, IonSelect, IonSelectOption, IonText, IonTitle, IonToggle, IonToolbar, alertController, modalController, onIonViewWillEnter } from "@ionic/vue";
+import { useRouter } from 'vue-router';
+import { useUserStore } from "@/store/user";
+import { useUtilStore } from "@/store/util";
+import { addCircleOutline, arrowForwardOutline, documentTextOutline, eyeOffOutline, eyeOutline } from 'ionicons/icons';
+import { copyToClipboard, showToast, isValidPassword, isValidEmail } from '@/utils';
 import { translate } from "@hotwax/dxp-components";
-import { UserService } from '@/services/UserService'
-import SelectFacilityModal from '@/components/SelectFacilityModal.vue'
+import { UserService } from '@/services/UserService';
+import SelectFacilityModal from '@/components/SelectFacilityModal.vue';
 import SelectProductStoreModal from "@/components/SelectProductStoreModal.vue";
 import logger from '@/logger';
 
-export default defineComponent({
-  name: "UserConfirmation",
-  components: {
-    IonBackButton,
-    IonButton,
-    IonCheckbox,
-    IonContent,
-    IonHeader,
-    IonIcon,
-    IonInput,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonListHeader,
-    IonPage,
-    IonSelect,
-    IonSelectOption,
-    IonText,
-    IonTitle,
-    IonToggle,
-    IonToolbar
-  },
-  computed: {
-    ...mapGetters({
-      selectedUser: 'user/getSelectedUser',
-      productStores: 'util/getProductStores',
-      allFacilities: 'util/getFacilities'
-    })
-  },
-  props: ['partyId'],
-  data() {
-    return {
-      userTemplateId: "FULFILLMENT",
-      selectedUserTemplate: {} as any,
-      facilities: [] as any,
-      selectedFacilities: [] as any,
-      selectedProductStores: [] as any,
-      showPassword: false,
-      formData: {
-        userLoginId: '',
-        currentPassword: '',
-        emailAddress: '',
-        externalId: '',
-        requirePasswordChange: true,
-      },
-      userTemplates: [
-        {
-          "templateId": "ADMIN",
-          "templateName": "Admin",
-          "securityGroupId": "COMMERCE_SUPER",
-          "roleTypeId": "",
-          "isUserLoginRequired": true,
-          "isFacilityRequired": false,
-          "facilityRoleTypeId": "",
-          "isProductStoreRequired": true,
-          "productStoreRoleTypeId": "APPLICATION_USER",
-        },
-        {
-          "templateId": "MERCHANDISING_MANAGER",
-          "templateName": "Merchandising manager",
-          "securityGroupId": "MERCHANDISE_MGR",
-          "roleTypeId": "",
-          "isUserLoginRequired": true,
-          "isFacilityRequired": false,
-          "facilityRoleTypeId": "",
-          "isProductStoreRequired": true,
-          "productStoreRoleTypeId": "APPLICATION_USER",
-        },
-        {
-          "templateId": "CSR",
-          "templateName": "CSR",
-          "securityGroupId": "CSR",
-          "roleTypeId": "",
-          "isUserLoginRequired": true,
-          "isFacilityRequired": false,
-          "facilityRoleTypeId": "",
-          "isProductStoreRequired": false,
-          "productStoreRoleTypeId": "",
-        },
-        {
-          "templateId": "FULFILLMENT_MANAGER",
-          "templateName": "Fulfillment manager",
-          "securityGroupId": "STORE_MANAGER",
-          "roleTypeId": "WAREHOUSE_PICKER",
-          "isUserLoginRequired": true,
-          "isEmployeeIdRequired": true,
-          "isFacilityRequired": true,
-          "facilityRoleTypeId": "WAREHOUSE_PICKER",
-          "isProductStoreRequired": false,
-          "productStoreRoleTypeId": ""
-        },
-        {
-          "templateId": "FULFILLMENT",
-          "templateName": "Fulfillment",
-          "securityGroupId": "",
-          "roleTypeId": "WAREHOUSE_PICKER",
-          "isEmployeeIdRequired": true,
-          "isFacilityRequired": false,
-          "facilityRoleTypeId": "",
-          "isProductStoreRequired": false,
-          "productStoreRoleTypeId": ""
-        },
-        {
-          "templateId": "INTEGRATION",
-          "templateName": "Integration",
-          "securityGroupId": "INTEGRATION",
-          "roleTypeId": "",
-          "isUserLoginRequired": true,
-          "isEmployeeIdRequired": false,
-          "isFacilityRequired": false,
-          "isPasswordChangeRequired": false,
-          "isPasswordChangeDisabled": true,
-          "facilityRoleTypeId": "",
-          "isProductStoreRequired": false,
-          "productStoreRoleTypeId": ""
-        }
-      ]
-    }
-  },
-  created() {
-    //Initially all product store comes selected
-    this.selectedProductStores = this.productStores;
-
-    if (!this.isFacilityLogin()) {
-      // Set selectedUserTemplate to the default value "FULFILLMENT" on component creation
-      this.selectedUserTemplate = this.userTemplates.find(template => template.templateId === this.userTemplateId);
-    }
-
-  },
-  async ionViewWillEnter() {
-    this.clearFormData()
-    await this.store.dispatch("user/getSelectedUserDetails", { partyId: this.partyId });
-    await this.store.dispatch('util/fetchFacilities');
-    await this.store.dispatch('util/fetchProductStores');
-    if (this.isFacilityLogin()) {
-      const addedFacilityIds = this.selectedUser.facilities.map((facility: any) => facility.facilityId);
-      const addedFacilities = this.allFacilities.filter((facility: any) =>  addedFacilityIds.includes(facility.facilityId));
-      this.facilities = addedFacilities;
-      this.selectedFacilities = addedFacilities;
-    }
-    await this.initializeFormData();
-  },
-  methods: {
-    isFacilityLogin() {
-      if (this.selectedUser && this.selectedUser.partyTypeId === "PARTY_GROUP") {
-        return true;
-      }
-      return false;
-    },
-    initializeFormData() {
-      if (this.selectedUser) {
-        this.formData.externalId = this.selectedUser.externalId
-        if (this.isFacilityLogin()) {
-          this.formData.requirePasswordChange = false;
-          this.formData.userLoginId = this.selectedUser.facilities?.[0].facilityId;
-        } else {
-          this.formData.userLoginId = this.selectedUserTemplate.isUserLoginRequired ? `${this.selectedUser.firstName.toLowerCase()}.${this.selectedUser.lastName.toLowerCase()}` : '';
-        }
-        this.formData.emailAddress = this.selectedUser.emailDetails?.email;
-        if(!this.selectedUserTemplate.isPasswordChangeRequired) {
-          this.formData.requirePasswordChange = false;
-        }
-      }
-    },
-    clearFormData() {
-      this.formData = {
-        userLoginId: '',
-        currentPassword: '',
-        emailAddress: '',
-        externalId: '',
-        requirePasswordChange: true
-      }
-    },
-    updateUserTemplate(event: CustomEvent) {
-      const selectedTemplateId = event.detail.value;
-      this.selectedUserTemplate = this.userTemplates.find((userTemplate: any) => userTemplate.templateId === selectedTemplateId);
-      this.clearFormData();
-      this.initializeFormData();
-    },
-    validatePassword(event: any) {
-      const value = event.target.value;
-      (this as any).$refs.password.$el.classList.remove('ion-valid');
-      (this as any).$refs.password.$el.classList.remove('ion-invalid');
-
-      if (value === '') return;
-
-      isValidPassword(value)
-        ? (this as any).$refs.password.$el.classList.add('ion-valid')
-        : (this as any).$refs.password.$el.classList.add('ion-invalid');
-    },
-    markPasswordTouched() {
-      (this as any).$refs.password.$el.classList.add('ion-touched');
-     },
-    validateUserDetail(data: any) {
-      const validationErrors = [];
-      if (this.selectedUserTemplate.isUserLoginRequired || this.isFacilityLogin()) {
-        if (!data.userLoginId) {
-          validationErrors.push(translate('Username is required.'));
-        }
-        if (!data.currentPassword) {
-          validationErrors.push(translate('Password is required.'));
-        }
-        if (this.selectedUserTemplate.templateId !== 'INTEGRATION' && !data.emailAddress) {
-          validationErrors.push(translate('Email is required.'));
-        }
-      }
-      if (data.emailAddress && !isValidEmail(data.emailAddress)) {
-        validationErrors.push(translate('Invalid email address.'));
-      }
-      if (data.currentPassword && !isValidPassword(data.currentPassword)) {
-        validationErrors.push(translate('Invalid passowrd. Password should be at least 5 characters long and contain at least one number, alphabet and special character.'));
-      }
-      return validationErrors;
-    },
-    async finishSetup() {
-      try {
-        const validationErrors = this.validateUserDetail(this.formData);
-        if (validationErrors.length > 0) {
-          const errorMessages = validationErrors.join(" ");
-          logger.error(errorMessages);
-          showToast(translate(errorMessages));
-          return;
-        }
-        await UserService.finishSetup({
-          selectedUser: this.selectedUser,
-          selectedTemplate: this.selectedUserTemplate,
-          formData: this.formData,
-          productStores: this.selectedProductStores,
-          facilities : this.selectedFacilities
-        });
-        if (this.selectedUserTemplate.isUserLoginRequired) {
-          await this.finishSetupAlert(this.formData.userLoginId);
-        } else {
-          this.$router.replace({ path: `/user-details/${this.partyId}` });
-        }
-      } catch (err: any) {
-        logger.error('error', err)
-        showToast(err.errorMessage ? err.errorMessage : translate('Failed to quick setup user.'));
-      }
-    },
-    async finishSetupAlert(userLoginId:  any) {
-      const message = 'is ready to login'
-      const alert = await alertController.create({
-        header: translate("Setup complete"),
-        message: translate(message, {userLoginId: userLoginId}),
-        backdropDismiss: false,
-        buttons: [
-          {
-            text: translate("Proceed"),
-            handler: (data :any) => {
-              this.copyCredentials(data);
-            }
-          }
-        ],
-        inputs: [
-          {
-            name: "copyCredentials",
-            label: 'Copy credentials',
-            type: 'checkbox',
-            value: 'Y',
-          }
-        ]
-      });
-      return alert.present();
-    },
-    copyCredentials(data: any) {
-      if (data.length > 0) {
-        const dataToCopy = `username: ${this.formData.userLoginId}, password: ${this.formData.currentPassword}`
-        copyToClipboard(dataToCopy, 'Copied to clipboard')
-      }
-      this.$router.replace({ path: `/user-details/${this.partyId}` });
-    },
-    async confirmSetupManually() {
-      const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?'
-      const alert = await alertController.create({
-        header: translate("Setup manually"),
-        message: translate(message),
-        buttons: [
-          {
-            text: translate("Cancel"),
-          },
-          {
-            text: translate("Setup manually"),
-            handler: async () => {
-              await this.setupManually();
-            }
-          }
-        ],
-      });
-      return alert.present();
-    },
-    async setupManually() {
-      await this.$router.replace({ path: `/user-details/${this.partyId}` })
-    },
-    async finishAndCreateNewUser() {
-      try {
-        const validationErrors = this.validateUserDetail(this.formData);
-        if (validationErrors.length > 0) {
-          const errorMessages = validationErrors.join(" ");
-          logger.error(errorMessages);
-          showToast(translate(errorMessages));
-          return;
-        }
-        await UserService.finishSetup({
-          selectedUser: this.selectedUser,
-          selectedTemplate: this.selectedUserTemplate,
-          formData: this.formData,
-          productStores: this.selectedProductStores,
-          facilities : this.selectedFacilities
-        });
-        await this.store.dispatch('user/clearSelectedUser');
-        await this.$router.replace({ path: `/create-user` })
-      } catch (err) {
-        logger.error('error', err)
-        showToast(translate('Failed to quick setup user.'))
-      }
-    },
-    async addFacilities() {
-      const selectFacilityModal = await modalController.create({
-        component: SelectFacilityModal,
-        componentProps: { selectedFacilities: this.selectedFacilities, isFacilityLogin: this.isFacilityLogin() }
-      });
-
-      selectFacilityModal.onDidDismiss().then((result) => {
-        if (result.data && result.data.value) {
-          this.facilities = result.data.value.selectedFacilities;
-          this.selectedFacilities = result.data.value.selectedFacilities;
-        }
-      })
-      return selectFacilityModal.present();
-    },
-    toggleFacilitySelection(updatedFacility: any) {
-      const selectedFacility = this.selectedFacilities.find((facility: any) => facility.facilityId === updatedFacility.facilityId)
-      if (selectedFacility) {
-        this.selectedFacilities = this.selectedFacilities.filter((facility: any) => facility.facilityId !== updatedFacility.facilityId)
-      } else {
-        this.selectedFacilities.push(updatedFacility);
-      }
-    },
-    async addProductStores() {
-      const selectProductStoreModal = await modalController.create({
-        component: SelectProductStoreModal,
-        componentProps: { selectedProductStores: this.selectedProductStores }
-      });
-
-      selectProductStoreModal.onDidDismiss().then((result) => {
-        if (result.data && result.data.value) {
-          this.selectedProductStores = result.data.value.selectedProductStores;
-        }
-      })
-      return selectProductStoreModal.present();
-    },
-    toggleRequirePasswordChange() {
-      this.formData.requirePasswordChange = !this.formData.requirePasswordChange;
-    }
-  },
-  setup() {
-    const store = useStore();
-    const router = useRouter();
-
-    return {
-      store,
-      router,
-      addCircleOutline,
-      arrowForwardOutline,
-      caretDownOutline,
-      documentTextOutline,
-      eyeOffOutline,
-      eyeOutline,
-      translate
-    };
+const props = defineProps({
+  partyId: {
+    type: String,
+    required: true
   }
 });
+
+const router = useRouter();
+const userStore = useUserStore();
+const utilStore = useUtilStore();
+
+const passwordRef = ref<any>(null);
+
+const userTemplateId = ref("FULFILLMENT");
+const selectedUserTemplate = ref<any>({});
+const facilities = ref<any[]>([]);
+const selectedFacilities = ref<any[]>([]);
+const selectedProductStores = ref<any[]>([]);
+const showPassword = ref(false);
+const formData = ref({
+  userLoginId: '',
+  currentPassword: '',
+  emailAddress: '',
+  externalId: '',
+  requirePasswordChange: true,
+});
+
+const userTemplates = [
+  {
+    "templateId": "ADMIN",
+    "templateName": "Admin",
+    "securityGroupId": "COMMERCE_SUPER",
+    "roleTypeId": "",
+    "isUserLoginRequired": true,
+    "isFacilityRequired": false,
+    "facilityRoleTypeId": "",
+    "isProductStoreRequired": true,
+    "productStoreRoleTypeId": "APPLICATION_USER",
+  },
+  {
+    "templateId": "MERCHANDISING_MANAGER",
+    "templateName": "Merchandising manager",
+    "securityGroupId": "MERCHANDISE_MGR",
+    "roleTypeId": "",
+    "isUserLoginRequired": true,
+    "isFacilityRequired": false,
+    "facilityRoleTypeId": "",
+    "isProductStoreRequired": true,
+    "productStoreRoleTypeId": "APPLICATION_USER",
+  },
+  {
+    "templateId": "CSR",
+    "templateName": "CSR",
+    "securityGroupId": "CSR",
+    "roleTypeId": "",
+    "isUserLoginRequired": true,
+    "isFacilityRequired": false,
+    "facilityRoleTypeId": "",
+    "isProductStoreRequired": false,
+    "productStoreRoleTypeId": "",
+  },
+  {
+    "templateId": "FULFILLMENT_MANAGER",
+    "templateName": "Fulfillment manager",
+    "securityGroupId": "STORE_MANAGER",
+    "roleTypeId": "WAREHOUSE_PICKER",
+    "isUserLoginRequired": true,
+    "isEmployeeIdRequired": true,
+    "isFacilityRequired": true,
+    "facilityRoleTypeId": "WAREHOUSE_PICKER",
+    "isProductStoreRequired": false,
+    "productStoreRoleTypeId": ""
+  },
+  {
+    "templateId": "FULFILLMENT",
+    "templateName": "Fulfillment",
+    "securityGroupId": "",
+    "roleTypeId": "WAREHOUSE_PICKER",
+    "isEmployeeIdRequired": true,
+    "isFacilityRequired": false,
+    "facilityRoleTypeId": "",
+    "isProductStoreRequired": false,
+    "productStoreRoleTypeId": ""
+  },
+  {
+    "templateId": "INTEGRATION",
+    "templateName": "Integration",
+    "securityGroupId": "INTEGRATION",
+    "roleTypeId": "",
+    "isUserLoginRequired": true,
+    "isEmployeeIdRequired": false,
+    "isFacilityRequired": false,
+    "isPasswordChangeRequired": false,
+    "isPasswordChangeDisabled": true,
+    "facilityRoleTypeId": "",
+    "isProductStoreRequired": false,
+    "productStoreRoleTypeId": ""
+  }
+];
+
+const selectedUser = computed(() => userStore.selectedUser);
+const productStores = computed(() => utilStore.getProductStores);
+const allFacilities = computed(() => utilStore.getFacilities);
+
+onMounted(() => {
+  //Initially all product store comes selected
+  selectedProductStores.value = productStores.value;
+
+  if (!isFacilityLogin()) {
+    // Set selectedUserTemplate to the default value "FULFILLMENT" on component creation
+    selectedUserTemplate.value = userTemplates.find(template => template.templateId === userTemplateId.value);
+  }
+});
+
+onIonViewWillEnter(async () => {
+  clearFormData();
+  await userStore.getSelectedUserDetails({ partyId: props.partyId });
+  await utilStore.fetchFacilities();
+  await utilStore.fetchProductStores();
+  if (isFacilityLogin()) {
+    const addedFacilityIds = selectedUser.value.facilities?.map((facility: any) => facility.facilityId) || [];
+    const addedFacilities = allFacilities.value.filter((facility: any) => addedFacilityIds.includes(facility.facilityId));
+    facilities.value = addedFacilities;
+    selectedFacilities.value = addedFacilities;
+  }
+  await initializeFormData();
+});
+
+const isFacilityLogin = () => {
+  return selectedUser.value && selectedUser.value.partyTypeId === "PARTY_GROUP";
+};
+
+const initializeFormData = () => {
+  if (selectedUser.value) {
+    formData.value.externalId = selectedUser.value.externalId || '';
+    if (isFacilityLogin()) {
+      formData.value.requirePasswordChange = false;
+      formData.value.userLoginId = selectedUser.value.facilities?.[0]?.facilityId || '';
+    } else {
+      formData.value.userLoginId = selectedUserTemplate.value.isUserLoginRequired ? `${selectedUser.value.firstName?.toLowerCase() || ''}.${selectedUser.value.lastName?.toLowerCase() || ''}` : '';
+    }
+    formData.value.emailAddress = selectedUser.value.emailDetails?.email || '';
+    if (selectedUserTemplate.value && !selectedUserTemplate.value.isPasswordChangeRequired) {
+      formData.value.requirePasswordChange = false;
+    }
+  }
+};
+
+const clearFormData = () => {
+  formData.value = {
+    userLoginId: '',
+    currentPassword: '',
+    emailAddress: '',
+    externalId: '',
+    requirePasswordChange: true
+  };
+};
+
+const updateUserTemplate = (event: CustomEvent) => {
+  const selectedTemplateId = event.detail.value;
+  selectedUserTemplate.value = userTemplates.find((userTemplate: any) => userTemplate.templateId === selectedTemplateId);
+  clearFormData();
+  initializeFormData();
+};
+
+const validatePassword = (event: any) => {
+  const value = event.target.value;
+  if (!passwordRef.value) return;
+  passwordRef.value.$el.classList.remove('ion-valid');
+  passwordRef.value.$el.classList.remove('ion-invalid');
+
+  if (value === '') return;
+
+  isValidPassword(value)
+    ? passwordRef.value.$el.classList.add('ion-valid')
+    : passwordRef.value.$el.classList.add('ion-invalid');
+};
+
+const markPasswordTouched = () => {
+  if (passwordRef.value) {
+    passwordRef.value.$el.classList.add('ion-touched');
+  }
+};
+
+const validateUserDetail = (data: any) => {
+  const validationErrors = [];
+  if (selectedUserTemplate.value.isUserLoginRequired || isFacilityLogin()) {
+    if (!data.userLoginId) {
+      validationErrors.push(translate('Username is required.'));
+    }
+    if (!data.currentPassword) {
+      validationErrors.push(translate('Password is required.'));
+    }
+    if (selectedUserTemplate.value.templateId !== 'INTEGRATION' && !data.emailAddress) {
+      validationErrors.push(translate('Email is required.'));
+    }
+  }
+  if (data.emailAddress && !isValidEmail(data.emailAddress)) {
+    validationErrors.push(translate('Invalid email address.'));
+  }
+  if (data.currentPassword && !isValidPassword(data.currentPassword)) {
+    validationErrors.push(translate('Invalid passowrd. Password should be at least 5 characters long and contain at least one number, alphabet and special character.'));
+  }
+  return validationErrors;
+};
+
+const finishSetup = async () => {
+  try {
+    const validationErrors = validateUserDetail(formData.value);
+    if (validationErrors.length > 0) {
+      const errorMessages = validationErrors.join(" ");
+      logger.error(errorMessages);
+      showToast(translate(errorMessages));
+      return;
+    }
+    await UserService.finishSetup({
+      selectedUser: selectedUser.value,
+      selectedTemplate: selectedUserTemplate.value,
+      formData: formData.value,
+      productStores: selectedProductStores.value,
+      facilities: selectedFacilities.value
+    });
+    if (selectedUserTemplate.value.isUserLoginRequired) {
+      await finishSetupAlert(formData.value.userLoginId);
+    } else {
+      router.replace({ path: `/user-details/${props.partyId}` });
+    }
+  } catch (err: any) {
+    logger.error('error', err);
+    showToast(err.errorMessage ? err.errorMessage : translate('Failed to quick setup user.'));
+  }
+};
+
+const finishSetupAlert = async (userLoginId: any) => {
+  const message = 'is ready to login';
+  const alert = await alertController.create({
+    header: translate("Setup complete"),
+    message: translate(message, { userLoginId: userLoginId }),
+    backdropDismiss: false,
+    buttons: [
+      {
+        text: translate("Proceed"),
+        handler: (data: any) => {
+          copyCredentials(data);
+        }
+      }
+    ],
+    inputs: [
+      {
+        name: "copyCredentials",
+        label: 'Copy credentials',
+        type: 'checkbox',
+        value: 'Y',
+      }
+    ]
+  });
+  return alert.present();
+};
+
+const copyCredentials = (data: any) => {
+  if (data.length > 0) {
+    const dataToCopy = `username: ${formData.value.userLoginId}, password: ${formData.value.currentPassword}`;
+    copyToClipboard(dataToCopy, 'Copied to clipboard');
+  }
+  router.replace({ path: `/user-details/${props.partyId}` });
+};
+
+const confirmSetupManually = async () => {
+  const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?';
+  const alert = await alertController.create({
+    header: translate("Setup manually"),
+    message: translate(message),
+    buttons: [
+      {
+        text: translate("Cancel"),
+      },
+      {
+        text: translate("Setup manually"),
+        handler: async () => {
+          await setupManually();
+        }
+      }
+    ],
+  });
+  return alert.present();
+};
+
+const setupManually = async () => {
+  await router.replace({ path: `/user-details/${props.partyId}` });
+};
+
+const finishAndCreateNewUser = async () => {
+  try {
+    const validationErrors = validateUserDetail(formData.value);
+    if (validationErrors.length > 0) {
+      const errorMessages = validationErrors.join(" ");
+      logger.error(errorMessages);
+      showToast(translate(errorMessages));
+      return;
+    }
+    await UserService.finishSetup({
+      selectedUser: selectedUser.value,
+      selectedTemplate: selectedUserTemplate.value,
+      formData: formData.value,
+      productStores: selectedProductStores.value,
+      facilities: selectedFacilities.value
+    });
+    await userStore.clearSelectedUser();
+    await router.replace({ path: `/create-user` });
+  } catch (err) {
+    logger.error('error', err);
+    showToast(translate('Failed to quick setup user.'));
+  }
+};
+
+const addFacilities = async () => {
+  const selectFacilityModal = await modalController.create({
+    component: SelectFacilityModal,
+    componentProps: { selectedFacilities: selectedFacilities.value, isFacilityLogin: isFacilityLogin() }
+  });
+
+  selectFacilityModal.onDidDismiss().then((result) => {
+    if (result.data && result.data.value) {
+      facilities.value = result.data.value.selectedFacilities;
+      selectedFacilities.value = result.data.value.selectedFacilities;
+    }
+  });
+  return selectFacilityModal.present();
+};
+
+const toggleFacilitySelection = (updatedFacility: any) => {
+  const selectedFacility = selectedFacilities.value.find((facility: any) => facility.facilityId === updatedFacility.facilityId);
+  if (selectedFacility) {
+    selectedFacilities.value = selectedFacilities.value.filter((facility: any) => facility.facilityId !== updatedFacility.facilityId);
+  } else {
+    selectedFacilities.value.push(updatedFacility);
+  }
+};
+
+const addProductStores = async () => {
+  const selectProductStoreModal = await modalController.create({
+    component: SelectProductStoreModal,
+    componentProps: { selectedProductStores: selectedProductStores.value }
+  });
+
+  selectProductStoreModal.onDidDismiss().then((result) => {
+    if (result.data && result.data.value) {
+      selectedProductStores.value = result.data.value.selectedProductStores;
+    }
+  });
+  return selectProductStoreModal.present();
+};
+
+const toggleRequirePasswordChange = () => {
+  formData.value.requirePasswordChange = !formData.value.requirePasswordChange;
+};
 </script>
 
 <style scoped>
-
   @media (min-width: 700px) {
     main {
       max-width: 375px;
@@ -531,5 +486,4 @@ export default defineComponent({
     flex-direction: column;
     align-items: start;
   }
-
 </style>

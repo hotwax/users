@@ -9,29 +9,11 @@
   </ion-content>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { translate } from '@hotwax/dxp-components';
-import {
-  IonContent,
-  IonItem,
-  IonList,
-  IonListHeader
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
+import { IonContent, IonItem, IonList, IonListHeader } from '@ionic/vue';
 
-export default defineComponent({
-  name: 'UserPopover',
-  components: {
-    IonContent,
-    IonItem,
-    IonList,
-    IonListHeader
-  },
-  props: ['user'],
-  setup() {
-    return {
-      translate
-    }
-  }
-});
+defineProps<{
+  user: any;
+}>();
 </script>

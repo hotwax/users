@@ -14,21 +14,21 @@
     <ion-content id="filter-menu">
       <div class="find">
         <section class="search">
-          <ion-searchbar :placeholder="translate('Search users')" v-model="query.queryString" @keyup.enter="updateQuery()" />
+          <ion-searchbar :placeholder="translate('Search users')" v-model="userStore.query.queryString" @keyup.enter="updateQuery()" />
         </section>
 
         <aside class="filters">
           <ion-list>
             <ion-item lines="none">
               <ion-icon :icon="idCardOutline" slot="start" />
-              <ion-select :label="translate('Clearance')" interface="popover" v-model="query.securityGroup" @ionChange="updateQuery()">
+              <ion-select :label="translate('Clearance')" interface="popover" v-model="userStore.query.securityGroup" @ionChange="updateQuery()">
                 <ion-select-option value="">{{ translate("All") }}</ion-select-option>
                 <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName || securityGroup.groupId }}</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item lines="none">
               <ion-icon :icon="toggleOutline" slot="start" />
-              <ion-select :label="translate('Login')" interface="popover" v-model="query.status" @ionChange="updateQuery()">
+              <ion-select :label="translate('Login')" interface="popover" v-model="userStore.query.status" @ionChange="updateQuery()">
                 <ion-select-option value="">{{ translate("All") }}</ion-select-option>
                 <ion-select-option value="Y">{{ translate("Active") }}</ion-select-option>
                 <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
@@ -36,7 +36,7 @@
             </ion-item>
             <ion-item>
               <ion-icon slot="start" :icon="cloudyNightOutline"/>
-              <ion-toggle v-model="query.hideDisabledUser" @ionChange="updateQuery()" label-placement="start" justify="space-between">{{ translate("Hide disabled users") }}</ion-toggle>
+              <ion-toggle v-model="userStore.query.hideDisabledUser" @ionChange="updateQuery()" label-placement="start" justify="space-between">{{ translate("Hide disabled users") }}</ion-toggle>
             </ion-item>
           </ion-list>
         </aside>
@@ -115,18 +115,6 @@
         </ion-fab-button>
       </ion-fab>
 
-      <!--
-        When searching for a keyword, and if the user moves to the last item, then the didFire value inside infinite scroll becomes true and thus the infinite scroll does not trigger again on the same page(https://github.com/hotwax/users/issues/84).
-        Also if we are at the section that has been loaded by infinite-scroll and then move to the details page then the list infinite scroll does not work after coming back to the page
-
-        In ionic v7.6.0, an issue related to infinite scroll has been fixed that when more items can be added to the DOM, but infinite scroll does not fire as the window is not completely filled with the content(https://github.com/ionic-team/ionic-framework/issues/18071).
-        The above fix in ionic 7.6.0 is resulting in the issue of infinite scroll not being called again.
-
-        To fix this we have maintained another variable `isScrollingEnabled` to check whether the scrolling can be performed or not.
-        If we do not define an extra variable and just use v-show to check for `isScrollable` then when coming back to the page infinite-scroll is called programatically.
-
-        We have added an ionScroll event on ionContent to check whether the infiniteScroll can be enabled or not by toggling the value of isScrollingEnabled whenever the height < 0.
-      -->
       <ion-infinite-scroll
         @ionInfinite="loadMoreUsers($event)"
         threshold="100px"
@@ -141,197 +129,114 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import {
-  IonBadge,
-  IonCard,
-  IonChip,
-  IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
-  IonIcon,
-  IonInfiniteScroll,
-  IonInfiniteScrollContent,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonMenuButton,
-  IonPage,
-  IonSearchbar,
-  IonSelect,
-  IonSelectOption,
-  IonTitle,
-  IonToggle,
-  IonToolbar,
-  popoverController
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
-import {
-  addOutline,
-  cloudyNightOutline,
-  ellipsisVerticalOutline,
-  idCardOutline,
-  optionsOutline,
-  toggleOutline,
-} from 'ionicons/icons';
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue';
+import { IonBadge, IonCard, IonChip, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonLabel, IonList, IonMenuButton, IonPage, IonSearchbar, IonSelect, IonSelectOption, IonTitle, IonToggle, IonToolbar, onIonViewWillEnter } from '@ionic/vue';
+import { addOutline, cloudyNightOutline, idCardOutline, optionsOutline, toggleOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
-import { mapGetters, useStore } from 'vuex';
 import { DateTime } from 'luxon';
-import UserPopover from '@/components/UserPopover.vue';
 import { translate } from '@hotwax/dxp-components'
 import FilterMenu from '@/components/FilterMenu.vue';
 import { UserService } from '@/services/UserService';
 import { hasError } from '@/adapter';
 import { Actions, hasPermission } from '@/authorization'
 import logger from '@/logger';
+import { useUserStore } from '@/store/user';
+import { useUtilStore } from '@/store/util';
 
-export default defineComponent({
-  name: 'Users',
-  components: {
-    FilterMenu,
-    IonBadge,
-    IonCard,
-    IonChip,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonInfiniteScroll,
-    IonInfiniteScrollContent,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonMenuButton,
-    IonPage,
-    IonSearchbar,
-    IonSelect,
-    IonSelectOption,
-    IonTitle,
-    IonToggle,
-    IonToolbar
-  },
-  computed: {
-    ...mapGetters({
-      users: 'user/getUsers',
-      securityGroups: 'util/getSecurityGroups',
-      query: 'user/getQuery',
-      isScrollable: "user/isScrollable",
-      userProfile: 'user/getUserProfile'
-    })
-  },
-  data() {
-    return {
-      currentUser: {},
-    }
-  },
-  async ionViewWillEnter() {
-    await this.fetchUsers()
-  },
-  async mounted() {
-    await this.store.dispatch('util/getSecurityGroups')
-  },
-  methods: {
-    createUser(){
-      this.store.dispatch('user/clearSelectedUser');  
-      this.router.push('/create-user');
-    },
-    getDate(date: any) {
-      return DateTime.fromMillis(date).toFormat('dd LLL yyyy')
-    },
-    async openUserPopover(ev: Event, user:any) {
-      const popover = await popoverController.create({
-        component: UserPopover,
-        componentProps: { user },
-        event: ev,
-        showBackdrop: false,
-      });
-      return popover.present();
-    },
-    async updateQuery() {
-      await this.store.dispatch('user/updateQuery', this.query)
-      this.fetchUsers();
-    },
-    async fetchUsers(vSize?: any, vIndex?: any) {
-      if(!this.query.queryString) {
-        // Do not fetch the current user information again when vIndex is passed(as we only pass vIndex in case of infinite scroll call), as we already have information for current user
-        !vIndex && await this.fetchLoggedInUserDetails()
-      } else {
-        this.currentUser = {}
-      }
+const userStore = useUserStore();
+const utilStore = useUtilStore();
+const router = useRouter();
 
-      const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
-      const viewIndex = vIndex ? vIndex : 0;
-      const payload = {
-        viewSize,
-        viewIndex,
-        currentUserPartyId: this.userProfile.partyId
-      };
-      await this.store.dispatch('user/fetchUsers', payload)
-    },
-    async viewUserDetails(user: any) {
-      await this.store.dispatch('user/updateSelectedUser', user)
-      this.router.push({ path: `/user-details/${user.partyId}` })
-    },
-    async loadMoreUsers(event: any) {
-      // Added this check here as if added on infinite-scroll component the Loading content does not gets displayed
-      this.fetchUsers(
-        undefined,
-        Math.ceil(
-          this.users?.length / (process.env.VUE_APP_VIEW_SIZE as any)
-        ).toString()
-      ).then(async () => {
-        await event.target.complete();
-      });
-    },
-    async fetchLoggedInUserDetails() {
-      const params = {
-        inputFields: {
-          roleTypeIdTo: 'APPLICATION_USER',
-          partyId: this.userProfile.partyId
-        },
-        fromDateName: 'relationshipFromDate',
-        thruDateName: 'relationshipThruDate',
-        filterByDate: 'Y',
-        entityName: 'PartyAndUserLoginSecurityGroupDetails',
-        noConditionFind: 'Y',
-        distinct: 'Y',
-        fieldList: ['createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
-      }
+const currentUser = ref<any>({});
 
-      try {
-        const resp = await UserService.fetchUsers(params)
+const users = computed(() => userStore.getUsers);
+const securityGroups = computed(() => utilStore.getSecurityGroups);
+const isScrollable = computed(() => userStore.isScrollable);
+const userProfile = computed(() => userStore.getUserProfile);
 
-        if (!hasError(resp) && resp.data.count) {
-          this.currentUser = resp.data.docs[0]
-        } else {
-          throw resp.data
-        }
-      } catch (error) {
-        logger.error(error)
-      }
-    }
-  },
-  setup() {
-    const router = useRouter();
-    const store = useStore();
-
-    return {
-      addOutline,
-      cloudyNightOutline,
-      ellipsisVerticalOutline,
-      hasPermission,
-      idCardOutline,
-      optionsOutline,
-      toggleOutline,
-      translate,
-      router,
-      store,
-      Actions
-    };
-  }
+onIonViewWillEnter(async () => {
+  await fetchUsers();
 });
+
+onMounted(async () => {
+  await utilStore.getSecurityGroups();
+});
+
+const createUser = () => {
+  userStore.clearSelectedUser();  
+  router.push('/create-user');
+};
+
+const getDate = (date: any) => {
+  return DateTime.fromMillis(date).toFormat('dd LLL yyyy');
+};
+
+const updateQuery = async () => {
+  await userStore.updateQuery(userStore.query);
+  fetchUsers();
+};
+
+const fetchUsers = async (vSize?: any, vIndex?: any) => {
+  if (!userStore.query.queryString) {
+    !vIndex && await fetchLoggedInUserDetails();
+  } else {
+    currentUser.value = {};
+  }
+
+  const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+  const viewIndex = vIndex ? vIndex : 0;
+  const payload = {
+    viewSize,
+    viewIndex,
+    currentUserPartyId: userProfile.value.partyId
+  };
+  await userStore.fetchUsers(payload);
+};
+
+const viewUserDetails = async (user: any) => {
+  await userStore.updateSelectedUser(user);
+  router.push({ path: `/user-details/${user.partyId}` });
+};
+
+const loadMoreUsers = async (event: any) => {
+  fetchUsers(
+    undefined,
+    Math.ceil(
+      users.value?.length / (process.env.VUE_APP_VIEW_SIZE as any)
+    ).toString()
+  ).then(async () => {
+    await event.target.complete();
+  });
+};
+
+const fetchLoggedInUserDetails = async () => {
+  const params = {
+    inputFields: {
+      roleTypeIdTo: 'APPLICATION_USER',
+      partyId: userProfile.value.partyId
+    },
+    fromDateName: 'relationshipFromDate',
+    thruDateName: 'relationshipThruDate',
+    filterByDate: 'Y',
+    entityName: 'PartyAndUserLoginSecurityGroupDetails',
+    noConditionFind: 'Y',
+    distinct: 'Y',
+    fieldList: ['createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
+  };
+
+  try {
+    const resp = await UserService.fetchUsers(params);
+
+    if (!hasError(resp) && resp.data.count) {
+      currentUser.value = resp.data.docs[0];
+    } else {
+      throw resp.data;
+    }
+  } catch (error) {
+    logger.error(error);
+  }
+};
 </script>
 
 <style scoped>
