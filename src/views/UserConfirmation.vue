@@ -47,8 +47,7 @@ import { IonBackButton, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCont
 import { useRouter } from 'vue-router';
 import { useUserStore } from "@/store/user";
 import { arrowForwardOutline, businessOutline, callOutline, mailOutline } from 'ionicons/icons';
-import { translate } from "@hotwax/dxp-components";
-import emitter from "@/event-bus";
+import { translate, emitter } from "@common";
 
 const props = defineProps({
   partyId: {

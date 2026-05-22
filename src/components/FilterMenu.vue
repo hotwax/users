@@ -38,7 +38,7 @@
 import { computed } from 'vue';
 import { IonContent, IonHeader, IonIcon, IonItem, IonList, IonMenu, IonTitle, IonToggle, IonToolbar, IonSelect, IonSelectOption, menuController } from '@ionic/vue'
 import { cloudyNightOutline, idCardOutline, toggleOutline } from 'ionicons/icons'
-import { translate } from '@hotwax/dxp-components'
+import { translate } from '@common';
 import { useUserStore } from '@/store/user';
 import { useUtilStore } from '@/store/util';
 

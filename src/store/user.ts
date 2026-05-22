@@ -1,29 +1,15 @@
 import { defineStore } from 'pinia'
-import { Settings } from 'luxon'
-import {
-  getServerPermissionsFromRules,
-  prepareAppPermissions,
-  resetPermissions,
-  setPermissions,
-} from '@/authorization'
-import { showToast } from '@/utils'
-import { translate, useAuthStore as useDxpAuthStore, useUserStore as useDxpUserStore } from '@hotwax/dxp-components'
-import emitter from '@/event-bus'
-import logger from '@/logger'
-import router from '@/router'
-import {
-  hasError,
-  logout as adapterLogout,
-  resetConfig,
-  updateInstanceUrl,
-  updateToken
-} from '@/adapter'
+import { DateTime, Settings } from "luxon"
+import { api, commonUtil, emitter, i18n, logger, translate, useAuth } from '@common';
+import { useUtilStore } from '@/store/util';
 
 export interface UserState {
-  token: string;
   current: any;
   instanceUrl: string;
   permissions: any;
+  timeZones: any[],
+  localeOptions: any,
+  locale: string,
   query: {
     queryString: string;
     securityGroup: string;
@@ -35,19 +21,18 @@ export interface UserState {
     list: any[];
     total: number;
   };
-  omsRedirectionInfo: {
-    url: string;
-    token: string;
-  };
   redirectedFrom: string;
+  oms: any
 }
 
 export const useUserStore = defineStore('user', {
   state: (): UserState => ({
-    token: '',
     current: {},
     instanceUrl: '',
     permissions: [],
+    timeZones: [],
+    localeOptions: import.meta.env.VITE_LOCALES ? JSON.parse(import.meta.env.VITE_LOCALES) : { "en-US": "English" },
+    locale: 'en-US',
     query: {
       queryString: '',
       securityGroup: '',
@@ -59,29 +44,11 @@ export const useUserStore = defineStore('user', {
       list: [],
       total: 0
     },
-    omsRedirectionInfo: {
-      url: '',
-      token: ''
-    },
-    redirectedFrom: ''
+    redirectedFrom: '',
+    oms: ""
   }),
   getters: {
-    isAuthenticated: (state): boolean => !!state.token,
-    isUserAuthenticated: (state): boolean => !!(state.token && state.current && Object.keys(state.current).length),
-    getBaseUrl: (state): string => {
-      let baseURL = process.env.VUE_APP_BASE_URL;
-      if (!baseURL) baseURL = state.instanceUrl;
-      if (!baseURL) return '';
-      return baseURL.startsWith('http') 
-        ? (baseURL.includes('/api') ? baseURL : `${baseURL}/api/`) 
-        : `https://${baseURL}.hotwax.io/api/`;
-    },
-    getUserToken: (state): string => state.token,
     getUserProfile: (state): any => state.current,
-    getInstanceUrl: (state): string => {
-      const baseUrl = process.env.VUE_APP_BASE_URL;
-      return baseUrl ? baseUrl : state.instanceUrl;
-    },
     getUserPermissions: (state): any => state.permissions,
     getSelectedUser: (state): any => state.selectedUser,
     getUsers: (state): any[] => state.users.list,
@@ -89,141 +56,182 @@ export const useUserStore = defineStore('user', {
     isScrollable: (state): boolean => {
       return (
         state.users.list?.length > 0 && 
-        (state.users.list?.length % Number(process.env.VUE_APP_VIEW_SIZE) === 0)
+        (state.users.list?.length % Number(import.meta.env.VITE_VIEW_SIZE) === 0)
       );
     },
     getUserProductStores: (state): any => state.selectedUser?.productStores || [],
     getUserSecurityGroups: (state): any => state.selectedUser?.securityGroups || [],
-    getOmsRedirectionInfo: (state): any => state.omsRedirectionInfo,
-    getRedirectedFromUrl: (state): string => state.redirectedFrom
+    getRedirectedFromUrl: (state): string => state.redirectedFrom,
+    hasPermission: (state: UserState) => (permissionId: string): boolean => {
+      const permissions = state.permissions;
+
+      if (!permissionId) {
+        return true;
+      }
+
+      // Handle OR/AND logic in permission string
+      if (permissionId.includes(' OR ')) {
+        const parts = permissionId.split(' OR ');
+        return parts.some(part => useUserStore().hasPermission(part.trim()));
+      }
+
+      if (permissionId.includes(' AND ')) {
+        const parts = permissionId.split(' AND ');
+        return parts.every(part => useUserStore().hasPermission(part.trim()));
+      }
+
+      return permissions.includes(permissionId);
+    }
   },
   actions: {
-    async login(payload: any) {
+
+    updateUserInfo(payload: any) {
+      this.current = { ...this.current, ...payload }
+    },
+    setPermissionsState(payload: any) {
+      this.permissions = payload
+    },
+    async fetchUserProfile() {
       try {
-        const { token, oms, omsRedirectionUrl } = payload;
-        this.setUserInstanceUrl(oms);
+        const userProfileResp = await api({
+          url: "admin/user/profile",
+          method: "get",
+        }) as any;
+        this.current = userProfileResp.data
+        useAuth().updateUserId(this.current.userId)
 
-        if (omsRedirectionUrl) {
-          this.setOmsRedirectionInfo({ url: omsRedirectionUrl, token: "" });
-        } else {
-          showToast(translate("Some of the app functionality will not work due to missing configuration."));
+        if (this.current.timeZone) {
+          Settings.defaultZone = this.current.timeZone;
         }
+      } catch (error: any) {
+        commonUtil.showToast(translate("Failed to fetch user profile information"));
+        console.error("error", error);
+        useAuth().clearAuth();
+        return Promise.reject(new Error(error));
+      }
+    },
+    async fetchPermissions() {
+      const permissionId = import.meta.env.VITE_APP_PERMISSION_ID;
+      const serverPermissions = [] as any;
 
-        // Dynamic import to avoid circular dependency
-        const { UserService } = await import('@/services/UserService');
+      // TODO Make it configurable from the environment variables.
+      // Though this might not be an server specific configuration, 
+      // we will be adding it to environment variable for easy configuration at app level
+      const viewSize = 50;
 
-        // Getting the permissions list from server
-        const permissionId = process.env.VUE_APP_PERMISSION_ID;
-        // Prepare permissions list
-        const serverPermissionsFromRules = getServerPermissionsFromRules();
-        if (permissionId) serverPermissionsFromRules.push(permissionId);
+      let viewIndex = 0;
 
-        const serverPermissions = await UserService.getUserPermissions({
-          permissionIds: [...new Set(serverPermissionsFromRules)]
-        }, token);
-        const appPermissions = prepareAppPermissions(serverPermissions);
+      try {
+        let resp;
+        do {
+          resp = await api({
+            url: "getPermissions",
+            method: "post",
+            baseURL: commonUtil.getOmsURL(),
+            data: { viewIndex, viewSize }
+          }) as any
+
+          if (resp.status === 200 && resp.data.docs?.length && !commonUtil.hasError(resp)) {
+            serverPermissions.push(...resp.data.docs.map((permission: any) => permission.permissionId));
+            viewIndex++;
+          } else {
+            resp = null;
+          }
+        } while (resp);
 
         // Checking if the user has permission to access the app
+        // If there is no configuration, the permission check is not enabled
         if (permissionId) {
-          const hasPerm = appPermissions.some((appPermission: any) => appPermission.action === permissionId);
-          if (!hasPerm) {
-            const permissionError = 'You do not have permission to access the app.';
-            showToast(translate(permissionError));
+          const hasAppPermission = serverPermissions.includes(permissionId);
+          if (!hasAppPermission) {
+            const permissionError = "You do not have permission to access the app.";
+            commonUtil.showToast(translate(permissionError));
             logger.error("error", permissionError);
             return Promise.reject(new Error(permissionError));
           }
         }
 
-        const userProfile = await UserService.getUserProfile(token);
-
-        setPermissions(appPermissions);
-        if (userProfile.userTimeZone) {
-          Settings.defaultZone = userProfile.userTimeZone;
-        }
-        updateToken(token);
-
-        this.current = userProfile;
-        this.permissions = appPermissions;
-        this.token = token;
-
-        const { useUtilStore } = await import('./util');
-        const utilStore = useUtilStore();
-        await utilStore.fetchOrganizationPartyId();
-
-        const partyId = router.currentRoute.value.query.partyId;
-        if (router.currentRoute.value.query.redirectedFrom) {
-          this.updateRedirectedFromUrl(router.currentRoute.value.query.redirectedFrom as string);
-        }
-
-        const { Actions: AuthActions, hasPermission: checkAppPermission } = await import('@/authorization');
-        if (partyId && checkAppPermission(AuthActions.APP_USERS_LIST_VIEW)) {
-          return `/user-details/${partyId}`;
-        }
-      } catch (err: any) {
-        showToast(translate('Something went wrong while login. Please contact administrator'));
-        logger.error("error", err);
-        return Promise.reject(err instanceof Object ? err : new Error(err));
+        // Update the state with the fetched permissions
+        this.permissions = serverPermissions;
+      } catch (error: any) {
+        return Promise.reject(error);
       }
     },
-    async logout(payload?: any) {
-      let redirectionUrl = '';
-      emitter.emit('presentLoader', { message: 'Logging out' });
 
-      if (!payload?.isUserUnauthorised) {
-        let resp;
-        try {
-          resp = await adapterLogout();
-          resp = JSON.parse(resp.startsWith('//') ? resp.replace('//', '') : resp);
-        } catch (err) {
-          logger.error('Error parsing data', err);
-        }
-
-        if (resp?.logoutAuthType == 'SAML2SSO') {
-          redirectionUrl = resp.logoutUrl;
-        }
+    async setUserTimeZone(tzId: string) {
+      try {
+        await api({
+          url: "admin/user/profile",
+          method: "POST",
+          data: { userId: this.current.userId, timeZone: tzId },
+        });
+        this.updateUserInfo({ userTimeZone: tzId })
+        this.current.timeZone = tzId
+      } catch (error: any) {
+        console.error("Failed to set user time zone", error);
+        commonUtil.showToast(translate("Failed to set user time zone"));
+      }
+    },
+    async getAvailableTimeZones() {
+      // Do not fetch timeZones information, if already available
+      if (this.timeZones.length) {
+        return;
       }
 
-      const dxpAuthStore = useDxpAuthStore();
-      const dxpUserStore = useDxpUserStore();
+      try {
+        const resp = await api({
+          url: "admin/user/getAvailableTimeZones",
+          method: "get",
+          cache: true
+        }) as any;
+        if (resp.status === 200 && !commonUtil.hasError(resp)) {
+          this.timeZones = resp.data.timeZones.filter((timeZone: any) => DateTime.local().setZone(timeZone.id).isValid);
+        }
+      } catch (err) {
+        console.error('Error', err)
+      }
+    },
+    async setLocale(locale: string) {
+      let newLocale = this.locale;
+      let matchingLocale: string | undefined;
 
-      // Reset state
+      try {
+        const userProfile = this.current
+        if (locale) {
+          matchingLocale = Object.keys(this.localeOptions).find((option: string) => option === locale)
+          // If exact locale is not found, try to match the first two characters i.e primary code
+          matchingLocale = matchingLocale || Object.keys(this.localeOptions).find((option: string) => option.slice(0, 2) === locale.slice(0, 2))
+          newLocale = matchingLocale || this.locale
+          // update locale in state and globally
+          await api({
+            url: "admin/user/profile",
+            method: "POST",
+            data: {
+              userId: userProfile.userId,
+              locale: newLocale
+            },
+          });
+        }
+      } catch (error) {
+        console.error(error)
+      } finally {
+        i18n.global.locale.value = newLocale as any
+        this.locale = newLocale
+      }
+    },
+
+    async postLogin() {
+      try {
+        await this.fetchPermissions()
+        await this.fetchUserProfile()
+        await useUtilStore().fetchOrganizationPartyId()
+      } catch (error: any) {
+        return Promise.reject(error);
+      }
+    },
+    async postLogout() {
       this.$reset();
-
-      const { useUtilStore } = await import('./util');
-      const { usePermissionStore } = await import('./permission');
-      const utilStore = useUtilStore();
-      const permissionStore = usePermissionStore();
-      utilStore.clearUtilState();
-      permissionStore.clearPermissionState();
-
-      this.setOmsRedirectionInfo({ url: "", token: "" });
-
-      resetPermissions();
-      resetConfig();
-
-      // Reset DXP components plugin store states on logout
-      dxpAuthStore.$reset();
-      dxpUserStore.$reset();
-
-      if (redirectionUrl) {
-        window.location.href = redirectionUrl;
-      }
-
-      emitter.emit('dismissLoader');
-      return redirectionUrl;
-    },
-    setUserInstanceUrl(instanceUrl: string) {
-      this.instanceUrl = instanceUrl;
-      updateInstanceUrl(instanceUrl);
-    },
-    async setUserTimeZone(timeZoneId: string) {
-      if (this.current) {
-        this.current.userTimeZone = timeZoneId;
-      }
-      Settings.defaultZone = timeZoneId;
-    },
-    setOmsRedirectionInfo(payload: { url: string; token: string }) {
-      this.omsRedirectionInfo = payload;
+      useUtilStore().$reset();
     },
     async getSelectedUserDetails(payload: { partyId: string; isFetchRequired?: boolean }) {
       const currentSelectedUser = JSON.parse(JSON.stringify(this.selectedUser));
@@ -248,7 +256,7 @@ export const useUserStore = defineStore('user', {
 
       try {
         userResp = await UserService.getUserLoginDetails(params);
-        if (!hasError(userResp)) {
+        if (!commonUtil.hasError(userResp)) {
           selectedUser = {
             ...userResp.data.docs[0]
           };
@@ -266,7 +274,7 @@ export const useUserStore = defineStore('user', {
           } as any;
 
           const contactResp = await UserService.getUserContactDetails(params);
-          if (!hasError(contactResp)) {
+          if (!commonUtil.hasError(contactResp)) {
             let emailDetails = {}, phoneNumberDetails = {};
 
             contactResp.data.docs.map((doc: any) => {
@@ -320,7 +328,7 @@ export const useUserStore = defineStore('user', {
           fieldList: ['partyId', 'roleTypeId']
         });
 
-        if (!hasError(resp) && resp.data.docs.length) {
+        if (!commonUtil.hasError(resp) && resp.data.docs.length) {
           selectedUser.isWarehousePicker = true;
         }
       }
@@ -337,7 +345,7 @@ export const useUserStore = defineStore('user', {
           noConditionFind: 'Y'
         });
 
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           selectedUser['createdByUserPartyId'] = resp.data.docs[0].partyId;
         }
       }
@@ -416,7 +424,7 @@ export const useUserStore = defineStore('user', {
 
       try {
         const resp = await UserService.fetchUsers(params);
-        if (!hasError(resp)) { 
+        if (!commonUtil.hasError(resp)) { 
           if (resp.data.count > 0) { 
             if (payload.viewIndex && payload.viewIndex > 0) { 
               users = users.concat(resp.data.docs); 
@@ -454,7 +462,7 @@ export const useUserStore = defineStore('user', {
           'userPrefValue': payload.productStoreId
         };
         const resp = await UserService.setUserPreference(params);
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           this.selectedUser = { ...this.selectedUser, favoriteProductStorePref: params };
           await this.setFavoriteShopifyShop({ 'userLoginId': payload.userLoginId, 'shopId': '' });
           return Promise.resolve(resp.data);
@@ -475,7 +483,7 @@ export const useUserStore = defineStore('user', {
           'userPrefValue': payload.shopId
         };
         const resp = await UserService.setUserPreference(params);
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           this.selectedUser = { ...this.selectedUser, favoriteShopifyShopPref: params };
           return Promise.resolve(resp.data);
         } else {

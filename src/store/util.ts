@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
-import { hasError } from '@/adapter'
-import logger from '@/logger'
+import { commonUtil, translate, logger } from '@common';
 import { showToast } from '@/utils'
-import { translate } from '@hotwax/dxp-components'
 
 export interface UtilState {
   roles: any[];
@@ -61,7 +59,7 @@ export const useUtilStore = defineStore('util', {
 
       try {
         const resp = await UtilService.fetchRoles(params);
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           roles = resp.data.docs;
           roles.push({
             roleTypeId: 'none',
@@ -91,7 +89,7 @@ export const useUtilStore = defineStore('util', {
 
       try {
         const resp = await UtilService.fetchProductStores(params);
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           productStores = resp.data.docs;
         } else {
           throw resp.data;
@@ -109,7 +107,7 @@ export const useUtilStore = defineStore('util', {
       let shopifyShops = [];
       try {
         const resp = await UtilService.getShopifyConfigs();
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           shopifyShops = resp.data.docs;
         } else {
           throw resp.data;
@@ -138,7 +136,7 @@ export const useUtilStore = defineStore('util', {
 
       try {
         const resp = await UtilService.getSecurityGroups(payload);
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           securityGroups = resp.data.docs;
         } else {
           throw resp.data;
@@ -169,7 +167,7 @@ export const useUtilStore = defineStore('util', {
 
       try {
         const resp = await UtilService.getSecurityGroups(payload);
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           securityGroups = resp.data.docs;
         } else {
           throw resp.data;
@@ -203,7 +201,7 @@ export const useUtilStore = defineStore('util', {
           };
 
           const resp = await UtilService.fetchFacilities(payload);
-          if (!hasError(resp) && resp.data?.docs?.length > 0) {
+          if (!commonUtil.hasError(resp) && resp.data?.docs?.length > 0) {
             facilities = facilities.concat(resp.data.docs);
             respCount = resp.data.docs.length;
             viewIndex++;
@@ -230,7 +228,7 @@ export const useUtilStore = defineStore('util', {
         };
 
         const resp = await UtilService.fetchProductStores(payload);
-        if (!hasError(resp) && resp.data.count > 0) {
+        if (!commonUtil.hasError(resp) && resp.data.count > 0) {
           stores = resp.data.docs;
         } else {
           throw resp.data;
@@ -257,7 +255,7 @@ export const useUtilStore = defineStore('util', {
 
       try {
         const resp = await UtilService.fetchOrganizationPartyId(params);
-        if (!hasError(resp)) {
+        if (!commonUtil.hasError(resp)) {
           partyId = resp.data.docs[0]?.partyId;
         } else {
           throw resp.data;

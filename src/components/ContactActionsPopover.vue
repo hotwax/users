@@ -18,11 +18,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { alertController, IonContent, IonItem, IonList, IonListHeader, popoverController } from "@ionic/vue";
-import { translate } from "@hotwax/dxp-components";
-import { hasError } from "@/adapter";
+import { commonUtil, translate, logger } from '@common';
 import { copyToClipboard, isValidEmail, showToast } from "@/utils";
 import { UserService } from "@/services/UserService";
-import logger from '@/logger';
 import { useUserStore } from "@/store/user";
 
 const props = defineProps<{
@@ -102,7 +100,7 @@ const updateContactField = async () => {
               emailAddress: input,
               partyId: selectedUser.value.partyId
             });
-            if (hasError(resp)) throw resp.data;
+            if (commonUtil.hasError(resp)) throw resp.data;
             updatedSelectedUser = {
               ...updatedSelectedUser,
               emailDetails: {
@@ -116,7 +114,7 @@ const updateContactField = async () => {
               contactNumber: input,
               partyId: selectedUser.value.partyId
             });
-            if (hasError(resp)) throw resp.data;
+            if (commonUtil.hasError(resp)) throw resp.data;
             updatedSelectedUser = {
               ...updatedSelectedUser,
               phoneNumberDetails: {
@@ -140,7 +138,7 @@ const updateContactField = async () => {
                 groupName: selectedUser.value.groupName
               });
             }
-            if (hasError(resp)) throw resp.data;
+            if (commonUtil.hasError(resp)) throw resp.data;
             updatedSelectedUser = {
               ...updatedSelectedUser,
               externalId: input
@@ -180,14 +178,14 @@ const deleteContactField = async () => {
               contactMechId: props.contactMechId,
               partyId: selectedUser.value.partyId
             });
-            if (hasError(resp)) throw resp.data;
+            if (commonUtil.hasError(resp)) throw resp.data;
             delete updatedSelectedUser.emailDetails;
           } else if (props.type === 'phoneNumber') {
             const resp = await UserService.deletePartyContactMech({
               contactMechId: props.contactMechId,
               partyId: selectedUser.value.partyId
             });
-            if (hasError(resp)) throw resp.data;
+            if (commonUtil.hasError(resp)) throw resp.data;
             delete updatedSelectedUser.phoneNumberDetails;
           } else {
             let resp = {} as any;
@@ -202,7 +200,7 @@ const deleteContactField = async () => {
                 partyId: selectedUser.value.partyId
               });
             }
-            if (hasError(resp)) throw resp.data;
+            if (commonUtil.hasError(resp)) throw resp.data;
             delete updatedSelectedUser.externalId;
           }
           userStore.updateSelectedUser(updatedSelectedUser);

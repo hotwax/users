@@ -55,7 +55,7 @@
 import { IonButtons, IonButton, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonRadio, IonRadioGroup, IonSearchbar, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { ref, computed, onMounted } from "vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@common';
 import { useUtilStore } from "@/store/util";
 
 const props = defineProps({

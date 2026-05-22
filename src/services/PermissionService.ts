@@ -1,4 +1,4 @@
-import { api } from '@/adapter';
+import { api } from '@common';
 
 const getPermissionsByClassificationGroups = async (payload: any): Promise<any> => {
   return api({

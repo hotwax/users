@@ -28,7 +28,7 @@ import {
   IonCardTitle,
   IonIcon
 } from '@ionic/vue';
-import { commonUtil, translate } from "@common";
+import { translate, commonUtil } from "@common";
 import { openOutline } from 'ionicons/icons'
 
 const props = defineProps({

@@ -34,7 +34,7 @@
 import { computed, ref } from "vue";
 import { IonButtons, IonButton, IonCheckbox, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components'
+import { translate } from '@common';
 import { useUtilStore } from "@/store/util";
 
 const props = defineProps<{

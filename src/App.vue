@@ -9,18 +9,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { createAnimation, IonApp, IonRouterOutlet, IonSplitPane, loadingController } from '@ionic/vue';
-import emitter from "@/event-bus"
+import { translate, emitter } from '@common';
 import { useUserStore } from '@/store/user'
-import { initialise, resetConfig } from '@/adapter'
-import { translate } from '@hotwax/dxp-components';
-
-const userStore = useUserStore();
 
 const loader = ref<any>(null);
-const maxAge = process.env.VUE_APP_CACHE_MAX_AGE ? parseInt(process.env.VUE_APP_CACHE_MAX_AGE) : 0;
-
-const userToken = computed(() => userStore.getUserToken);
-const instanceUrl = computed(() => userStore.getInstanceUrl);
 
 const presentLoader = async (options = { message: '', backdropDismiss: false }) => {
   // When having a custom message remove already existing loader
@@ -78,28 +70,6 @@ const playAnimation = () => {
     .play();
 };
 
-const unauthorized = async () => {
-  // Mark the user as unauthorised, this will help in not making the logout api call in actions
-  await userStore.logout({ isUserUnauthorised: true });
-  const redirectUrl = window.location.origin + '/login';
-  window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}`;
-};
-
-initialise({
-  token: userToken.value,
-  instanceUrl: instanceUrl.value,
-  cacheMaxAge: maxAge,
-  events: {
-    unauthorised: unauthorized,
-    responseError: () => {
-      setTimeout(() => dismissLoader(), 100);
-    },
-    queueTask: (payload: any) => {
-      emitter.emit("queueTask", payload);
-    }
-  }
-});
-
 onMounted(async () => {
   loader.value = await loadingController
     .create({
@@ -107,15 +77,14 @@ onMounted(async () => {
       translucent: true,
       backdropDismiss: false
     });
-  emitter.on('presentLoader', presentLoader);
+  emitter.on("presentLoader", (options: any) => presentLoader(options));
   emitter.on('dismissLoader', dismissLoader);
   emitter.on('playAnimation', playAnimation);
 });
 
 onUnmounted(() => {
-  emitter.off('presentLoader', presentLoader);
+  emitter.off("presentLoader", (options: any) => presentLoader(options));
   emitter.off('dismissLoader', dismissLoader);
   emitter.off('playAnimation', playAnimation);
-  resetConfig();
 });
 </script>

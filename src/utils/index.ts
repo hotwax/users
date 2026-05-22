@@ -1,6 +1,6 @@
 import { toastController } from '@ionic/vue';
 import { Plugins } from '@capacitor/core';
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@common';
 import Papa from 'papaparse'
 import saveAs from "file-saver";
 import { DateTime } from 'luxon';

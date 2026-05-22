@@ -32,11 +32,9 @@
 import { computed, onMounted, ref } from "vue";
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonTextarea, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components'
+import { commonUtil, translate, logger } from "@common";
 import { UtilService } from "@/services/UtilService";
-import { hasError } from "@/adapter";
 import { showToast } from "@/utils";
-import logger from "@/logger";
 import { usePermissionStore } from "@/store/permission";
 import { useUtilStore } from "@/store/util";
 
@@ -67,7 +65,7 @@ const updateSecurityGroup = async () => {
       description: group.value.description
     });
 
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       showToast(translate("Security group updated successfully."));
       const updatedSecurityGroups = securityGroups.value.map((securityGroup: any) => {
         if (securityGroup.groupId === currentGroup.value.groupId) {

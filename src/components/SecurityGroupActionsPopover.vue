@@ -18,13 +18,11 @@
 <script setup lang="ts">
 import { alertController, IonContent, IonItem, IonLabel, IonList, IonListHeader, popoverController } from "@ionic/vue";
 import { computed } from "vue";
-import { translate } from "@hotwax/dxp-components";
+import { commonUtil, translate, logger } from '@common';
 import { useUserStore } from "@/store/user";
 import { UserService } from "@/services/UserService";
 import { DateTime } from "luxon";
 import { showToast } from "@/utils";
-import { hasError } from "@/adapter";
-import logger from '@/logger';
 
 const props = defineProps({
   securityGroup: {
@@ -52,7 +50,7 @@ const removeUserSecurityGroup = async () => {
         userLoginId: selectedUser.value.userLoginId
     })
     
-    if (hasError(resp)) throw resp.data
+    if (commonUtil.hasError(resp)) throw resp.data
     showToast(translate('Security group removed successfully.'))
   } catch (error) {
     showToast(translate('Something went wrong.'));

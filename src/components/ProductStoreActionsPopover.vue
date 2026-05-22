@@ -17,13 +17,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { alertController, IonContent, IonItem, IonLabel, IonList, IonListHeader, popoverController } from "@ionic/vue";
-import { translate, useAuthStore } from "@hotwax/dxp-components";
+import { commonUtil, logger, translate } from '@common';
 import { useUserStore } from "@/store/user";
 import { UserService } from "@/services/UserService";
 import { DateTime } from "luxon";
 import { showToast } from "@/utils";
-import { hasError } from "@/adapter";
-import logger from '@/logger';
 
 const props = defineProps({
   productStore: {
@@ -32,7 +30,6 @@ const props = defineProps({
   }
 });
 
-const authStore = useAuthStore();
 const userStore = useUserStore();
 
 const selectedUser = computed(() => userStore.selectedUser);
@@ -52,7 +49,7 @@ const removeProductStoreRole = async () => {
       fromDate: userProductStores.value.find((store: any) => props.productStore.productStoreId === store.productStoreId).fromDate,
       thruDate: DateTime.now().toMillis()
     });
-    if (hasError(resp)) throw resp.data;
+    if (commonUtil.hasError(resp)) throw resp.data;
     showToast(translate('Role removed successfully.'));
   } catch (error) {
     showToast(translate('Something went wrong.'));
@@ -85,7 +82,7 @@ const confirmRemove = async () => {
 };
 
 const redirectToStore = () => {
-  const companyDetailUrl = `${process.env.VUE_APP_COMPANY_LOGIN_URL}?oms=${omsRedirectionInfo.value.url}&token=${authStore.token.value}&expirationTime=${authStore.token.expiration}&omsRedirectionUrl=${authStore.getOms}&productStoreId=${props.productStore.productStoreId}`;
+  const companyDetailUrl = `${import.meta.env.VITE_COMPANY_LOGIN_URL}?oms=${omsRedirectionInfo.value.url}&token=${commonUtil.getToken()}&expirationTime=${commonUtil.getTokenExpiration()}&omsRedirectionUrl=${commonUtil.getOMSInstanceName()}&productStoreId=${props.productStore.productStoreId}`;
   window.open(companyDetailUrl, "_blank");
 };
 </script>

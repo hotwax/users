@@ -39,11 +39,9 @@ import { useRouter } from 'vue-router';
 import { useUtilStore } from "@/store/util";
 import { usePermissionStore } from "@/store/permission";
 import { addOutline } from 'ionicons/icons';
-import { translate } from "@hotwax/dxp-components";
+import { commonUtil, translate, logger } from "@common";
 import { generateInternalId, showToast } from "@/utils";
 import { PermissionService } from "@/services/PermissionService";
-import { hasError } from "@/adapter";
-import logger from "@/logger";
 
 const router = useRouter();
 const utilStore = useUtilStore();
@@ -98,7 +96,7 @@ const createGroup = async () => {
   try {
     const resp = await PermissionService.createSecurityGroup(formData.value);
 
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       showToast(translate("Security group created successfully."));
       utilStore.securityGroups.push({ ...formData.value });
       permissionStore.updateCurrentGroup({ ...formData.value });

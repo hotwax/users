@@ -25,7 +25,7 @@
             </ion-item>
           </ion-list>
 
-          <ion-button @click="createGroup()" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE)" fill="clear" expand="block">
+          <ion-button @click="createGroup()" :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" fill="clear" expand="block">
             <ion-icon slot="start" :icon="addOutline" />
             <ion-label>{{ translate("Create security group") }}</ion-label>
           </ion-button>
@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonNote, IonPage, IonTitle, IonToolbar, alertController, modalController } from '@ionic/vue';
-import { translate } from '@hotwax/dxp-components';
+import { commonUtil, translate, emitter, logger } from '@common';
 import { addOutline, downloadOutline, idCardOutline, openOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import PermissionItems from '@/components/PermissionItems.vue';
@@ -68,13 +68,9 @@ import { useUtilStore } from '@/store/util';
 import { usePermissionStore } from '@/store/permission';
 import { useUserStore } from '@/store/user';
 import { jsonToCsv } from '@/utils';
-import { hasError } from '@/adapter';
-import emitter from "@/event-bus";
 import { PermissionService } from '@/services/PermissionService';
 import { DateTime } from 'luxon';
 import EditSecurityGroupModal from '@/components/EditSecurityGroupModal.vue';
-import { Actions, hasPermission } from '@/authorization';
-import logger from '@/logger';
 
 const router = useRouter();
 const utilStore = useUtilStore();
@@ -143,7 +139,7 @@ const getUsersCount = async () => {
       }
     });
 
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       securityGroupUsers.value[currentGroup.value.groupId] = resp.data.count;
     } else {
       throw resp.data;
@@ -212,7 +208,7 @@ const downloadCSVForAllPermissionsCSV = async () => {
           }
         });
 
-        if (!hasError(resp) && resp.data.count) {
+        if (!commonUtil.hasError(resp) && resp.data.count) {
           resp.data.docs.map((permission: any) => {
             permissionsByGroup.push({
               "Group Id": permission.groupId,

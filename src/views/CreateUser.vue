@@ -70,11 +70,9 @@ import { IonBackButton, IonButton, IonContent, IonHeader, IonIcon, IonItem, IonP
 import { useRouter } from 'vue-router';
 import { useUtilStore } from '@/store/util';
 import { businessOutline, desktopOutline, arrowForwardOutline } from 'ionicons/icons';
-import { translate } from "@hotwax/dxp-components";
+import { commonUtil, translate, logger } from '@common';
 import { showToast, isValidEmail } from '@/utils';
 import { UserService } from '@/services/UserService';
-import { hasError } from '@/adapter';
-import logger from '@/logger';
 
 const router = useRouter();
 const utilStore = useUtilStore();
@@ -166,7 +164,7 @@ const createUser = async () => {
     };
 
     const resp = await UserService.createUser(payload);
-    if (resp.status === 200 && !hasError(resp) && resp.data.partyId) {
+    if (resp.status === 200 && !commonUtil.hasError(resp) && resp.data.partyId) {
       const partyId = resp.data.partyId;
       if (partyTypeId === "PARTY_GROUP") {
         await UserService.addPartyToFacility({ "partyId": partyId, "facilityId": payload.facilityId, "roleTypeId": "WAREHOUSE_PICKER" });

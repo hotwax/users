@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-import { hasError } from '@/adapter'
-import logger from '@/logger'
+import { commonUtil, logger } from '@common';
 
 export interface PermissionState {
   permissionsByClassificationGroups: any;
@@ -93,7 +92,7 @@ export const usePermissionStore = defineStore('permission', {
             viewIndex: viewIndex,
           });
 
-          if (!hasError(resp) && resp.data.count) {
+          if (!commonUtil.hasError(resp) && resp.data.count) {
             resp.data.docs.map((permission: any) => {
               permissions[permission.permissionId] = permission;
             });
@@ -129,7 +128,7 @@ export const usePermissionStore = defineStore('permission', {
             }
           });
 
-          if (!hasError(resp)) {
+          if (!commonUtil.hasError(resp)) {
             permissions = permissions.concat(resp.data.docs);
             viewIndex++;
           } else {
@@ -202,7 +201,7 @@ export const usePermissionStore = defineStore('permission', {
             }
           });
 
-          if (!hasError(resp) && resp.data.count) {
+          if (!commonUtil.hasError(resp) && resp.data.count) {
             resp.data.docs.map((permission: any) => {
               if (!permissions[permission.permissionId]) {
                 permissions[permission.permissionId] = permission;

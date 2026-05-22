@@ -10,7 +10,7 @@ const props = defineProps<{
   src?: string;
 }>();
 
-const resourceUrl = process.env.VUE_APP_RESOURCE_URL || '';
+const resourceUrl = import.meta.env.VITE_RESOURCE_URL || '';
 const imageUrl = ref(defaultImageUrl);
 
 const checkIfImageExists = (src: string) => {

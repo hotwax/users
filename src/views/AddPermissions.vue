@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { IonButton, IonButtons, IonContent, IonFooter, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@common';
 import { checkmarkDoneOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import PermissionItems from '@/components/PermissionItems.vue';

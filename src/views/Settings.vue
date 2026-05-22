@@ -22,7 +22,7 @@
             </ion-card-header>
           </ion-item>
           <ion-button color="danger" @click="logout()">{{ translate("Logout") }}</ion-button>
-          <ion-button :standalone-hidden="!hasPermission(Actions.APP_PWA_STANDALONE_ACCESS)" fill="outline" @click="goToLaunchpad()">
+          <ion-button :standalone-hidden="!userStore.hasPermission('COMMON_ADMIN')" fill="outline" @click="goToLaunchpad()">
             {{ translate("Go to Launchpad") }}
             <ion-icon slot="end" :icon="openOutline" />
           </ion-button>
@@ -59,8 +59,7 @@ import { computed, onMounted, ref } from 'vue';
 import { IonAvatar, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonHeader, IonIcon, IonItem, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import { openOutline } from 'ionicons/icons'
 import Image from '@/components/Image.vue';
-import { translate } from "@hotwax/dxp-components";
-import { Actions, hasPermission } from '@/authorization'
+import { translate } from "@common";
 import { DateTime } from 'luxon';
 import { useUserStore } from '@/store/user';
 import DxpOmsInstanceNavigator from "@/components/DxpOmsInstanceNavigator.vue";
@@ -70,7 +69,7 @@ import DxpLanguageSwitcher from "@/components/DxpLanguageSwitcher.vue";
 
 const userStore = useUserStore();
 
-const appInfo = (process.env.VUE_APP_VERSION_INFO ? JSON.parse(process.env.VUE_APP_VERSION_INFO) : {}) as any;
+const appInfo = (import.meta.env.VITE_APP_VERSION_INFO ? JSON.parse(import.meta.env.VITE_APP_VERSION_INFO as string) : {}) as any;
 const appVersion = ref("");
 
 const userProfile = computed(() => userStore.getUserProfile);
@@ -84,13 +83,13 @@ const logout = async () => {
     // if not having redirection url then redirect the user to launchpad
     if (!redirectionUrl) {
       const redirectUrl = window.location.origin + '/login';
-      window.location.href = `${process.env.VUE_APP_LOGIN_URL}?isLoggedOut=true&redirectUrl=${redirectUrl}`;
+      window.location.href = `${import.meta.env.VITE_LOGIN_URL}?isLoggedOut=true&redirectUrl=${redirectUrl}`;
     }
   });
 };
 
 const goToLaunchpad = () => {
-  window.location.href = `${process.env.VUE_APP_LOGIN_URL}`;
+  window.location.href = `${import.meta.env.VITE_LOGIN_URL}`;
 };
 
 const getDateTime = (time: any) => {

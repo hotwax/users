@@ -1,4 +1,4 @@
-import { api } from '@/adapter';
+import { api } from '@common';
 
 const fetchRoles = async (payload: any): Promise<any> => {
   return api({

@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@common';
 import { IonContent, IonItem, IonList, IonListHeader } from '@ionic/vue';
 
 defineProps<{

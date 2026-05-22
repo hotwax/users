@@ -62,7 +62,7 @@
 
     <!-- TODO improve disable button logic -->
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button :disabled="(!hasPermission(Actions.APP_UPDT_PASSWORD) && userProfile?.userLoginId !== userLoginId) || checkResetButtonStatus()" @click="resetPassword()">
+      <ion-fab-button :disabled="(!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN') && userProfile?.userLoginId !== userLoginId) || checkResetButtonStatus()" @click="resetPassword()">
         <ion-icon :icon="lockClosedOutline" />  
       </ion-fab-button>
     </ion-fab>
@@ -73,12 +73,9 @@
 import { computed, ref } from "vue";
 import { IonButtons, IonButton, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonList, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, lockClosedOutline, mailOutline } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components'
+import { commonUtil, translate, logger } from '@common';
 import { isValidPassword, showToast } from "@/utils";
-import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
-import { Actions, hasPermission } from '@/authorization'
-import logger from '@/logger';
 import { useUserStore } from "@/store/user";
 
 const props = defineProps<{
@@ -110,7 +107,7 @@ const resetPassword = async () => {
       newPasswordVerify: confirmPassword.value,
       userLoginId: props.userLoginId
     });
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       showToast(translate('Password reset successful.'));
     } else {
       throw resp.data;
@@ -158,7 +155,7 @@ const sendResetPasswordEmail = async () => {
       emailAddress: props.email,
       userName: props.userLoginId
     });
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       showToast(translate('Password reset email sent successfully.'));
     } else {
       throw resp.data;

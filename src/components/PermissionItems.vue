@@ -36,7 +36,7 @@
               <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
             </div>
             <ion-spinner v-if="permission.isStatusUpdating" name="crescent" data-spinner-size="medium" />
-            <ion-checkbox v-else :disabled="permission.isChecked ? !hasPermission(Actions.APP_PERMISSION_UPDATE) : !hasPermission(Actions.APP_PERMISSION_CREATE)" :checked="permission.isChecked" />
+            <ion-checkbox v-else :disabled="permission.isChecked ? !userStore.hasPermission('SECURITY_UPDATE OR SECURITY_ADMIN') : !userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" :checked="permission.isChecked" />
           </ion-card-header>
         </ion-card>
       </section>
@@ -52,19 +52,18 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonIcon, IonItem, IonItemDivider, IonLabel, IonNote, IonSearchbar, IonSelect, IonSelectOption, IonSpinner, IonToggle } from '@ionic/vue';
-import { translate } from '@hotwax/dxp-components';
+import { commonUtil, translate, logger } from '@common';
 import { optionsOutline, shieldCheckmarkOutline } from 'ionicons/icons';
 import { PermissionService } from '@/services/PermissionService';
 import { showToast } from '@/utils';
-import { hasError } from '@/adapter';
 import { DateTime } from 'luxon';
-import { Actions, hasPermission } from '@/authorization'
-import logger from '@/logger';
 import { usePermissionStore } from '@/store/permission';
 import { useUtilStore } from '@/store/util';
+import { useUserStore } from '@/store/user';
 
 const permissionStore = usePermissionStore();
 const utilStore = useUtilStore();
+const userStore = useUserStore();
 
 const query = computed(() => permissionStore.getQuery);
 const currentGroupPermissions = computed(() => permissionStore.getCurrentGroupPermissions);
@@ -97,7 +96,7 @@ const updatePermissionAssociation = async (permission: any) => {
         fromDate
       });
 
-      if (hasError(resp)) {
+      if (commonUtil.hasError(resp)) {
         throw resp.data;
       }
 
@@ -111,14 +110,14 @@ const updatePermissionAssociation = async (permission: any) => {
 
       resp = await PermissionService.addSecurityPermissionToSecurityGroup(params);
 
-      if (hasError(resp)) {
+      if (commonUtil.hasError(resp)) {
         throw resp.data;
       }
 
       currentPermissions[permission.permissionId] = params;
     }
 
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       showToast(translate("Security group permission association successfully updated."));
       await permissionStore.updateCurrentGroupPermissions({ groupId: currentGroup.value.groupId, currentPermissions});
       permissionStore.checkAssociated();

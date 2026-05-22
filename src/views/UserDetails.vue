@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button v-if="redirectedFromUrl" @click="goBack($event)" slot="start" default-href="/tabs/users" />
-        <ion-back-button v-else-if="hasPermission(Actions.APP_USERS_LIST_VIEW)" slot="start" default-href="/tabs/users" />
+        <ion-back-button v-else-if="userStore.hasPermission('USERS_LIST_VIEW')" slot="start" default-href="/tabs/users" />
         <ion-title>{{ translate("User details") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -48,7 +48,7 @@
                 <input @change="uploadImage" class="ion-hide" type="file" accept="image/*" id="profilePic"/>
                 <label for="profilePic">{{ translate("Upload") }}</label>
               </ion-item>
-              <ion-item lines="none" :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)">
+              <ion-item lines="none" :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
                 <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click.prevent="updateUserStatus($event)">
                   {{ translate("Disable user") }}
@@ -66,7 +66,7 @@
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
-                <ion-toggle :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click.prevent="updateUserStatus($event)">
+                <ion-toggle :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click.prevent="updateUserStatus($event)">
                   {{ translate("Disable user") }}
                 </ion-toggle>
               </ion-item>
@@ -115,17 +115,17 @@
                   <ion-label>{{ translate('Username') }}</ion-label>
                   <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
                 </ion-item>
-                <ion-item :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN) || selectedUser.statusId !== 'PARTY_ENABLED'" >
+                <ion-item :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN') || selectedUser.statusId !== 'PARTY_ENABLED'" >
                   <ion-toggle @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled == 'N'">
                     {{ translate("Block login") }}
                   </ion-toggle>
                 </ion-item>
               </ion-list>
               <div class="login-detail-actions">
-                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PASSWORD) && selectedUser.userLoginId !== userProfile.userLoginId" @click="resetPassword()" fill="outline" color="warning">
+                <ion-button :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN') && selectedUser.userLoginId !== userProfile.userLoginId" @click="resetPassword()" fill="outline" color="warning">
                   {{ translate('Reset password') }}
                 </ion-button>
-                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN) || selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
+                <ion-button :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN') || selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
                   {{ translate('Force logout') }}
                 </ion-button>
               </div>
@@ -158,7 +158,7 @@
                   </ion-input>
                 </ion-item>
               </ion-list>
-              <ion-button @click="createNewUserLogin()" :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" fill="outline" expand="block">
+              <ion-button @click="createNewUserLogin()" :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" fill="outline" expand="block">
                 {{ translate('Add credentials') }}
               </ion-button>
             </template>
@@ -261,12 +261,12 @@
             <ion-list>
               <ion-list-header color="light">
                 <ion-label>{{ translate('Security Group') }}</ion-label>
-                <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" @click="selectSecurityGroup()" v-if="userSecurityGroups.length">
+                <ion-button :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN') || !selectedUser.userLoginId" @click="selectSecurityGroup()" v-if="userSecurityGroups.length">
                   {{ translate('Add') }}
                   <ion-icon slot="end" :icon="addCircleOutline" />
                 </ion-button>
               </ion-list-header>
-              <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" v-if="!userSecurityGroups.length" @click="selectSecurityGroup()" fill="outline" expand="block" class="ion-margin">
+              <ion-button :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN') || !selectedUser.userLoginId" v-if="!userSecurityGroups.length" @click="selectSecurityGroup()" fill="outline" expand="block" class="ion-margin">
                 <ion-icon :icon="addOutline" slot='start' />
                 {{ translate('Add to security group') }}
               </ion-button>
@@ -280,7 +280,7 @@
                 </ion-button>
               </ion-item>
 
-              <template v-if="!hasPermission(Actions.APP_SUPER_USER) && checkUserAssociatedSecurityGroup('SUPER')">
+              <template v-if="!userStore.hasPermission('WEBTOOLS_VIEW') && checkUserAssociatedSecurityGroup('SUPER')">
                 <ion-item lines="none" :disabled="true">
                   <ion-label>{{ translate('Super') }}</ion-label>
                   <ion-button  size="default" slot="end" fill="clear" color="medium">
@@ -289,7 +289,7 @@
                 </ion-item>
               </template>
               <template v-else>
-                <ion-item :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE)" v-for="securityGroup in userSecurityGroups" :key="securityGroup.groupId">
+                <ion-item :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" v-for="securityGroup in userSecurityGroups" :key="securityGroup.groupId">
                   <ion-label>
                     {{ getSecurityGroupName(securityGroup.groupId) }}
                   </ion-label>
@@ -301,18 +301,18 @@
 
               <ion-list-header color="light">
                 <ion-label>{{ translate('Product stores') }}</ion-label>
-                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" @click="selectProductStore()" v-if="userProductStores.length">
+                <ion-button :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" @click="selectProductStore()" v-if="userProductStores.length">
                   {{ translate('Add') }}
                   <ion-icon slot="end" :icon="addCircleOutline" />
                 </ion-button>
               </ion-list-header>
 
-              <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block" class="ion-margin">
+              <ion-button :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" v-if="!userProductStores.length" @click="selectProductStore()" fill="outline" expand="block" class="ion-margin">
                 <ion-icon :icon="addOutline" slot='start' />
                 {{ translate('Add to a product store') }}
               </ion-button>
 
-              <ion-item :disabled="!hasPermission(Actions.APP_UPDT_PRODUCT_STORE_CONFG)" v-for="store in userProductStores" :key="store.productStoreId">
+              <ion-item :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" v-for="store in userProductStores" :key="store.productStoreId">
                 <ion-label>
                   <h2>{{ store.storeName || store.productStoreId }}</h2>
                   <p>{{ getRoleTypeDesc(store.roleTypeId) }}</p>
@@ -348,7 +348,7 @@
               </ion-card-title>
             </ion-card-header>
             <ion-list>
-              <ion-item :disabled="!hasPermission(Actions.APP_UPDT_PICKER_CONFG)">
+              <ion-item :disabled="!userStore.hasPermission('STOREFULFILLMENT_ADMIN')">
                 <ion-toggle @click.prevent="updatePickerRoleStatus($event)" :checked="selectedUser?.isWarehousePicker">
                   {{ translate("Show as picker") }}
                 </ion-toggle>
@@ -356,7 +356,7 @@
               <ion-item v-if="isUserFulfillmentAdmin">
                 <ion-label>{{ translate("This user has 'STOREFULFILLMENT_ADMIN' permission, enabling access to all facilities.") }}</ion-label>
               </ion-item>
-              <ion-item lines="none" button detail @click="selectFacility()" :disabled="!hasPermission(Actions.APP_UPDT_FULFILLMENT_FACILITY) || checkUserAssociatedSecurityGroup('INTEGRATION')">
+              <ion-item lines="none" button detail @click="selectFacility()" :disabled="!userStore.hasPermission('STOREFULFILLMENT_ADMIN') || checkUserAssociatedSecurityGroup('INTEGRATION')">
                 <ion-label>{{ getUserFacilities().length === 1 ? translate('Added to 1 facility') : translate('Added to facilities', { count: getUserFacilities().length }) }}</ion-label>
               </ion-item>
             </ion-list>
@@ -433,7 +433,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store/user';
 import { useUtilStore } from '@/store/util';
 import { addOutline, addCircleOutline, bodyOutline, businessOutline, callOutline, cameraOutline, cloudyNightOutline, ellipsisVerticalOutline, eyeOffOutline, eyeOutline, mailOutline, timeOutline } from 'ionicons/icons';
-import { translate } from '@hotwax/dxp-components';
+import { commonUtil, translate, emitter, logger } from '@common';
 import ContactActionsPopover from '@/components/ContactActionsPopover.vue';
 import ProductStoreActionsPopover from '@/components/ProductStoreActionsPopover.vue';
 import SecurityGroupActionsPopover from '@/components/SecurityGroupActionsPopover.vue';
@@ -444,12 +444,8 @@ import SelectSecurityGroupModal from '@/components/SelectSecurityGroupModal.vue'
 import UserSecurityGroupAssocHistoryModal from '@/components/UserSecurityGroupAssocHistoryModal.vue';
 import { UserService } from "@/services/UserService";
 import { isValidEmail, isValidPassword, showToast } from "@/utils";
-import { hasError } from '@/adapter';
 import { DateTime } from "luxon";
 import Image from "@/components/Image.vue";
-import { Actions, hasPermission } from '@/authorization';
-import emitter from "@/event-bus";
-import logger from '@/logger';
 
 const props = defineProps({
   partyId: {
@@ -623,7 +619,7 @@ const addContactField = async (type: string) => {
               partyId: selectedUser.value.partyId,
               contactMechPurposeTypeId: 'PRIMARY_EMAIL'
             });
-            if (hasError(resp)) resp.data;
+            if (commonUtil.hasError(resp)) resp.data;
             updatedSelectedUser = {
               ...updatedSelectedUser,
               emailDetails: {
@@ -637,7 +633,7 @@ const addContactField = async (type: string) => {
               partyId: selectedUser.value.partyId,
               contactMechPurposeTypeId: 'PRIMARY_PHONE'
             });
-            if (hasError(resp)) resp.data;
+            if (commonUtil.hasError(resp)) resp.data;
             updatedSelectedUser = {
               ...updatedSelectedUser,
               phoneNumberDetails: {
@@ -661,7 +657,7 @@ const addContactField = async (type: string) => {
                 groupName: selectedUser.value.groupName
               });
             }
-            if (hasError(resp)) resp.data;
+            if (commonUtil.hasError(resp)) resp.data;
             updatedSelectedUser = {
               ...updatedSelectedUser,
               externalId: input
@@ -730,7 +726,7 @@ const createNewUserLogin = async () => {
       userPrefTypeId: 'ORGANIZATION_PARTY',
       userPrefValue: organizationPartyId.value,
     });
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       await userStore.getSelectedUserDetails({ partyId: props.partyId, isFetchRequired: true });
     } else {
       throw resp.data;
@@ -778,7 +774,7 @@ const forceLogout = async () => {
     const resp = await UserService.forceLogout({
       userLoginId: selectedUser.value.userLoginId
     });
-    if (hasError(resp)) {
+    if (commonUtil.hasError(resp)) {
       throw resp;
     }
     await userStore.getSelectedUserDetails({ partyId: props.partyId, isFetchRequired: true });
@@ -812,7 +808,7 @@ const updateUserLoginStatus = async (event: any) => {
             partyId: props.partyId,
             userLoginId: selectedUser.value.userLoginId
           });
-          if (!hasError(resp)) {
+          if (!commonUtil.hasError(resp)) {
             showToast(translate('User login status updated successfully.'));
             event.target.checked = isChecked;
             selectedUser.value.enabled = isChecked ? 'N' : 'Y';
@@ -892,7 +888,7 @@ const selectFacility = async () => {
             partyId: props.partyId,
             roleTypeId: 'WAREHOUSE_PICKER',
           });
-          if (hasError(resp)) {
+          if (commonUtil.hasError(resp)) {
             showToast(translate('Something went wrong.'));
             throw resp.data;
           }
@@ -993,7 +989,7 @@ const selectProductStore = async () => {
             partyId: selectedUser.value.partyId,
             roleTypeId: "APPLICATION_USER",
           });
-          if (hasError(resp)) {
+          if (commonUtil.hasError(resp)) {
             showToast(translate('Something went wrong.'));
             throw resp.data;
           }
@@ -1042,7 +1038,7 @@ const updatePickerRoleStatus = async (event: any) => {
         roleTypeId: "WAREHOUSE_PICKER"
       });
     }
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       showToast(translate('User picker role updated successfully.'));
 
       const currentUser = JSON.parse(JSON.stringify(selectedUser.value));
@@ -1098,7 +1094,7 @@ const editName = async () => {
               resp = await UserService.updatePerson(payload);
             }
 
-            if (!hasError(resp)) {
+            if (!commonUtil.hasError(resp)) {
               showToast(translate("User renamed successfully."));
               await userStore.updateSelectedUser({ ...selectedUser.value, ...payload });
             } else {
@@ -1145,7 +1141,7 @@ const updateUserStatus = async (event: any) => {
       resp = await UserService.updatePerson({ ...payload, firstName: selectedUser.value.firstName });
     }
 
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       showToast(translate("User status updated successfully."));
       await userStore.updateSelectedUser({ ...selectedUser.value, ...payload });
       event.target.checked = isChecked;
@@ -1201,7 +1197,7 @@ const uploadImage = async (event: any) => {
   formData.append('uploadedFile', selectedFile, selectedFile?.name);
   try {
     const resp = await UserService.uploadPartyImage(formData);
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       showToast(translate("Image uploaded successfully."));
       await fetchProfileImage();
     } else {

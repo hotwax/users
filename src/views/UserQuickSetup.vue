@@ -109,11 +109,10 @@ import { useUserStore } from "@/store/user";
 import { useUtilStore } from "@/store/util";
 import { addCircleOutline, arrowForwardOutline, documentTextOutline, eyeOffOutline, eyeOutline } from 'ionicons/icons';
 import { copyToClipboard, showToast, isValidPassword, isValidEmail } from '@/utils';
-import { translate } from "@hotwax/dxp-components";
+import { translate, logger } from '@common';
 import { UserService } from '@/services/UserService';
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue';
 import SelectProductStoreModal from "@/components/SelectProductStoreModal.vue";
-import logger from '@/logger';
 
 const props = defineProps({
   partyId: {

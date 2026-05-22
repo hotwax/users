@@ -30,11 +30,10 @@
 import { IonButtons, IonButton, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonNote, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { ref, computed, onMounted } from "vue";
 import { closeOutline } from "ionicons/icons";
-import { translate } from '@hotwax/dxp-components';
+import { commonUtil, translate } from '@common';
 import { useUserStore } from "@/store/user";
 import { useUtilStore } from "@/store/util";
 import { getDateWithOrdinalSuffix } from "@/utils";
-import { hasError } from "@/adapter";
 import { UserService } from "@/services/UserService";
 
 const userStore = useUserStore();
@@ -63,7 +62,7 @@ const fetchUserSecurityGroupAssoHistory = async () => {
       orderBy: "thruDate DESC",
       viewSize: 250
     });
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       histories = resp.data.docs;
       securityGroups.value.forEach((group: any) => securityGroupNameByGroupId[group.groupId] = group.groupName);
       histories.forEach((history: any) => {

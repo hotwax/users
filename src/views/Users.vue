@@ -110,7 +110,7 @@
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button :disabled="!hasPermission(Actions.APP_USER_CREATE)" @click="createUser()">
+        <ion-fab-button :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" @click="createUser()">
           <ion-icon :icon="addOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -135,12 +135,9 @@ import { IonBadge, IonCard, IonChip, IonContent, IonFab, IonFabButton, IonHeader
 import { addOutline, cloudyNightOutline, idCardOutline, optionsOutline, toggleOutline } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
-import { translate } from '@hotwax/dxp-components'
+import { commonUtil, translate, logger } from '@common';
 import FilterMenu from '@/components/FilterMenu.vue';
 import { UserService } from '@/services/UserService';
-import { hasError } from '@/adapter';
-import { Actions, hasPermission } from '@/authorization'
-import logger from '@/logger';
 import { useUserStore } from '@/store/user';
 import { useUtilStore } from '@/store/util';
 
@@ -184,7 +181,7 @@ const fetchUsers = async (vSize?: any, vIndex?: any) => {
     currentUser.value = {};
   }
 
-  const viewSize = vSize ? vSize : process.env.VUE_APP_VIEW_SIZE;
+  const viewSize = vSize ? vSize : import.meta.env.VITE_VIEW_SIZE;
   const viewIndex = vIndex ? vIndex : 0;
   const payload = {
     viewSize,
@@ -203,7 +200,7 @@ const loadMoreUsers = async (event: any) => {
   fetchUsers(
     undefined,
     Math.ceil(
-      users.value?.length / (process.env.VUE_APP_VIEW_SIZE as any)
+      users.value?.length / (import.meta.env.VITE_VIEW_SIZE as any)
     ).toString()
   ).then(async () => {
     await event.target.complete();
@@ -228,7 +225,7 @@ const fetchLoggedInUserDetails = async () => {
   try {
     const resp = await UserService.fetchUsers(params);
 
-    if (!hasError(resp) && resp.data.count) {
+    if (!commonUtil.hasError(resp) && resp.data.count) {
       currentUser.value = resp.data.docs[0];
     } else {
       throw resp.data;

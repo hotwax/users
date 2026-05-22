@@ -1,11 +1,9 @@
-import { api, client, hasError } from '@/adapter';
+import { api, client, commonUtil, logger, translate } from '@common';
 import { DateTime } from "luxon";
 
 import { useUserStore } from '@/store/user';
 import { useUtilStore } from '@/store/util';
 import { showToast } from '@/utils';
-import { translate } from '@hotwax/dxp-components';
-import logger from '@/logger';
 
 const login = async (username: string, password: string): Promise<any> => {
   return api({
@@ -30,7 +28,7 @@ const getUserProfile = async (token: any): Promise<any> => {
         'Content-Type': 'application/json'
       }
     });
-    if (hasError(resp)) return Promise.reject("Error getting user profile: " + JSON.stringify(resp.data));
+    if (commonUtil.hasError(resp)) return Promise.reject("Error getting user profile: " + JSON.stringify(resp.data));
     return Promise.resolve(resp.data)
   } catch (error: any) {
     return Promise.reject(error)
@@ -91,7 +89,7 @@ const getUserPermissions = async (payload: any, token: any): Promise<any> => {
         'Content-Type': 'application/json'
       }
     })
-    if (resp.status === 200 && resp.data.docs?.length && !hasError(resp)) {
+    if (resp.status === 200 && resp.data.docs?.length && !commonUtil.hasError(resp)) {
       serverPermissions = resp.data.docs.map((permission: any) => permission.permissionId);
       const total = resp.data.count;
       const remainingPermissions = total - serverPermissions.length;
@@ -113,7 +111,7 @@ const getUserPermissions = async (payload: any, token: any): Promise<any> => {
               'Content-Type': 'application/json'
             }
           })
-          if (!hasError(response)) {
+          if (!commonUtil.hasError(response)) {
             return Promise.resolve(response);
           } else {
             return Promise.reject(response);
@@ -124,7 +122,7 @@ const getUserPermissions = async (payload: any, token: any): Promise<any> => {
           failed: []
         }
         responses.reduce((permissionResponses: any, permissionResponse: any) => {
-          if (permissionResponse.status !== 200 || hasError(permissionResponse) || !permissionResponse.data?.docs) {
+          if (permissionResponse.status !== 200 || commonUtil.hasError(permissionResponse) || !permissionResponse.data?.docs) {
             permissionResponses.failed.push(permissionResponse);
           } else {
             permissionResponses.success.push(permissionResponse);
@@ -186,7 +184,7 @@ const getUserFavorites = async (payload: any): Promise<any> => {
       data: params
     }) as any;
 
-    if (!hasError(resp)) {
+    if (!commonUtil.hasError(resp)) {
       favorites = resp.data.docs;
     } else {
       throw resp.data;
@@ -320,7 +318,7 @@ const getUserSecurityGroups = async (userLoginId: string): Promise<any> => {
     }) as any
 
 
-    if (!hasError(resp) || resp.data.error === 'No record found') {
+    if (!commonUtil.hasError(resp) || resp.data.error === 'No record found') {
       userSecurityGroups = resp.data.docs ? resp.data.docs : []
     } else {
       throw resp.data
@@ -351,7 +349,7 @@ const isUserFulfillmentAdmin = async (groupIds: string): Promise<any> => {
       method: "POST",
       data: payload,
     });
-    if(!hasError(resp) && resp.data.docs.length) {
+    if(!commonUtil.hasError(resp) && resp.data.docs.length) {
       return true
     }
     return false
@@ -419,7 +417,7 @@ const getUserFacilities = async (partyId: string): Promise<any> => {
     }) as any
 
 
-    if (!hasError(resp) || resp.data.error === 'No record found') {
+    if (!commonUtil.hasError(resp) || resp.data.error === 'No record found') {
       facilities = resp.data.docs ? resp.data.docs : []
     } else {
       throw resp.data;
@@ -471,7 +469,7 @@ const getUserProductStores = async (partyId: string): Promise<any> => {
     const utilStore = useUtilStore();
     Promise.allSettled([utilStore.getProductStores(), utilStore.fetchRoles()])
 
-    if (!hasError(resp) || resp.data.error === 'No record found') {
+    if (!commonUtil.hasError(resp) || resp.data.error === 'No record found') {
       productStores = resp.data.docs ? resp.data.docs : []
     } else {
       throw resp.data
@@ -510,7 +508,7 @@ const isUserLoginIdAlreadyExists = async(username: string): Promise<any> => {
       distinct: 'Y',
       noConditionFind: 'Y'
     }) as any
-    if(!hasError(resp) && resp.data.docs.length) {
+    if(!commonUtil.hasError(resp) && resp.data.docs.length) {
       showToast(translate('Could not create login user: user with ID already exists.', { userLoginId: username }))
       return true
     }
@@ -547,7 +545,7 @@ const finishSetup = async (payload: any): Promise <any> => {
         "userPrefTypeId": "ORGANIZATION_PARTY",
         "userPrefValue": organizationPartyId
       });
-      if (!hasError(resp)) {
+      if (!commonUtil.hasError(resp)) {
         addUserToSecurityGroup({
           "userLoginId": payload.formData.userLoginId,
           "groupIds": payload.selectedTemplate.securityGroupId ? [payload.selectedTemplate.securityGroupId] : ["STORE_MANAGER"],
@@ -603,7 +601,7 @@ const finishSetup = async (payload: any): Promise <any> => {
       });
 
       // Handle if ensurePartyRole fails internally or returns error
-      if (hasError(result)) {
+      if (commonUtil.hasError(result)) {
         throw result.data;
       }
     }
@@ -652,7 +650,7 @@ const finishSetup = async (payload: any): Promise <any> => {
             "roleTypeId": "FAC_LOGIN",
             "description": "Facility Login",
           })
-          if (hasError(resp)) {
+          if (commonUtil.hasError(resp)) {
             throw resp.data;
           }
         }
@@ -667,7 +665,7 @@ const finishSetup = async (payload: any): Promise <any> => {
 
     await Promise.all(promises).then(responses => {
       responses.forEach(response => {
-        if (hasError(response)) {
+        if (commonUtil.hasError(response)) {
           throw response.data;
         }
       });
@@ -702,7 +700,7 @@ const isRoleTypeExists = async (roleTypeId: string): Promise<any> => {
         noConditionFind: 'Y'
       }
     }) as any
-    if (!hasError(resp) && resp.data.docs.length) {
+    if (!commonUtil.hasError(resp) && resp.data.docs.length) {
       return true
     }
     return false
@@ -741,7 +739,7 @@ const fetchLogoImageForParty = async (partyId: any): Promise<any> => {
       }
     }) as any
 
-    if (!hasError(resp) && resp.data.count > 0) {
+    if (!commonUtil.hasError(resp) && resp.data.count > 0) {
       const partyContents = resp.data.docs;
 
       resp = await api({
@@ -758,7 +756,7 @@ const fetchLogoImageForParty = async (partyId: any): Promise<any> => {
         }
       })
 
-      if (!hasError(resp) && resp.data.count > 0) {
+      if (!commonUtil.hasError(resp) && resp.data.count > 0) {
         profileImage = resp.data.docs[0]
       } else {
         throw resp.data
