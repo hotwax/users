@@ -74,8 +74,6 @@ import { computed, ref } from "vue";
 import { IonButtons, IonButton, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonList, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, lockClosedOutline, mailOutline } from "ionicons/icons";
 import { commonUtil, translate, logger } from '@common';
-import { isValidPassword, showToast } from "@/utils";
-import { UserService } from "@/services/UserService";
 import { useUserStore } from "@/store/user";
 
 const props = defineProps<{
@@ -102,18 +100,18 @@ const closeModal = () => {
 
 const resetPassword = async () => {
   try {
-    const resp = await UserService.resetPassword({
+    const resp = await userStore.resetPassword({
       newPassword: newPassword.value,
       newPasswordVerify: confirmPassword.value,
       userLoginId: props.userLoginId
     });
     if (!commonUtil.hasError(resp)) {
-      showToast(translate('Password reset successful.'));
+      commonUtil.showToast(translate('Password reset successful.'));
     } else {
       throw resp.data;
     }
   } catch (error) {
-    showToast(translate('Failed to reset password.'));
+    commonUtil.showToast(translate('Failed to reset password.'));
     logger.error(error);
   }
   closeModal();
@@ -123,7 +121,7 @@ const checkResetButtonStatus = () => {
   // TODO add check for length and other requirements(
   return ((!newPassword.value.length || !confirmPassword.value.length)
     || (newPassword.value !== confirmPassword.value)
-    || (!isValidPassword(newPassword.value) || !isValidPassword(confirmPassword.value)));
+    || (!commonUtil.isValidPassword(newPassword.value) || !commonUtil.isValidPassword(confirmPassword.value)));
 };
 
 const validatePassword = (event: any) => {
@@ -134,7 +132,7 @@ const validatePassword = (event: any) => {
 
   if (value === '') return;
 
-  isValidPassword(value)
+  commonUtil.isValidPassword(value)
     ? element?.classList.add('ion-valid')
     : element?.classList.add('ion-invalid');
 };
@@ -151,17 +149,17 @@ const validateConfirmPassword = () => {
 
 const sendResetPasswordEmail = async () => {
   try {
-    const resp = await UserService.sendResetPasswordEmail({
+    const resp = await userStore.sendResetPasswordEmail({
       emailAddress: props.email,
       userName: props.userLoginId
     });
     if (!commonUtil.hasError(resp)) {
-      showToast(translate('Password reset email sent successfully.'));
+      commonUtil.showToast(translate('Password reset email sent successfully.'));
     } else {
       throw resp.data;
     }
   } catch (error) {
-    showToast(translate('Failed to send password reset email.'));
+    commonUtil.showToast(translate('Failed to send password reset email.'));
     logger.error(error);
   }
   closeModal();

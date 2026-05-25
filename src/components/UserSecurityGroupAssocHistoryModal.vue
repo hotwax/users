@@ -17,7 +17,7 @@
           {{ assocHistory.groupName ? assocHistory.groupName : assocHistory.groupId }}
           <p>{{ assocHistory.groupId }}</p>
         </ion-label>
-        <ion-note slot="end">{{ getDateWithOrdinalSuffix(assocHistory.fromDate) }} - {{ assocHistory.thruDate ? getDateWithOrdinalSuffix(assocHistory.thruDate) : translate('Current') }}</ion-note>
+        <ion-note slot="end">{{ commonUtil.getDateWithOrdinalSuffix(assocHistory.fromDate) }} - {{ assocHistory.thruDate ? commonUtil.getDateWithOrdinalSuffix(assocHistory.thruDate) : translate('Current') }}</ion-note>
       </ion-item>
     </ion-list>
     <div class="empty-state" v-else>
@@ -33,8 +33,6 @@ import { closeOutline } from "ionicons/icons";
 import { commonUtil, translate } from '@common';
 import { useUserStore } from "@/store/user";
 import { useUtilStore } from "@/store/util";
-import { getDateWithOrdinalSuffix } from "@/utils";
-import { UserService } from "@/services/UserService";
 
 const userStore = useUserStore();
 const utilStore = useUtilStore();
@@ -54,7 +52,7 @@ const fetchUserSecurityGroupAssoHistory = async () => {
   const securityGroupNameByGroupId = {} as any;
   let histories = [] as any;
   try {
-    const resp = await UserService.fetchUserSecurityGroupAssocHistory({
+    const resp = await userStore.fetchUserSecurityGroupAssocHistory({
       entityName: "UserLoginAndSecurityGroup",
       inputFields: {
         userLoginId: selectedUser.value.userLoginId,

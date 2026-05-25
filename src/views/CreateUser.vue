@@ -69,13 +69,13 @@ import { ref, computed } from "vue";
 import { IonBackButton, IonButton, IonContent, IonHeader, IonIcon, IonItem, IonPage, IonText, IonTitle, IonToolbar, IonToggle, IonInput, IonSelect, IonSelectOption, onIonViewWillEnter } from "@ionic/vue";
 import { useRouter } from 'vue-router';
 import { useUtilStore } from '@/store/util';
+import { useUserStore } from '@/store/user';
 import { businessOutline, desktopOutline, arrowForwardOutline } from 'ionicons/icons';
 import { commonUtil, translate, logger } from '@common';
-import { showToast, isValidEmail } from '@/utils';
-import { UserService } from '@/services/UserService';
 
 const router = useRouter();
 const utilStore = useUtilStore();
+const userStore = useUserStore();
 
 const isFacilityLogin = ref(false);
 const formData = ref({
@@ -136,7 +136,7 @@ const validateCreateUserDetail = (data: any) => {
       validationErrors.push(translate('Last name is required.'));
     }
   }
-  if (data.emailAddress && !isValidEmail(data.emailAddress)) {
+  if (data.emailAddress && !commonUtil.isValidEmail(data.emailAddress)) {
     validationErrors.push(translate('Invalid email address.'));
   }
   return validationErrors; 
@@ -150,7 +150,7 @@ const createUser = async () => {
     if (validationErrors.length > 0) {
       const errorMessages = validationErrors.join(" ");
       logger.error(errorMessages);
-      showToast(translate(errorMessages));
+      commonUtil.showToast(translate(errorMessages));
       return;
     }
 
@@ -163,13 +163,13 @@ const createUser = async () => {
       "partyRelationshipTypeId": "EMPLOYMENT",
     };
 
-    const resp = await UserService.createUser(payload);
+    const resp = await userStore.createUser(payload);
     if (resp.status === 200 && !commonUtil.hasError(resp) && resp.data.partyId) {
       const partyId = resp.data.partyId;
       if (partyTypeId === "PARTY_GROUP") {
-        await UserService.addPartyToFacility({ "partyId": partyId, "facilityId": payload.facilityId, "roleTypeId": "WAREHOUSE_PICKER" });
+        await userStore.addPartyToFacility({ "partyId": partyId, "facilityId": payload.facilityId, "roleTypeId": "WAREHOUSE_PICKER" });
       }
-      showToast(translate("User created successfully"));
+      commonUtil.showToast(translate("User created successfully"));
       router.replace({ path: `/user-confirmation/${partyId}` });
     } else {
       throw resp.data;
@@ -180,7 +180,7 @@ const createUser = async () => {
       errorMessage = err.response.data.error.message;
     }
     logger.error('error', err);
-    showToast(errorMessage);
+    commonUtil.showToast(errorMessage);
   }
 };
 </script>

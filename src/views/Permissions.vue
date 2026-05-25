@@ -67,8 +67,6 @@ import PermissionItems from '@/components/PermissionItems.vue';
 import { useUtilStore } from '@/store/util';
 import { usePermissionStore } from '@/store/permission';
 import { useUserStore } from '@/store/user';
-import { jsonToCsv } from '@/utils';
-import { PermissionService } from '@/services/PermissionService';
 import { DateTime } from 'luxon';
 import EditSecurityGroupModal from '@/components/EditSecurityGroupModal.vue';
 
@@ -123,7 +121,7 @@ const getUsersCount = async () => {
   }
 
   try {
-    const resp = await PermissionService.getSecurityGroupUsers({
+    const resp = await permissionStore.getSecurityGroupUsers({
       entityName: "PartyAndUserLoginSecurityGroupDetails",
       noConditionFind: "Y",
       fromDateName: "relationshipFromDate",
@@ -186,7 +184,7 @@ const downloadCSVForPermissions = async () => {
 
   const fileName = `HotWaxSecurityGroupExport_${DateTime.now().toFormat('yyyy_MM_dd_HH:mm')}`;
 
-  await jsonToCsv(permissionsJson, { download: true, name: fileName });
+  await commonUtil.jsonToCsv(permissionsJson, { download: true, name: fileName });
 };
 
 const downloadCSVForAllPermissionsCSV = async () => {
@@ -196,7 +194,7 @@ const downloadCSVForAllPermissionsCSV = async () => {
     await Promise.allSettled(securityGroups.value.map(async (group: any) => {
       let viewIndex = 0, resp;
       do {
-        resp = await PermissionService.getPermissionsByGroup({
+        resp = await permissionStore.fetchPermissionsByGroup({
           entityName: "SecurityGroupAndPermission",
           distinct: "Y",
           noConditionFind: "Y",

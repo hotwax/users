@@ -33,8 +33,6 @@ import { computed, onMounted, ref } from "vue";
 import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonTextarea, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { commonUtil, translate, logger } from "@common";
-import { UtilService } from "@/services/UtilService";
-import { showToast } from "@/utils";
 import { usePermissionStore } from "@/store/permission";
 import { useUtilStore } from "@/store/util";
 
@@ -43,7 +41,6 @@ const utilStore = useUtilStore();
 
 const group = ref<any>({});
 const currentGroup = computed(() => permissionStore.getCurrentGroup);
-const securityGroups = computed(() => utilStore.getSecurityGroups);
 
 onMounted(() => {
   group.value = JSON.parse(JSON.stringify(currentGroup.value));
@@ -59,37 +56,27 @@ const isGroupUpdated = () => {
 
 const updateSecurityGroup = async () => {
   try {
-    const resp = await UtilService.updateSecurityGroup({
+    const payload = {
       groupId: currentGroup.value.groupId,
       groupName: group.value.groupName,
       description: group.value.description
-    });
+    };
+    const resp = await utilStore.updateSecurityGroup(payload);
 
     if (!commonUtil.hasError(resp)) {
-      showToast(translate("Security group updated successfully."));
-      const updatedSecurityGroups = securityGroups.value.map((securityGroup: any) => {
-        if (securityGroup.groupId === currentGroup.value.groupId) {
-          return {
-            ...securityGroup,
-            groupName: group.value.groupName,
-            description: group.value.description
-          };
-        }
-        return securityGroup;
-      });
+      commonUtil.showToast(translate("Security group updated successfully."));
       const updatedCurrentGroup = {
         ...currentGroup.value,
         groupName: group.value.groupName,
         description: group.value.description
       };
-      await utilStore.updateSecurityGroup(updatedSecurityGroups);
       await permissionStore.updateCurrentGroup(updatedCurrentGroup);
       modalController.dismiss();
     } else {
       throw resp.data;
     }
   } catch (error) {
-    showToast(translate("Failed to update security group."));
+    commonUtil.showToast(translate("Failed to update security group."));
     logger.error(error);
   }
 };

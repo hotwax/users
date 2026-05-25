@@ -50,9 +50,7 @@
 import { onBeforeMount, ref } from "vue";
 import { IonButtons, IonButton, IonContent, IonFab, IonFabButton, IonHeader, IonItem, IonIcon, IonList, IonRadioGroup, IonRadio, IonSearchbar, IonSpinner, IonTitle, IonToolbar, modalController, alertController } from "@ionic/vue";
 import { close, save } from "ionicons/icons";
-import { UserService } from "@/services/UserService";
-import { DateTime } from 'luxon';
-import { commonUtil, translate } from "@common";
+import { translate } from "@common";
 import { useUserStore } from "@/store/user";
 
 const userStore = useUserStore();
@@ -101,14 +99,9 @@ const findTimeZone = () => {
 
 const getAvailableTimeZones = async () => {
   isLoading.value = true;
-  const resp = await UserService.getAvailableTimeZones();
-  if (resp.status === 200 && !commonUtil.hasError(resp)) {
-    // We are filtering valid the timeZones coming with response here
-    timeZones.value = resp.data.filter((timeZone: any) => {
-      return DateTime.local().setZone(timeZone.id).isValid;
-    });
-    findTimeZone();
-  }
+  await userStore.getAvailableTimeZones();
+  timeZones.value = userStore.getTimeZones;
+  findTimeZone();
   isLoading.value = false;
 };
 

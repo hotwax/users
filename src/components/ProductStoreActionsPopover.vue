@@ -19,9 +19,7 @@ import { computed } from "vue";
 import { alertController, IonContent, IonItem, IonLabel, IonList, IonListHeader, popoverController } from "@ionic/vue";
 import { commonUtil, logger, translate } from '@common';
 import { useUserStore } from "@/store/user";
-import { UserService } from "@/services/UserService";
 import { DateTime } from "luxon";
-import { showToast } from "@/utils";
 
 const props = defineProps({
   productStore: {
@@ -33,7 +31,7 @@ const props = defineProps({
 const userStore = useUserStore();
 
 const selectedUser = computed(() => userStore.selectedUser);
-const userProductStores = computed(() => userStore.getUserProductStores);
+const userProductStores = computed(() => userStore.getSelectedUserProductStores);
 const omsRedirectionInfo = computed(() => userStore.getOmsRedirectionInfo);
 
 const closePopover = () => {
@@ -42,7 +40,7 @@ const closePopover = () => {
 
 const removeProductStoreRole = async () => {
   try {
-    const resp = await UserService.updateProductStoreRole({
+    const resp = await userStore.updateProductStoreRole({
       partyId: selectedUser.value.partyId,
       productStoreId: props.productStore.productStoreId,
       roleTypeId: props.productStore.roleTypeId,
@@ -50,13 +48,13 @@ const removeProductStoreRole = async () => {
       thruDate: DateTime.now().toMillis()
     });
     if (commonUtil.hasError(resp)) throw resp.data;
-    showToast(translate('Role removed successfully.'));
+    commonUtil.showToast(translate('Role removed successfully.'));
   } catch (error) {
-    showToast(translate('Something went wrong.'));
+    commonUtil.showToast(translate('Something went wrong.'));
     logger.error(error);
   }
   
-  const updatedUserProductStores = await UserService.getUserProductStores(selectedUser.value.partyId);
+  const updatedUserProductStores = await userStore.getUserProductStores(selectedUser.value.partyId);
   userStore.updateSelectedUser({ ...selectedUser.value, productStores: updatedUserProductStores });
   closePopover();
 };

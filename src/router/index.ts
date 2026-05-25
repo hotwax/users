@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import UserDetails from '@/views/UserDetails.vue'
 import { useUserStore } from '@/store/user'
-import { showToast } from '@/utils'
 import { commonUtil, translate, useAuth, Login } from '@common'
 import Tabs from '@/components/Tabs.vue'
 import CreateUser from '@/views/CreateUser.vue'
@@ -130,7 +129,7 @@ const router = createRouter({
 router.beforeEach((to, from) => {
   const permissionId = to.meta.permissionId;
   if (permissionId && !useUserStore().hasPermission(permissionId)) {
-    showToast(translate('The requested page was not available to your user. Please contact your administrator to update your permissions.'));
+    commonUtil.showToast(translate('The requested page was not available to your user. Please contact your administrator to update your permissions.'));
     if (from.path === '/login' || from.path === '/') {
       return { path: '/tabs/settings' };
     }

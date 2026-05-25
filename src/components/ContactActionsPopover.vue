@@ -19,8 +19,6 @@
 import { computed } from "vue";
 import { alertController, IonContent, IonItem, IonList, IonListHeader, popoverController } from "@ionic/vue";
 import { commonUtil, translate, logger } from '@common';
-import { copyToClipboard, isValidEmail, showToast } from "@/utils";
-import { UserService } from "@/services/UserService";
 import { useUserStore } from "@/store/user";
 
 const props = defineProps<{
@@ -57,7 +55,7 @@ const closePopover = () => {
 };
 
 const copyInfo = () => {
-  copyToClipboard(props.value, 'Copied to clipboard');
+  commonUtil.copyToClipboard(props.value, 'Copied to clipboard');
   closePopover();
 };
 
@@ -81,7 +79,7 @@ const updateContactField = async () => {
         // if initial and new value are same, return
         if (!input || input === props.value) {
           if (!input) {
-            showToast(translate('Please enter a value'));
+            commonUtil.showToast(translate('Please enter a value'));
             return false;
           }
           return true;
@@ -90,12 +88,12 @@ const updateContactField = async () => {
         let updatedSelectedUser = JSON.parse(JSON.stringify(selectedUser.value));
         try {
           if (props.type === 'email') {
-            if (!isValidEmail(input)) {
-              showToast(translate('Invalid email address.'));
+            if (!commonUtil.isValidEmail(input)) {
+              commonUtil.showToast(translate('Invalid email address.'));
               return false;
             }
 
-            const resp = await UserService.createUpdatePartyEmailAddress({
+            const resp = await userStore.createUpdatePartyEmailAddress({
               contactMechId: props.contactMechId,
               emailAddress: input,
               partyId: selectedUser.value.partyId
@@ -109,7 +107,7 @@ const updateContactField = async () => {
               }
             };
           } else if (props.type === 'phoneNumber') {
-            const resp = await UserService.createUpdatePartyTelecomNumber({
+            const resp = await userStore.createUpdatePartyTelecomNumber({
               contactMechId: props.contactMechId,
               contactNumber: input,
               partyId: selectedUser.value.partyId
@@ -125,14 +123,14 @@ const updateContactField = async () => {
           } else {
             let resp = {} as any;
             if (selectedUser.value.partyTypeId === 'PERSON') {
-              resp = await UserService.updatePerson({
+              resp = await userStore.updatePerson({
                 externalId: input,
                 partyId: selectedUser.value.partyId,
                 firstName: selectedUser.value.firstName,
                 lastName: selectedUser.value.lastName
               });
             } else {
-              resp = await UserService.updatePartyGroup({
+              resp = await userStore.updatePartyGroup({
                 externalId: input,
                 partyId: selectedUser.value.partyId,
                 groupName: selectedUser.value.groupName
@@ -145,9 +143,9 @@ const updateContactField = async () => {
             };
           }
           userStore.updateSelectedUser(updatedSelectedUser);
-          showToast(translate(`${OPTIONS[props.type].placeholder} updated successfully.`));
+          commonUtil.showToast(translate(`${OPTIONS[props.type].placeholder} updated successfully.`));
         } catch (error) {
-          showToast(translate(`Failed to update ${props.type === 'email' ? 'email' : (props.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`));
+          commonUtil.showToast(translate(`Failed to update ${props.type === 'email' ? 'email' : (props.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`));
           logger.error(error);
         }
         return true;
@@ -174,14 +172,14 @@ const deleteContactField = async () => {
         const updatedSelectedUser = JSON.parse(JSON.stringify(selectedUser.value));
         try {
           if (props.type === 'email') {
-            const resp = await UserService.deletePartyContactMech({
+            const resp = await userStore.deletePartyContactMech({
               contactMechId: props.contactMechId,
               partyId: selectedUser.value.partyId
             });
             if (commonUtil.hasError(resp)) throw resp.data;
             delete updatedSelectedUser.emailDetails;
           } else if (props.type === 'phoneNumber') {
-            const resp = await UserService.deletePartyContactMech({
+            const resp = await userStore.deletePartyContactMech({
               contactMechId: props.contactMechId,
               partyId: selectedUser.value.partyId
             });
@@ -190,12 +188,12 @@ const deleteContactField = async () => {
           } else {
             let resp = {} as any;
             if (selectedUser.value.partyTypeId === 'PERSON') {
-              resp = await UserService.updatePerson({
+              resp = await userStore.updatePerson({
                 externalId: '',
                 partyId: selectedUser.value.partyId
               });
             } else {
-              resp = await UserService.updatePartyGroup({
+              resp = await userStore.updatePartyGroup({
                 externalId: '',
                 partyId: selectedUser.value.partyId
               });
@@ -204,9 +202,9 @@ const deleteContactField = async () => {
             delete updatedSelectedUser.externalId;
           }
           userStore.updateSelectedUser(updatedSelectedUser);
-          showToast(translate(`${OPTIONS[props.type].placeholder} removed successfully.`));
+          commonUtil.showToast(translate(`${OPTIONS[props.type].placeholder} removed successfully.`));
         } catch (error) {
-          showToast(translate(`Failed to remove ${props.type === 'email' ? 'email' : (props.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`));
+          commonUtil.showToast(translate(`Failed to remove ${props.type === 'email' ? 'email' : (props.type === 'phoneNumber' ? 'phone number' : 'external ID')}.`));
           logger.error(error);
         }
       }

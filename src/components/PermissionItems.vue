@@ -54,8 +54,6 @@ import { computed } from 'vue';
 import { IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonIcon, IonItem, IonItemDivider, IonLabel, IonNote, IonSearchbar, IonSelect, IonSelectOption, IonSpinner, IonToggle } from '@ionic/vue';
 import { commonUtil, translate, logger } from '@common';
 import { optionsOutline, shieldCheckmarkOutline } from 'ionicons/icons';
-import { PermissionService } from '@/services/PermissionService';
-import { showToast } from '@/utils';
 import { DateTime } from 'luxon';
 import { usePermissionStore } from '@/store/permission';
 import { useUtilStore } from '@/store/util';
@@ -90,7 +88,7 @@ const updatePermissionAssociation = async (permission: any) => {
     if (permission.isChecked) {
       const fromDate = currentGroupPermissions.value[permission.permissionId].fromDate;
 
-      resp = await PermissionService.removeSecurityPermissionFromSecurityGroup({
+      resp = await permissionStore.removeSecurityPermissionFromSecurityGroup({
         ...payload,
         thruDate: DateTime.now().toMillis(),
         fromDate
@@ -108,7 +106,7 @@ const updatePermissionAssociation = async (permission: any) => {
         fromDate: time
       };
 
-      resp = await PermissionService.addSecurityPermissionToSecurityGroup(params);
+      resp = await permissionStore.addSecurityPermissionToSecurityGroup(params);
 
       if (commonUtil.hasError(resp)) {
         throw resp.data;
@@ -118,14 +116,14 @@ const updatePermissionAssociation = async (permission: any) => {
     }
 
     if (!commonUtil.hasError(resp)) {
-      showToast(translate("Security group permission association successfully updated."));
+      commonUtil.showToast(translate("Security group permission association successfully updated."));
       await permissionStore.updateCurrentGroupPermissions({ groupId: currentGroup.value.groupId, currentPermissions});
       permissionStore.checkAssociated();
     } else {
       throw resp.data;
     }
   } catch (err) {
-    showToast(translate("Failed to update security group permission association."));
+    commonUtil.showToast(translate("Failed to update security group permission association."));
     logger.error(err);
   }
   updatePermissionStatus(permission, false);

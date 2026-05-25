@@ -442,8 +442,6 @@ import SelectFacilityModal from '@/components/SelectFacilityModal.vue';
 import SelectProductStoreModal from '@/components/SelectProductStoreModal.vue';
 import SelectSecurityGroupModal from '@/components/SelectSecurityGroupModal.vue';
 import UserSecurityGroupAssocHistoryModal from '@/components/UserSecurityGroupAssocHistoryModal.vue';
-import { UserService } from "@/services/UserService";
-import { isValidEmail, isValidPassword, showToast } from "@/utils";
 import { DateTime } from "luxon";
 import Image from "@/components/Image.vue";
 
@@ -484,8 +482,8 @@ const shopifyShopsForProductStore = ref<any[]>([]);
 const isUserFulfillmentAdmin = ref(false);
 
 const selectedUser = computed(() => userStore.selectedUser);
-const userProductStores = computed(() => userStore.getUserProductStores);
-const userSecurityGroups = computed(() => userStore.getUserSecurityGroups);
+const userProductStores = computed(() => userStore.getSelectedUserProductStores);
+const userSecurityGroups = computed(() => userStore.getSelectedUserSecurityGroups);
 const getRoleTypeDesc = (roleTypeId: string) => utilStore.getRoleTypeDesc(roleTypeId);
 const securityGroups = computed(() => utilStore.getSecurityGroups);
 const userProfile = computed(() => userStore.getUserProfile);
@@ -507,7 +505,7 @@ onIonViewWillEnter(async () => {
   if (productStoreId) {
     getShopifyShops(productStoreId);
   }
-  isUserFulfillmentAdmin.value = selectedUser.value.securityGroups?.length ? await UserService.isUserFulfillmentAdmin(selectedUser.value.securityGroups.map((group: any) => group.groupId)) : false;
+  isUserFulfillmentAdmin.value = selectedUser.value.securityGroups?.length ? await userStore.isUserFulfillmentAdmin(selectedUser.value.securityGroups.map((group: any) => group.groupId)) : false;
   isUserFetched.value = true;
   username.value = selectedUser.value.groupName ? (selectedUser.value.groupName)?.toLowerCase() : (`${selectedUser.value.firstName}.${selectedUser.value.lastName}`?.toLowerCase()) || "";
 });
@@ -531,9 +529,9 @@ const updateFavoriteProductStore = (event: any) => {
     userStore.setFavoriteProductStore({ "userLoginId": selectedUser.value?.userLoginId, "productStoreId": selectedProductStoreId })
     .then(() => {
       getShopifyShops(selectedProductStoreId);
-      showToast(translate('Favorite product store updated successfully.'));
+      commonUtil.showToast(translate('Favorite product store updated successfully.'));
     }).catch(() => {
-      showToast(translate("Failed to set favorite product store."));
+      commonUtil.showToast(translate("Failed to set favorite product store."));
     });
   }
 };
@@ -548,9 +546,9 @@ const updateFavoriteShopifyShop = (event: any) => {
   if (selectedShopId && selectedShopId !== selectedUser.value?.favoriteShopifyShopPref?.userPrefValue) {
     userStore.setFavoriteShopifyShop({ "userLoginId": selectedUser.value?.userLoginId, "shopId": selectedShopId })
     .then(() => {
-      showToast(translate('Favorite shopify shop updated successfully.'));
+      commonUtil.showToast(translate('Favorite shopify shop updated successfully.'));
     }).catch(() => {
-      showToast(translate("Failed to set favorite shopify shop."));
+      commonUtil.showToast(translate("Failed to set favorite shopify shop."));
     });
   }
 };
@@ -602,19 +600,19 @@ const addContactField = async (type: string) => {
       handler: async (result) => {
         const input = result.input.trim();
         if (!input) {
-          showToast(translate('Please enter a value'));
+          commonUtil.showToast(translate('Please enter a value'));
           return false;
         }
 
         let updatedSelectedUser = JSON.parse(JSON.stringify(selectedUser.value));
         try {
           if (type === 'email') {
-            if (!isValidEmail(input)) {
-              showToast(translate('Invalid email address.'));
+            if (!commonUtil.isValidEmail(input)) {
+              commonUtil.showToast(translate('Invalid email address.'));
               return false;
             }
 
-            const resp = await UserService.createUpdatePartyEmailAddress({
+            const resp = await userStore.createUpdatePartyEmailAddress({
               emailAddress: input,
               partyId: selectedUser.value.partyId,
               contactMechPurposeTypeId: 'PRIMARY_EMAIL'
@@ -628,7 +626,7 @@ const addContactField = async (type: string) => {
               }
             };
           } else if (type === 'phoneNumber') {
-            const resp = await UserService.createUpdatePartyTelecomNumber({
+            const resp = await userStore.createUpdatePartyTelecomNumber({
               contactNumber: input,
               partyId: selectedUser.value.partyId,
               contactMechPurposeTypeId: 'PRIMARY_PHONE'
@@ -644,14 +642,14 @@ const addContactField = async (type: string) => {
           } else {
             let resp = {} as any;
             if (selectedUser.value.partyTypeId === 'PERSON') {
-              resp = await UserService.updatePerson({
+              resp = await userStore.updatePerson({
                 externalId: input,
                 partyId: selectedUser.value.partyId,
                 firstName: selectedUser.value.firstName,
                 lastName: selectedUser.value.lastName
               });
             } else {
-              resp = await UserService.updatePartyGroup({
+              resp = await userStore.updatePartyGroup({
                 externalId: input,
                 partyId: selectedUser.value.partyId,
                 groupName: selectedUser.value.groupName
@@ -664,9 +662,9 @@ const addContactField = async (type: string) => {
             };
           }
           userStore.updateSelectedUser(updatedSelectedUser);
-          showToast(translate(`${OPTIONS[type as 'email' | 'phoneNumber' | 'externalId'].placeholder} added successfully.`));
+          commonUtil.showToast(translate(`${OPTIONS[type as 'email' | 'phoneNumber' | 'externalId'].placeholder} added successfully.`));
         } catch (error) {
-          showToast(translate(`Failed to add ${type === 'email' ? 'email' : (type === 'phoneNumber' ? 'phone number' : 'external ID')}.`));
+          commonUtil.showToast(translate(`Failed to add ${type === 'email' ? 'email' : (type === 'phoneNumber' ? 'phone number' : 'external ID')}.`));
           logger.error(error);
         }
         return true;
@@ -684,7 +682,7 @@ const validatePassword = (event: any) => {
 
   if (value === '') return;
 
-  isValidPassword(value)
+  commonUtil.isValidPassword(value)
     ? passwordRef.value.$el.classList.add('ion-valid')
     : passwordRef.value.$el.classList.add('ion-invalid');
 };
@@ -708,16 +706,16 @@ const createNewUserLogin = async () => {
   }
   
   if (!password.value || !username.value) {
-    showToast(translate("Please add a to create a user login", { missingFields }));
+    commonUtil.showToast(translate("Please add a to create a user login", { missingFields }));
     return;
   }
 
-  if (await UserService.isUserLoginIdAlreadyExists(username.value)) {
+  if (await userStore.isUserLoginIdAlreadyExists(username.value)) {
     return;
   }
 
   try {
-    const resp = await UserService.createNewUserLogin({
+    const resp = await userStore.createNewUserLogin({
       partyId: props.partyId,
       currentPassword: password.value,
       currentPasswordVerify: password.value,
@@ -732,7 +730,7 @@ const createNewUserLogin = async () => {
       throw resp.data;
     }
   } catch (error) {
-    showToast(translate('Something went wrong.'));
+    commonUtil.showToast(translate('Something went wrong.'));
     logger.error(error);
   }
 };
@@ -771,16 +769,16 @@ const confirmForceLogout = async () => {
 
 const forceLogout = async () => {
   try {
-    const resp = await UserService.forceLogout({
+    const resp = await userStore.forceLogout({
       userLoginId: selectedUser.value.userLoginId
     });
     if (commonUtil.hasError(resp)) {
       throw resp;
     }
     await userStore.getSelectedUserDetails({ partyId: props.partyId, isFetchRequired: true });
-    showToast(translate('User has been logged out.'));
+    commonUtil.showToast(translate('User has been logged out.'));
   } catch (error) {
-    showToast(translate('Failed to perform force logout.'));
+    commonUtil.showToast(translate('Failed to perform force logout.'));
     logger.error(error);
   }
 };
@@ -803,20 +801,20 @@ const updateUserLoginStatus = async (event: any) => {
       role: 'success',
       handler: async () => {
         try {
-          const resp = await UserService.updateUserLoginStatus({
+          const resp = await userStore.updateUserLoginStatus({
             enabled: isChecked ? 'N' : 'Y',
             partyId: props.partyId,
             userLoginId: selectedUser.value.userLoginId
           });
           if (!commonUtil.hasError(resp)) {
-            showToast(translate('User login status updated successfully.'));
+            commonUtil.showToast(translate('User login status updated successfully.'));
             event.target.checked = isChecked;
             selectedUser.value.enabled = isChecked ? 'N' : 'Y';
           } else {
             throw resp.data;
           }
         } catch (error) {
-          showToast(translate('Failed to update user login status.'));
+          commonUtil.showToast(translate('Failed to update user login status.'));
           logger.error(error);
         }
       }
@@ -838,7 +836,7 @@ const openSecurityGroupActionsPopover = async (event: Event, securityGroup: any)
   securityGroupActionsPopover.present();
 
   const result = await securityGroupActionsPopover.onDidDismiss();
-  isUserFulfillmentAdmin.value = result.data?.length ? await UserService.isUserFulfillmentAdmin(result.data.map((group: any) => group.groupId)) : false;
+  isUserFulfillmentAdmin.value = result.data?.length ? await userStore.isUserFulfillmentAdmin(result.data.map((group: any) => group.groupId)) : false;
 };
 
 const openProductStoreActionsPopover = async (event: Event, store: any) => {
@@ -873,7 +871,7 @@ const selectFacility = async () => {
       const facilitiesToRemove = result.data.value.facilitiesToRemove;
 
       const removeResponses = await Promise.allSettled(facilitiesToRemove
-        .map(async (payload: any) => await UserService.removePartyFromFacility({
+        .map(async (payload: any) => await userStore.removePartyFromFacility({
           partyId: selectedUser.value.partyId,
           facilityId: payload.facilityId,
           roleTypeId: payload.roleTypeId,
@@ -884,12 +882,12 @@ const selectFacility = async () => {
 
       if (facilitiesToAdd.length) {
         try {
-          const resp = await UserService.ensurePartyRole({
+          const resp = await userStore.ensurePartyRole({
             partyId: props.partyId,
             roleTypeId: 'WAREHOUSE_PICKER',
           });
           if (commonUtil.hasError(resp)) {
-            showToast(translate('Something went wrong.'));
+            commonUtil.showToast(translate('Something went wrong.'));
             throw resp.data;
           }
         } catch (error) {
@@ -899,7 +897,7 @@ const selectFacility = async () => {
       }
 
       const createResponses = await Promise.allSettled(facilitiesToAdd
-        .map(async (payload: any) => await UserService.addPartyToFacility({
+        .map(async (payload: any) => await userStore.addPartyToFacility({
           partyId: selectedUser.value.partyId,
           facilityId: payload.facilityId,
           roleTypeId: 'WAREHOUSE_PICKER',
@@ -908,11 +906,11 @@ const selectFacility = async () => {
 
       const hasFailedResponse = [...removeResponses, ...createResponses].some((response: any) => response.status === 'rejected');
       if (hasFailedResponse) {
-        showToast(translate('Failed to update some association(s).'));
+        commonUtil.showToast(translate('Failed to update some association(s).'));
       } else {
-        showToast(translate('Facility associations updated successfully.'));
+        commonUtil.showToast(translate('Facility associations updated successfully.'));
       }
-      const userFacilities = await UserService.getUserFacilities(selectedUser.value.partyId);
+      const userFacilities = await userStore.getUserFacilities(selectedUser.value.partyId);
       userStore.updateSelectedUser({ ...selectedUser.value, facilities: userFacilities });
     }
   });
@@ -932,29 +930,29 @@ const selectSecurityGroup = async () => {
 
       try {
         const updateResponses = await Promise.allSettled(securityGroupsToRemove
-          .map(async (payload: any) => await UserService.removeUserSecurityGroup({
+          .map(async (payload: any) => await userStore.removeUserSecurityGroup({
             groupId: payload.groupId,
             userLoginId: selectedUser.value.userLoginId
           }))
         );
 
-        const createResponse = await UserService.addUserToSecurityGroup({
+        const createResponse = await userStore.addUserToSecurityGroup({
           groupIds: securityGroupsToCreate?.map((group: any) => group.groupId),
           userLoginId: selectedUser.value.userLoginId
         });
 
         const hasFailedResponse = [...updateResponses, createResponse].some((response: any) => response.status === 'rejected');
         if (hasFailedResponse) {
-          showToast(translate('Failed to update some security group(s).'));
+          commonUtil.showToast(translate('Failed to update some security group(s).'));
         } else {
-          showToast(translate('Security group(s) updated successfully.'));
+          commonUtil.showToast(translate('Security group(s) updated successfully.'));
         }
-        const updatedUserSecurityGroups = await UserService.getUserSecurityGroups(selectedUser.value.userLoginId);
+        const updatedUserSecurityGroups = await userStore.getUserSecurityGroups(selectedUser.value.userLoginId);
         userStore.updateSelectedUser({ ...selectedUser.value, securityGroups: updatedUserSecurityGroups });
-        isUserFulfillmentAdmin.value = updatedUserSecurityGroups.length ? await UserService.isUserFulfillmentAdmin(updatedUserSecurityGroups.map((group: any) => group.groupId)) : false;
+        isUserFulfillmentAdmin.value = updatedUserSecurityGroups.length ? await userStore.isUserFulfillmentAdmin(updatedUserSecurityGroups.map((group: any) => group.groupId)) : false;
       } catch (error) {
         logger.error(error);
-        showToast(translate('Failed to update some security group(s).'));
+        commonUtil.showToast(translate('Failed to update some security group(s).'));
       }
     }
   });
@@ -974,7 +972,7 @@ const selectProductStore = async () => {
       const productStoresToRemove = result.data.value.productStoresToRemove;
 
       const updateResponses = await Promise.allSettled(productStoresToRemove
-        .map(async (payload: any) => await UserService.updateProductStoreRole({
+        .map(async (payload: any) => await userStore.updateProductStoreRole({
           partyId: selectedUser.value.partyId,
           productStoreId: payload.productStoreId,
           roleTypeId: payload.roleTypeId,
@@ -985,12 +983,12 @@ const selectProductStore = async () => {
 
       if (productStoresToCreate.length) {
         try {
-          const resp = await UserService.ensurePartyRole({
+          const resp = await userStore.ensurePartyRole({
             partyId: selectedUser.value.partyId,
             roleTypeId: "APPLICATION_USER",
           });
           if (commonUtil.hasError(resp)) {
-            showToast(translate('Something went wrong.'));
+            commonUtil.showToast(translate('Something went wrong.'));
             throw resp.data;
           }
         } catch (error) {
@@ -1000,7 +998,7 @@ const selectProductStore = async () => {
       }
 
       const createResponses = await Promise.allSettled(productStoresToCreate
-        .map(async (payload: any) => await UserService.createProductStoreRole({
+        .map(async (payload: any) => await userStore.createProductStoreRole({
           productStoreId: payload.productStoreId,
           partyId: selectedUser.value.partyId,
           roleTypeId: "APPLICATION_USER",
@@ -1009,11 +1007,11 @@ const selectProductStore = async () => {
 
       const hasFailedResponse = [...updateResponses, ...createResponses].some((response: any) => response.status === 'rejected');
       if (hasFailedResponse) {
-        showToast(translate('Failed to update some role(s).'));
+        commonUtil.showToast(translate('Failed to update some role(s).'));
       } else {
-        showToast(translate('Role(s) updated successfully.'));
+        commonUtil.showToast(translate('Role(s) updated successfully.'));
       }
-      const updatedUserProductStores = await UserService.getUserProductStores(selectedUser.value.partyId);
+      const updatedUserProductStores = await userStore.getUserProductStores(selectedUser.value.partyId);
       userStore.updateSelectedUser({ ...selectedUser.value, productStores: updatedUserProductStores });
     }
   });
@@ -1028,18 +1026,18 @@ const updatePickerRoleStatus = async (event: any) => {
   try {
     let resp;
     if (isChecked) {
-      resp = await UserService.ensurePartyRole({
+      resp = await userStore.ensurePartyRole({
         partyId: selectedUser.value?.partyId,
         roleTypeId: "WAREHOUSE_PICKER"
       });
     } else {
-      resp = await UserService.deletePartyRole({
+      resp = await userStore.deletePartyRole({
         partyId: selectedUser.value?.partyId,
         roleTypeId: "WAREHOUSE_PICKER"
       });
     }
     if (!commonUtil.hasError(resp)) {
-      showToast(translate('User picker role updated successfully.'));
+      commonUtil.showToast(translate('User picker role updated successfully.'));
 
       const currentUser = JSON.parse(JSON.stringify(selectedUser.value));
       currentUser.isWarehousePicker = isChecked;
@@ -1049,7 +1047,7 @@ const updatePickerRoleStatus = async (event: any) => {
       throw resp.data;
     }
   } catch (error) {
-    showToast(translate('Failed to update user role.'));
+    commonUtil.showToast(translate('Failed to update user role.'));
     logger.error(error);
   }
 };
@@ -1089,13 +1087,13 @@ const editName = async () => {
 
           try {
             if (selectedUser.value.partyTypeId === 'PARTY_GROUP') {
-              resp = await UserService.updatePartyGroup(payload);
+              resp = await userStore.updatePartyGroup(payload);
             } else {
-              resp = await UserService.updatePerson(payload);
+              resp = await userStore.updatePerson(payload);
             }
 
             if (!commonUtil.hasError(resp)) {
-              showToast(translate("User renamed successfully."));
+              commonUtil.showToast(translate("User renamed successfully."));
               await userStore.updateSelectedUser({ ...selectedUser.value, ...payload });
             } else {
               throw resp.data;
@@ -1128,7 +1126,7 @@ const updateUserStatus = async (event: any) => {
 
   try {
     if (isChecked && selectedUser.value.userLoginId) {   
-      await UserService.updateUserLoginStatus({
+      await userStore.updateUserLoginStatus({
         enabled: 'N',
         partyId: props.partyId,
         userLoginId: selectedUser.value.userLoginId
@@ -1136,13 +1134,13 @@ const updateUserStatus = async (event: any) => {
       selectedUser.value.enabled = 'N';         
     }
     if (selectedUser.value.partyTypeId === 'PARTY_GROUP') {
-      resp = await UserService.updatePartyGroup(payload);
+      resp = await userStore.updatePartyGroup(payload);
     } else {
-      resp = await UserService.updatePerson({ ...payload, firstName: selectedUser.value.firstName });
+      resp = await userStore.updatePerson({ ...payload, firstName: selectedUser.value.firstName });
     }
 
     if (!commonUtil.hasError(resp)) {
-      showToast(translate("User status updated successfully."));
+      commonUtil.showToast(translate("User status updated successfully."));
       await userStore.updateSelectedUser({ ...selectedUser.value, ...payload });
       event.target.checked = isChecked;
     } else {
@@ -1150,7 +1148,7 @@ const updateUserStatus = async (event: any) => {
     }
   } catch (err) {
     logger.error(err);
-    showToast(translate("Failed to update user status."));
+    commonUtil.showToast(translate("Failed to update user status."));
   }
 
   emitter.emit('dismissLoader');
@@ -1187,7 +1185,7 @@ const uploadImage = async (event: any) => {
   try {
     await validateImageType(selectedFile, validImageTypes);
   } catch (error) {
-    showToast(translate("Please upload a valid image file, supported types: jpg/jpeg, png, gif, svg"));
+    commonUtil.showToast(translate("Please upload a valid image file, supported types: jpg/jpeg, png, gif, svg"));
     return;
   }
 
@@ -1196,21 +1194,21 @@ const uploadImage = async (event: any) => {
   formData.append('_uploadedFile_contentType', 'image/*');
   formData.append('uploadedFile', selectedFile, selectedFile?.name);
   try {
-    const resp = await UserService.uploadPartyImage(formData);
+    const resp = await userStore.uploadPartyImage(formData);
     if (!commonUtil.hasError(resp)) {
-      showToast(translate("Image uploaded successfully."));
+      commonUtil.showToast(translate("Image uploaded successfully."));
       await fetchProfileImage();
     } else {
       throw resp.data;
     }
   } catch (error) {
-    showToast(translate("Failed to upload image."));
+    commonUtil.showToast(translate("Failed to upload image."));
     logger.error('Error uploading image:', error);
   }
 };
 
 const fetchProfileImage = async () => {
-  const profileImage = await UserService.fetchLogoImageForParty(selectedUser.value.partyId);
+  const profileImage = await userStore.fetchLogoImageForParty(selectedUser.value.partyId);
 
   if (profileImage.objectInfo) {
     imageUrl.value = (baseUrl.value.startsWith('http') ? baseUrl.value.replace(/api\/?/, "") : `https://${baseUrl.value}.hotwax.io/`) + profileImage.objectInfo;

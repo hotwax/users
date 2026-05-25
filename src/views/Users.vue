@@ -137,7 +137,6 @@ import { useRouter } from 'vue-router';
 import { DateTime } from 'luxon';
 import { commonUtil, translate, logger } from '@common';
 import FilterMenu from '@/components/FilterMenu.vue';
-import { UserService } from '@/services/UserService';
 import { useUserStore } from '@/store/user';
 import { useUtilStore } from '@/store/util';
 
@@ -188,7 +187,7 @@ const fetchUsers = async (vSize?: any, vIndex?: any) => {
     viewIndex,
     currentUserPartyId: userProfile.value.partyId
   };
-  await userStore.fetchUsers(payload);
+  await userStore.fetchFilteredUsers(payload);
 };
 
 const viewUserDetails = async (user: any) => {
@@ -223,7 +222,7 @@ const fetchLoggedInUserDetails = async () => {
   };
 
   try {
-    const resp = await UserService.fetchUsers(params);
+    const resp = await userStore.fetchUsers(params);
 
     if (!commonUtil.hasError(resp) && resp.data.count) {
       currentUser.value = resp.data.docs[0];

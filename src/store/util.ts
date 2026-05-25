@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-import { commonUtil, translate, logger } from '@common';
-import { showToast } from '@/utils'
+import { api, commonUtil, translate, logger } from '@common';
 
 export interface UtilState {
   roles: any[];
@@ -40,8 +39,6 @@ export const useUtilStore = defineStore('util', {
         return;
       }
 
-      const { UtilService } = await import('@/services/UtilService');
-
       let roles = [];
       const params = {
         inputFields: {
@@ -58,7 +55,13 @@ export const useUtilStore = defineStore('util', {
       };
 
       try {
-        const resp = await UtilService.fetchRoles(params);
+        const resp = await api({
+          baseURL: commonUtil.getOmsURL(),
+          url: 'performFind',
+          method: 'POST',
+          data: params,
+          cache: true
+        });
         if (!commonUtil.hasError(resp)) {
           roles = resp.data.docs;
           roles.push({
@@ -70,43 +73,29 @@ export const useUtilStore = defineStore('util', {
           throw resp.data;
         }
       } catch (error) {
-        showToast(translate('Something went wrong.'));
+        commonUtil.showToast(translate('Something went wrong.'));
         logger.error(error);
       }
       this.roles = roles;
     },
 
-    async getProductStores() {
-      const { UtilService } = await import('@/services/UtilService');
-
-      let productStores = [];
+    async fetchShopifyShopConfigs() {
+      let shopifyShops = [];
       const params = {
-        viewSize: 100,
-        noConditionFind: 'Y',
-        entityName: 'ProductStore',
-        fieldList: ['productStoreId', 'storeName']
+        "entityName": "ShopifyShopAndConfig",
+        "noConditionFind": "Y",
+        "fieldList": ["shopifyConfigId", "name", "shopId", "productStoreId"],
+        "viewSize": 250
       };
 
       try {
-        const resp = await UtilService.fetchProductStores(params);
-        if (!commonUtil.hasError(resp)) {
-          productStores = resp.data.docs;
-        } else {
-          throw resp.data;
-        }
-      } catch (error) {
-        showToast(translate('Something went wrong.'));
-        logger.error(error);
-      }
-      this.productStores = productStores;
-    },
-
-    async fetchShopifyShopConfigs() {
-      const { UtilService } = await import('@/services/UtilService');
-
-      let shopifyShops = [];
-      try {
-        const resp = await UtilService.getShopifyConfigs();
+        const resp = await api({
+          baseURL: commonUtil.getOmsURL(),
+          url: "performFind",
+          method: "get",
+          params,
+          cache: true
+        });
         if (!commonUtil.hasError(resp)) {
           shopifyShops = resp.data.docs;
         } else {
@@ -119,8 +108,6 @@ export const useUtilStore = defineStore('util', {
     },
 
     async getSecurityGroups() {
-      const { UtilService } = await import('@/services/UtilService');
-
       const payload = {
         entityName: "SecurityGroup",
         viewSize: 200,
@@ -135,7 +122,13 @@ export const useUtilStore = defineStore('util', {
       let securityGroups = [];
 
       try {
-        const resp = await UtilService.getSecurityGroups(payload);
+        const resp = await api({
+          baseURL: commonUtil.getOmsURL(),
+          url: "performFind",
+          method: "POST",
+          data: payload,
+          cache: true
+        });
         if (!commonUtil.hasError(resp)) {
           securityGroups = resp.data.docs;
         } else {
@@ -148,8 +141,6 @@ export const useUtilStore = defineStore('util', {
     },
 
     async getClassificationSecurityGroups() {
-      const { UtilService } = await import('@/services/UtilService');
-
       const payload = {
         entityName: "SecurityGroup",
         viewSize: 250,
@@ -166,7 +157,13 @@ export const useUtilStore = defineStore('util', {
       let securityGroups = [];
 
       try {
-        const resp = await UtilService.getSecurityGroups(payload);
+        const resp = await api({
+          baseURL: commonUtil.getOmsURL(),
+          url: "performFind",
+          method: "POST",
+          data: payload,
+          cache: true
+        });
         if (!commonUtil.hasError(resp)) {
           securityGroups = resp.data.docs;
         } else {
@@ -179,8 +176,6 @@ export const useUtilStore = defineStore('util', {
     },
 
     async fetchFacilities() {
-      const { UtilService } = await import('@/services/UtilService');
-
       let facilities: Array<any> = [];
       let viewIndex = 0;
       let respCount = 0;
@@ -200,7 +195,13 @@ export const useUtilStore = defineStore('util', {
             viewIndex
           };
 
-          const resp = await UtilService.fetchFacilities(payload);
+          const resp = await api({
+            baseURL: commonUtil.getOmsURL(),
+            url: "performFind",
+            method: "POST",
+            data: payload,
+            cache: true
+          });
           if (!commonUtil.hasError(resp) && resp.data?.docs?.length > 0) {
             facilities = facilities.concat(resp.data.docs);
             respCount = resp.data.docs.length;
@@ -217,8 +218,6 @@ export const useUtilStore = defineStore('util', {
     },
 
     async fetchProductStores() {
-      const { UtilService } = await import('@/services/UtilService');
-
       let stores = [];
       try {
         const payload = {
@@ -227,7 +226,13 @@ export const useUtilStore = defineStore('util', {
           "viewSize": 100
         };
 
-        const resp = await UtilService.fetchProductStores(payload);
+        const resp = await api({
+          baseURL: commonUtil.getOmsURL(),
+          url: "performFind",
+          method: "POST",
+          data: payload,
+          cache: true
+        });
         if (!commonUtil.hasError(resp) && resp.data.count > 0) {
           stores = resp.data.docs;
         } else {
@@ -240,8 +245,6 @@ export const useUtilStore = defineStore('util', {
     },
 
     async fetchOrganizationPartyId() {
-      const { UtilService } = await import('@/services/UtilService');
-
       let partyId = "";
       const params = {
         entityName: "PartyRole",
@@ -254,7 +257,12 @@ export const useUtilStore = defineStore('util', {
       };
 
       try {
-        const resp = await UtilService.fetchOrganizationPartyId(params);
+        const resp = await api({
+          baseURL: commonUtil.getOmsURL(),
+          url: "performFind",
+          method: "POST",
+          data: params
+        });
         if (!commonUtil.hasError(resp)) {
           partyId = resp.data.docs[0]?.partyId;
         } else {
@@ -266,8 +274,28 @@ export const useUtilStore = defineStore('util', {
       this.organizationPartyId = partyId;
     },
 
-    updateSecurityGroup(payload: any) {
-      this.securityGroups = payload;
+    async updateSecurityGroup(payload: any): Promise<any> {
+      const resp = await api({
+        baseURL: commonUtil.getOmsURL(),
+        url: "service/updateSecurityGroup",
+        method: "post",
+        data: payload
+      });
+
+      if (!commonUtil.hasError(resp)) {
+        this.securityGroups = this.securityGroups.map((securityGroup: any) => {
+          if (securityGroup.groupId === payload.groupId) {
+            return {
+              ...securityGroup,
+              groupName: payload.groupName,
+              description: payload.description
+            };
+          }
+          return securityGroup;
+        });
+      }
+
+      return resp;
     },
 
     clearUtilState() {

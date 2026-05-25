@@ -108,9 +108,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from "@/store/user";
 import { useUtilStore } from "@/store/util";
 import { addCircleOutline, arrowForwardOutline, documentTextOutline, eyeOffOutline, eyeOutline } from 'ionicons/icons';
-import { copyToClipboard, showToast, isValidPassword, isValidEmail } from '@/utils';
-import { translate, logger } from '@common';
-import { UserService } from '@/services/UserService';
+import { commonUtil, translate, logger } from '@common';
 import SelectFacilityModal from '@/components/SelectFacilityModal.vue';
 import SelectProductStoreModal from "@/components/SelectProductStoreModal.vue";
 
@@ -287,7 +285,7 @@ const validatePassword = (event: any) => {
 
   if (value === '') return;
 
-  isValidPassword(value)
+  commonUtil.isValidPassword(value)
     ? passwordRef.value.$el.classList.add('ion-valid')
     : passwordRef.value.$el.classList.add('ion-invalid');
 };
@@ -311,10 +309,10 @@ const validateUserDetail = (data: any) => {
       validationErrors.push(translate('Email is required.'));
     }
   }
-  if (data.emailAddress && !isValidEmail(data.emailAddress)) {
+  if (data.emailAddress && !commonUtil.isValidEmail(data.emailAddress)) {
     validationErrors.push(translate('Invalid email address.'));
   }
-  if (data.currentPassword && !isValidPassword(data.currentPassword)) {
+  if (data.currentPassword && !commonUtil.isValidPassword(data.currentPassword)) {
     validationErrors.push(translate('Invalid passowrd. Password should be at least 5 characters long and contain at least one number, alphabet and special character.'));
   }
   return validationErrors;
@@ -326,10 +324,10 @@ const finishSetup = async () => {
     if (validationErrors.length > 0) {
       const errorMessages = validationErrors.join(" ");
       logger.error(errorMessages);
-      showToast(translate(errorMessages));
+      commonUtil.showToast(translate(errorMessages));
       return;
     }
-    await UserService.finishSetup({
+    await userStore.finishSetup({
       selectedUser: selectedUser.value,
       selectedTemplate: selectedUserTemplate.value,
       formData: formData.value,
@@ -343,7 +341,7 @@ const finishSetup = async () => {
     }
   } catch (err: any) {
     logger.error('error', err);
-    showToast(err.errorMessage ? err.errorMessage : translate('Failed to quick setup user.'));
+    commonUtil.showToast(err.errorMessage ? err.errorMessage : translate('Failed to quick setup user.'));
   }
 };
 
@@ -376,7 +374,7 @@ const finishSetupAlert = async (userLoginId: any) => {
 const copyCredentials = (data: any) => {
   if (data.length > 0) {
     const dataToCopy = `username: ${formData.value.userLoginId}, password: ${formData.value.currentPassword}`;
-    copyToClipboard(dataToCopy, 'Copied to clipboard');
+    commonUtil.copyToClipboard(dataToCopy, 'Copied to clipboard');
   }
   router.replace({ path: `/user-details/${props.partyId}` });
 };
@@ -411,10 +409,10 @@ const finishAndCreateNewUser = async () => {
     if (validationErrors.length > 0) {
       const errorMessages = validationErrors.join(" ");
       logger.error(errorMessages);
-      showToast(translate(errorMessages));
+      commonUtil.showToast(translate(errorMessages));
       return;
     }
-    await UserService.finishSetup({
+    await userStore.finishSetup({
       selectedUser: selectedUser.value,
       selectedTemplate: selectedUserTemplate.value,
       formData: formData.value,
@@ -425,7 +423,7 @@ const finishAndCreateNewUser = async () => {
     await router.replace({ path: `/create-user` });
   } catch (err) {
     logger.error('error', err);
-    showToast(translate('Failed to quick setup user.'));
+    commonUtil.showToast(translate('Failed to quick setup user.'));
   }
 };
 

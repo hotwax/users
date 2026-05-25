@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { commonUtil, logger } from '@common';
+import { api, commonUtil, logger } from '@common';
 
 export interface PermissionState {
   permissionsByClassificationGroups: any;
@@ -76,20 +76,71 @@ export const usePermissionStore = defineStore('permission', {
     getAllPermissions: (state): any => state.allPermissions
   },
   actions: {
+    async addSecurityPermissionToSecurityGroup(payload: any): Promise<any> {
+      return api({
+        baseURL: commonUtil.getOmsURL(),
+        url: "service/addSecurityPermissionToSecurityGroup",
+        method: "post",
+        data: payload
+      });
+    },
+
+    async createSecurityGroup(payload: any): Promise<any> {
+      return api({
+        baseURL: commonUtil.getOmsURL(),
+        url: "service/createSecurityGroup",
+        method: "post",
+        data: payload
+      });
+    },
+
+    async fetchPermissionsByGroup(payload: any): Promise<any> {
+      return api({
+        baseURL: commonUtil.getOmsURL(),
+        url: "performFind",
+        method: "POST",
+        data: payload,
+        cache: true
+      });
+    },
+
+    async getSecurityGroupUsers(payload: any): Promise<any> {
+      return api({
+        baseURL: commonUtil.getOmsURL(),
+        url: "performFind",
+        method: "POST",
+        data: payload
+      });
+    },
+
+    async removeSecurityPermissionFromSecurityGroup(payload: any): Promise<any> {
+      return api({
+        baseURL: commonUtil.getOmsURL(),
+        url: "service/updateSecurityPermissionToSecurityGroup",
+        method: "post",
+        data: payload
+      });
+    },
+
     async fetchAllPermissions() {
-      const { PermissionService } = await import('@/services/PermissionService');
       const permissions = {} as any;
       let viewIndex = 0, resp;
 
       try {
         do {
-          resp = await PermissionService.getAllPermissions({
-            entityName: "SecurityPermission",
-            distinct: "Y",
-            noConditionFind: "Y",
-            fieldList: ["description", "permissionId"],
-            viewSize: 250,
-            viewIndex: viewIndex,
+          resp = await api({
+            baseURL: commonUtil.getOmsURL(),
+            url: "performFind",
+            method: "POST",
+            cache: true,
+            data: {
+              entityName: "SecurityPermission",
+              distinct: "Y",
+              noConditionFind: "Y",
+              fieldList: ["description", "permissionId"],
+              viewSize: 250,
+              viewIndex: viewIndex,
+            }
           });
 
           if (!commonUtil.hasError(resp) && resp.data.count) {
@@ -109,22 +160,27 @@ export const usePermissionStore = defineStore('permission', {
     },
 
     async getPermissionsByClassificationGroups() {
-      const { PermissionService } = await import('@/services/PermissionService');
       let permissions = [] as any, resp;
       let viewIndex = 0;
 
       try {
         do {
-          resp = await PermissionService.getPermissionsByClassificationGroups({
-            entityName: "SecurityGroupAndPermission",
-            distinct: "Y",
-            noConditionFind: "Y",
-            filterByDate: "Y",
-            fieldList: ["description", "permissionId", "groupId", "groupName"],
-            viewSize: 250,
-            viewIndex: viewIndex,
-            inputFields: {
-              groupTypeEnumId: "PRM_CLASS_TYPE"
+          resp = await api({
+            baseURL: commonUtil.getOmsURL(),
+            url: "performFind",
+            method: "POST",
+            cache: true,
+            data: {
+              entityName: "SecurityGroupAndPermission",
+              distinct: "Y",
+              noConditionFind: "Y",
+              filterByDate: "Y",
+              fieldList: ["description", "permissionId", "groupId", "groupName"],
+              viewSize: 250,
+              viewIndex: viewIndex,
+              inputFields: {
+                groupTypeEnumId: "PRM_CLASS_TYPE"
+              }
             }
           });
 
@@ -183,13 +239,12 @@ export const usePermissionStore = defineStore('permission', {
         return;
       }
 
-      const { PermissionService } = await import('@/services/PermissionService');
       const permissions = {} as any;
       let viewIndex = 0, resp;
 
       try {
         do {
-          resp = await PermissionService.getPermissionsByGroup({
+          resp = await this.fetchPermissionsByGroup({
             entityName: "SecurityGroupAndPermission",
             distinct: "Y",
             noConditionFind: "Y",

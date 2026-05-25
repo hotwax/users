@@ -20,9 +20,7 @@ import { alertController, IonContent, IonItem, IonLabel, IonList, IonListHeader,
 import { computed } from "vue";
 import { commonUtil, translate, logger } from '@common';
 import { useUserStore } from "@/store/user";
-import { UserService } from "@/services/UserService";
 import { DateTime } from "luxon";
-import { showToast } from "@/utils";
 
 const props = defineProps({
   securityGroup: {
@@ -45,19 +43,19 @@ const getDateTime = (time: any) => {
 
 const removeUserSecurityGroup = async () => {
   try {
-    const resp = await UserService.removeUserSecurityGroup({
+    const resp = await userStore.removeUserSecurityGroup({
         groupId: props.securityGroup.groupId,
         userLoginId: selectedUser.value.userLoginId
     })
     
     if (commonUtil.hasError(resp)) throw resp.data
-    showToast(translate('Security group removed successfully.'))
+    commonUtil.showToast(translate('Security group removed successfully.'))
   } catch (error) {
-    showToast(translate('Something went wrong.'));
+    commonUtil.showToast(translate('Something went wrong.'));
     logger.error(error)
   }
   // refetching security groups
-  const userSecurityGroups = await UserService.getUserSecurityGroups(selectedUser.value.userLoginId)
+  const userSecurityGroups = await userStore.getUserSecurityGroups(selectedUser.value.userLoginId)
   userStore.updateSelectedUser({ ...selectedUser.value, securityGroups: userSecurityGroups })
   closePopover(userSecurityGroups)
 };

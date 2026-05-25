@@ -40,8 +40,6 @@ import { useUtilStore } from "@/store/util";
 import { usePermissionStore } from "@/store/permission";
 import { addOutline } from 'ionicons/icons';
 import { commonUtil, translate, logger } from "@common";
-import { generateInternalId, showToast } from "@/utils";
-import { PermissionService } from "@/services/PermissionService";
 
 const router = useRouter();
 const utilStore = useUtilStore();
@@ -56,7 +54,7 @@ const formData = ref({
 });
 
 const setGroupId = (groupName: string) => {
-  formData.value.groupId = generateInternalId(groupName);
+  formData.value.groupId = commonUtil.generateInternalId(groupName);
 };
 
 const validateGroupId = (event: any) => {
@@ -80,12 +78,12 @@ const markGroupIdTouched = () => {
 
 const createGroup = async () => {
   if (!formData.value.groupName?.trim()) {
-    showToast(translate("Security group name is required."));
+    commonUtil.showToast(translate("Security group name is required."));
     return;
   }
 
   if (formData.value.groupId.length > 20) {
-    showToast(translate("Internal ID cannot be more than 20 characters."));
+    commonUtil.showToast(translate("Internal ID cannot be more than 20 characters."));
     return;
   }
 
@@ -94,10 +92,10 @@ const createGroup = async () => {
   }
 
   try {
-    const resp = await PermissionService.createSecurityGroup(formData.value);
+    const resp = await permissionStore.createSecurityGroup(formData.value);
 
     if (!commonUtil.hasError(resp)) {
-      showToast(translate("Security group created successfully."));
+      commonUtil.showToast(translate("Security group created successfully."));
       utilStore.securityGroups.push({ ...formData.value });
       permissionStore.updateCurrentGroup({ ...formData.value });
       permissionStore.updateQuery({ queryString: '', showSelected: false });
@@ -109,9 +107,9 @@ const createGroup = async () => {
   } catch (err: any) {
     logger.error(err);
     if (err.response?.data?.error?.message) {
-      showToast(err.response.data.error.message);
+      commonUtil.showToast(err.response.data.error.message);
     } else {
-      showToast(translate("Failed to create security group."));
+      commonUtil.showToast(translate("Failed to create security group."));
     }
   }
 };
