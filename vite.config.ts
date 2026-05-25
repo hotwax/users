@@ -16,13 +16,11 @@ export default defineConfig({
       targets: ['> 1%', 'last 2 versions', 'not dead']
     }),
     VitePWA({
-      registerType: 'prompt',
+      registerType: "autoUpdate",
+      selfDestroying: true,
       manifest: manifest as any,
       devOptions: {
         enabled: true
-      },
-      workbox: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
       }
     })
   ],
