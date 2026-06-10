@@ -87,6 +87,9 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'users',
         component: () => import('@/views/Users.vue'),
+        meta: {
+          permissionId: "USERS_LIST_VIEW"
+        }
       },{
         path: 'settings',
         component: () => import('@/views/Settings.vue')
@@ -150,13 +153,19 @@ const routes: Array<RouteRecordRaw> = [
     path: '/create-security-group',
     name: 'CreateSecurityGroup',
     component: CreateSecurityGroup,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      permissionId: "APP_SECURITY_GROUP_CREATE"
+    }
   },
   {
     path: '/add-permissions',
     name: 'AddPermissions',
     component: AddPermissions,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
+    meta: {
+      permissionId: "APP_PERMISSION_CREATE"
+    }
   }
 ]
 

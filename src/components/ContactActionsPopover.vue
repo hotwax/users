@@ -5,10 +5,10 @@
       <ion-item button @click="copyInfo()">
         {{ translate("Copy") }}
       </ion-item>
-      <ion-item @click="updateContactField()" button>
+      <ion-item @click="updateContactField()" button :disabled="!hasPermission(Actions.APP_USER_CONTACT_UPDATE)">
         {{ translate("Edit") }}
       </ion-item>
-      <ion-item @click="deleteContactField()" button lines="none">
+      <ion-item @click="deleteContactField()" button lines="none" :disabled="!hasPermission(Actions.APP_USER_CONTACT_DELETE)">
         {{ translate("Remove") }}
       </ion-item>
     </ion-list>
@@ -31,6 +31,7 @@ import { hasError } from "@/adapter";
 import { copyToClipboard, isValidEmail, showToast } from "@/utils";
 import { UserService } from "@/services/UserService";
 import logger from '@/logger';
+import { Actions, hasPermission } from '@/authorization';
 
 export default defineComponent({
   name: "ContactActionsPopover",
@@ -233,6 +234,8 @@ export default defineComponent({
     const store = useStore();
 
     return {
+      Actions,
+      hasPermission,
       store,
       translate
     }
