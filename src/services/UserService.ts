@@ -6,7 +6,31 @@ import { showToast } from '@/utils';
 import { translate } from '@hotwax/dxp-components';
 import logger from '@/logger';
 
-const login = async (username: string, password: string): Promise<any> => {
+const isLocalMoquiLogin = () => process.env.VUE_APP_LOCAL_MOQUI_LOGIN === 'true' || process.env.VUE_APP_OMS_TYPE === 'MOQUI';
+
+const normalizeMoquiBaseUrl = (instanceUrl?: string): string => {
+  const url = (instanceUrl || store.getters['user/getInstanceUrl'] || process.env.VUE_APP_LOCAL_MOQUI_URL || '').trim();
+  const baseUrl = url
+    .replace(/\/rest\/s1.*$/, '')
+    .replace(/\/api\/?$/, '')
+    .replace(/\/+$/, '');
+
+  return baseUrl.startsWith('http') ? `${baseUrl}/rest/s1/` : `https://${baseUrl}.hotwax.io/rest/s1/`;
+}
+
+const login = async (username: string, password: string, instanceUrl?: string): Promise<any> => {
+  if (isLocalMoquiLogin()) {
+    return client({
+      url: "admin/login",
+      method: "post",
+      baseURL: normalizeMoquiBaseUrl(instanceUrl),
+      data: {
+        username,
+        password
+      }
+    });
+  }
+
   return api({
     url: "login",
     method: "post",
@@ -18,10 +42,10 @@ const login = async (username: string, password: string): Promise<any> => {
 }
 
 const getUserProfile = async (token: any): Promise<any> => {
-  const baseURL = store.getters['user/getBaseUrl'];
+  const baseURL = isLocalMoquiLogin() ? normalizeMoquiBaseUrl() : store.getters['user/getBaseUrl'];
   try {
     const resp = await client({
-      url: "user-profile",
+      url: isLocalMoquiLogin() ? "admin/user/profile" : "user-profile",
       method: "get",
       baseURL,
       headers: {
@@ -61,12 +85,45 @@ const setUserTimeZone = async (payload: any): Promise<any> => {
 }
 
 const getUserPermissions = async (payload: any, token: any): Promise<any> => {
-  const baseURL = store.getters['user/getBaseUrl'];
+  const baseURL = isLocalMoquiLogin() ? normalizeMoquiBaseUrl() : store.getters['user/getBaseUrl'];
   let serverPermissions = [] as any;
 
   // If the server specific permission list doesn't exist, getting server permissions will be of no use
   // It means there are no rules yet depending upon the server permissions.
   if (payload.permissionIds && payload.permissionIds.length == 0) return serverPermissions;
+
+  if (isLocalMoquiLogin()) {
+    const viewSize = 200;
+    let viewIndex = 0;
+    let resp;
+
+    try {
+      do {
+        resp = await client({
+          url: "admin/user/permissions",
+          method: "get",
+          baseURL,
+          params: { viewIndex, viewSize },
+          headers: {
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (resp.status === 200 && resp.data.docs?.length && !hasError(resp)) {
+          serverPermissions.push(...resp.data.docs.map((permission: any) => permission.permissionId));
+          viewIndex++;
+        } else {
+          resp = null;
+        }
+      } while (resp);
+
+      return serverPermissions;
+    } catch (error: any) {
+      return Promise.reject(error);
+    }
+  }
+
   // TODO pass specific permissionIds
   let resp;
   // TODO Make it configurable from the environment variables.
