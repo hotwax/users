@@ -229,6 +229,11 @@
             },
             {
               "file": "src/views/Completed.vue",
+              "context": "COMMON_ADMIN OR FF_SHIP_NOW",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Completed.vue",
               "context": "COMMON_ADMIN OR SF_UNLOCK_ORDER",
               "kind": "has-permission"
             },
@@ -245,6 +250,11 @@
             {
               "file": "src/views/OrderDetail.vue",
               "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/OrderDetail.vue",
+              "context": "COMMON_ADMIN OR FF_SHIP_NOW",
               "kind": "has-permission"
             },
             {
@@ -276,6 +286,21 @@
               "file": "src/router/index.ts",
               "context": "FF_ORDER_LOOKUP_VIEW",
               "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "FF_SHIP_NOW",
+          "usages": [
+            {
+              "file": "src/views/Completed.vue",
+              "context": "COMMON_ADMIN OR FF_SHIP_NOW",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/OrderDetail.vue",
+              "context": "COMMON_ADMIN OR FF_SHIP_NOW",
+              "kind": "has-permission"
             }
           ]
         },
@@ -776,32 +801,6 @@
       ]
     },
     {
-      "appId": "order-manager-execute-solr-query",
-      "root": "../order-manager-execute-solr-query",
-      "permissions": [
-        {
-          "permissionId": "COMMERCEUSER_VIEW",
-          "usages": [
-            {
-              "file": "src/views/Settings.vue",
-              "context": "COMMERCEUSER_VIEW",
-              "kind": "has-permission"
-            }
-          ]
-        },
-        {
-          "permissionId": "ORDERMGR_VIEW",
-          "usages": [
-            {
-              "file": ".env.example",
-              "context": "ORDERMGR_VIEW",
-              "kind": "env"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "appId": "order-routing",
       "root": "../order-routing",
       "permissions": [
@@ -957,12 +956,6 @@
           ]
         }
       ]
-    },
-    {
-      "appId": "product-updates",
-      "root": "../product-updates",
-      "allowNoPermissions": true,
-      "permissions": []
     },
     {
       "appId": "products",
@@ -1313,6 +1306,11 @@
               "kind": "action-map"
             },
             {
+              "file": "src/components/Tabs.vue",
+              "context": "Actions.APP_PERMISSION_VIEW",
+              "kind": "has-permission-action"
+            },
+            {
               "file": "src/router/index.ts",
               "context": "APP_PERMISSION_VIEW",
               "kind": "route-meta"
@@ -1343,7 +1341,7 @@
               "kind": "action-map"
             },
             {
-              "file": "src/views/Permissions.vue",
+              "file": "src/views/AppPermissions.vue",
               "context": "Actions.APP_SECURITY_GROUP_CREATE",
               "kind": "has-permission-action"
             },

@@ -47,10 +47,8 @@ Initial local scan found these likely app repos with permission references:
 - `/Users/adityapatel/Documents/GitHub/job-manager`
 - `/Users/adityapatel/Documents/GitHub/launchpad`
 - `/Users/adityapatel/Documents/GitHub/order-manager`
-- `/Users/adityapatel/Documents/GitHub/order-manager-execute-solr-query`
 - `/Users/adityapatel/Documents/GitHub/order-routing`
 - `/Users/adityapatel/Documents/GitHub/preorder`
-- `/Users/adityapatel/Documents/GitHub/product-updates`
 - `/Users/adityapatel/Documents/GitHub/products`
 - `/Users/adityapatel/Documents/GitHub/receiving`
 - `/Users/adityapatel/Documents/GitHub/reroute-fulfilment`
@@ -125,10 +123,8 @@ Add the audited repo roots as stable app IDs with paths relative to the Users re
   { "appId": "job-manager", "root": "../job-manager" },
   { "appId": "launchpad", "root": "../launchpad" },
   { "appId": "order-manager", "root": "../order-manager" },
-  { "appId": "order-manager-execute-solr-query", "root": "../order-manager-execute-solr-query" },
   { "appId": "order-routing", "root": "../order-routing" },
   { "appId": "preorder", "root": "../preorder" },
-  { "appId": "product-updates", "root": "../product-updates", "allowNoPermissions": true },
   { "appId": "products", "root": "../products" },
   { "appId": "receiving", "root": "../receiving" },
   { "appId": "reroute-fulfilment", "root": "../reroute-fulfilment" },
