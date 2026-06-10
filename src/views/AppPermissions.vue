@@ -2,22 +2,22 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>{{ translate("Permissions") }}</ion-title>
-      </ion-toolbar>
-      <ion-toolbar>
-        <ion-segment value="app">
-          <ion-segment-button value="app">
-            <ion-label>{{ translate("By app") }}</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="group" @click="openGroupPermissions()">
-            <ion-label>{{ translate("By group") }}</ion-label>
-          </ion-segment-button>
-        </ion-segment>
+        <div class="permission-toolbar-content">
+          <ion-title>{{ translate("Permissions") }}</ion-title>
+          <ion-segment :value="viewMode" @ionChange="updateViewMode($event)">
+            <ion-segment-button value="app">
+              <ion-label>{{ translate("By app") }}</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="group">
+              <ion-label>{{ translate("By group") }}</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </div>
       </ion-toolbar>
     </ion-header>
 
     <ion-content>
-      <div class="app-permissions">
+      <div v-if="viewMode === 'app'" class="app-permissions">
         <aside>
           <ion-searchbar :placeholder="translate('Search permissions')" v-model="query" />
           <ion-list>
@@ -71,12 +71,57 @@
           </div>
         </main>
       </div>
+
+      <div v-else class="app-permissions">
+        <aside>
+          <h1>{{ translate("Security Groups") }}</h1>
+
+          <ion-list>
+            <ion-item v-for="group in securityGroups" :key="group?.groupId" button detail @click="updateCurrentGroup(group)">
+              <ion-label :color="group.groupId === currentGroup?.groupId ? 'primary' : ''">
+                <p class="overline">{{ group.groupId }}</p>
+                {{ group?.groupName || group?.groupId }}
+              </ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-button @click="createGroup()" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE)" fill="clear" expand="block">
+            <ion-icon slot="start" :icon="addOutline" />
+            <ion-label>{{ translate("Create security group") }}</ion-label>
+          </ion-button>
+        </aside>
+
+        <main v-if="currentGroup?.groupId">
+          <div class="section-header">
+            <ion-item lines="none">
+              <ion-icon :icon="idCardOutline" slot="start" />
+              <ion-label>
+                <ion-note class="overline">{{ currentGroup.groupId }}</ion-note>
+                <h1>{{ currentGroup.groupName || currentGroup.groupId }}</h1>
+                <p class="ion-text-wrap">{{ currentGroup.description }}</p>
+              </ion-label>
+              <ion-button slot="end" @click="editSecurityGroup()" fill="outline">{{ translate("Edit") }}</ion-button>
+            </ion-item>
+            <ion-button v-if="securityGroupUsers[currentGroup.groupId]" fill="clear" color="medium" @click="openCurrentGroupUsers()">
+              {{ translate(securityGroupUsers[currentGroup.groupId] > 1 ? "users" : "user", { userCount: securityGroupUsers[currentGroup.groupId] }) }}
+              <ion-icon :icon="openOutline" slot="end" />
+            </ion-button>
+          </div>
+          <hr />
+          <PermissionItems />
+        </main>
+
+        <main v-else class="empty-state">
+          <p>{{ translate("Select a security group to view its details") }}</p>
+        </main>
+      </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script lang="ts">
 import {
+  IonButton,
   IonContent,
   IonHeader,
   IonIcon,
@@ -93,20 +138,29 @@ import {
   modalController
 } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { shieldCheckmarkOutline } from 'ionicons/icons';
+import { addOutline, idCardOutline, openOutline, shieldCheckmarkOutline } from 'ionicons/icons';
 import { translate } from '@hotwax/dxp-components';
 import { appPermissionCatalogs, AppPermissionCatalog, AppPermissionDefinition } from '@/config/app-permissions';
 import AppPermissionCard from '@/components/AppPermissionCard.vue';
 import AppPermissionGroupModal from '@/components/AppPermissionGroupModal.vue';
 import AppPermissionHistoryModal from '@/components/AppPermissionHistoryModal.vue';
+import EditSecurityGroupModal from '@/components/EditSecurityGroupModal.vue';
+import PermissionItems from '@/components/PermissionItems.vue';
 import { AppPermissionService } from '@/services/AppPermissionService';
+import { PermissionService } from '@/services/PermissionService';
 import { showToast } from '@/utils';
+import { hasError } from '@/adapter';
+import { Actions, hasPermission } from '@/authorization';
+import { mapGetters, useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import emitter from "@/event-bus";
 import logger from '@/logger';
 
 export default defineComponent({
   name: 'AppPermissions',
   components: {
     AppPermissionCard,
+    IonButton,
     IonContent,
     IonHeader,
     IonIcon,
@@ -119,17 +173,26 @@ export default defineComponent({
     IonSegment,
     IonSegmentButton,
     IonTitle,
-    IonToolbar
+    IonToolbar,
+    PermissionItems
   },
   data() {
     return {
       activeGroupsByPermission: {} as Record<string, any[]>,
       assignableSecurityGroups: [] as any[],
       query: '',
-      selectedAppId: (appPermissionCatalogs[0]?.appId || '') as string
+      securityGroupUsers: {} as any,
+      selectedAppId: (appPermissionCatalogs[0]?.appId || '') as string,
+      viewMode: 'app'
     }
   },
   computed: {
+    ...mapGetters({
+      allPermissions: 'permission/getAllPermissions',
+      currentGroup: 'permission/getCurrentGroup',
+      permissionsByClassificationGroups: 'permission/getPermissionsByClassificationGroups',
+      securityGroups: 'util/getSecurityGroups'
+    }),
     filteredApps(): readonly AppPermissionCatalog[] {
       const query = this.query.trim().toLowerCase();
       if (!query) return appPermissionCatalogs;
@@ -152,10 +215,84 @@ export default defineComponent({
       return appPermissionCatalogs.find((app) => app.appId === this.selectedAppId) || appPermissionCatalogs[0];
     }
   },
+  watch: {
+    '$route.query.view': {
+      async handler() {
+        const nextViewMode = this.getViewModeFromRoute();
+        if (this.viewMode === nextViewMode) return;
+
+        this.viewMode = nextViewMode;
+        if (this.viewMode === 'group') {
+          await this.loadGroupPermissions();
+        }
+      }
+    }
+  },
   async mounted() {
-    await this.loadActiveGroupsForSelectedApp();
+    this.viewMode = this.getViewModeFromRoute();
+
+    if (this.viewMode === 'app') {
+      await this.loadActiveGroupsForSelectedApp();
+      return;
+    }
+
+    await this.loadGroupPermissions();
   },
   methods: {
+    createGroup() {
+      this.$router.push({ path: `/create-security-group/` });
+    },
+    async editSecurityGroup() {
+      const editSecurityGroupModal = await modalController.create({
+        component: EditSecurityGroupModal
+      });
+
+      editSecurityGroupModal.present();
+    },
+    async getUsersCount() {
+      if(this.securityGroupUsers[this.currentGroup.groupId]) {
+        return;
+      }
+
+      try {
+        const resp = await PermissionService.getSecurityGroupUsers({
+          entityName: "PartyAndUserLoginSecurityGroupDetails",
+          noConditionFind: "Y",
+          fromDateName: "relationshipFromDate",
+          thruDateName: "relationshipThruDate",
+          filterByDate: "Y",
+          distinct: "Y",
+          viewSize: 1,
+          viewIndex: 0,
+          fieldList: ['partyId','securityGroupName'],
+          inputFields: {
+            securityGroupId: this.currentGroup.groupId,
+            roleTypeIdTo: "APPLICATION_USER"
+          }
+        });
+
+        if(!hasError(resp)) {
+          this.securityGroupUsers[this.currentGroup.groupId] = resp.data.count;
+        } else {
+          throw resp.data;
+        }
+      } catch(err) {
+        logger.error(err);
+      }
+    },
+    getViewModeFromRoute() {
+      return this.$route.query.view === 'group' ? 'group' : 'app';
+    },
+    async loadGroupPermissions() {
+      await this.store.dispatch('util/getSecurityGroups');
+      await this.store.dispatch('util/getClassificationSecurityGroups');
+      if(!this.allPermissions.length) await this.store.dispatch('permission/getAllPermissions');
+      if(!Object.keys(this.permissionsByClassificationGroups).length) await this.store.dispatch('permission/getPermissionsByClassificationGroups');
+      if(this.currentGroup.groupId) {
+        await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId);
+        await this.getUsersCount();
+      }
+    },
     matchesPermission(permission: AppPermissionDefinition, query: string) {
       return permission.permissionId.toLowerCase().includes(query)
         || permission.title.toLowerCase().includes(query)
@@ -182,8 +319,9 @@ export default defineComponent({
 
       this.assignableSecurityGroups = await AppPermissionService.getAssignableSecurityGroups();
     },
-    openGroupPermissions() {
-      this.$router.push('/tabs/permissions');
+    async openCurrentGroupUsers() {
+      await this.store.dispatch('user/updateQuery', {queryString: '', securityGroup: this.currentGroup.groupId, status: '', hideDisabledUser: true});
+      this.router.push('users');
     },
     async openHistory(permission: AppPermissionDefinition) {
       let records = [] as any[];
@@ -260,11 +398,50 @@ export default defineComponent({
     async selectApp(appId: string) {
       this.selectedAppId = appId;
       await this.loadActiveGroupsForSelectedApp();
+    },
+    async updateCurrentGroup(group: any) {
+      emitter.emit('presentLoader');
+      await this.store.dispatch('permission/updateCurrentGroup', group);
+      await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId);
+      await this.store.dispatch('permission/checkAssociated');
+      await this.getUsersCount();
+      await this.store.dispatch('permission/updateQuery', {queryString: '', showAllSelected: false, classificationSecurityGroupId: ''});
+      emitter.emit('dismissLoader');
+    },
+    async updateViewMode(event: CustomEvent) {
+      this.viewMode = event.detail.value === 'group' ? 'group' : 'app';
+      const query = { ...this.$route.query } as any;
+      if (this.viewMode === 'group') {
+        query.view = 'group';
+      } else {
+        delete query.view;
+      }
+
+      await this.router.replace({
+        path: '/tabs/app-permissions',
+        query
+      });
+
+      if (this.viewMode === 'group') {
+        await this.loadGroupPermissions();
+      } else {
+        await this.loadActiveGroupsForSelectedApp();
+      }
     }
   },
   setup() {
+    const router = useRouter();
+    const store = useStore();
+
     return {
+      Actions,
+      addOutline,
+      hasPermission,
+      idCardOutline,
+      openOutline,
+      router,
       shieldCheckmarkOutline,
+      store,
       translate
     }
   }
@@ -277,6 +454,29 @@ export default defineComponent({
   gap: 16px;
   grid-template-columns: minmax(220px, 320px) 1fr;
   padding: 16px;
+}
+
+.permission-toolbar-content {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding-inline-end: 16px;
+}
+
+.permission-toolbar-content ion-segment {
+  max-width: 320px;
+  width: 100%;
+}
+
+.section-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.section-header > ion-item {
+  width: 50%;
 }
 
 section {
@@ -294,6 +494,26 @@ section {
   .app-permissions,
   section {
     grid-template-columns: 1fr;
+  }
+
+  .permission-toolbar-content {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+    padding-block: 8px;
+  }
+
+  .permission-toolbar-content ion-segment {
+    max-width: none;
+  }
+
+  .section-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .section-header > ion-item {
+    width: 100%;
   }
 }
 </style>

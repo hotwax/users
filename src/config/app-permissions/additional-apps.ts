@@ -300,24 +300,6 @@ export const orderManagerPermissionCatalog = defineAppPermissionCatalog({
   ]
 } as const);
 
-export const orderManagerSolrPermissionCatalog = defineAppPermissionCatalog({
-  appId: "order-manager-execute-solr-query",
-  appName: "Order Manager Solr Query",
-  appDescription: "Controls access to Order Manager Solr query tooling.",
-  appAccessPermissionIds: ["ORDERMGR_VIEW"],
-  adminPermissionIds: adminPermissions,
-  permissions: [
-    {
-      permissionId: "ORDERMGR_VIEW",
-      title: "Access order manager Solr query",
-      description: "Allows users to open the Order Manager Solr query tool.",
-      category: "Application access",
-      impliedBy: adminPermissions,
-      usedIn: usage(".env.example", "ORDERMGR_VIEW")
-    }
-  ]
-} as const);
-
 export const orderRoutingPermissionCatalog = defineAppPermissionCatalog({
   appId: "order-routing",
   appName: "Order Routing",
@@ -432,15 +414,6 @@ export const preorderPermissionCatalog = defineAppPermissionCatalog({
       usedIn: usage("src/authorization/Actions.ts", "APP_PWA_STANDALONE_ACCESS")
     }
   ]
-} as const);
-
-export const productUpdatesPermissionCatalog = defineAppPermissionCatalog({
-  appId: "product-updates",
-  appName: "Product Updates",
-  appDescription: "No auditable permission checks are currently configured in this checkout.",
-  appAccessPermissionIds: [],
-  adminPermissionIds: adminPermissions,
-  permissions: []
 } as const);
 
 export const productsPermissionCatalog = defineAppPermissionCatalog({
@@ -645,10 +618,8 @@ export const additionalAppPermissionCatalogs = [
   jobManagerPermissionCatalog,
   launchpadPermissionCatalog,
   orderManagerPermissionCatalog,
-  orderManagerSolrPermissionCatalog,
   orderRoutingPermissionCatalog,
   preorderPermissionCatalog,
-  productUpdatesPermissionCatalog,
   productsPermissionCatalog,
   receivingPermissionCatalog,
   rerouteFulfilmentPermissionCatalog,

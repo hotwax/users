@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-back-button default-href="/tabs/permissions" slot="start"></ion-back-button>
+        <ion-back-button default-href="/tabs/app-permissions?view=group" slot="start"></ion-back-button>
         <ion-title>{{ translate("Create security group") }}</ion-title>
       </ion-toolbar>
     </ion-header>

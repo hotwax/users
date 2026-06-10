@@ -63,7 +63,7 @@ export const usersPermissionCatalog = defineAppPermissionCatalog({
       category: "Security groups",
       impliedBy: ["COMMON_ADMIN"],
       usedIn: [
-        { file: "src/views/Permissions.vue", context: "Create security group action" },
+        { file: "src/views/AppPermissions.vue", context: "Create security group action" },
         { file: "src/views/UserDetails.vue", context: "Assign security groups to a user" },
       ],
     },
@@ -73,7 +73,7 @@ export const usersPermissionCatalog = defineAppPermissionCatalog({
       description: "Allows users to open permission administration pages.",
       category: "Permission administration",
       impliedBy: ["COMMON_ADMIN"],
-      usedIn: [{ file: "src/router/index.ts", context: "Permissions tab route", routePath: "/tabs/permissions" }],
+      usedIn: [{ file: "src/router/index.ts", context: "Permissions tab route", routePath: "/tabs/app-permissions" }],
     },
     {
       permissionId: "APP_PERMISSION_CREATE",

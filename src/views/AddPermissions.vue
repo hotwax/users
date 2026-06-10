@@ -65,7 +65,7 @@ export default defineComponent({
   },
   methods: {
     openPermissions() {
-      this.router.replace('tabs/permissions')
+      this.router.replace('/tabs/app-permissions?view=group')
     }
   },
   setup() {
