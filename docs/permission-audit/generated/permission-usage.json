@@ -1,0 +1,1520 @@
+{
+  "schemaVersion": 1,
+  "apps": [
+    {
+      "appId": "available-to-promise",
+      "root": "../available-to-promise",
+      "permissions": [
+        {
+          "permissionId": "ATP_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "ATP_APP_VIEW",
+              "kind": "env"
+            }
+          ]
+        },
+        {
+          "permissionId": "COMMON_ADMIN",
+          "usages": [
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "bopis",
+      "root": "../bopis",
+      "permissions": [
+        {
+          "permissionId": "BOPIS_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "BOPIS_APP_VIEW",
+              "kind": "env"
+            }
+          ]
+        },
+        {
+          "permissionId": "BOPIS_POD_UPDATE",
+          "usages": [
+            {
+              "file": "src/views/Orders.vue",
+              "context": "BOPIS_POD_UPDATE",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "BOPIS_POD_UPDATE",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "BOPIS_REQUEST_TRANSFER_UPDATE",
+          "usages": [
+            {
+              "file": "src/views/Settings.vue",
+              "context": "BOPIS_REQUEST_TRANSFER_UPDATE",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "COMMERCEUSER_VIEW",
+          "usages": [
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMERCEUSER_VIEW",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "COMMON_ADMIN",
+          "usages": [
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "ORD_SALES_ORDER_CNCL",
+          "usages": [
+            {
+              "file": "src/views/OrderDetail.vue",
+              "context": "ORD_SALES_ORDER_CNCL",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "STOREFULFILLMENT_ADMIN",
+          "usages": [
+            {
+              "file": "src/components/DxpProductIdentifier.vue",
+              "context": "STOREFULFILLMENT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/store/productStore.ts",
+              "context": "STOREFULFILLMENT_ADMIN",
+              "kind": "has-permission"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "company",
+      "root": "../company",
+      "permissions": [
+        {
+          "permissionId": "COMMERCEUSER_VIEW",
+          "usages": [
+            {
+              "file": "src/views/settings/Settings.vue",
+              "context": "COMMERCEUSER_VIEW",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "COMMON_ADMIN",
+          "usages": [
+            {
+              "file": "src/views/settings/Settings.vue",
+              "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "COMPANY_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "COMPANY_APP_VIEW",
+              "kind": "env"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "facilities",
+      "root": "../facilities",
+      "permissions": [
+        {
+          "permissionId": "APP_COMMERCE_VIEW",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_COMMERCE_VIEW",
+              "kind": "action-map"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_PWA_STANDALONE_ACCESS",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_PWA_STANDALONE_ACCESS",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "Actions.APP_PWA_STANDALONE_ACCESS",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "FACILITIES_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "FACILITIES_APP_VIEW",
+              "kind": "env"
+            },
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "FACILITIES_APP_VIEW",
+              "kind": "action-map"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "fulfillment",
+      "root": "../fulfillment",
+      "permissions": [
+        {
+          "permissionId": "CARRIER_SETUP_VIEW",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "CARRIER_SETUP_VIEW",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "COMMERCEUSER_VIEW",
+          "usages": [
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMERCEUSER_VIEW",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "COMMON_ADMIN",
+          "usages": [
+            {
+              "file": "src/views/Completed.vue",
+              "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Completed.vue",
+              "context": "COMMON_ADMIN OR SF_UNLOCK_ORDER",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/InProgress.vue",
+              "context": "COMMON_ADMIN OR STOREFULFILLMENT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/OpenOrders.vue",
+              "context": "COMMON_ADMIN OR STOREFULFILLMENT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/OrderDetail.vue",
+              "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/OrderDetail.vue",
+              "context": "COMMON_ADMIN OR SF_UNLOCK_ORDER",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "FF_INVOICING_STATUS_VIEW",
+          "usages": [
+            {
+              "file": "src/views/OrderDetail.vue",
+              "context": "FF_INVOICING_STATUS_VIEW",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "FF_ORDER_LOOKUP_VIEW",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "FF_ORDER_LOOKUP_VIEW",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "FULFILLMENT_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "FULFILLMENT_APP_VIEW",
+              "kind": "env"
+            }
+          ]
+        },
+        {
+          "permissionId": "FULFILLMENT_VIEW_ALL_PICKERS",
+          "usages": [
+            {
+              "file": "src/components/EditPickersModal.vue",
+              "context": "FULFILLMENT_VIEW_ALL_PICKERS",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/AssignPickerModal.vue",
+              "context": "FULFILLMENT_VIEW_ALL_PICKERS",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "ORD_TRANSFER_ORDER_ADMIN",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "ORD_TRANSFER_ORDER_VIEW OR ORD_TRANSFER_ORDER_ADMIN",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "ORD_TRANSFER_ORDER_CANCEL",
+          "usages": [
+            {
+              "file": "src/components/CloseTransferOrderModal.vue",
+              "context": "ORD_TRANSFER_ORDER_CANCEL",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/TransferOrderDetail.vue",
+              "context": "ORD_TRANSFER_ORDER_CANCEL",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "ORD_TRANSFER_ORDER_VIEW",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "ORD_TRANSFER_ORDER_VIEW OR ORD_TRANSFER_ORDER_ADMIN",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "ORDER_SHIPMENT_METHOD_UPDATE",
+          "usages": [
+            {
+              "file": "src/views/OrderDetail.vue",
+              "context": "ORDER_SHIPMENT_METHOD_UPDATE",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "SF_UNLOCK_ORDER",
+          "usages": [
+            {
+              "file": "src/views/Completed.vue",
+              "context": "COMMON_ADMIN OR SF_UNLOCK_ORDER",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/OrderDetail.vue",
+              "context": "COMMON_ADMIN OR SF_UNLOCK_ORDER",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "STOREFULFILLMENT_ADMIN",
+          "usages": [
+            {
+              "file": "src/components/DxpProductIdentifier.vue",
+              "context": "STOREFULFILLMENT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "STOREFULFILLMENT_ADMIN",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/store/productStore.ts",
+              "context": "STOREFULFILLMENT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/store/transferorder.ts",
+              "context": "STOREFULFILLMENT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/store/util.ts",
+              "context": "STOREFULFILLMENT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/InProgress.vue",
+              "context": "COMMON_ADMIN OR STOREFULFILLMENT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/OpenOrders.vue",
+              "context": "COMMON_ADMIN OR STOREFULFILLMENT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/TransferOrderDetail.vue",
+              "context": "STOREFULFILLMENT_ADMIN",
+              "kind": "has-permission"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "inventory-count",
+      "root": "../inventory-count",
+      "permissions": [
+        {
+          "permissionId": "COMMERCEUSER_VIEW",
+          "usages": [
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMERCEUSER_VIEW",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "COMMON_ADMIN",
+          "usages": [
+            {
+              "file": "src/App.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_VAR_LOG",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INVCOUNT_APP_VIEW",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/stores/userProfileStore.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Count.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_LOCK_RLS",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Count.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_PRE_START",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/CountProgressReview.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_CNT_VIEW_QOH",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/CountProgressReview.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_SUBMIT",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/CountProgressReview.vue",
+              "context": "PREVIEW_COUNT_ITEM OR COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/SessionCountDetail.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_CNT_VIEW_QOH",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INVCOUNT_APP_VIEW",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Tabs.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_VAR_LOG",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "INV_CNT_VIEW_QOH",
+          "usages": [
+            {
+              "file": "src/views/CountProgressReview.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_CNT_VIEW_QOH",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/SessionCountDetail.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_CNT_VIEW_QOH",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "INV_COUNT_ADMIN",
+          "usages": [
+            {
+              "file": "src/App.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_VAR_LOG",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INVCOUNT_APP_VIEW",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/stores/userProfileStore.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Count.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_LOCK_RLS",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Count.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_PRE_START",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/CountProgressReview.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_CNT_VIEW_QOH",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/CountProgressReview.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_SUBMIT",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/CountProgressReview.vue",
+              "context": "PREVIEW_COUNT_ITEM OR COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/SessionCountDetail.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_CNT_VIEW_QOH",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INVCOUNT_APP_VIEW",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Tabs.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_VAR_LOG",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "INV_COUNT_LOCK_RLS",
+          "usages": [
+            {
+              "file": "src/views/Count.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_LOCK_RLS",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "INV_COUNT_PRE_START",
+          "usages": [
+            {
+              "file": "src/views/Count.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_PRE_START",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "INV_COUNT_SUBMIT",
+          "usages": [
+            {
+              "file": "src/views/CountProgressReview.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_SUBMIT",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "INV_COUNT_VAR_LOG",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_VAR_LOG",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/views/Tabs.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INV_COUNT_VAR_LOG",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "INVCOUNT_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "INVCOUNT_APP_VIEW",
+              "kind": "env"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INVCOUNT_APP_VIEW",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMON_ADMIN OR INV_COUNT_ADMIN OR INVCOUNT_APP_VIEW",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "PREVIEW_COUNT_ITEM",
+          "usages": [
+            {
+              "file": "src/views/CountProgressReview.vue",
+              "context": "PREVIEW_COUNT_ITEM OR COMMON_ADMIN OR INV_COUNT_ADMIN",
+              "kind": "has-permission"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "job-manager",
+      "root": "../job-manager",
+      "permissions": [
+        {
+          "permissionId": "COMMERCEUSER_VIEW",
+          "usages": [
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMERCEUSER_VIEW",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "JOB_MANAGER_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "JOB_MANAGER_APP_VIEW",
+              "kind": "env"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "launchpad",
+      "root": "../launchpad",
+      "permissions": [
+        {
+          "permissionId": "APP_COMMERCE_VIEW",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_COMMERCE_VIEW",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/Home.vue",
+              "context": "Actions.APP_COMMERCE_VIEW",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_FULFILLMENT_VIEW",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_FULFILLMENT_VIEW",
+              "kind": "action-map"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_LEGACY_FULFILLMENT_VIEW",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_LEGACY_FULFILLMENT_VIEW",
+              "kind": "action-map"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "order-manager",
+      "root": "../order-manager",
+      "permissions": [
+        {
+          "permissionId": "COMMERCEUSER_VIEW",
+          "usages": [
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMERCEUSER_VIEW",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "ORDERMGR_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "ORDERMGR_VIEW",
+              "kind": "env"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "order-manager-execute-solr-query",
+      "root": "../order-manager-execute-solr-query",
+      "permissions": [
+        {
+          "permissionId": "COMMERCEUSER_VIEW",
+          "usages": [
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMERCEUSER_VIEW",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "ORDERMGR_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "ORDERMGR_VIEW",
+              "kind": "env"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "order-routing",
+      "root": "../order-routing",
+      "permissions": [
+        {
+          "permissionId": "COMMON_ADMIN",
+          "usages": [
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "ORDER_ROUTING_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "ORDER_ROUTING_APP_VIEW",
+              "kind": "env"
+            }
+          ]
+        },
+        {
+          "permissionId": "ROUTING_TEST_DRIVE_VIEW",
+          "usages": [
+            {
+              "file": "src/views/BrokeringQuery.vue",
+              "context": "ROUTING_TEST_DRIVE_VIEW",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/BrokeringRoute.vue",
+              "context": "ROUTING_TEST_DRIVE_VIEW",
+              "kind": "has-permission"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "preorder",
+      "root": "../preorder",
+      "permissions": [
+        {
+          "permissionId": "APP_AUDIT_PRDT_DTLS_VIEW",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "APP_AUDIT_PRDT_DTLS_VIEW",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_AUDIT_VIEW",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "APP_AUDIT_VIEW",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_COMMERCE_VIEW",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_COMMERCE_VIEW",
+              "kind": "action-map"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_INV_CNFG_UPDT",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_INV_CNFG_UPDT",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/audit-product-details.vue",
+              "context": "Actions.APP_INV_CNFG_UPDT",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_ORDERS_VIEW",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "APP_ORDERS_VIEW",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_PRDT_DTLS_VIEW",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "APP_PRDT_DTLS_VIEW",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_PRODUCT_IDENTIFIER_UPDATE",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_PRODUCT_IDENTIFIER_UPDATE",
+              "kind": "action-map"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_PRODUCTS_VIEW",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "APP_PRODUCTS_VIEW",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_PWA_STANDALONE_ACCESS",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_PWA_STANDALONE_ACCESS",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/settings.vue",
+              "context": "Actions.APP_PWA_STANDALONE_ACCESS",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "PREORDER_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "PREORDER_APP_VIEW",
+              "kind": "env"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "product-updates",
+      "root": "../product-updates",
+      "allowNoPermissions": true,
+      "permissions": []
+    },
+    {
+      "appId": "products",
+      "root": "../products",
+      "allowNoPermissions": true,
+      "permissions": []
+    },
+    {
+      "appId": "receiving",
+      "root": "../receiving",
+      "permissions": [
+        {
+          "permissionId": "APP_SHIPMENTS_VIEW",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "APP_SHIPMENTS_VIEW",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "COMMON_ADMIN",
+          "usages": [
+            {
+              "file": "src/components/DxpProductIdentifier.vue",
+              "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/store/productStore.ts",
+              "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "COMMON_ADMIN",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "FULFILLMENT_APP_VIEW",
+          "usages": [
+            {
+              "file": "src/App.vue",
+              "context": "FULFILLMENT_APP_VIEW",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "FULFILLMENT_APP_VIEW",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "FULFILLMENT_APP_VIEW",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "FULFILLMENT_LEGACY_APP_VIEW",
+          "usages": [
+            {
+              "file": "src/App.vue",
+              "context": "FULFILLMENT_LEGACY_APP_VIEW",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "FULFILLMENT_LEGACY_APP_VIEW",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "FULFILLMENT_LEGACY_APP_VIEW",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "RECEIVING_ADMIN",
+          "usages": [
+            {
+              "file": "src/components/ClosePurchaseOrderModal.vue",
+              "context": "RECEIVING_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/components/ReceiveTransferOrder.vue",
+              "context": "RECEIVING_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/PurchaseOrderDetail.vue",
+              "context": "RECEIVING_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/ReturnDetails.vue",
+              "context": "RECEIVING_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/ShipmentDetails.vue",
+              "context": "RECEIVING_ADMIN",
+              "kind": "has-permission"
+            },
+            {
+              "file": "src/views/TransferOrderDetail.vue",
+              "context": "RECEIVING_ADMIN",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "RECEIVING_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "RECEIVING_APP_VIEW",
+              "kind": "env"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "reroute-fulfilment",
+      "root": "../reroute-fulfilment",
+      "permissions": [
+        {
+          "permissionId": "APP_SHPGRP_CNCL",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_SHPGRP_CNCL",
+              "kind": "action-map"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_SHPGRP_DLVRADR_UPDATE",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_SHPGRP_DLVRADR_UPDATE",
+              "kind": "action-map"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_SHPGRP_DLVRMTHD_UPDATE",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_SHPGRP_DLVRMTHD_UPDATE",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/Order.vue",
+              "context": "Actions.APP_SHPGRP_DLVRMTHD_UPDATE",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_SHPGRP_PCKUP_UPDATE",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_SHPGRP_PCKUP_UPDATE",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/Order.vue",
+              "context": "Actions.APP_SHPGRP_PCKUP_UPDATE",
+              "kind": "has-permission-action"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "returns",
+      "root": "../returns",
+      "allowNoPermissions": true,
+      "permissions": []
+    },
+    {
+      "appId": "shopify-bopis",
+      "root": "../shopify-bopis",
+      "allowNoPermissions": true,
+      "permissions": []
+    },
+    {
+      "appId": "transfers",
+      "root": "../transfers",
+      "permissions": [
+        {
+          "permissionId": "APP_BULK_UPLOAD",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "APP_BULK_UPLOAD",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/views/CreateOrder.vue",
+              "context": "APP_BULK_UPLOAD",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_COMMERCE_VIEW",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_COMMERCE_VIEW",
+              "kind": "action-map"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_DISCREPANCY_REPORT",
+          "usages": [
+            {
+              "file": "src/router/index.ts",
+              "context": "APP_DISCREPANCY_REPORT",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/views/Tabs.vue",
+              "context": "APP_DISCREPANCY_REPORT",
+              "kind": "has-permission"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_PRODUCT_IDENTIFIER_UPDATE",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_PRODUCT_IDENTIFIER_UPDATE",
+              "kind": "action-map"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_PWA_STANDALONE_ACCESS",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_PWA_STANDALONE_ACCESS",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "Actions.APP_PWA_STANDALONE_ACCESS",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_TFNR_BULK_UPLOAD",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_BULK_UPLOAD",
+              "kind": "action-map"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_TFNR_DISCREPANCY_REPORT",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_DISCREPANCY_REPORT",
+              "kind": "action-map"
+            }
+          ]
+        },
+        {
+          "permissionId": "TRANSFERS_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "TRANSFERS_APP_VIEW",
+              "kind": "env"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appId": "users",
+      "root": ".",
+      "permissions": [
+        {
+          "permissionId": "APP_COMMERCE_VIEW",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_COMMERCE_VIEW",
+              "kind": "action-map"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_PERMISSION_CREATE",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_PERMISSION_CREATE",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/components/PermissionItems.vue",
+              "context": "Actions.APP_PERMISSION_CREATE",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_PERMISSION_UPDATE",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_PERMISSION_UPDATE",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/components/PermissionItems.vue",
+              "context": "Actions.APP_PERMISSION_UPDATE",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_PERMISSION_VIEW",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_PERMISSION_VIEW",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "APP_PERMISSION_VIEW",
+              "kind": "route-meta"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_PWA_STANDALONE_ACCESS",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_PWA_STANDALONE_ACCESS",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/Settings.vue",
+              "context": "Actions.APP_PWA_STANDALONE_ACCESS",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_SECURITY_GROUP_CREATE",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_SECURITY_GROUP_CREATE",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/Permissions.vue",
+              "context": "Actions.APP_SECURITY_GROUP_CREATE",
+              "kind": "has-permission-action"
+            },
+            {
+              "file": "src/views/UserDetails.vue",
+              "context": "Actions.APP_SECURITY_GROUP_CREATE",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_SUPER_USER",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_SUPER_USER",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/UserDetails.vue",
+              "context": "Actions.APP_SUPER_USER",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_UPDT_BLOCK_LOGIN",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_UPDT_BLOCK_LOGIN",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/UserDetails.vue",
+              "context": "Actions.APP_UPDT_BLOCK_LOGIN",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_UPDT_FULFILLMENT_FACILITY",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_UPDT_FULFILLMENT_FACILITY",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/UserDetails.vue",
+              "context": "Actions.APP_UPDT_FULFILLMENT_FACILITY",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_UPDT_PASSWORD",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_UPDT_PASSWORD",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/components/ResetPasswordModal.vue",
+              "context": "Actions.APP_UPDT_PASSWORD",
+              "kind": "has-permission-action"
+            },
+            {
+              "file": "src/views/UserDetails.vue",
+              "context": "Actions.APP_UPDT_PASSWORD",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_UPDT_PICKER_CONFG",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_UPDT_PICKER_CONFG",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/UserDetails.vue",
+              "context": "Actions.APP_UPDT_PICKER_CONFG",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_UPDT_PRODUCT_STORE_CONFG",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_UPDT_PRODUCT_STORE_CONFG",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/views/UserDetails.vue",
+              "context": "Actions.APP_UPDT_PRODUCT_STORE_CONFG",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "APP_USER_CREATE",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_USER_CREATE",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "APP_USER_CREATE",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/views/Users.vue",
+              "context": "Actions.APP_USER_CREATE",
+              "kind": "has-permission-action"
+            }
+          ]
+        },
+        {
+          "permissionId": "USERS_APP_VIEW",
+          "usages": [
+            {
+              "file": ".env.example",
+              "context": "USERS_APP_VIEW",
+              "kind": "env"
+            }
+          ]
+        },
+        {
+          "permissionId": "USERS_LIST_VIEW",
+          "usages": [
+            {
+              "file": "src/authorization/Actions.ts",
+              "context": "APP_USERS_LIST_VIEW",
+              "kind": "action-map"
+            },
+            {
+              "file": "src/components/Tabs.vue",
+              "context": "Actions.APP_USERS_LIST_VIEW",
+              "kind": "has-permission-action"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "Actions.APP_USERS_LIST_VIEW",
+              "kind": "has-permission-action"
+            },
+            {
+              "file": "src/router/index.ts",
+              "context": "USERS_LIST_VIEW",
+              "kind": "route-meta"
+            },
+            {
+              "file": "src/store/modules/user/actions.ts",
+              "context": "Actions.APP_USERS_LIST_VIEW",
+              "kind": "has-permission-action"
+            },
+            {
+              "file": "src/views/UserDetails.vue",
+              "context": "Actions.APP_USERS_LIST_VIEW",
+              "kind": "has-permission-action"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
