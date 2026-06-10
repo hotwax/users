@@ -212,6 +212,14 @@ export const fulfillmentPermissionCatalog = defineAppPermissionCatalog({
       usedIn: usage("src/views/OrderDetail.vue", "ORDER_SHIPMENT_METHOD_UPDATE")
     },
     {
+      permissionId: "FF_SHIP_NOW",
+      title: "Ship fulfillment orders",
+      description: "Allows users to ship packed fulfillment orders.",
+      category: "Order actions",
+      impliedBy: ["COMMON_ADMIN", "STOREFULFILLMENT_ADMIN"],
+      usedIn: usage("src/views/Completed.vue", "COMMON_ADMIN OR FF_SHIP_NOW")
+    },
+    {
       permissionId: "SF_UNLOCK_ORDER",
       title: "Unlock fulfillment orders",
       description: "Allows users to unlock fulfillment orders from completed workflows.",
