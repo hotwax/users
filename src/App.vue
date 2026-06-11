@@ -86,6 +86,10 @@ export default defineComponent({
     async unauthorized() {
       // Mark the user as unauthorised, this will help in not making the logout api call in actions
       this.store.dispatch("user/logout", { isUserUnauthorised: true });
+      if (process.env.VUE_APP_LOCAL_MOQUI_LOGIN === 'true') {
+        this.router.replace('/login');
+        return;
+      }
       const redirectUrl = window.location.origin + '/login';
       window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}`;
     }
@@ -106,6 +110,7 @@ export default defineComponent({
       token: this.userToken,
       instanceUrl: this.instanceUrl,
       cacheMaxAge: this.maxAge,
+      ...(process.env.VUE_APP_OMS_TYPE === 'MOQUI' && { systemType: 'MOQUI' }),
       events: {
         unauthorised: this.unauthorized,
         responseError: () => {
