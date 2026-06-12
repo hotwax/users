@@ -14,9 +14,11 @@ import {
 import { Settings } from 'luxon';
 import {
   getServerPermissionsFromRules,
+  hasPermission,
   prepareAppPermissions,
   resetPermissions,
-  setPermissions
+  setPermissions,
+  Actions
 } from '@/authorization'
 import { translate, useAuthStore, useUserStore } from '@hotwax/dxp-components'
 import emitter from '@/event-bus'
@@ -85,7 +87,7 @@ const actions: ActionTree<UserState, RootState> = {
         dispatch("updateRedirectedFromUrl", router.currentRoute.value.query.redirectedFrom)
       }
 
-      if (partyId) {
+      if (partyId && hasPermission(Actions.APP_USERS_LIST_VIEW)) {
         return `/user-details/${partyId}`;
       }
     } catch (err: any) {

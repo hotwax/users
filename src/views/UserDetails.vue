@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-back-button v-if="redirectedFromUrl" @click="goBack($event)" slot="start" default-href="/tabs/users" />
-        <ion-back-button v-else slot="start" default-href="/tabs/users" />
+        <ion-back-button v-else-if="hasPermission(Actions.APP_USERS_LIST_VIEW)" slot="start" default-href="/tabs/users" />
         <ion-title>{{ translate("User details") }}</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -32,7 +32,7 @@
                   <p>{{ selectedUser.userLoginId }}</p>
                   <ion-badge v-if="selectedUser.userLoginId === userProfile.userLoginId">{{ translate("Your user") }}</ion-badge>
                 </ion-label>
-                <ion-button fill="outline" @click="editName">{{ translate('Edit') }}</ion-button>
+                <ion-button fill="outline" :disabled="!hasPermission(Actions.APP_USER_PROFILE_UPDATE)" @click="editName">{{ translate('Edit') }}</ion-button>
               </ion-item>
             </div>
             <div v-if="isUserFetched">
@@ -45,10 +45,10 @@
                 <ion-icon :icon="cameraOutline" slot="start" />
                 <ion-label v-if="!imageUrl">{{ translate("Add profile picture") }}</ion-label>
                 <ion-label v-else>{{ translate("Replace profile picture") }}</ion-label>
-                <input @change="uploadImage" class="ion-hide" type="file" accept="image/*" id="profilePic"/>
+                <input @change="uploadImage" class="ion-hide" type="file" accept="image/*" id="profilePic" :disabled="!hasPermission(Actions.APP_USER_PROFILE_UPDATE)"/>
                 <label for="profilePic">{{ translate("Upload") }}</label>
               </ion-item>
-              <ion-item lines="none">
+              <ion-item lines="none" :disabled="!hasPermission(Actions.APP_USER_STATUS_UPDATE)">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
                 <ion-toggle :checked="selectedUser.statusId === 'PARTY_DISABLED'" @click.prevent="updateUserStatus($event)">
                   {{ translate("Disable user") }}
@@ -66,7 +66,7 @@
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="cloudyNightOutline" slot="start" />
-                <ion-toggle :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click.prevent="updateUserStatus($event)">
+                <ion-toggle :disabled="!hasPermission(Actions.APP_USER_STATUS_UPDATE)" :checked="selectedUser.statusId === 'PARTY_ENABLED'" @click.prevent="updateUserStatus($event)">
                   {{ translate("Disable user") }}
                 </ion-toggle>
               </ion-item>
@@ -130,10 +130,10 @@
                 </ion-item>
               </ion-list>
               <div class="login-detail-actions">
-                <ion-button @click="resetPassword()" fill="outline" color="warning">
+                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_PASSWORD) && selectedUser.userLoginId !== userProfile.userLoginId" @click="resetPassword()" fill="outline" color="warning">
                   {{ translate('Reset password') }}
                 </ion-button>
-                <ion-button :disabled="selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
+                <ion-button :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN) || selectedUser.hasLoggedOut === 'Y'" @click="confirmForceLogout()" fill="outline" color="danger">
                   {{ translate('Force logout') }}
                 </ion-button>
               </div>
@@ -160,13 +160,13 @@
                     :error-text="translate('Password should be at least 5 characters long and contain at least one number, alphabet and special character.')"
                   >
                     <div slot="label">{{ translate("Password") }} <ion-text color="danger">*</ion-text></div>
-                    <ion-button @click="showPassword = !showPassword" slot="end" fill="clear">
+                    <ion-button size="default" @click="showPassword = !showPassword" slot="end" fill="clear">
                       <ion-icon :icon="showPassword ? eyeOutline : eyeOffOutline" slot="icon-only" />
                     </ion-button>
                   </ion-input>
                 </ion-item>
               </ion-list>
-              <ion-button @click="createNewUserLogin()" fill="outline" expand="block">
+              <ion-button @click="createNewUserLogin()" :disabled="!hasPermission(Actions.APP_UPDT_BLOCK_LOGIN)" fill="outline" expand="block">
                 {{ translate('Add credentials') }}
               </ion-button>
             </template>
@@ -202,30 +202,30 @@
               <ion-item>
                 <ion-icon :icon="mailOutline" slot="start" />
                 <ion-label class="ion-text-wrap">{{ selectedUser?.emailDetails ? selectedUser.emailDetails.email : translate('Email') }}</ion-label>
-                <ion-button v-if="selectedUser?.emailDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'email', selectedUser.emailDetails.email)">
+                <ion-button size="default" v-if="selectedUser?.emailDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'email', selectedUser.emailDetails.email)">
                   <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                 </ion-button>
-                <ion-button v-else @click="addContactField('email')" slot="end" fill="clear">
+                <ion-button  size="default" v-else @click="addContactField('email')" slot="end" fill="clear" :disabled="!hasPermission(Actions.APP_USER_CONTACT_CREATE)">
                   <ion-icon slot="icon-only" :icon="addCircleOutline" />
                 </ion-button>
               </ion-item>
               <ion-item>
                 <ion-icon :icon="callOutline" slot="start" />
                 <ion-label class="ion-text-wrap">{{ selectedUser?.phoneNumberDetails ? selectedUser.phoneNumberDetails.contactNumber : translate('Phone number') }}</ion-label>
-                <ion-button v-if="selectedUser?.phoneNumberDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'phoneNumber', selectedUser.phoneNumberDetails.contactNumber)">
+                <ion-button size="default" v-if="selectedUser?.phoneNumberDetails" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'phoneNumber', selectedUser.phoneNumberDetails.contactNumber)">
                   <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                 </ion-button>
-                <ion-button v-else @click="addContactField('phoneNumber')" slot="end" fill="clear">
+                <ion-button size="default" v-else @click="addContactField('phoneNumber')" slot="end" fill="clear" :disabled="!hasPermission(Actions.APP_USER_CONTACT_CREATE)">
                   <ion-icon slot="icon-only" :icon="addCircleOutline" />
                 </ion-button>
               </ion-item>
               <ion-item lines="none">
                 <ion-icon :icon="businessOutline" slot="start" />
                 <ion-label class="ion-text-wrap">{{ selectedUser.externalId ? selectedUser.externalId : translate('External ID') }}</ion-label>
-                <ion-button v-if="selectedUser.externalId" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'externalId', selectedUser.externalId)">
+                <ion-button size="default" v-if="selectedUser.externalId" slot="end" fill="clear" color="medium" @click="openContactActionsPopover($event, 'externalId', selectedUser.externalId)">
                   <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                 </ion-button>
-                <ion-button v-else @click="addContactField('externalId')" slot="end" fill="clear">
+                <ion-button size="default" v-else @click="addContactField('externalId')" slot="end" fill="clear" :disabled="!hasPermission(Actions.APP_USER_PROFILE_UPDATE)">
                   <ion-icon slot="icon-only" :icon="addCircleOutline" />
                 </ion-button>
               </ion-item>
@@ -269,12 +269,12 @@
             <ion-list>
               <ion-list-header color="light">
                 <ion-label>{{ translate('Security Group') }}</ion-label>
-                <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" @click="selectSecurityGroup()" v-if="userSecurityGroups.length">
+                <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_ASSIGNMENT) || !selectedUser.userLoginId" @click="selectSecurityGroup()" v-if="userSecurityGroups.length">
                   {{ translate('Add') }}
                   <ion-icon slot="end" :icon="addCircleOutline" />
                 </ion-button>
               </ion-list-header>
-              <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" v-if="!userSecurityGroups.length" @click="selectSecurityGroup()" fill="outline" expand="block" class="ion-margin">
+              <ion-button :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_ASSIGNMENT) || !selectedUser.userLoginId" v-if="!userSecurityGroups.length" @click="selectSecurityGroup()" fill="outline" expand="block" class="ion-margin">
                 <ion-icon :icon="addOutline" slot='start' />
                 {{ translate('Add to security group') }}
               </ion-button>
@@ -283,7 +283,7 @@
               </ion-item>
               <ion-item v-else>
                 <ion-label>{{ translate("View history") }}</ion-label>
-                <ion-button slot="end" fill="clear" color="medium" @click="openUserSecurityGroupAssocHistoryModal($event)">
+                <ion-button  size="default" slot="end" fill="clear" color="medium" @click="openUserSecurityGroupAssocHistoryModal($event)">
                   <ion-icon slot="icon-only" :icon="timeOutline" />
                 </ion-button>
               </ion-item>
@@ -291,17 +291,17 @@
               <template v-if="!hasPermission(Actions.APP_SUPER_USER) && checkUserAssociatedSecurityGroup('SUPER')">
                 <ion-item lines="none" :disabled="true">
                   <ion-label>{{ translate('Super') }}</ion-label>
-                  <ion-button slot="end" fill="clear" color="medium">
+                  <ion-button  size="default" slot="end" fill="clear" color="medium">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
                 </ion-item>
               </template>
               <template v-else>
-                <ion-item :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE)" v-for="securityGroup in userSecurityGroups" :key="securityGroup.groupId">
+                <ion-item :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_ASSIGNMENT)" v-for="securityGroup in userSecurityGroups" :key="securityGroup.groupId">
                   <ion-label>
                     {{ getSecurityGroupName(securityGroup.groupId) }}
                   </ion-label>
-                  <ion-button slot="end" fill="clear" color="medium" @click="openSecurityGroupActionsPopover($event, securityGroup)">
+                  <ion-button size="default" slot="end" fill="clear" color="medium" @click="openSecurityGroupActionsPopover($event, securityGroup)">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                   </ion-button>
                 </ion-item>
@@ -312,7 +312,7 @@
                 <ion-label>{{ translate('Security Group') }}</ion-label>        
                 <ion-label slot="end">{{ translate('Super') }}</ion-label>
               </template>
-              <ion-select v-else :label="translate('Security Group')" interface="popover" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE) || !selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
+              <ion-select v-else :label="translate('Security Group')" interface="popover" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_ASSIGNMENT) || !selectedUser.userLoginId" :value="selectedUser.securityGroup?.groupId" @ionChange="updateSecurityGroup($event)">
                 <ion-select-option v-for="securityGroup in getSecurityGroups(securityGroups)" :key="securityGroup.groupId" :value="securityGroup.groupId">
                   {{ securityGroup.groupName || securityGroup.groupId}}
                 </ion-select-option>
@@ -338,7 +338,7 @@
                   <h2>{{ store.storeName || store.productStoreId }}</h2>
                   <p>{{ getRoleTypeDesc(store.roleTypeId) }}</p>
                 </ion-label>
-                <ion-button slot="end" fill="clear" color="medium" @click="openProductStoreActionsPopover($event, store)">
+                <ion-button size="default" slot="end" fill="clear" color="medium" @click="openProductStoreActionsPopover($event, store)">
                   <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
                 </ion-button>
               </ion-item>
@@ -1237,6 +1237,8 @@ export default defineComponent({
           img.onload = () => {
             if (validImageTypes.includes(file.type)) {
               resolve(true);
+            } else {
+              reject(false);
             }
           };
           img.onerror = () => {
@@ -1259,7 +1261,7 @@ export default defineComponent({
       try {
         await this.validateImageType(selectedFile, validImageTypes);
       } catch (error) {
-        showToast(translate("Please upload a valid image file"));
+        showToast(translate("Please upload a valid image file, supported types: jpg/jpeg, png, gif, svg"));
         return;
       }
 

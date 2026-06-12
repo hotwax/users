@@ -8,7 +8,7 @@
             <p>{{ translate('added to group') }}</p>
           </ion-label>
         </ion-item>
-        <ion-item button @click="confirmRemove()" lines="none">
+        <ion-item button @click="confirmRemove()" lines="none" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_ASSIGNMENT)">
           {{ translate("Remove") }}
         </ion-item>
       </ion-list>
@@ -33,6 +33,7 @@
   import { showToast } from "@/utils";
   import { hasError } from "@/adapter";
   import logger from '@/logger';
+  import { Actions, hasPermission } from '@/authorization';
   
   export default defineComponent({
     name: "SecurityGroupActionsPopover",
@@ -100,6 +101,8 @@
       const store = useStore();
   
       return {
+        Actions,
+        hasPermission,
         store,
         translate
       }

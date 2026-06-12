@@ -179,6 +179,9 @@ const actions: ActionTree<UtilState, RootState> = {
         }
       } catch (err) {
         logger.error('Failed to fetch facilities', err)
+        // If the api fails in any case then assigning resp count to 0, so that the while check fails
+        // and the facilities gets displayed on UI, if available.
+        respCount = 0
       }
     } while(respCount >= viewSize)
     commit(types.UTIL_FACILITIES_UPDATED, facilities)
