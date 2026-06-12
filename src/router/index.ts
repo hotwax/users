@@ -102,7 +102,13 @@ const routes: Array<RouteRecordRaw> = [
         }
       },{
         path: 'permissions',
-        component: () => import('@/views/Permissions.vue'),
+        redirect: '/tabs/app-permissions?view=group',
+        meta: {
+          permissionId: "APP_PERMISSION_VIEW"
+        }
+      },{
+        path: 'app-permissions',
+        component: () => import('@/views/AppPermissions.vue'),
         meta: {
           permissionId: "APP_PERMISSION_VIEW"
         }

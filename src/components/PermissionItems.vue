@@ -9,18 +9,18 @@
     </ion-item>
     <ion-item lines="full">
       <ion-icon :icon="optionsOutline" slot="start" />
-      <ion-select :label="translate('Filters')" interface="popover" v-model="query.classificationSecurityGroupId" @ionChange="updateQuery()">
+      <ion-select :label="translate('App')" interface="popover" v-model="query.classificationSecurityGroupId" @ionChange="updateQuery()">
         <ion-select-option value="">{{ translate("All") }}</ion-select-option>
-        <ion-select-option :value="classificationSecurityGroup.groupId" :key="classificationSecurityGroup.groupId" v-for="classificationSecurityGroup in classificationSecurityGroups">
-          {{ classificationSecurityGroup.groupName }}
+        <ion-select-option :value="app.appId" :key="app.appId" v-for="app in appPermissionCatalogs">
+          {{ app.appName }}
         </ion-select-option>
-        <ion-select-option value="OTHERS">{{ translate("Others") }}</ion-select-option>
+        <ion-select-option value="OTHERS">{{ translate("Other permissions") }}</ion-select-option>
       </ion-select>
     </ion-item>
   </div>
 
   <template v-if="arePermissionsAvailable()">
-    <div v-for="(group, groupId) in filteredPermissions" :key="groupId">
+    <div v-for="group in filteredPermissionGroups" :key="group.groupId">
       <ion-item-divider v-if="group.permissions.length" class="ion-margin-vertical" color="light">
         <ion-label>
           {{ group.groupName || group.groupId }}
@@ -32,8 +32,9 @@
         <ion-card v-for="permission in group.permissions" :key="permission.permissionId" button @click="updatePermissionAssociation(permission)">
           <ion-card-header>
             <div>
-              <ion-card-title>{{ permission.permissionId }}</ion-card-title>
-              <ion-card-subtitle>{{ permission.description }}</ion-card-subtitle>
+              <ion-card-title>{{ permission.title || permission.permissionId }}</ion-card-title>
+              <ion-card-subtitle>{{ permission.permissionId }}</ion-card-subtitle>
+              <p>{{ permission.description }}</p>
             </div>
             <ion-spinner v-if="permission.isStatusUpdating" name="crescent" data-spinner-size="medium" />
             <ion-checkbox v-else :disabled="permission.isChecked ? !hasPermission(Actions.APP_PERMISSION_UPDATE) : !hasPermission(Actions.APP_PERMISSION_CREATE)" :checked="permission.isChecked" />
@@ -76,6 +77,7 @@ import { showToast } from '@/utils';
 import { hasError } from '@/adapter';
 import { DateTime } from 'luxon';
 import { Actions, hasPermission } from '@/authorization'
+import { appPermissionCatalogs, AppPermissionCatalog, AppPermissionDefinition } from '@/config/app-permissions';
 import logger from '@/logger';
 
 export default defineComponent({
@@ -97,15 +99,63 @@ export default defineComponent({
     IonSpinner,
     IonToggle,
   },
+  data() {
+    return {
+      updatingPermissionIds: {} as Record<string, boolean>
+    }
+  },
   computed: {
     ...mapGetters({
       query: 'permission/getQuery',
       currentGroupPermissions: 'permission/getCurrentGroupPermissions',
       currentGroup: "permission/getCurrentGroup",
-      filteredPermissions: "permission/getFilteredPermissions",
-      classificationSecurityGroups: 'util/getClassificationSecurityGroups',
-      permissionsByClassificationGroups: 'permission/getPermissionsByClassificationGroups'
-    })
+      permissionsByClassificationGroups: 'permission/getPermissionsByClassificationGroups',
+      allPermissions: 'permission/getAllPermissions'
+    }),
+    appPermissionCatalogs(): readonly AppPermissionCatalog[] {
+      return appPermissionCatalogs as readonly AppPermissionCatalog[];
+    },
+    filteredPermissionGroups(): any[] {
+      const selectedGroupId = this.query.classificationSecurityGroupId;
+      const groups = this.appPermissionGroups.filter((group: any) => !selectedGroupId || group.groupId === selectedGroupId);
+
+      return groups.map((group: any) => ({
+        ...group,
+        permissions: group.permissions.filter((permission: any) => this.matchesQuery(permission, group) && this.matchesSelectedFilter(permission))
+      }));
+    },
+    appPermissionGroups(): any[] {
+      const catalogPermissionIds = new Set<string>();
+      const hiddenPermissionIds = this.getHiddenPermissionIds();
+      const catalogs = appPermissionCatalogs as readonly AppPermissionCatalog[];
+
+      const groups = catalogs.map((app: AppPermissionCatalog): any => {
+        const permissions = [...app.permissions]
+          .filter((permission: AppPermissionDefinition) => !hiddenPermissionIds.has(permission.permissionId))
+          .map((permission: AppPermissionDefinition) => {
+            catalogPermissionIds.add(permission.permissionId);
+            return this.getPermissionItem(permission.permissionId, permission);
+          });
+
+        return {
+          groupId: app.appId,
+          groupName: app.appName,
+          permissions
+        };
+      });
+
+      const otherPermissions = Object.values(this.allPermissions || {})
+        .filter((permission: any) => permission.permissionId && !catalogPermissionIds.has(permission.permissionId) && !hiddenPermissionIds.has(permission.permissionId))
+        .map((permission: any) => this.getPermissionItem(permission.permissionId));
+
+      groups.push({
+        groupId: 'OTHERS',
+        groupName: translate('Other permissions'),
+        permissions: otherPermissions
+      });
+
+      return groups;
+    }
   },
   methods: {
     async updateQuery() {
@@ -166,19 +216,42 @@ export default defineComponent({
       this.updatePermissionStatus(permission, false);
     },
     arePermissionsAvailable() {
-      return Object.values(this.filteredPermissions).some((groupType: any) => groupType.permissions.length)
+      return this.filteredPermissionGroups.some((group: any) => group.permissions.length)
+    },
+    getHiddenPermissionIds() {
+      return new Set((this.permissionsByClassificationGroups?.SGC_HIDDEN?.permissions || []).map((permission: any) => permission.permissionId));
+    },
+    getPermissionItem(permissionId: string, definition?: AppPermissionDefinition) {
+      const serverPermission = this.allPermissions?.[permissionId] || {};
+
+      return {
+        ...serverPermission,
+        ...definition,
+        permissionId,
+        title: definition?.title || serverPermission.permissionId,
+        description: definition?.description || serverPermission.description,
+        isChecked: !!this.currentGroupPermissions[permissionId],
+        isStatusUpdating: !!this.updatingPermissionIds[permissionId]
+      };
+    },
+    matchesQuery(permission: any, group: any) {
+      const queryString = this.query.queryString?.toLowerCase();
+      if (!queryString) return true;
+
+      return permission.permissionId?.toLowerCase().includes(queryString)
+        || permission.title?.toLowerCase().includes(queryString)
+        || permission.description?.toLowerCase().includes(queryString)
+        || permission.category?.toLowerCase().includes(queryString)
+        || group.groupName?.toLowerCase().includes(queryString);
+    },
+    matchesSelectedFilter(permission: any) {
+      return !this.query.showSelected || permission.isChecked;
     },
     updatePermissionStatus(currentPermission: any, status: boolean) {
-      const permissionsByGroup = JSON.parse(JSON.stringify(this.permissionsByClassificationGroups));
-
-      Object.values(permissionsByGroup).map((group: any) => {
-        const permission = group.permissions.find((permission: any) => permission.permissionId === currentPermission.permissionId)
-        if(permission) {
-          permission["isStatusUpdating"] = status
-        }
-      })
-
-      this.store.dispatch('permission/updatePermissionsByClassificationGroups', permissionsByGroup)
+      this.updatingPermissionIds = {
+        ...this.updatingPermissionIds,
+        [currentPermission.permissionId]: status
+      }
     }
   },
   setup() {

@@ -7,7 +7,7 @@
           <ion-icon :icon="personOutline" />
           <ion-label>{{ translate("Users") }}</ion-label>
         </ion-tab-button>
-        <ion-tab-button v-if="hasPermission(Actions.APP_USERS_LIST_VIEW)" tab="permissions" href="/tabs/permissions">
+        <ion-tab-button v-if="hasPermission(Actions.APP_PERMISSION_VIEW)" tab="permissions" href="/tabs/app-permissions">
           <ion-icon :icon="idCardOutline" />
           <ion-label>{{ translate("Permissions") }}</ion-label>
         </ion-tab-button>

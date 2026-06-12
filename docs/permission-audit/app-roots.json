@@ -1,0 +1,20 @@
+[
+  { "appId": "available-to-promise", "root": "../available-to-promise" },
+  { "appId": "bopis", "root": "../bopis" },
+  { "appId": "company", "root": "../company" },
+  { "appId": "facilities", "root": "../facilities" },
+  { "appId": "fulfillment", "root": "../fulfillment" },
+  { "appId": "inventory-count", "root": "../inventory-count" },
+  { "appId": "job-manager", "root": "../job-manager" },
+  { "appId": "launchpad", "root": "../launchpad" },
+  { "appId": "order-manager", "root": "../order-manager" },
+  { "appId": "order-routing", "root": "../order-routing" },
+  { "appId": "preorder", "root": "../preorder" },
+  { "appId": "products", "root": "../products", "allowNoPermissions": true },
+  { "appId": "receiving", "root": "../receiving" },
+  { "appId": "reroute-fulfilment", "root": "../reroute-fulfilment" },
+  { "appId": "returns", "root": "../returns", "allowNoPermissions": true },
+  { "appId": "shopify-bopis", "root": "../shopify-bopis", "allowNoPermissions": true },
+  { "appId": "transfers", "root": "../transfers" },
+  { "appId": "users", "root": "." }
+]
