@@ -37,7 +37,7 @@
               <p>{{ permission.description }}</p>
             </div>
             <ion-spinner v-if="permission.isStatusUpdating" name="crescent" data-spinner-size="medium" />
-            <ion-checkbox v-else :disabled="permission.isChecked ? !hasPermission(Actions.APP_PERMISSION_UPDATE) : !hasPermission(Actions.APP_PERMISSION_CREATE)" :checked="permission.isChecked" />
+            <ion-checkbox v-else :disabled="permission.isChecked ? !userStore.hasPermission('SECURITY_UPDATE OR SECURITY_ADMIN') : !userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" :checked="permission.isChecked" />
           </ion-card-header>
         </ion-card>
       </section>
@@ -50,223 +50,169 @@
 
 </template>
 
-<script lang="ts">
-import {
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonCheckbox,
-  IonIcon,
-  IonItem,
-  IonItemDivider,
-  IonLabel,
-  IonNote,
-  IonSearchbar,
-  IonSelect,
-  IonSelectOption,
-  IonSpinner,
-  IonToggle
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
-import { translate } from '@hotwax/dxp-components';
+<script setup lang="ts">
+import { computed, reactive } from 'vue';
+import { IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonIcon, IonItem, IonItemDivider, IonLabel, IonNote, IonSearchbar, IonSelect, IonSelectOption, IonSpinner, IonToggle } from '@ionic/vue';
+import { commonUtil, translate, logger } from '@common';
 import { optionsOutline, shieldCheckmarkOutline } from 'ionicons/icons';
-import { mapGetters, useStore } from 'vuex';
-import { PermissionService } from '@/services/PermissionService';
-import { showToast } from '@/utils';
-import { hasError } from '@/adapter';
 import { DateTime } from 'luxon';
-import { Actions, hasPermission } from '@/authorization'
+import { usePermissionStore } from '@/store/permission';
+import { useUserStore } from '@/store/user';
 import { appPermissionCatalogs, AppPermissionCatalog, AppPermissionDefinition } from '@/config/app-permissions';
-import logger from '@/logger';
 
-export default defineComponent({
-  name: 'PermissionItems',
-  components: {
-    IonCard,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonCheckbox,
-    IonIcon,
-    IonItem,
-    IonItemDivider,
-    IonLabel,
-    IonNote,
-    IonSearchbar,
-    IonSelect,
-    IonSelectOption,
-    IonSpinner,
-    IonToggle,
-  },
-  data() {
-    return {
-      updatingPermissionIds: {} as Record<string, boolean>
-    }
-  },
-  computed: {
-    ...mapGetters({
-      query: 'permission/getQuery',
-      currentGroupPermissions: 'permission/getCurrentGroupPermissions',
-      currentGroup: "permission/getCurrentGroup",
-      permissionsByClassificationGroups: 'permission/getPermissionsByClassificationGroups',
-      allPermissions: 'permission/getAllPermissions'
-    }),
-    appPermissionCatalogs(): readonly AppPermissionCatalog[] {
-      return appPermissionCatalogs as readonly AppPermissionCatalog[];
-    },
-    filteredPermissionGroups(): any[] {
-      const selectedGroupId = this.query.classificationSecurityGroupId;
-      const groups = this.appPermissionGroups.filter((group: any) => !selectedGroupId || group.groupId === selectedGroupId);
+const permissionStore = usePermissionStore();
+const userStore = useUserStore();
 
-      return groups.map((group: any) => ({
-        ...group,
-        permissions: group.permissions.filter((permission: any) => this.matchesQuery(permission, group) && this.matchesSelectedFilter(permission))
-      }));
-    },
-    appPermissionGroups(): any[] {
-      const catalogPermissionIds = new Set<string>();
-      const hiddenPermissionIds = this.getHiddenPermissionIds();
-      const catalogs = appPermissionCatalogs as readonly AppPermissionCatalog[];
+const updatingPermissionIds = reactive<Record<string, boolean>>({});
 
-      const groups = catalogs.map((app: AppPermissionCatalog): any => {
-        const permissions = [...app.permissions]
-          .filter((permission: AppPermissionDefinition) => !hiddenPermissionIds.has(permission.permissionId))
-          .map((permission: AppPermissionDefinition) => {
-            catalogPermissionIds.add(permission.permissionId);
-            return this.getPermissionItem(permission.permissionId, permission);
-          });
+const query = computed(() => permissionStore.getQuery);
+const currentGroupPermissions = computed(() => permissionStore.getCurrentGroupPermissions);
+const currentGroup = computed(() => permissionStore.getCurrentGroup);
+const permissionsByClassificationGroups = computed(() => permissionStore.getPermissionsByClassificationGroups);
+const allPermissions = computed(() => permissionStore.getAllPermissions);
 
-        return {
-          groupId: app.appId,
-          groupName: app.appName,
-          permissions
-        };
+const getHiddenPermissionIds = () => {
+  return new Set((permissionsByClassificationGroups.value?.SGC_HIDDEN?.permissions || []).map((permission: any) => permission.permissionId));
+};
+
+const getPermissionItem = (permissionId: string, definition?: AppPermissionDefinition) => {
+  const serverPermission = allPermissions.value?.[permissionId] || {};
+
+  return {
+    ...serverPermission,
+    ...definition,
+    permissionId,
+    title: definition?.title || serverPermission.permissionId,
+    description: definition?.description || serverPermission.description,
+    isChecked: !!currentGroupPermissions.value[permissionId],
+    isStatusUpdating: !!updatingPermissionIds[permissionId]
+  };
+};
+
+const matchesQuery = (permission: any, group: any) => {
+  const queryString = query.value.queryString?.toLowerCase();
+  if (!queryString) return true;
+
+  return permission.permissionId?.toLowerCase().includes(queryString)
+    || permission.title?.toLowerCase().includes(queryString)
+    || permission.description?.toLowerCase().includes(queryString)
+    || permission.category?.toLowerCase().includes(queryString)
+    || group.groupName?.toLowerCase().includes(queryString);
+};
+
+const matchesSelectedFilter = (permission: any) => {
+  return !query.value.showSelected || permission.isChecked;
+};
+
+const appPermissionGroups = computed<any[]>(() => {
+  const catalogPermissionIds = new Set<string>();
+  const hiddenPermissionIds = getHiddenPermissionIds();
+  const catalogs = appPermissionCatalogs as readonly AppPermissionCatalog[];
+
+  const groups = catalogs.map((app: AppPermissionCatalog): any => {
+    const permissions = [...app.permissions]
+      .filter((permission: AppPermissionDefinition) => !hiddenPermissionIds.has(permission.permissionId))
+      .map((permission: AppPermissionDefinition) => {
+        catalogPermissionIds.add(permission.permissionId);
+        return getPermissionItem(permission.permissionId, permission);
       });
 
-      const otherPermissions = Object.values(this.allPermissions || {})
-        .filter((permission: any) => permission.permissionId && !catalogPermissionIds.has(permission.permissionId) && !hiddenPermissionIds.has(permission.permissionId))
-        .map((permission: any) => this.getPermissionItem(permission.permissionId));
-
-      groups.push({
-        groupId: 'OTHERS',
-        groupName: translate('Other permissions'),
-        permissions: otherPermissions
-      });
-
-      return groups;
-    }
-  },
-  methods: {
-    async updateQuery() {
-      await this.store.dispatch('permission/updateQuery', this.query)
-    },
-    async updatePermissionAssociation(permission: any) {
-      let resp = {} as any;
-      const payload = {
-        groupId: this.currentGroup.groupId,
-        permissionId: permission.permissionId
-      }
-
-      let currentPermissions = JSON.parse(JSON.stringify(this.currentGroupPermissions))
-      this.updatePermissionStatus(permission, true);
-
-      try {
-        if(permission.isChecked) {
-          const fromDate = this.currentGroupPermissions[permission.permissionId].fromDate
-
-          resp = await PermissionService.removeSecurityPermissionFromSecurityGroup({
-            ...payload,
-            thruDate: DateTime.now().toMillis(),
-            fromDate
-          })
-
-          if(hasError(resp)) {
-            throw resp.data;
-          }
-
-          delete currentPermissions[permission.permissionId]
-        } else {
-          const time = DateTime.now().toMillis()
-          const params = {
-            ...payload,
-            fromDate: time
-          }
-
-          resp = await PermissionService.addSecurityPermissionToSecurityGroup(params)
-
-          if(hasError(resp)) {
-            throw resp.data;
-          }
-
-          currentPermissions[permission.permissionId] = params
-        }
-
-        if(!hasError(resp)) {
-          showToast(translate("Security group permission association successfully updated."))
-          await this.store.dispatch('permission/updateCurrentGroupPermissions', { groupId: this.currentGroup.groupId, currentPermissions})
-          this.store.dispatch('permission/checkAssociated')
-        } else {
-          throw resp.data
-        }
-      } catch(err) {
-        showToast(translate("Failed to update security group permission association."))
-        logger.error(err)
-      }
-      this.updatePermissionStatus(permission, false);
-    },
-    arePermissionsAvailable() {
-      return this.filteredPermissionGroups.some((group: any) => group.permissions.length)
-    },
-    getHiddenPermissionIds() {
-      return new Set((this.permissionsByClassificationGroups?.SGC_HIDDEN?.permissions || []).map((permission: any) => permission.permissionId));
-    },
-    getPermissionItem(permissionId: string, definition?: AppPermissionDefinition) {
-      const serverPermission = this.allPermissions?.[permissionId] || {};
-
-      return {
-        ...serverPermission,
-        ...definition,
-        permissionId,
-        title: definition?.title || serverPermission.permissionId,
-        description: definition?.description || serverPermission.description,
-        isChecked: !!this.currentGroupPermissions[permissionId],
-        isStatusUpdating: !!this.updatingPermissionIds[permissionId]
-      };
-    },
-    matchesQuery(permission: any, group: any) {
-      const queryString = this.query.queryString?.toLowerCase();
-      if (!queryString) return true;
-
-      return permission.permissionId?.toLowerCase().includes(queryString)
-        || permission.title?.toLowerCase().includes(queryString)
-        || permission.description?.toLowerCase().includes(queryString)
-        || permission.category?.toLowerCase().includes(queryString)
-        || group.groupName?.toLowerCase().includes(queryString);
-    },
-    matchesSelectedFilter(permission: any) {
-      return !this.query.showSelected || permission.isChecked;
-    },
-    updatePermissionStatus(currentPermission: any, status: boolean) {
-      this.updatingPermissionIds = {
-        ...this.updatingPermissionIds,
-        [currentPermission.permissionId]: status
-      }
-    }
-  },
-  setup() {
-    const store = useStore();
-
     return {
-      Actions,
-      hasPermission,
-      optionsOutline,
-      shieldCheckmarkOutline,
-      store,
-      translate
-    }
-  }
+      groupId: app.appId,
+      groupName: app.appName,
+      permissions
+    };
+  });
+
+  const otherPermissions = Object.values(allPermissions.value || {})
+    .filter((permission: any) => permission.permissionId && !catalogPermissionIds.has(permission.permissionId) && !hiddenPermissionIds.has(permission.permissionId))
+    .map((permission: any) => getPermissionItem(permission.permissionId));
+
+  groups.push({
+    groupId: 'OTHERS',
+    groupName: translate('Other permissions'),
+    permissions: otherPermissions
+  });
+
+  return groups;
 });
+
+const filteredPermissionGroups = computed<any[]>(() => {
+  const selectedGroupId = query.value.classificationSecurityGroupId;
+  const groups = appPermissionGroups.value.filter((group: any) => !selectedGroupId || group.groupId === selectedGroupId);
+
+  return groups.map((group: any) => ({
+    ...group,
+    permissions: group.permissions.filter((permission: any) => matchesQuery(permission, group) && matchesSelectedFilter(permission))
+  }));
+});
+
+const updateQuery = async () => {
+  await permissionStore.updateQuery(query.value);
+};
+
+const updatePermissionAssociation = async (permission: any) => {
+  let resp = {} as any;
+  const payload = {
+    groupId: currentGroup.value.groupId,
+    permissionId: permission.permissionId
+  };
+
+  const currentPermissions = JSON.parse(JSON.stringify(currentGroupPermissions.value));
+  updatePermissionStatus(permission, true);
+
+  try {
+    if (permission.isChecked) {
+      const fromDate = currentGroupPermissions.value[permission.permissionId].fromDate;
+
+      resp = await permissionStore.removeSecurityPermissionFromSecurityGroup({
+        ...payload,
+        thruDate: DateTime.now().toMillis(),
+        fromDate
+      });
+
+      if (commonUtil.hasError(resp)) {
+        throw resp.data;
+      }
+
+      delete currentPermissions[permission.permissionId];
+    } else {
+      const time = DateTime.now().toMillis();
+      const params = {
+        ...payload,
+        fromDate: time
+      };
+
+      resp = await permissionStore.addSecurityPermissionToSecurityGroup(params);
+
+      if (commonUtil.hasError(resp)) {
+        throw resp.data;
+      }
+
+      currentPermissions[permission.permissionId] = params;
+    }
+
+    if (!commonUtil.hasError(resp)) {
+      commonUtil.showToast(translate("Security group permission association successfully updated."));
+      await permissionStore.updateCurrentGroupPermissions({ groupId: currentGroup.value.groupId, currentPermissions});
+      permissionStore.checkAssociated();
+    } else {
+      throw resp.data;
+    }
+  } catch (err) {
+    commonUtil.showToast(translate("Failed to update security group permission association."));
+    logger.error(err);
+  }
+  updatePermissionStatus(permission, false);
+};
+
+const arePermissionsAvailable = () => {
+  return filteredPermissionGroups.value.some((group: any) => group.permissions.length);
+};
+
+const updatePermissionStatus = (currentPermission: any, status: boolean) => {
+  updatingPermissionIds[currentPermission.permissionId] = status;
+};
 </script>
 
 <style scoped>

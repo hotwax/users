@@ -1,74 +1,32 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import UserDetails from '@/views/UserDetails.vue'
-import { DxpLogin, useAuthStore } from '@hotwax/dxp-components';
-import LocalLogin from '@/views/LocalLogin.vue'
-import { loader } from '@/utils/user';
-import store from '@/store'
-import { showToast } from '@/utils'
-import { translate } from '@hotwax/dxp-components'
-import { Actions, hasPermission } from '@/authorization';
+import { useUserStore } from '@/store/user'
+import { commonUtil, translate, useAuth, Login } from '@common'
 import Tabs from '@/components/Tabs.vue'
 import CreateUser from '@/views/CreateUser.vue'
 import UserConfirmation from '@/views/UserConfirmation.vue'
 import UserQuickSetup from '@/views/UserQuickSetup.vue'
 import CreateSecurityGroup from '@/views/CreateSecurityGroup.vue';
 import AddPermissions from '@/views/AddPermissions.vue';
-
-declare module 'vue-router' {
-  interface RouteMeta {
-    permissionId?: string;
-  }
-}
-
-const isLocalMoquiLogin = process.env.VUE_APP_LOCAL_MOQUI_LOGIN === 'true';
-
-const syncLocalAuthStore = (authStore = useAuthStore()) => {
-  if (!isLocalMoquiLogin || !store.getters['user/isAuthenticated']) return;
-
-  (authStore as any).$patch({
-    token: {
-      value: store.getters['user/getUserToken'],
-      expiration: Date.now() + 24 * 60 * 60 * 1000
-    },
-    oms: store.getters['user/getInstanceUrl']
-  });
-}
+import AppPermissions from '@/views/AppPermissions.vue';
+import 'vue-router'
 
 const authGuard = async (to: any, from: any, next: any) => {
-  const authStore = useAuthStore()
-  syncLocalAuthStore(authStore);
-  if (!authStore.isAuthenticated || !store.getters['user/isAuthenticated']) {
-    if (isLocalMoquiLogin) {
-      next('/login');
-      return;
-    }
-
-    await loader.present('Authenticating')
-    // TODO use authenticate() when support is there
-    const redirectUrl = window.location.origin + '/login'
-    window.location.href = `${process.env.VUE_APP_LOGIN_URL}?redirectUrl=${redirectUrl}`
-    loader.dismiss()
-    return;
+  const { isAuthenticated } = useAuth()
+  if (!isAuthenticated.value) {
+    if (!commonUtil.isAppEmbedded()) next('/login')
+    else next('/shopify-login')
+  } else {
+    next()
   }
-  next()
-};
-
-const loginGuard = (to: any, from: any, next: any) => {
-  const authStore = useAuthStore()
-  syncLocalAuthStore(authStore);
-  if (authStore.isAuthenticated && store.getters['user/isAuthenticated'] && !to.query?.token && !to.query?.oms) {
-    next('/')
-    return;
-  }
-  next();
 };
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     redirect: () => {
-      if (hasPermission(Actions.APP_USERS_LIST_VIEW)) {
+      if (useUserStore().hasPermission('USERS_LIST_VIEW OR PARTYMGR_VIEW OR PARTYMGR_ADMIN')) {
         return '/tabs/users';
       }
       return '/tabs/me';
@@ -76,9 +34,8 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/login',
-    name: 'DxpLogin',
-    component: isLocalMoquiLogin ? LocalLogin : DxpLogin,
-    beforeEnter: loginGuard
+    name: 'Login',
+    component: Login
   },
   {
     path: '/tabs',
@@ -88,7 +45,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'users',
         component: () => import('@/views/Users.vue'),
         meta: {
-          permissionId: "USERS_LIST_VIEW"
+          permissionId: "USERS_LIST_VIEW OR PARTYMGR_VIEW OR PARTYMGR_ADMIN"
         }
       },{
         path: 'settings',
@@ -97,20 +54,20 @@ const routes: Array<RouteRecordRaw> = [
         path: 'me',
         component: () => import('@/views/UserDetails.vue'),
         props: () => {
-          const user = store.getters['user/getUserProfile'] || {};
+          const user = useUserStore().getUserProfile || {};
           return { partyId: user.partyId };
         }
       },{
         path: 'permissions',
         redirect: '/tabs/app-permissions?view=group',
         meta: {
-          permissionId: "APP_PERMISSION_VIEW"
+          permissionId: "SECURITY_VIEW OR SECURITY_ADMIN"
         }
       },{
         path: 'app-permissions',
         component: () => import('@/views/AppPermissions.vue'),
         meta: {
-          permissionId: "APP_PERMISSION_VIEW"
+          permissionId: "SECURITY_VIEW OR SECURITY_ADMIN"
         }
       },
     ],
@@ -122,7 +79,7 @@ const routes: Array<RouteRecordRaw> = [
     component: UserDetails,
     beforeEnter: authGuard,
     meta: {
-      permissionId: "USERS_LIST_VIEW"
+      permissionId: "USERS_LIST_VIEW OR PARTYMGR_VIEW OR PARTYMGR_ADMIN"
     },
     props: true
   },
@@ -132,7 +89,7 @@ const routes: Array<RouteRecordRaw> = [
     component: CreateUser,
     beforeEnter: authGuard,
     meta: {
-      permissionId: "APP_USER_CREATE"
+      permissionId: "SECURITY_CREATE OR SECURITY_ADMIN"
     }
   },
   {
@@ -142,7 +99,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: authGuard,
     props: true,
     meta: {
-      permissionId: "APP_USER_CREATE"
+      permissionId: "SECURITY_CREATE OR SECURITY_ADMIN"
     }
   },
   {
@@ -152,7 +109,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: authGuard,
     props: true,
     meta: {
-      permissionId: "APP_USER_CREATE"
+      permissionId: "SECURITY_CREATE OR SECURITY_ADMIN"
     }
   },
   {
@@ -161,7 +118,7 @@ const routes: Array<RouteRecordRaw> = [
     component: CreateSecurityGroup,
     beforeEnter: authGuard,
     meta: {
-      permissionId: "APP_SECURITY_GROUP_CREATE"
+      permissionId: "SECURITY_CREATE OR SECURITY_ADMIN"
     }
   },
   {
@@ -170,20 +127,20 @@ const routes: Array<RouteRecordRaw> = [
     component: AddPermissions,
     beforeEnter: authGuard,
     meta: {
-      permissionId: "APP_PERMISSION_CREATE"
+      permissionId: "SECURITY_CREATE OR SECURITY_ADMIN"
     }
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 })
 
 router.beforeEach((to, from) => {
   const permissionId = to.meta.permissionId;
-  if (permissionId && !hasPermission(permissionId)) {
-    showToast(translate('The requested page was not available to your user. Please contact your administrator to update your permissions.'));
+  if (permissionId && !useUserStore().hasPermission(permissionId)) {
+    commonUtil.showToast(translate('The requested page was not available to your user. Please contact your administrator to update your permissions.'));
     if (from.path === '/login' || from.path === '/') {
       return { path: '/tabs/settings' };
     }

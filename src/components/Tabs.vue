@@ -3,15 +3,15 @@
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button v-if="hasPermission(Actions.APP_USERS_LIST_VIEW)" tab="users" href="/tabs/users">
+        <ion-tab-button v-if="userStore.hasPermission('USERS_LIST_VIEW OR PARTYMGR_VIEW OR PARTYMGR_ADMIN')" tab="users" href="/tabs/users">
           <ion-icon :icon="personOutline" />
           <ion-label>{{ translate("Users") }}</ion-label>
         </ion-tab-button>
-        <ion-tab-button v-if="hasPermission(Actions.APP_PERMISSION_VIEW)" tab="permissions" href="/tabs/app-permissions">
+        <ion-tab-button v-if="userStore.hasPermission('SECURITY_VIEW OR SECURITY_ADMIN')" tab="permissions" href="/tabs/app-permissions">
           <ion-icon :icon="idCardOutline" />
           <ion-label>{{ translate("Permissions") }}</ion-label>
         </ion-tab-button>
-        <ion-tab-button v-if="!hasPermission(Actions.APP_USERS_LIST_VIEW)" tab="me" :href="`/tabs/me`">
+        <ion-tab-button v-if="!userStore.hasPermission('USERS_LIST_VIEW OR PARTYMGR_VIEW OR PARTYMGR_ADMIN')" tab="me" :href="`/tabs/me`">
           <ion-icon :icon="personOutline" />
           <ion-label>{{ translate("Me") }}</ion-label>
         </ion-tab-button>
@@ -24,30 +24,13 @@
   </ion-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs, IonRouterOutlet } from "@ionic/vue";
-import {
-  settingsOutline,
-  personOutline,
-  idCardOutline
-} from "ionicons/icons";
-import { translate } from "@hotwax/dxp-components";
-import { Actions, hasPermission } from '@/authorization'
+import { settingsOutline, personOutline, idCardOutline } from "ionicons/icons";
+import { translate } from "@common";
+import { useUserStore } from '@/store/user';
 
-export default {
-  name: "Tabs",
-  components: { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs, IonRouterOutlet },
-  setup() {
-    return {
-      settingsOutline,
-      personOutline,
-      idCardOutline,
-      translate,
-      hasPermission,
-      Actions
-    };
-  }
-};
+const userStore = useUserStore();
 </script>
 
 <style scoped>

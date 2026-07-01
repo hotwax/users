@@ -39,7 +39,7 @@
   </ion-card>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
   IonButton,
   IonCard,
@@ -54,44 +54,21 @@ import {
   IonList,
   IonNote
 } from '@ionic/vue';
-import { defineComponent, PropType } from 'vue';
+import { PropType } from 'vue';
 import { peopleOutline, timeOutline } from 'ionicons/icons';
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@common';
 import { AppPermissionDefinition } from '@/config/app-permissions';
 
-export default defineComponent({
-  name: 'AppPermissionCard',
-  components: {
-    IonButton,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonIcon,
-    IonItem,
-    IonItemDivider,
-    IonLabel,
-    IonList,
-    IonNote
+defineProps({
+  permission: {
+    type: Object as PropType<AppPermissionDefinition>,
+    required: true
   },
-  props: {
-    permission: {
-      type: Object as PropType<AppPermissionDefinition>,
-      required: true
-    },
-    activeGroups: {
-      type: Array as PropType<any[]>,
-      default: () => []
-    }
-  },
-  emits: ['history', 'manage'],
-  setup() {
-    return {
-      peopleOutline,
-      timeOutline,
-      translate
-    }
+  activeGroups: {
+    type: Array as PropType<any[]>,
+    default: () => []
   }
 });
+
+defineEmits(['history', 'manage']);
 </script>

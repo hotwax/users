@@ -33,7 +33,7 @@
   </ion-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
   IonButton,
   IonButtons,
@@ -49,50 +49,27 @@ import {
   IonToolbar,
   modalController
 } from '@ionic/vue';
-import { defineComponent, PropType } from 'vue';
+import { PropType } from 'vue';
 import { DateTime } from 'luxon';
 import { closeOutline } from 'ionicons/icons';
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@common';
 
-export default defineComponent({
-  name: 'AppPermissionHistoryModal',
-  components: {
-    IonButton,
-    IonButtons,
-    IonContent,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonNote,
-    IonPage,
-    IonTitle,
-    IonToolbar
-  },
-  props: {
-    records: {
-      type: Array as PropType<any[]>,
-      default: () => []
-    }
-  },
-  methods: {
-    close() {
-      modalController.dismiss(null, 'cancel');
-    },
-    getDateTime(time: any) {
-      if (!time) return "";
-      const millis = typeof time === "string" ? parseInt(time, 10) : time;
-      return DateTime.fromMillis(millis).toLocaleString(DateTime.DATETIME_MED);
-    }
-  },
-  setup() {
-    return {
-      closeOutline,
-      translate
-    }
+defineProps({
+  records: {
+    type: Array as PropType<any[]>,
+    default: () => []
   }
 });
+
+const close = () => {
+  modalController.dismiss(null, 'cancel');
+};
+
+const getDateTime = (time: any) => {
+  if (!time) return "";
+  const millis = typeof time === "string" ? parseInt(time, 10) : time;
+  return DateTime.fromMillis(millis).toLocaleString(DateTime.DATETIME_MED);
+};
 </script>
 
 <style scoped>

@@ -22,7 +22,7 @@
             </ion-card-header>
           </ion-item>
           <ion-button color="danger" @click="logout()">{{ translate("Logout") }}</ion-button>
-          <ion-button :standalone-hidden="!hasPermission(Actions.APP_PWA_STANDALONE_ACCESS)" fill="outline" @click="goToLaunchpad()">
+          <ion-button :standalone-hidden="!userStore.hasPermission('COMMON_ADMIN')" fill="outline" @click="goToLaunchpad()">
             {{ translate("Go to Launchpad") }}
             <ion-icon slot="end" :icon="openOutline" />
           </ion-button>
@@ -47,128 +47,52 @@
       </div>
 
       <section>
-        <DxpTimeZoneSwitcher @timeZoneUpdated="timeZoneUpdated" />
+        <DxpTimeZoneSwitcher />
         <DxpLanguageSwitcher />
       </section>
     </ion-content>
   </ion-page>
 </template>
 
-<script lang="ts">
-import {
-  IonAvatar,
-  IonButton,
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonItem,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
-import {
-  codeWorkingOutline,
-  ellipsisVertical,
-  openOutline,
-  personCircleOutline,
-  sendOutline,
-  storefrontOutline
-} from 'ionicons/icons'
-import { mapGetters, useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue';
+import { IonAvatar, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonHeader, IonIcon, IonItem, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+import { openOutline } from 'ionicons/icons'
 import Image from '@/components/Image.vue';
-import { translate } from "@hotwax/dxp-components";
-import { Actions, hasPermission } from '@/authorization'
+import { translate, useAuth } from "@common";
 import { DateTime } from 'luxon';
+import { useUserStore } from '@/store/user';
+import DxpOmsInstanceNavigator from "@/components/DxpOmsInstanceNavigator.vue";
+import DxpTimeZoneSwitcher from "@/components/DxpTimeZoneSwitcher.vue";
+import DxpLanguageSwitcher from "@/components/DxpLanguageSwitcher.vue";
 
-export default defineComponent({
-  name: 'Settings',
-  components: {
-    IonAvatar,
-    IonButton, 
-    IonCard,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonContent, 
-    IonHeader, 
-    IonIcon,
-    IonItem, 
-    IonPage, 
-    IonTitle,
-    IonToolbar,
-    Image
-  },
-  data(){
-    return {
-      baseURL: process.env.VUE_APP_BASE_URL,
-      appInfo: (process.env.VUE_APP_VERSION_INFO ? JSON.parse(process.env.VUE_APP_VERSION_INFO) : {}) as any,
-      appVersion: "",
-      rerouteFulfillmentConfig: {
-        // TODO Remove fromDate and directly store values making it loosely coupled with OMS
-        allowDeliveryMethodUpdate: {},
-        allowDeliveryAddressUpdate: {},
-        allowPickupUpdate: {},
-        allowCancel: {},
-        shippingMethod: {}
-      } as any,
-      availableShipmentMethods: [] as any,
-      rerouteFulfillmentConfigMapping: (process.env.VUE_APP_RF_CNFG_MPNG? JSON.parse(process.env.VUE_APP_RF_CNFG_MPNG) : {}) as any
-    }
-  },
-  computed: {
-    ...mapGetters({
-      userProfile: 'user/getUserProfile',
-      baseUrl: 'user/getBaseUrl'
-    })
-  },
-  mounted() {
-    this.appVersion = this.appInfo.branch ? (this.appInfo.branch + "-" + this.appInfo.revision) : this.appInfo.tag;
-  },
-  methods: {
-    async logout () {
-      this.store.dispatch('user/logout', { isUserUnauthorised: false }).then((redirectionUrl) => {
-        // if not having redirection url then redirect the user to launchpad
-        if(!redirectionUrl) {
-          const redirectUrl = window.location.origin + '/login'
-          window.location.href = `${process.env.VUE_APP_LOGIN_URL}?isLoggedOut=true&redirectUrl=${redirectUrl}`
-        }
-      })
-    },
-    goToLaunchpad() {
-      window.location.href = `${process.env.VUE_APP_LOGIN_URL}`
-    },
-    getDateTime(time: any) {
-      return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
-    },
-    async timeZoneUpdated(tzId: string) {
-      await this.store.dispatch("user/setUserTimeZone", tzId)
-    },
-  },
-  setup () {
-    const store = useStore();
-    const router = useRouter();
 
-    return {
-      Actions,
-      ellipsisVertical,
-      hasPermission,
-      personCircleOutline,
-      router,
-      sendOutline,
-      store,
-      storefrontOutline,
-      codeWorkingOutline,
-      openOutline,
-      translate
-    }
-  }
+const userStore = useUserStore();
+
+const appInfo = (import.meta.env.VITE_APP_VERSION_INFO ? JSON.parse(import.meta.env.VITE_APP_VERSION_INFO as string) : {}) as any;
+const appVersion = ref("");
+
+const userProfile = computed(() => userStore.getUserProfile);
+
+onMounted(() => {
+  appVersion.value = appInfo.branch ? (appInfo.branch + "-" + appInfo.revision) : appInfo.tag;
 });
+
+const logout = async () => {
+  useAuth().logout({ isUserUnauthorised: false });
+}
+
+const goToLaunchpad = () => {
+  window.location.href = `${import.meta.env.VITE_LOGIN_URL}`;
+};
+
+const getDateTime = (time: any) => {
+  return DateTime.fromMillis(time).toLocaleString(DateTime.DATETIME_MED);
+};
+
+const timeZoneUpdated = async (tzId: string) => {
+  await userStore.setUserTimeZone(tzId);
+};
 </script>
 
 <style scoped>

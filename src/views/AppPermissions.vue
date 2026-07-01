@@ -85,7 +85,7 @@
             </ion-item>
           </ion-list>
 
-          <ion-button @click="createGroup()" :disabled="!hasPermission(Actions.APP_SECURITY_GROUP_CREATE)" fill="clear" expand="block">
+          <ion-button @click="createGroup()" :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" fill="clear" expand="block">
             <ion-icon slot="start" :icon="addOutline" />
             <ion-label>{{ translate("Create security group") }}</ion-label>
           </ion-button>
@@ -119,7 +119,8 @@
   </ion-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import {
   IonButton,
   IonContent,
@@ -137,315 +138,283 @@ import {
   IonToolbar,
   modalController
 } from '@ionic/vue';
-import { defineComponent } from 'vue';
 import { addOutline, idCardOutline, openOutline, shieldCheckmarkOutline } from 'ionicons/icons';
-import { translate } from '@hotwax/dxp-components';
+import { commonUtil, emitter, logger, translate } from '@common';
+import { useRoute } from 'vue-router';
+import router from '@/router';
 import { appPermissionCatalogs, AppPermissionCatalog, AppPermissionDefinition } from '@/config/app-permissions';
 import AppPermissionCard from '@/components/AppPermissionCard.vue';
 import AppPermissionGroupModal from '@/components/AppPermissionGroupModal.vue';
 import AppPermissionHistoryModal from '@/components/AppPermissionHistoryModal.vue';
 import EditSecurityGroupModal from '@/components/EditSecurityGroupModal.vue';
 import PermissionItems from '@/components/PermissionItems.vue';
-import { AppPermissionService } from '@/services/AppPermissionService';
-import { PermissionService } from '@/services/PermissionService';
-import { showToast } from '@/utils';
-import { hasError } from '@/adapter';
-import { Actions, hasPermission } from '@/authorization';
-import { mapGetters, useStore } from 'vuex';
-import { useRouter } from 'vue-router';
-import emitter from "@/event-bus";
-import logger from '@/logger';
+import { usePermissionStore } from '@/store/permission';
+import { useUtilStore } from '@/store/util';
+import { useUserStore } from '@/store/user';
 
-export default defineComponent({
-  name: 'AppPermissions',
-  components: {
-    AppPermissionCard,
-    IonButton,
-    IonContent,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonNote,
-    IonPage,
-    IonSearchbar,
-    IonSegment,
-    IonSegmentButton,
-    IonTitle,
-    IonToolbar,
-    PermissionItems
-  },
-  data() {
-    return {
-      activeGroupsByPermission: {} as Record<string, any[]>,
-      assignableSecurityGroups: [] as any[],
-      query: '',
-      securityGroupUsers: {} as any,
-      selectedAppId: (appPermissionCatalogs[0]?.appId || '') as string,
-      viewMode: 'app'
+const route = useRoute();
+const permissionStore = usePermissionStore();
+const utilStore = useUtilStore();
+const userStore = useUserStore();
+
+const activeGroupsByPermission = reactive<Record<string, any[]>>({});
+const assignableSecurityGroups = ref<any[]>([]);
+const query = ref('');
+const securityGroupUsers = ref<any>({});
+const selectedAppId = ref<string>(appPermissionCatalogs[0]?.appId || '');
+const viewMode = ref<'app' | 'group'>('app');
+
+const allPermissions = computed(() => permissionStore.getAllPermissions);
+const currentGroup = computed(() => permissionStore.getCurrentGroup);
+const permissionsByClassificationGroups = computed(() => permissionStore.getPermissionsByClassificationGroups);
+const securityGroups = computed(() => utilStore.getSecurityGroups);
+
+const selectedApp = computed<AppPermissionCatalog | undefined>(() => {
+  return appPermissionCatalogs.find((app) => app.appId === selectedAppId.value) || appPermissionCatalogs[0];
+});
+
+const matchesPermission = (permission: AppPermissionDefinition, queryString: string) => {
+  return permission.permissionId.toLowerCase().includes(queryString)
+    || permission.title.toLowerCase().includes(queryString)
+    || permission.description.toLowerCase().includes(queryString)
+    || permission.category.toLowerCase().includes(queryString);
+};
+
+const filteredApps = computed<readonly AppPermissionCatalog[]>(() => {
+  const queryString = query.value.trim().toLowerCase();
+  if (!queryString) return appPermissionCatalogs;
+
+  return appPermissionCatalogs.filter((app) => {
+    return app.appName.toLowerCase().includes(queryString)
+      || app.appId.toLowerCase().includes(queryString)
+      || app.permissions.some((permission) => matchesPermission(permission, queryString));
+  });
+});
+
+const filteredPermissions = computed<readonly AppPermissionDefinition[]>(() => {
+  if (!selectedApp.value) return [];
+
+  const queryString = query.value.trim().toLowerCase();
+  if (!queryString) return selectedApp.value.permissions;
+
+  return selectedApp.value.permissions.filter((permission) => matchesPermission(permission, queryString));
+});
+
+const getViewModeFromRoute = () => (route.query.view === 'group' ? 'group' : 'app');
+
+const getUsersCount = async () => {
+  if (securityGroupUsers.value[currentGroup.value.groupId]) {
+    return;
+  }
+
+  try {
+    const resp = await permissionStore.getSecurityGroupUsers({
+      entityName: "PartyAndUserLoginSecurityGroupDetails",
+      noConditionFind: "Y",
+      fromDateName: "relationshipFromDate",
+      thruDateName: "relationshipThruDate",
+      filterByDate: "Y",
+      distinct: "Y",
+      viewSize: 1,
+      viewIndex: 0,
+      fieldList: ['partyId', 'securityGroupName'],
+      inputFields: {
+        securityGroupId: currentGroup.value.groupId,
+        roleTypeIdTo: "APPLICATION_USER"
+      }
+    });
+
+    if (!commonUtil.hasError(resp)) {
+      securityGroupUsers.value[currentGroup.value.groupId] = resp.data.count;
+    } else {
+      throw resp.data;
     }
-  },
-  computed: {
-    ...mapGetters({
-      allPermissions: 'permission/getAllPermissions',
-      currentGroup: 'permission/getCurrentGroup',
-      permissionsByClassificationGroups: 'permission/getPermissionsByClassificationGroups',
-      securityGroups: 'util/getSecurityGroups'
-    }),
-    filteredApps(): readonly AppPermissionCatalog[] {
-      const query = this.query.trim().toLowerCase();
-      if (!query) return appPermissionCatalogs;
+  } catch (err) {
+    logger.error(err);
+  }
+};
 
-      return appPermissionCatalogs.filter((app) => {
-        return app.appName.toLowerCase().includes(query)
-          || app.appId.toLowerCase().includes(query)
-          || app.permissions.some((permission) => this.matchesPermission(permission, query));
-      });
-    },
-    filteredPermissions(): readonly AppPermissionDefinition[] {
-      if (!this.selectedApp) return [];
+const loadGroupPermissions = async () => {
+  await utilStore.fetchSecurityGroups();
+  await utilStore.fetchClassificationSecurityGroups();
+  if (!Object.keys(allPermissions.value).length) await permissionStore.fetchAllPermissions();
+  if (!Object.keys(permissionsByClassificationGroups.value).length) await permissionStore.fetchPermissionsByClassificationGroups();
+  if (currentGroup.value?.groupId) {
+    await permissionStore.fetchPermissionsByGroup(currentGroup.value.groupId);
+    await getUsersCount();
+  }
+};
 
-      const query = this.query.trim().toLowerCase();
-      if (!query) return this.selectedApp.permissions;
+const loadActiveGroups = async (permissionId: string) => {
+  try {
+    activeGroupsByPermission[permissionId] = await permissionStore.getActiveGroupsByPermission(permissionId);
+  } catch (error) {
+    logger.error(error);
+    activeGroupsByPermission[permissionId] = [];
+  }
+};
 
-      return this.selectedApp.permissions.filter((permission) => this.matchesPermission(permission, query));
-    },
-    selectedApp(): AppPermissionCatalog | undefined {
-      return appPermissionCatalogs.find((app) => app.appId === this.selectedAppId) || appPermissionCatalogs[0];
-    }
-  },
-  watch: {
-    '$route.query.view': {
-      async handler() {
-        const nextViewMode = this.getViewModeFromRoute();
-        if (this.viewMode === nextViewMode) return;
+const loadActiveGroupsForSelectedApp = async () => {
+  if (!selectedApp.value) return;
 
-        this.viewMode = nextViewMode;
-        if (this.viewMode === 'group') {
-          await this.loadGroupPermissions();
-        }
-      }
-    }
-  },
-  async mounted() {
-    this.viewMode = this.getViewModeFromRoute();
+  await Promise.all(selectedApp.value.permissions.map((permission) => loadActiveGroups(permission.permissionId)));
+};
 
-    if (this.viewMode === 'app') {
-      await this.loadActiveGroupsForSelectedApp();
-      return;
-    }
+const loadAssignableSecurityGroups = async () => {
+  if (assignableSecurityGroups.value.length) return;
 
-    await this.loadGroupPermissions();
-  },
-  methods: {
-    createGroup() {
-      this.$router.push({ path: `/create-security-group/` });
-    },
-    async editSecurityGroup() {
-      const editSecurityGroupModal = await modalController.create({
-        component: EditSecurityGroupModal
-      });
+  await utilStore.fetchSecurityGroups();
+  assignableSecurityGroups.value = securityGroups.value;
+};
 
-      editSecurityGroupModal.present();
-    },
-    async getUsersCount() {
-      if(this.securityGroupUsers[this.currentGroup.groupId]) {
-        return;
-      }
+onMounted(async () => {
+  viewMode.value = getViewModeFromRoute();
 
-      try {
-        const resp = await PermissionService.getSecurityGroupUsers({
-          entityName: "PartyAndUserLoginSecurityGroupDetails",
-          noConditionFind: "Y",
-          fromDateName: "relationshipFromDate",
-          thruDateName: "relationshipThruDate",
-          filterByDate: "Y",
-          distinct: "Y",
-          viewSize: 1,
-          viewIndex: 0,
-          fieldList: ['partyId','securityGroupName'],
-          inputFields: {
-            securityGroupId: this.currentGroup.groupId,
-            roleTypeIdTo: "APPLICATION_USER"
-          }
-        });
+  if (viewMode.value === 'app') {
+    await loadActiveGroupsForSelectedApp();
+    return;
+  }
 
-        if(!hasError(resp)) {
-          this.securityGroupUsers[this.currentGroup.groupId] = resp.data.count;
-        } else {
-          throw resp.data;
-        }
-      } catch(err) {
-        logger.error(err);
-      }
-    },
-    getViewModeFromRoute() {
-      return this.$route.query.view === 'group' ? 'group' : 'app';
-    },
-    async loadGroupPermissions() {
-      await this.store.dispatch('util/getSecurityGroups');
-      await this.store.dispatch('util/getClassificationSecurityGroups');
-      if(!this.allPermissions.length) await this.store.dispatch('permission/getAllPermissions');
-      if(!Object.keys(this.permissionsByClassificationGroups).length) await this.store.dispatch('permission/getPermissionsByClassificationGroups');
-      if(this.currentGroup.groupId) {
-        await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId);
-        await this.getUsersCount();
-      }
-    },
-    matchesPermission(permission: AppPermissionDefinition, query: string) {
-      return permission.permissionId.toLowerCase().includes(query)
-        || permission.title.toLowerCase().includes(query)
-        || permission.description.toLowerCase().includes(query)
-        || permission.category.toLowerCase().includes(query);
-    },
-    async loadActiveGroupsForSelectedApp() {
-      if (!this.selectedApp) return;
+  await loadGroupPermissions();
+});
 
-      await Promise.all(this.selectedApp.permissions.map(async (permission) => {
-        await this.loadActiveGroups(permission.permissionId);
-      }));
-    },
-    async loadActiveGroups(permissionId: string) {
-      try {
-        this.activeGroupsByPermission[permissionId] = await AppPermissionService.getActiveGroupsByPermission(permissionId);
-      } catch (error) {
-        logger.error(error);
-        this.activeGroupsByPermission[permissionId] = [];
-      }
-    },
-    async loadAssignableSecurityGroups() {
-      if (this.assignableSecurityGroups.length) return;
+watch(() => route.query.view, async () => {
+  const nextViewMode = getViewModeFromRoute();
+  if (viewMode.value === nextViewMode) return;
 
-      this.assignableSecurityGroups = await AppPermissionService.getAssignableSecurityGroups();
-    },
-    async openCurrentGroupUsers() {
-      await this.store.dispatch('user/updateQuery', {queryString: '', securityGroup: this.currentGroup.groupId, status: '', hideDisabledUser: true});
-      this.router.push('users');
-    },
-    async openHistory(permission: AppPermissionDefinition) {
-      let records = [] as any[];
-
-      try {
-        records = await AppPermissionService.getPermissionHistory(permission.permissionId);
-      } catch (error) {
-        logger.error(error);
-      }
-
-      const historyModal = await modalController.create({
-        component: AppPermissionHistoryModal,
-        componentProps: {
-          records
-        }
-      });
-
-      historyModal.present();
-    },
-    async openManageGroups(permission: AppPermissionDefinition) {
-      try {
-        await this.loadAssignableSecurityGroups();
-      } catch (error) {
-        logger.error(error);
-        showToast(translate("Something went wrong."));
-        return;
-      }
-
-      const groupModal = await modalController.create({
-        component: AppPermissionGroupModal,
-        componentProps: {
-          activeGroups: this.activeGroupsByPermission[permission.permissionId] || [],
-          permission,
-          securityGroups: this.assignableSecurityGroups
-        }
-      });
-
-      groupModal.present();
-
-      const result = await groupModal.onDidDismiss();
-      if (result.role !== 'save' || !result.data) return;
-
-      await this.saveSecurityGroups(result.data.permission, result.data.originalGroups, result.data.selectedGroups);
-    },
-    async saveSecurityGroups(permission: AppPermissionDefinition, originalGroups: any[], selectedGroups: any[]) {
-      const originalIds = originalGroups.map((group) => group.groupId);
-      const selectedIds = selectedGroups.map((group) => group.groupId);
-      const groupIdsToCreate = selectedIds.filter((groupId) => !originalIds.includes(groupId));
-      const groupIdsToRemove = originalIds.filter((groupId) => !selectedIds.includes(groupId));
-
-      try {
-        await Promise.all([
-          ...groupIdsToCreate.map((groupId) => AppPermissionService.grantPermissionToGroup({
-            groupId,
-            permissionId: permission.permissionId
-          })),
-          ...groupIdsToRemove.map((groupId) => {
-            const originalGroup = originalGroups.find((group) => group.groupId === groupId);
-            return AppPermissionService.removePermissionFromGroup({
-              groupId,
-              permissionId: permission.permissionId,
-              fromDate: originalGroup?.fromDate
-            });
-          })
-        ]);
-
-        showToast(translate("Security group permission association successfully updated."));
-        await this.loadActiveGroups(permission.permissionId);
-      } catch (error) {
-        logger.error(error);
-        showToast(translate("Failed to update security group permission association."));
-      }
-    },
-    async selectApp(appId: string) {
-      this.selectedAppId = appId;
-      await this.loadActiveGroupsForSelectedApp();
-    },
-    async updateCurrentGroup(group: any) {
-      emitter.emit('presentLoader');
-      await this.store.dispatch('permission/updateCurrentGroup', group);
-      await this.store.dispatch('permission/getPermissionsByGroup', this.currentGroup.groupId);
-      await this.store.dispatch('permission/checkAssociated');
-      await this.getUsersCount();
-      await this.store.dispatch('permission/updateQuery', {queryString: '', showAllSelected: false, classificationSecurityGroupId: ''});
-      emitter.emit('dismissLoader');
-    },
-    async updateViewMode(event: CustomEvent) {
-      this.viewMode = event.detail.value === 'group' ? 'group' : 'app';
-      const query = { ...this.$route.query } as any;
-      if (this.viewMode === 'group') {
-        query.view = 'group';
-      } else {
-        delete query.view;
-      }
-
-      await this.router.replace({
-        path: '/tabs/app-permissions',
-        query
-      });
-
-      if (this.viewMode === 'group') {
-        await this.loadGroupPermissions();
-      } else {
-        await this.loadActiveGroupsForSelectedApp();
-      }
-    }
-  },
-  setup() {
-    const router = useRouter();
-    const store = useStore();
-
-    return {
-      Actions,
-      addOutline,
-      hasPermission,
-      idCardOutline,
-      openOutline,
-      router,
-      shieldCheckmarkOutline,
-      store,
-      translate
-    }
+  viewMode.value = nextViewMode;
+  if (viewMode.value === 'group') {
+    await loadGroupPermissions();
   }
 });
+
+const createGroup = () => {
+  router.push({ path: `/create-security-group/` });
+};
+
+const editSecurityGroup = async () => {
+  const editSecurityGroupModal = await modalController.create({
+    component: EditSecurityGroupModal
+  });
+
+  editSecurityGroupModal.present();
+};
+
+const openCurrentGroupUsers = async () => {
+  userStore.updateQuery({ queryString: '', securityGroup: currentGroup.value.groupId, status: '', hideDisabledUser: true });
+  router.push('users');
+};
+
+const openHistory = async (permission: AppPermissionDefinition) => {
+  let records = [] as any[];
+
+  try {
+    records = await permissionStore.getPermissionHistory(permission.permissionId);
+  } catch (error) {
+    logger.error(error);
+  }
+
+  const historyModal = await modalController.create({
+    component: AppPermissionHistoryModal,
+    componentProps: {
+      records
+    }
+  });
+
+  historyModal.present();
+};
+
+const saveSecurityGroups = async (permission: AppPermissionDefinition, originalGroups: any[], selectedGroups: any[]) => {
+  const originalIds = originalGroups.map((group) => group.groupId);
+  const selectedIds = selectedGroups.map((group) => group.groupId);
+  const groupIdsToCreate = selectedIds.filter((groupId) => !originalIds.includes(groupId));
+  const groupIdsToRemove = originalIds.filter((groupId) => !selectedIds.includes(groupId));
+
+  try {
+    await Promise.all([
+      ...groupIdsToCreate.map((groupId) => permissionStore.grantPermissionToGroup({
+        groupId,
+        permissionId: permission.permissionId
+      })),
+      ...groupIdsToRemove.map((groupId) => {
+        const originalGroup = originalGroups.find((group) => group.groupId === groupId);
+        return permissionStore.removePermissionFromGroup({
+          groupId,
+          permissionId: permission.permissionId,
+          fromDate: originalGroup?.fromDate
+        });
+      })
+    ]);
+
+    commonUtil.showToast(translate("Security group permission association successfully updated."));
+    await loadActiveGroups(permission.permissionId);
+  } catch (error) {
+    logger.error(error);
+    commonUtil.showToast(translate("Failed to update security group permission association."));
+  }
+};
+
+const openManageGroups = async (permission: AppPermissionDefinition) => {
+  try {
+    await loadAssignableSecurityGroups();
+  } catch (error) {
+    logger.error(error);
+    commonUtil.showToast(translate("Something went wrong."));
+    return;
+  }
+
+  const groupModal = await modalController.create({
+    component: AppPermissionGroupModal,
+    componentProps: {
+      activeGroups: activeGroupsByPermission[permission.permissionId] || [],
+      permission,
+      securityGroups: assignableSecurityGroups.value
+    }
+  });
+
+  groupModal.present();
+
+  const result = await groupModal.onDidDismiss();
+  if (result.role !== 'save' || !result.data) return;
+
+  await saveSecurityGroups(result.data.permission, result.data.originalGroups, result.data.selectedGroups);
+};
+
+const selectApp = async (appId: string) => {
+  selectedAppId.value = appId;
+  await loadActiveGroupsForSelectedApp();
+};
+
+const updateCurrentGroup = async (group: any) => {
+  emitter.emit('presentLoader');
+  permissionStore.updateCurrentGroup(group);
+  await permissionStore.fetchPermissionsByGroup(currentGroup.value.groupId);
+  await permissionStore.checkAssociated();
+  await getUsersCount();
+  permissionStore.updateQuery({ queryString: '', showSelected: false, classificationSecurityGroupId: '' });
+  emitter.emit('dismissLoader');
+};
+
+const updateViewMode = async (event: CustomEvent) => {
+  viewMode.value = event.detail.value === 'group' ? 'group' : 'app';
+  const query = { ...route.query } as any;
+  if (viewMode.value === 'group') {
+    query.view = 'group';
+  } else {
+    delete query.view;
+  }
+
+  await router.replace({
+    path: '/tabs/app-permissions',
+    query
+  });
+
+  if (viewMode.value === 'group') {
+    await loadGroupPermissions();
+  } else {
+    await loadActiveGroupsForSelectedApp();
+  }
+};
 </script>
 
 <style scoped>

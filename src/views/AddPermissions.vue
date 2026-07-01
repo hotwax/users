@@ -25,59 +25,22 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import {
-  IonButton,
-  IonButtons,
-  IonContent,
-  IonFooter,
-  IonHeader,
-  IonIcon,
-  IonPage,
-  IonTitle,
-  IonToolbar
-} from '@ionic/vue';
-import { defineComponent } from 'vue';
-import { translate } from '@hotwax/dxp-components';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { IonButton, IonButtons, IonContent, IonFooter, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+import { translate } from '@common';
 import { checkmarkDoneOutline } from 'ionicons/icons';
-import { useRouter } from 'vue-router';
+import router from '@/router';
 import PermissionItems from '@/components/PermissionItems.vue';
-import { mapGetters } from 'vuex';
+import { usePermissionStore } from '@/store/permission';
 
-export default defineComponent({
-  name: 'AddPermissions',
-  components: {
-    IonButton,
-    IonButtons,
-    IonContent,
-    IonFooter,
-    IonHeader,
-    IonIcon,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-    PermissionItems
-  },
-  computed: {
-    ...mapGetters({
-      currentGroup: "permission/getCurrentGroup"
-    })
-  },
-  methods: {
-    openPermissions() {
-      this.router.replace('/tabs/app-permissions?view=group')
-    }
-  },
-  setup() {
-    const router = useRouter();
+const permissionStore = usePermissionStore();
 
-    return {
-      checkmarkDoneOutline,
-      router,
-      translate
-    }
-  }
-});
+const currentGroup = computed(() => permissionStore.getCurrentGroup);
+
+const openPermissions = () => {
+  router.replace('/tabs/app-permissions?view=group');
+};
 </script>
 
 <style scoped>

@@ -38,7 +38,7 @@
   </ion-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
   IonButton,
   IonButtons,
@@ -57,102 +57,74 @@ import {
   IonToolbar,
   modalController
 } from '@ionic/vue';
-import { defineComponent, PropType } from 'vue';
+import { computed, onMounted, PropType, ref } from 'vue';
 import { closeOutline, saveOutline } from 'ionicons/icons';
-import { translate } from '@hotwax/dxp-components';
+import { translate } from '@common';
 import { AppPermissionDefinition } from '@/config/app-permissions';
 
-export default defineComponent({
-  name: 'AppPermissionGroupModal',
-  components: {
-    IonButton,
-    IonButtons,
-    IonCheckbox,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonPage,
-    IonSearchbar,
-    IonTitle,
-    IonToolbar
+const props = defineProps({
+  permission: {
+    type: Object as PropType<AppPermissionDefinition>,
+    required: true
   },
-  props: {
-    permission: {
-      type: Object as PropType<AppPermissionDefinition>,
-      required: true
-    },
-    securityGroups: {
-      type: Array as PropType<any[]>,
-      default: () => []
-    },
-    activeGroups: {
-      type: Array as PropType<any[]>,
-      default: () => []
-    }
+  securityGroups: {
+    type: Array as PropType<any[]>,
+    default: () => []
   },
-  data() {
-    return {
-      query: '',
-      selectedGroups: [] as any[]
-    }
-  },
-  computed: {
-    filteredSecurityGroups(): any[] {
-      const query = this.query.trim().toLowerCase();
-      if (!query) return this.securityGroups;
-
-      return this.securityGroups.filter((securityGroup: any) => {
-        return securityGroup.groupId.toLowerCase().includes(query)
-          || (securityGroup.groupName && securityGroup.groupName.toLowerCase().includes(query));
-      });
-    }
-  },
-  mounted() {
-    this.selectedGroups = this.activeGroups.map((group: any) => ({
-      groupId: group.groupId,
-      groupName: group.groupName,
-      fromDate: group.fromDate
-    }));
-  },
-  methods: {
-    close() {
-      modalController.dismiss(null, 'cancel');
-    },
-    isSelected(groupId: string) {
-      return this.selectedGroups.some((group: any) => group.groupId === groupId);
-    },
-    save() {
-      modalController.dismiss({
-        permission: this.permission,
-        originalGroups: this.activeGroups,
-        selectedGroups: this.selectedGroups
-      }, 'save');
-    },
-    toggleSecurityGroup(securityGroup: any) {
-      if (this.isSelected(securityGroup.groupId)) {
-        this.selectedGroups = this.selectedGroups.filter((group: any) => group.groupId !== securityGroup.groupId);
-        return;
-      }
-
-      this.selectedGroups.push({
-        groupId: securityGroup.groupId,
-        groupName: securityGroup.groupName
-      });
-    }
-  },
-  setup() {
-    return {
-      closeOutline,
-      saveOutline,
-      translate
-    }
+  activeGroups: {
+    type: Array as PropType<any[]>,
+    default: () => []
   }
 });
+
+const query = ref('');
+const selectedGroups = ref<any[]>([]);
+
+const filteredSecurityGroups = computed(() => {
+  const queryString = query.value.trim().toLowerCase();
+  if (!queryString) return props.securityGroups;
+
+  return props.securityGroups.filter((securityGroup: any) => {
+    return securityGroup.groupId.toLowerCase().includes(queryString)
+      || (securityGroup.groupName && securityGroup.groupName.toLowerCase().includes(queryString));
+  });
+});
+
+onMounted(() => {
+  selectedGroups.value = props.activeGroups.map((group: any) => ({
+    groupId: group.groupId,
+    groupName: group.groupName,
+    fromDate: group.fromDate
+  }));
+});
+
+const close = () => {
+  modalController.dismiss(null, 'cancel');
+};
+
+const isSelected = (groupId: string) => {
+  return selectedGroups.value.some((group: any) => group.groupId === groupId);
+};
+
+const save = () => {
+  modalController.dismiss({
+    permission: props.permission,
+    originalGroups: props.activeGroups,
+    selectedGroups: selectedGroups.value
+  }, 'save');
+};
+
+const toggleSecurityGroup = (securityGroup: any) => {
+  if (isSelected(securityGroup.groupId)) {
+    selectedGroups.value = selectedGroups.value.filter((group: any) => group.groupId !== securityGroup.groupId);
+    return;
+  }
+
+  selectedGroups.value.push({
+    groupId: securityGroup.groupId,
+    groupName: securityGroup.groupName
+  });
+};
 </script>
 
 <style scoped>
