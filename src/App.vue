@@ -10,7 +10,6 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { createAnimation, IonApp, IonRouterOutlet, IonSplitPane, loadingController } from '@ionic/vue';
 import { translate, emitter } from '@common';
-import { useUserStore } from '@/store/user'
 
 const loader = ref<any>(null);
 

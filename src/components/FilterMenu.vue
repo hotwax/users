@@ -10,9 +10,9 @@
       <ion-list>
         <ion-item lines="none">
           <ion-icon :icon="idCardOutline" slot="start" />
-          <ion-select :label="translate('Clearance')" interface="popover" v-model="query.securityGroup" @ionChange="closeMenu">
+          <ion-select :label="translate('Clearance')" interface="popover" v-model="query.userGroupId" @ionChange="closeMenu">
             <ion-select-option value="">{{ translate("All") }}</ion-select-option>
-            <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName || securityGroup.groupId }}</ion-select-option>
+            <ion-select-option :value="userGroup.userGroupId" :key="index" v-for="(userGroup, index) in userGroups">{{ userGroup.description || userGroup.userGroupId }}</ion-select-option>
           </ion-select>
         </ion-item>
         <ion-item lines="none">
@@ -22,12 +22,6 @@
             <ion-select-option value="Y">{{ translate("Active") }}</ion-select-option>
             <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
           </ion-select>
-        </ion-item>
-        <ion-item>
-          <ion-icon slot="start" :icon="cloudyNightOutline"/>
-          <ion-toggle v-model="query.hideDisabledUser" @ionChange="closeMenu">
-            {{ translate("Hide disabled users") }}
-          </ion-toggle>
         </ion-item>
       </ion-list>
     </ion-content>
@@ -46,7 +40,7 @@ const userStore = useUserStore();
 const utilStore = useUtilStore();
 
 const query = computed(() => userStore.getQuery);
-const securityGroups = computed(() => utilStore.getSecurityGroups);
+const userGroups = computed(() => utilStore.getUserGroups);
 
 const closeMenu = () => {
   // Query updation and fetchUsers action automatically gets handled by the event handlers on Users page.

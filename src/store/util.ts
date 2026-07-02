@@ -6,6 +6,7 @@ export interface UtilState {
   productStores: any[];
   securityGroups: any[];
   classificationSecurityGroups: any[];
+  userGroups: any[];
   facilities: any[];
   shopifyShops: any[];
   organizationPartyId: string;
@@ -17,6 +18,7 @@ export const useUtilStore = defineStore('util', {
     productStores: [],
     securityGroups: [],
     classificationSecurityGroups: [],
+    userGroups: [],
     facilities: [],
     shopifyShops: [],
     organizationPartyId: ''
@@ -29,6 +31,7 @@ export const useUtilStore = defineStore('util', {
     },
     getSecurityGroups: (state): any[] => state.securityGroups,
     getClassificationSecurityGroups: (state): any[] => state.classificationSecurityGroups,
+    getUserGroups: (state): any[] => state.userGroups,
     getFacilities: (state): any[] => state.facilities,
     getShopifyShops: (state): any[] => state.shopifyShops,
     getOrganizationPartyId: (state): string => state.organizationPartyId
@@ -138,6 +141,29 @@ export const useUtilStore = defineStore('util', {
         logger.error(error);
       }
       this.securityGroups = securityGroups;
+    },
+
+    async fetchUserGroups() {
+      if (this.userGroups.length) {
+        return;
+      }
+
+      let userGroups = [];
+      try {
+        const resp = await api({
+          url: "admin/userGroups",
+          method: "get",
+          cache: true
+        }) as any;
+        if (!commonUtil.hasError(resp)) {
+          userGroups = resp.data;
+        } else {
+          throw resp.data;
+        }
+      } catch (error) {
+        logger.error(error);
+      }
+      this.userGroups = userGroups;
     },
 
     async fetchClassificationSecurityGroups() {

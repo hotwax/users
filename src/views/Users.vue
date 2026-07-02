@@ -21,9 +21,9 @@
           <ion-list>
             <ion-item lines="none">
               <ion-icon :icon="idCardOutline" slot="start" />
-              <ion-select :label="translate('Clearance')" interface="popover" v-model="userStore.query.securityGroup" @ionChange="updateQuery()">
+              <ion-select :label="translate('Clearance')" interface="popover" v-model="userStore.query.userGroupId" @ionChange="updateQuery()">
                 <ion-select-option value="">{{ translate("All") }}</ion-select-option>
-                <ion-select-option :value="securityGroup.groupId" :key="index" v-for="(securityGroup, index) in securityGroups">{{ securityGroup.groupName || securityGroup.groupId }}</ion-select-option>
+                <ion-select-option :value="userGroup.userGroupId" :key="index" v-for="(userGroup, index) in userGroups">{{ userGroup.description || userGroup.userGroupId }}</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item lines="none">
@@ -34,27 +34,23 @@
                 <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-item>
-              <ion-icon slot="start" :icon="cloudyNightOutline"/>
-              <ion-toggle v-model="userStore.query.hideDisabledUser" @ionChange="updateQuery()" label-placement="start" justify="space-between">{{ translate("Hide disabled users") }}</ion-toggle>
-            </ion-item>
           </ion-list>
         </aside>
 
         <main>
-          <ion-card class="list-item" v-if="currentUser.partyId" @click=viewUserDetails(currentUser)>
+          <ion-card class="list-item" v-if="currentUser.userId" @click=viewUserDetails(currentUser)>
             <ion-item lines="none">
               <ion-label>
-                {{ currentUser.groupName ?? `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}` }}
-                <p>{{ currentUser.userLoginId }}</p>
-                <p>{{ currentUser.infoString }}</p>
+                {{ currentUser.userFullName }}
+                <p>{{ currentUser.username }}</p>
+                <p>{{ currentUser.emailAddress }}</p>
                 <ion-badge>{{ translate("Your user") }}</ion-badge>
               </ion-label>
             </ion-item>
 
             <div class="tablet">
-              <ion-label class="ion-text-center" v-if="currentUser.createdDate">
-                {{ getDate(currentUser.createdDate) }}
+              <ion-label class="ion-text-center" v-if="currentUser.createdStamp">
+                {{ getDate(currentUser.createdStamp) }}
                 <p>{{ translate("created") }}</p>
               </ion-label>
               <ion-label v-else>
@@ -64,8 +60,8 @@
 
             <ion-item lines="none">
               <div class="tablet" slot="end">
-                <ion-chip outline v-if="currentUser.securityGroupId">
-                  <ion-label>{{ currentUser.securityGroupName || currentUser.securityGroupId }}</ion-label>
+                <ion-chip outline v-if="currentUser.groups?.length">
+                  <ion-label>{{ currentUser.groups.map((group) => group.description || group.userGroupId).join(', ') }}</ion-label>
                 </ion-chip>
                 <ion-label v-else>
                   {{ '-' }}
@@ -77,15 +73,15 @@
             <div class="list-item" v-for="(user, index) in users" :key="index" @click=viewUserDetails(user)>
               <ion-item lines="none">
                 <ion-label>
-                  {{ user.groupName ?? `${user.firstName ?? ''} ${user.lastName ?? ''}` }}
-                  <p>{{ user.userLoginId }}</p>
-                  <p>{{ user.infoString }}</p>
+                  {{ user.userFullName || user.username }}
+                  <p>{{ user.username }}</p>
+                  <p>{{ user.emailAddress }}</p>
                 </ion-label>
               </ion-item>
 
               <div class="tablet">
-                <ion-label class="ion-text-center" v-if="user.createdDate">
-                  {{ getDate(user.createdDate) }}
+                <ion-label class="ion-text-center" v-if="user.createdStamp">
+                  {{ getDate(user.createdStamp) }}
                   <p>{{ translate("created") }}</p>
                 </ion-label>
                 <ion-label v-else>
@@ -94,8 +90,8 @@
               </div>
 
               <div class="tablet">
-                <ion-chip outline v-if="user.securityGroupId">
-                  <ion-label>{{ user.securityGroupName || user.securityGroupId }}</ion-label>
+                <ion-chip outline v-if="user.groups?.length">
+                  <ion-label>{{ user.groups.map((group) => group.description || group.userGroupId).join(', ') }}</ion-label>
                 </ion-chip>
                 <ion-label v-else>
                   {{ '-' }}
@@ -135,7 +131,7 @@ import { IonBadge, IonCard, IonChip, IonContent, IonFab, IonFabButton, IonHeader
 import { addOutline, cloudyNightOutline, idCardOutline, optionsOutline, toggleOutline } from 'ionicons/icons';
 import router from '@/router';
 import { DateTime } from 'luxon';
-import { commonUtil, translate, logger } from '@common';
+import { translate } from '@common';
 import FilterMenu from '@/components/FilterMenu.vue';
 import { useUserStore } from '@/store/user';
 import { useUtilStore } from '@/store/util';
@@ -143,23 +139,24 @@ import { useUtilStore } from '@/store/util';
 const userStore = useUserStore();
 const utilStore = useUtilStore();
 
+// The logged-in user's own record, pinned at the top of the list. The profile is already available from
+// login, but it doesn't carry group associations, so those are fetched separately via getUserGroups().
 const currentUser = ref<any>({});
 
 const users = computed(() => userStore.getUsers);
-const securityGroups = computed(() => utilStore.getSecurityGroups);
+const userGroups = computed(() => utilStore.getUserGroups);
 const isScrollable = computed(() => userStore.isScrollable);
-const userProfile = computed(() => userStore.getUserProfile);
 
 onIonViewWillEnter(async () => {
   await fetchUsers();
 });
 
 onMounted(async () => {
-  await utilStore.fetchSecurityGroups();
+  await utilStore.fetchUserGroups();
 });
 
 const createUser = () => {
-  userStore.clearSelectedUser();  
+  userStore.clearSelectedUser();
   router.push('/create-user');
 };
 
@@ -172,21 +169,24 @@ const updateQuery = async () => {
   fetchUsers();
 };
 
-const fetchUsers = async (vSize?: any, vIndex?: any) => {
+const fetchUsers = async (pSize?: any, pIndex?: any) => {
+  const pageSize = pSize ? pSize : import.meta.env.VITE_VIEW_SIZE;
+  const pageIndex = pIndex ? pIndex : 0;
+
   if (!userStore.query.queryString) {
-    !vIndex && await fetchLoggedInUserDetails();
+    // Do not fetch the current user information again on infinite-scroll pages, as we already have it.
+    pageIndex === 0 && await fetchCurrentUser();
   } else {
     currentUser.value = {};
   }
 
-  const viewSize = vSize ? vSize : import.meta.env.VITE_VIEW_SIZE;
-  const viewIndex = vIndex ? vIndex : 0;
-  const payload = {
-    viewSize,
-    viewIndex,
-    currentUserPartyId: userProfile.value.partyId
-  };
-  await userStore.fetchFilteredUsers(payload);
+  await userStore.fetchFilteredUsers({ pageSize, pageIndex });
+};
+
+const fetchCurrentUser = async () => {
+  const profile = userStore.getUserProfile;
+  const groups = profile.userId ? await userStore.getUserGroups(profile.userId) : [];
+  currentUser.value = { ...profile, groups };
 };
 
 const viewUserDetails = async (user: any) => {
@@ -203,34 +203,6 @@ const loadMoreUsers = async (event: any) => {
   ).then(async () => {
     await event.target.complete();
   });
-};
-
-const fetchLoggedInUserDetails = async () => {
-  const params = {
-    inputFields: {
-      roleTypeIdTo: 'APPLICATION_USER',
-      partyId: userProfile.value.partyId
-    },
-    fromDateName: 'relationshipFromDate',
-    thruDateName: 'relationshipThruDate',
-    filterByDate: 'Y',
-    entityName: 'PartyAndUserLoginSecurityGroupDetails',
-    noConditionFind: 'Y',
-    distinct: 'Y',
-    fieldList: ['createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'partyId', 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
-  };
-
-  try {
-    const resp = await userStore.fetchUsers(params);
-
-    if (!commonUtil.hasError(resp) && resp.data.count) {
-      currentUser.value = resp.data.docs[0];
-    } else {
-      throw resp.data;
-    }
-  } catch (error) {
-    logger.error(error);
-  }
 };
 </script>
 

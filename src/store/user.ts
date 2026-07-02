@@ -12,9 +12,8 @@ export interface UserState {
   locale: string,
   query: {
     queryString: string;
-    securityGroup: string;
+    userGroupId: string;
     status: string;
-    hideDisabledUser: boolean;
   };
   selectedUser: any;
   users: {
@@ -35,9 +34,8 @@ export const useUserStore = defineStore('user', {
     locale: 'en-US',
     query: {
       queryString: '',
-      securityGroup: '',
+      userGroupId: '',
       status: '',
-      hideDisabledUser: true
     },
     selectedUser: {},
     users: {
@@ -184,14 +182,6 @@ export const useUserStore = defineStore('user', {
       });
     },
     async fetchUserSecurityGroupAssocHistory(payload: any): Promise<any> {
-      return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "performFind",
-        method: "post",
-        data: payload
-      });
-    },
-    async fetchUsers(payload: any): Promise<any> {
       return api({
         baseURL: commonUtil.getOmsURL(),
         url: "performFind",
@@ -350,6 +340,26 @@ export const useUserStore = defineStore('user', {
       }
 
       return userSecurityGroups
+    },
+    async getUserGroups(userId: string): Promise<any> {
+      let userGroups = [] as any
+
+      try {
+        const resp = await api({
+          url: `admin/users/${userId}/groups`,
+          method: "get"
+        }) as any
+
+        if (!commonUtil.hasError(resp)) {
+          userGroups = resp.data
+        } else {
+          throw resp.data
+        }
+      } catch (error) {
+        logger.error('Failed to fetch user associated groups.', error)
+      }
+
+      return userGroups
     },
     async isRoleTypeExists(roleTypeId: string): Promise<any> {
       try {
@@ -950,93 +960,49 @@ export const useUserStore = defineStore('user', {
     updateSelectedUser(selectedUser: any) {
       this.selectedUser = selectedUser;
     },
-    async fetchFilteredUsers(payload: { currentUserPartyId: string; viewIndex: number; viewSize: number }) {
-      if (payload.viewIndex === 0) emitter.emit("presentLoader");
-      const filters = {} as any;
-
-      if (this.query.securityGroup) {
-        filters['securityGroupId'] = this.query.securityGroup;
-        filters['securityGroupId_op'] = 'equals';
-      }
-
-      if (this.query.status) {
-        filters['userLoginId_op'] = 'not-empty';
-        if (this.query.status === "N") {
-          filters['enabled'] = this.query.status;
-          filters['enabled_op'] = 'equals';
-        } else {
-          filters['enabled'] = "N";
-          filters['enabled_op'] = 'notEqual';  
-        }
-      }
-
-      if (this.query.hideDisabledUser) {
-        filters['statusId'] = "PARTY_DISABLED";
-        filters['statusId_op'] = 'notEqual';  
-      }
-
-      if (this.query.queryString) {
-        const keyword = this.query.queryString.split(' ')[0];
-
-        filters['groupName_value'] = keyword;
-        filters['groupName_op'] = 'like';
-        filters['groupName_ic'] = 'Y';
-        filters['groupName_grp'] = '1';
-        filters['firstName_value'] = keyword;
-        filters['firstName_op'] = 'like';
-        filters['firstName_ic'] = 'Y';
-        filters['firstName_grp'] = '2';
-        filters['lastName_value'] = keyword;
-        filters['lastName_op'] = 'like';
-        filters['lastName_ic'] = 'Y';
-        filters['lastName_grp'] = '3';
-      }
-
-      if (!this.query.queryString) {
-        filters['partyId_value'] = payload.currentUserPartyId;
-        filters['partyId_op'] = 'notEqual';
-      }
+    async fetchFilteredUsers(payload: { pageIndex: number; pageSize: number }) {
+      if (payload.pageIndex === 0) emitter.emit("presentLoader");
 
       const params = {
-        "inputFields": {
-          "roleTypeIdTo": "APPLICATION_USER", 
-          ...filters
-        },
-        "fromDateName": "relationshipFromDate",
-        "thruDateName": "relationshipThruDate",
-        "filterByDate": "Y",
-        "entityName": "PartyAndUserLoginSecurityGroupDetails",
-        "noConditionFind": "Y",
-        "distinct": "Y",
-        "fieldList": ['partyId', 'createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
-        "viewIndex": payload.viewIndex,
-        "viewSize": payload.viewSize
-      };
+        pageIndex: payload.pageIndex,
+        pageSize: payload.pageSize
+      } as any;
+
+      if (this.query.queryString) params.keyword = this.query.queryString
+      if (this.query.userGroupId) params.userGroupId = this.query.userGroupId
+      if (this.query.status) {
+        params.disabled = this.query.status === "Y" ? "N" : "Y";
+      }
 
       let users = JSON.parse(JSON.stringify(this.users.list));
       let total = this.users.total;
-      
+
       try {
-        const resp = await this.fetchUsers(params);
-        if (!commonUtil.hasError(resp)) { 
-          if (resp.data.count > 0) { 
-            if (payload.viewIndex && payload.viewIndex > 0) { 
-              users = users.concat(resp.data.docs); 
-            } else {
-              users = resp.data.docs;
-            }
-            total = resp.data.count;
-          }
+        const resp = await api({
+          url: "admin/users",
+          method: "get",
+          params
+        }) as any;
+
+        if (!commonUtil.hasError(resp)) {
+          // The logged-in user is shown pinned separately at the top of the page, so exclude them from the general list.
+          const fetchedUsers = this.query.queryString
+            ? resp.data.users
+            : resp.data.users.filter((user: any) => user.userId !== this.current.userId);
+
+          users = payload.pageIndex > 0 ? users.concat(fetchedUsers) : fetchedUsers;
+          total = resp.data.usersCount;
         } else {
-          throw resp.data; 
+          throw resp.data;
         }
       } catch (error) {
-        if (payload.viewIndex === 0) { 
-          users = []; 
-          total = 0; 
+        if (payload.pageIndex === 0) {
+          users = [];
+          total = 0;
         }
+        logger.error(error);
       }
-      
+
       this.users.list = users;
       this.users.total = total;
       emitter.emit("dismissLoader");
