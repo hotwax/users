@@ -246,25 +246,15 @@ export const useUtilStore = defineStore('util', {
 
     async fetchOrganizationPartyId() {
       let partyId = "";
-      const params = {
-        entityName: "PartyRole",
-        inputFields: {
-          roleTypeId: 'INTERNAL_ORGANIZATIO'
-        },
-        noConditionFind: 'Y',
-        fieldList: ["partyId"],
-        viewSize: 1
-      };
-
+      
       try {
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "performFind",
-          method: "POST",
-          data: params
+          url: "admin/organizations",
+          method: "get",
+          params: {roleTypeId: 'INTERNAL_ORGANIZATIO', pageSize: 1}
         });
         if (!commonUtil.hasError(resp)) {
-          partyId = resp.data.docs[0]?.partyId;
+          partyId = resp.data?.[0]?.partyId;
         } else {
           throw resp.data;
         }
