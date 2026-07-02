@@ -388,7 +388,7 @@
           </ion-card-content>
             <ion-list>
               <ion-item>
-                <ion-select :label="translate('Product store')" interface="popover" :value="selectedUser.favoriteProductStorePref?.userPrefValue ? selectedUser.favoriteProductStorePref?.userPrefValue : ''" @ionChange="updateFavoriteProductStore($event)" :disabled="!selectedUser?.userLoginId">
+                <ion-select :label="translate('Product store')" interface="popover" :value="selectedUser.favoriteProductStorePref?.preferenceValue ? selectedUser.favoriteProductStorePref?.preferenceValue : ''" @ionChange="updateFavoriteProductStore($event)" :disabled="!selectedUser?.userLoginId">
                   <ion-select-option v-for="productStore in userProductStores" :key="productStore.productStoreId" :value="productStore.productStoreId">
                     {{ productStore.storeName || productStore.productStoreId}}
                   </ion-select-option>
@@ -396,7 +396,7 @@
                 </ion-select>
               </ion-item>
               <ion-item lines="none">
-                <ion-select :label="translate('Shopify shop')" interface="popover" :value="selectedUser.favoriteShopifyShopPref?.userPrefValue ? selectedUser.favoriteShopifyShopPref?.userPrefValue : ''" @ionChange="updateFavoriteShopifyShop($event)" :disabled="!selectedUser?.userLoginId">
+                <ion-select :label="translate('Shopify shop')" interface="popover" :value="selectedUser.favoriteShopifyShopPref?.preferenceValue ? selectedUser.favoriteShopifyShopPref?.preferenceValue : ''" @ionChange="updateFavoriteShopifyShop($event)" :disabled="!selectedUser?.userLoginId">
                   <ion-select-option v-for="shopifyShop in shopifyShopsForProductStore" :key="shopifyShop.shopId" :value="shopifyShop.shopId">
                     {{ shopifyShop.name || shopifyShop.shopId }}
                   </ion-select-option>
@@ -500,7 +500,7 @@ onIonViewWillEnter(async () => {
   await userStore.getSelectedUserDetails({ partyId: props.partyId, isFetchRequired: true });
   await fetchProfileImage();
   await Promise.all([utilStore.fetchSecurityGroups(), utilStore.fetchShopifyShopConfigs()]);
-  const productStoreId = selectedUser.value.favoriteProductStorePref?.userPrefValue;
+  const productStoreId = selectedUser.value.favoriteProductStorePref?.preferenceValue;
   if (productStoreId) {
     getShopifyShops(productStoreId);
   }
@@ -524,8 +524,8 @@ const getShopifyShops = (productStoreId: string) => {
 
 const updateFavoriteProductStore = (event: any) => {
   const selectedProductStoreId = event.target.value;
-  if (selectedProductStoreId && selectedProductStoreId !== selectedUser.value?.favoriteProductStorePref?.userPrefValue) {
-    userStore.setFavoriteProductStore({ "userLoginId": selectedUser.value?.userLoginId, "productStoreId": selectedProductStoreId })
+  if (selectedProductStoreId && selectedProductStoreId !== selectedUser.value?.favoriteProductStorePref?.preferenceValue) {
+    userStore.setFavoriteProductStore({ "userId": selectedUser.value?.userLoginId, "productStoreId": selectedProductStoreId })
     .then(() => {
       getShopifyShops(selectedProductStoreId);
       commonUtil.showToast(translate('Favorite product store updated successfully.'));
@@ -542,8 +542,8 @@ const goBack = ($event: any) => {
 
 const updateFavoriteShopifyShop = (event: any) => {
   const selectedShopId = event.target.value;
-  if (selectedShopId && selectedShopId !== selectedUser.value?.favoriteShopifyShopPref?.userPrefValue) {
-    userStore.setFavoriteShopifyShop({ "userLoginId": selectedUser.value?.userLoginId, "shopId": selectedShopId })
+  if (selectedShopId && selectedShopId !== selectedUser.value?.favoriteShopifyShopPref?.preferenceValue) {
+    userStore.setFavoriteShopifyShop({ "userId": selectedUser.value?.userLoginId, "shopId": selectedShopId })
     .then(() => {
       commonUtil.showToast(translate('Favorite shopify shop updated successfully.'));
     }).catch(() => {

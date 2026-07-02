@@ -882,35 +882,30 @@ export const useUserStore = defineStore('user', {
         selectedUser.securityGroups = await this.getUserSecurityGroups(selectedUser.userLoginId);
         selectedUser.productStores = await this.getUserProductStores(selectedUser.partyId);
         if (selectedUser.userLoginId) {
-          let userFavorites = [] as any;
+          let userPreferences = [] as any;
           try {
-            const favoritesResp = await api({
-              baseURL: commonUtil.getOmsURL(),
-              url: 'performFind',
-              method: 'POST',
-              data: {
-                inputFields: {
-                  userLoginId: selectedUser.userLoginId,
-                  userPrefTypeId: ['FAVORITE_PRODUCT_STORE', 'FAVORITE_SHOPIFY_SHOP'],
-                  userPrefTypeId_op: 'in'
-                },
-                viewSize: 2,
-                entityName: 'UserPreference',
-                fieldList: ['userPrefTypeId', 'userPrefValue', 'userPrefGroupTypeId', 'userLoginId']
+            const preferencesResp = await api({
+              url: 'admin/user/preferences',
+              method: 'GET',
+              params: {
+                userId: selectedUser.userLoginId,
+                preferenceKey: 'FAVORITE_PRODUCT_STORE,FAVORITE_SHOPIFY_SHOP',
+                preferenceKey_op: 'in',
+                pageSize: 2
               }
             }) as any;
 
-            if (!commonUtil.hasError(favoritesResp)) {
-              userFavorites = favoritesResp.data.docs;
+            if (!commonUtil.hasError(preferencesResp)) {
+              userPreferences = preferencesResp.data;
             } else {
-              throw favoritesResp.data;
+              throw preferencesResp.data;
             }
           } catch (error) {
             logger.error(error)
           }
-          if (userFavorites) {
-            selectedUser.favoriteProductStorePref = userFavorites.find((userFavorite: any) => userFavorite.userPrefTypeId === 'FAVORITE_PRODUCT_STORE');
-            selectedUser.favoriteShopifyShopPref = userFavorites.find((userFavorite: any) => userFavorite.userPrefTypeId === 'FAVORITE_SHOPIFY_SHOP');
+          if (userPreferences) {
+            selectedUser.favoriteProductStorePref = userPreferences.find((preference: any) => preference.preferenceKey === 'FAVORITE_PRODUCT_STORE');
+            selectedUser.favoriteShopifyShopPref = userPreferences.find((preference: any) => preference.preferenceKey === 'FAVORITE_SHOPIFY_SHOP');
           }
         }
 
@@ -1013,22 +1008,21 @@ export const useUserStore = defineStore('user', {
     async clearSelectedUser() {
       this.selectedUser = {};
     },
-    async setFavoriteProductStore(payload: { userLoginId: string; productStoreId: string }) {
+    async setFavoriteProductStore(payload: { userId: string; productStoreId: string }) {
       try {
         const params = {
-          'userPrefLoginId': payload.userLoginId,
-          'userPrefTypeId': 'FAVORITE_PRODUCT_STORE',
-          'userPrefValue': payload.productStoreId
+          userId: payload.userId,
+          preferenceKey: 'FAVORITE_PRODUCT_STORE',
+          preferenceValue: payload.productStoreId
         };
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "service/setUserPreference",
-          method: "post",
+          url: "admin/user/preferences",
+          method: "put",
           data: params
         });
         if (!commonUtil.hasError(resp)) {
           this.selectedUser = { ...this.selectedUser, favoriteProductStorePref: params };
-          await this.setFavoriteShopifyShop({ 'userLoginId': payload.userLoginId, 'shopId': '' });
+          await this.setFavoriteShopifyShop({ userId: payload.userId, shopId: '' });
           return Promise.resolve(resp.data);
         } else {
           throw resp.data;
@@ -1038,17 +1032,16 @@ export const useUserStore = defineStore('user', {
         return Promise.reject(error);
       }
     },
-    async setFavoriteShopifyShop(payload: { userLoginId: string; shopId: string }) {
+    async setFavoriteShopifyShop(payload: { userId: string; shopId: string }) {
       try {
         const params = {
-          'userPrefLoginId': payload.userLoginId,
-          'userPrefTypeId': 'FAVORITE_SHOPIFY_SHOP',
-          'userPrefValue': payload.shopId
+          userId: payload.userId,
+          preferenceKey: 'FAVORITE_SHOPIFY_SHOP',
+          preferenceValue: payload.shopId
         };
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "service/setUserPreference",
-          method: "post",
+          url: "admin/user/preferences",
+          method: "put",
           data: params
         });
         if (!commonUtil.hasError(resp)) {
