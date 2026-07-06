@@ -16,11 +16,11 @@
     <ion-content>
       <template v-if="filteredSecurityGroups.length">
       <ion-list>
-        <ion-item v-for="securityGroup in filteredSecurityGroups" :key="securityGroup.groupId">
-          <ion-checkbox :checked="isSelected(securityGroup.groupId)" @ionChange="toggleSecurityGroupSelection(securityGroup)">
+        <ion-item v-for="securityGroup in filteredSecurityGroups" :key="securityGroup.userGroupId">
+          <ion-checkbox :checked="isSelected(securityGroup.userGroupId)" @ionChange="toggleSecurityGroupSelection(securityGroup)">
             <ion-label>
-              {{ securityGroup.groupName || securityGroup.groupId }}
-              <p>{{ securityGroup.groupId }}</p>
+              {{ securityGroup.description || securityGroup.userGroupId }}
+              <p>{{ securityGroup.userGroupId }}</p>
             </ion-label>
           </ion-checkbox>
         </ion-item>
@@ -52,15 +52,15 @@ import { translate } from '@common';
   const utilStore = useUtilStore();
 
   const queryString = ref('');
-  const securityGroups = computed(() => utilStore.getSecurityGroups);
+  const securityGroups = computed(() => utilStore.getUserGroups);
   const selectedSecurityGroupValues = ref<any[]>(JSON.parse(JSON.stringify(props.selectedSecurityGroups || [])));
   const filteredSecurityGroups = computed(() => {
     const query = queryString.value.toLowerCase();
     if (!query) return securityGroups.value;
 
     return securityGroups.value.filter((securityGroup: any) => {
-      return securityGroup.groupId.toLowerCase().includes(query)
-        || (securityGroup.groupName && securityGroup.groupName.toLowerCase().includes(query));
+      return securityGroup.userGroupId.toLowerCase().includes(query)
+        || (securityGroup.description && securityGroup.description.toLowerCase().includes(query));
     });
   });
 
@@ -69,8 +69,8 @@ import { translate } from '@common';
   };
 
   const saveSecurityGroups = () => {
-    const securityGroupsToCreate = selectedSecurityGroupValues.value.filter((selectedGroup: any) => !props.selectedSecurityGroups.some((group: any) => group.groupId === selectedGroup.groupId));
-    const securityGroupsToRemove = props.selectedSecurityGroups.filter((group: any) => !selectedSecurityGroupValues.value.some((selectedGroup: any) => group.groupId === selectedGroup.groupId));
+    const securityGroupsToCreate = selectedSecurityGroupValues.value.filter((selectedGroup: any) => !props.selectedSecurityGroups.some((group: any) => group.userGroupId === selectedGroup.userGroupId));
+    const securityGroupsToRemove = props.selectedSecurityGroups.filter((group: any) => !selectedSecurityGroupValues.value.some((selectedGroup: any) => group.userGroupId === selectedGroup.userGroupId));
 
     modalController.dismiss({
       dismissed: true,
@@ -83,16 +83,16 @@ import { translate } from '@common';
   };
 
   const toggleSecurityGroupSelection = (updatedSecurityGroup: any) => {
-    const selectedGroup = selectedSecurityGroupValues.value.some((group :any) => group.groupId === updatedSecurityGroup.groupId);
+    const selectedGroup = selectedSecurityGroupValues.value.some((group :any) => group.userGroupId === updatedSecurityGroup.userGroupId);
     if (selectedGroup) {
-      selectedSecurityGroupValues.value = selectedSecurityGroupValues.value.filter((group :any) => group.groupId !== updatedSecurityGroup.groupId);
+      selectedSecurityGroupValues.value = selectedSecurityGroupValues.value.filter((group :any) => group.userGroupId !== updatedSecurityGroup.userGroupId);
     } else {
       selectedSecurityGroupValues.value.push(updatedSecurityGroup);
     }
   };
 
   const isSelected = (securityGroupId: any) => {
-    return selectedSecurityGroupValues.value.some((securityGroup :any) => securityGroup.groupId === securityGroupId);
+    return selectedSecurityGroupValues.value.some((securityGroup :any) => securityGroup.userGroupId === securityGroupId);
   };
   </script>
 <style scoped>

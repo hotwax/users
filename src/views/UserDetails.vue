@@ -28,7 +28,8 @@
                 </ion-avatar>
                 <ion-label class="ion-margin-start">
                   <h1 v-if="selectedUser.groupName">{{ selectedUser.groupName }}</h1>
-                  <h1 v-else>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
+                  <h1 v-else-if="selectedUser.firstName || selectedUser.lastName">{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h1>
+                  <h1 v-else>{{ selectedUser.userFullName }}</h1>
                   <p>{{ selectedUser.userLoginId }}</p>
                   <ion-badge v-if="selectedUser.userLoginId === userProfile.userLoginId">{{ translate("Your user") }}</ion-badge>
                 </ion-label>
@@ -116,7 +117,7 @@
                   <ion-label slot="end">{{ selectedUser.userLoginId }}</ion-label>
                 </ion-item>
                 <ion-item :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN') || selectedUser.statusId !== 'PARTY_ENABLED'" >
-                  <ion-toggle @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.enabled == 'N'">
+                  <ion-toggle @click.prevent="updateUserLoginStatus($event)" :checked="selectedUser.disabled == 'Y'">
                     {{ translate("Block login") }}
                   </ion-toggle>
                 </ion-item>
@@ -289,9 +290,9 @@
                 </ion-item>
               </template>
               <template v-else>
-                <ion-item :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN OR PARTY_SECURITY_ASSIGNMENT')" v-for="securityGroup in userSecurityGroups" :key="securityGroup.groupId">
+                <ion-item :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN OR PARTY_SECURITY_ASSIGNMENT')" v-for="securityGroup in userSecurityGroups" :key="securityGroup.userGroupId">
                   <ion-label>
-                    {{ getSecurityGroupName(securityGroup.groupId) }}
+                    {{ securityGroup.description || securityGroup.userGroupId }}
                   </ion-label>
                   <ion-button size="default" slot="end" fill="clear" color="medium" @click="openSecurityGroupActionsPopover($event, securityGroup)">
                     <ion-icon slot="icon-only" :icon="ellipsisVerticalOutline" />
@@ -446,7 +447,7 @@ import { DateTime } from "luxon";
 import Image from "@/components/Image.vue";
 
 const props = defineProps({
-  partyId: {
+  userId: {
     type: String,
     required: true
   }
@@ -474,7 +475,6 @@ const OPTIONS = {
 
 const username = ref("");
 const password = ref("");
-const imageUrl = ref("");
 const isUserFetched = ref(false);
 const showPassword = ref(false);
 const shopifyShopsForProductStore = ref<any[]>([]);
@@ -484,12 +484,17 @@ const selectedUser = computed(() => userStore.selectedUser);
 const userProductStores = computed(() => userStore.getSelectedUserProductStores);
 const userSecurityGroups = computed(() => userStore.getSelectedUserSecurityGroups);
 const getRoleTypeDesc = (roleTypeId: string) => utilStore.getRoleTypeDesc(roleTypeId);
-const securityGroups = computed(() => utilStore.getSecurityGroups);
 const userProfile = computed(() => userStore.getUserProfile);
 const baseUrl = computed(() => userStore.getBaseUrl);
 const shopifyShops = computed(() => utilStore.getShopifyShops);
 const organizationPartyId = computed(() => utilStore.getOrganizationPartyId);
 const redirectedFromUrl = computed(() => userStore.getRedirectedFromUrl);
+const imageUrl = computed(() => {
+  const partyImageUrl = selectedUser.value.partyImageUrl;
+  if (!partyImageUrl) return "";
+  if (partyImageUrl.startsWith("data:") || partyImageUrl.startsWith("http")) return partyImageUrl;
+  return (baseUrl.value.startsWith('http') ? baseUrl.value.replace(/api\/?/, "") : `https://${baseUrl.value}.hotwax.io/`) + partyImageUrl;
+});
 
 onIonViewWillLeave(async () => {
   await userStore.updateRedirectedFromUrl("");
@@ -497,25 +502,19 @@ onIonViewWillLeave(async () => {
 
 onIonViewWillEnter(async () => {
   isUserFetched.value = false;
-  await userStore.getSelectedUserDetails({ partyId: props.partyId, isFetchRequired: true });
-  await fetchProfileImage();
-  await Promise.all([utilStore.fetchSecurityGroups(), utilStore.fetchShopifyShopConfigs()]);
+  await userStore.getSelectedUserDetails({ userId: props.userId, isFetchRequired: true });
+  await Promise.all([utilStore.fetchUserGroups(), utilStore.fetchShopifyShopConfigs()]);
   const productStoreId = selectedUser.value.favoriteProductStorePref?.preferenceValue;
   if (productStoreId) {
     getShopifyShops(productStoreId);
   }
-  isUserFulfillmentAdmin.value = selectedUser.value.securityGroups?.length ? await userStore.isUserFulfillmentAdmin(selectedUser.value.securityGroups.map((group: any) => group.groupId)) : false;
+  isUserFulfillmentAdmin.value = selectedUser.value.securityGroups?.length ? await userStore.isUserFulfillmentAdmin(selectedUser.value.securityGroups.map((group: any) => group.userGroupId)) : false;
   isUserFetched.value = true;
   username.value = selectedUser.value.groupName ? (selectedUser.value.groupName)?.toLowerCase() : (`${selectedUser.value.firstName}.${selectedUser.value.lastName}`?.toLowerCase()) || "";
 });
 
 const checkUserAssociatedSecurityGroup = (securityGroupId: any) => {
-  return userSecurityGroups.value?.some((userSecurityGroup: any) => userSecurityGroup.groupId === securityGroupId);
-};
-
-const getSecurityGroupName = (securityGroupId: any) => {
-  const group = securityGroups.value.find((group: any) => group.groupId === securityGroupId);
-  return group?.groupName || group?.groupId || null;
+  return userSecurityGroups.value?.some((userSecurityGroup: any) => userSecurityGroup.userGroupId === securityGroupId);
 };
 
 const getShopifyShops = (productStoreId: string) => {
@@ -639,21 +638,10 @@ const addContactField = async (type: string) => {
               }
             };
           } else {
-            let resp = {} as any;
-            if (selectedUser.value.partyTypeId === 'PERSON') {
-              resp = await userStore.updatePerson({
-                externalId: input,
-                partyId: selectedUser.value.partyId,
-                firstName: selectedUser.value.firstName,
-                lastName: selectedUser.value.lastName
-              });
-            } else {
-              resp = await userStore.updatePartyGroup({
-                externalId: input,
-                partyId: selectedUser.value.partyId,
-                groupName: selectedUser.value.groupName
-              });
-            }
+            const resp = await userStore.updatePartyExternalId({
+              externalId: input,
+              partyId: selectedUser.value.partyId
+            });
             if (commonUtil.hasError(resp)) resp.data;
             updatedSelectedUser = {
               ...updatedSelectedUser,
@@ -715,7 +703,7 @@ const createNewUserLogin = async () => {
 
   try {
     const resp = await userStore.createNewUserLogin({
-      partyId: props.partyId,
+      partyId: selectedUser.value.partyId,
       currentPassword: password.value,
       currentPasswordVerify: password.value,
       userLoginId: username.value,
@@ -724,7 +712,7 @@ const createNewUserLogin = async () => {
       userPrefValue: organizationPartyId.value,
     });
     if (!commonUtil.hasError(resp)) {
-      await userStore.getSelectedUserDetails({ partyId: props.partyId, isFetchRequired: true });
+      await userStore.getSelectedUserDetails({ userId: username.value, isFetchRequired: true });
     } else {
       throw resp.data;
     }
@@ -769,12 +757,12 @@ const confirmForceLogout = async () => {
 const forceLogout = async () => {
   try {
     const resp = await userStore.forceLogout({
-      userLoginId: selectedUser.value.userLoginId
+      userId: selectedUser.value.userLoginId
     });
     if (commonUtil.hasError(resp)) {
       throw resp;
     }
-    await userStore.getSelectedUserDetails({ partyId: props.partyId, isFetchRequired: true });
+    await userStore.getSelectedUserDetails({ userId: props.userId, isFetchRequired: true });
     commonUtil.showToast(translate('User has been logged out.'));
   } catch (error) {
     commonUtil.showToast(translate('Failed to perform force logout.'));
@@ -801,14 +789,13 @@ const updateUserLoginStatus = async (event: any) => {
       handler: async () => {
         try {
           const resp = await userStore.updateUserLoginStatus({
-            enabled: isChecked ? 'N' : 'Y',
-            partyId: props.partyId,
-            userLoginId: selectedUser.value.userLoginId
+            userId: selectedUser.value.userLoginId,
+            disabled: isChecked ? 'Y' : 'N'
           });
           if (!commonUtil.hasError(resp)) {
             commonUtil.showToast(translate('User login status updated successfully.'));
             event.target.checked = isChecked;
-            selectedUser.value.enabled = isChecked ? 'N' : 'Y';
+            selectedUser.value.disabled = isChecked ? 'Y' : 'N';
           } else {
             throw resp.data;
           }
@@ -827,7 +814,7 @@ const openSecurityGroupActionsPopover = async (event: Event, securityGroup: any)
   const securityGroupActionsPopover = await popoverController.create({
     component: SecurityGroupActionsPopover,
     componentProps: {
-      securityGroup: { ...securityGroup, groupName: getSecurityGroupName(securityGroup.groupId) }
+      securityGroup
     },
     event,
     showBackdrop: false,
@@ -835,7 +822,7 @@ const openSecurityGroupActionsPopover = async (event: Event, securityGroup: any)
   securityGroupActionsPopover.present();
 
   const result = await securityGroupActionsPopover.onDidDismiss();
-  isUserFulfillmentAdmin.value = result.data?.length ? await userStore.isUserFulfillmentAdmin(result.data.map((group: any) => group.groupId)) : false;
+  isUserFulfillmentAdmin.value = result.data?.length ? await userStore.isUserFulfillmentAdmin(result.data.map((group: any) => group.userGroupId)) : false;
 };
 
 const openProductStoreActionsPopover = async (event: Event, store: any) => {
@@ -882,7 +869,7 @@ const selectFacility = async () => {
       if (facilitiesToAdd.length) {
         try {
           const resp = await userStore.ensurePartyRole({
-            partyId: props.partyId,
+            partyId: selectedUser.value.partyId,
             roleTypeId: 'WAREHOUSE_PICKER',
           });
           if (commonUtil.hasError(resp)) {
@@ -910,6 +897,7 @@ const selectFacility = async () => {
         commonUtil.showToast(translate('Facility associations updated successfully.'));
       }
       const userFacilities = await userStore.getUserFacilities(selectedUser.value.partyId);
+      console.log("=====userFacilities===", userFacilities)
       userStore.updateSelectedUser({ ...selectedUser.value, facilities: userFacilities });
     }
   });
@@ -930,25 +918,31 @@ const selectSecurityGroup = async () => {
       try {
         const updateResponses = await Promise.allSettled(securityGroupsToRemove
           .map(async (payload: any) => await userStore.removeUserSecurityGroup({
-            groupId: payload.groupId,
-            userLoginId: selectedUser.value.userLoginId
+            userGroupId: payload.userGroupId,
+            userId: selectedUser.value.userLoginId,
+            fromDate: payload.fromDate,
+            thruDate: DateTime.now().toMillis()
           }))
         );
 
-        const createResponse = await userStore.addUserToSecurityGroup({
-          groupIds: securityGroupsToCreate?.map((group: any) => group.groupId),
-          userLoginId: selectedUser.value.userLoginId
-        });
+        const createResponses = await Promise.allSettled(securityGroupsToCreate
+          .map(async (payload: any) => await userStore.addUserToSecurityGroup({
+            userGroupId: payload.userGroupId,
+            userId: selectedUser.value.userLoginId
+          }))
+        );
 
-        const hasFailedResponse = [...updateResponses, createResponse].some((response: any) => response.status === 'rejected');
+        const hasFailedResponse = [...updateResponses, ...createResponses].some((response: any) => response.status === 'rejected');
         if (hasFailedResponse) {
           commonUtil.showToast(translate('Failed to update some security group(s).'));
         } else {
           commonUtil.showToast(translate('Security group(s) updated successfully.'));
         }
-        const updatedUserSecurityGroups = await userStore.getUserSecurityGroups(selectedUser.value.userLoginId);
+        const userGroups = await userStore.getUserGroups(selectedUser.value.userLoginId);
+        const now = Date.now();
+        const updatedUserSecurityGroups = userGroups.filter((group: any) => !group.thruDate || group.thruDate > now);
         userStore.updateSelectedUser({ ...selectedUser.value, securityGroups: updatedUserSecurityGroups });
-        isUserFulfillmentAdmin.value = updatedUserSecurityGroups.length ? await userStore.isUserFulfillmentAdmin(updatedUserSecurityGroups.map((group: any) => group.groupId)) : false;
+        isUserFulfillmentAdmin.value = updatedUserSecurityGroups.length ? await userStore.isUserFulfillmentAdmin(updatedUserSecurityGroups.map((group: any) => group.userGroupId)) : false;
       } catch (error) {
         logger.error(error);
         commonUtil.showToast(translate('Failed to update some security group(s).'));
@@ -1055,7 +1049,7 @@ const editName = async () => {
   let inputFields = [{
       name: "firstName",
       value: selectedUser.value.firstName
-    }, 
+    },
     {
       name: "lastName",
       value: selectedUser.value.lastName
@@ -1079,21 +1073,16 @@ const editName = async () => {
       text: translate('Confirm'),
       handler: async (data: any) => {
         if (data.firstName || data.groupName) {
-          let resp;
-          const payload = { partyId: selectedUser.value.partyId, ...data };
-
           emitter.emit('presentLoader');
 
           try {
-            if (selectedUser.value.partyTypeId === 'PARTY_GROUP') {
-              resp = await userStore.updatePartyGroup(payload);
-            } else {
-              resp = await userStore.updatePerson(payload);
-            }
+            const resp = selectedUser.value.partyTypeId === 'PARTY_GROUP'
+              ? await userStore.updatePartyGroupName({ partyId: selectedUser.value.partyId, groupName: data.groupName })
+              : await userStore.updatePartyPersonName({ partyId: selectedUser.value.partyId, firstName: data.firstName, lastName: data.lastName });
 
             if (!commonUtil.hasError(resp)) {
               commonUtil.showToast(translate("User renamed successfully."));
-              await userStore.updateSelectedUser({ ...selectedUser.value, ...payload });
+              await userStore.updateSelectedUser({ ...selectedUser.value, ...data });
             } else {
               throw resp.data;
             }
@@ -1114,7 +1103,6 @@ const updateUserStatus = async (event: any) => {
   event.stopImmediatePropagation();
 
   const isChecked = !event.target.checked;
-  let resp;
 
   const payload = {
     partyId: selectedUser.value.partyId,
@@ -1124,19 +1112,14 @@ const updateUserStatus = async (event: any) => {
   emitter.emit('presentLoader');
 
   try {
-    if (isChecked && selectedUser.value.userLoginId) {   
+    if (isChecked && selectedUser.value.userLoginId) {
       await userStore.updateUserLoginStatus({
-        enabled: 'N',
-        partyId: props.partyId,
-        userLoginId: selectedUser.value.userLoginId
-      });   
-      selectedUser.value.enabled = 'N';         
+        userId: selectedUser.value.userLoginId,
+        disabled: 'Y'
+      });
+      selectedUser.value.disabled = 'Y';
     }
-    if (selectedUser.value.partyTypeId === 'PARTY_GROUP') {
-      resp = await userStore.updatePartyGroup(payload);
-    } else {
-      resp = await userStore.updatePerson({ ...payload, firstName: selectedUser.value.firstName });
-    }
+    const resp = await userStore.updatePartyStatus(payload);
 
     if (!commonUtil.hasError(resp)) {
       commonUtil.showToast(translate("User status updated successfully."));
@@ -1189,28 +1172,18 @@ const uploadImage = async (event: any) => {
   }
 
   const formData = new FormData();
-  formData.append('partyId', selectedUser.value.partyId);
-  formData.append('_uploadedFile_contentType', 'image/*');
   formData.append('uploadedFile', selectedFile, selectedFile?.name);
   try {
-    const resp = await userStore.uploadPartyImage(formData);
+    const resp = await userStore.uploadPartyImage({ userId: selectedUser.value.userLoginId, formData });
     if (!commonUtil.hasError(resp)) {
       commonUtil.showToast(translate("Image uploaded successfully."));
-      await fetchProfileImage();
+      userStore.updateSelectedUser({ ...selectedUser.value, partyImageUrl: resp.data.partyImageUrl });
     } else {
       throw resp.data;
     }
   } catch (error) {
     commonUtil.showToast(translate("Failed to upload image."));
     logger.error('Error uploading image:', error);
-  }
-};
-
-const fetchProfileImage = async () => {
-  const profileImage = await userStore.fetchLogoImageForParty(selectedUser.value.partyId);
-
-  if (profileImage.objectInfo) {
-    imageUrl.value = (baseUrl.value.startsWith('http') ? baseUrl.value.replace(/api\/?/, "") : `https://${baseUrl.value}.hotwax.io/`) + profileImage.objectInfo;
   }
 };
 

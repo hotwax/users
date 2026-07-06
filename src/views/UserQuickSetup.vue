@@ -336,7 +336,7 @@ const finishSetup = async () => {
     if (selectedUserTemplate.value.isUserLoginRequired) {
       await finishSetupAlert(formData.value.userLoginId);
     } else {
-      router.replace({ path: `/user-details/${props.partyId}` });
+      router.replace({ path: `/user-details/${formData.value.userLoginId}` });
     }
   } catch (err: any) {
     logger.error('error', err);
@@ -375,7 +375,7 @@ const copyCredentials = (data: any) => {
     const dataToCopy = `username: ${formData.value.userLoginId}, password: ${formData.value.currentPassword}`;
     commonUtil.copyToClipboard(dataToCopy, 'Copied to clipboard');
   }
-  router.replace({ path: `/user-details/${props.partyId}` });
+  router.replace({ path: `/user-details/${formData.value.userLoginId}` });
 };
 
 const confirmSetupManually = async () => {
@@ -399,7 +399,7 @@ const confirmSetupManually = async () => {
 };
 
 const setupManually = async () => {
-  await router.replace({ path: `/user-details/${props.partyId}` });
+  await router.replace({ path: `/user-details/${formData.value.userLoginId}` });
 };
 
 const finishAndCreateNewUser = async () => {

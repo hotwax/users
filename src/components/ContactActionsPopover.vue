@@ -121,21 +121,10 @@ const updateContactField = async () => {
               }
             };
           } else {
-            let resp = {} as any;
-            if (selectedUser.value.partyTypeId === 'PERSON') {
-              resp = await userStore.updatePerson({
-                externalId: input,
-                partyId: selectedUser.value.partyId,
-                firstName: selectedUser.value.firstName,
-                lastName: selectedUser.value.lastName
-              });
-            } else {
-              resp = await userStore.updatePartyGroup({
-                externalId: input,
-                partyId: selectedUser.value.partyId,
-                groupName: selectedUser.value.groupName
-              });
-            }
+            const resp = await userStore.updatePartyExternalId({
+              externalId: input,
+              partyId: selectedUser.value.partyId
+            });
             if (commonUtil.hasError(resp)) throw resp.data;
             updatedSelectedUser = {
               ...updatedSelectedUser,
@@ -186,18 +175,10 @@ const deleteContactField = async () => {
             if (commonUtil.hasError(resp)) throw resp.data;
             delete updatedSelectedUser.phoneNumberDetails;
           } else {
-            let resp = {} as any;
-            if (selectedUser.value.partyTypeId === 'PERSON') {
-              resp = await userStore.updatePerson({
-                externalId: '',
-                partyId: selectedUser.value.partyId
-              });
-            } else {
-              resp = await userStore.updatePartyGroup({
-                externalId: '',
-                partyId: selectedUser.value.partyId
-              });
-            }
+            const resp = await userStore.updatePartyExternalId({
+              externalId: '',
+              partyId: selectedUser.value.partyId
+            });
             if (commonUtil.hasError(resp)) throw resp.data;
             delete updatedSelectedUser.externalId;
           }

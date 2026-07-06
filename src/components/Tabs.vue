@@ -11,6 +11,10 @@
           <ion-icon :icon="idCardOutline" />
           <ion-label>{{ translate("Permissions") }}</ion-label>
         </ion-tab-button>
+        <ion-tab-button v-if="userStore.hasPermission('SECURITY_VIEW OR SECURITY_ADMIN')" tab="manage-authorization" href="/tabs/manage-authorization">
+          <ion-icon :icon="keyOutline" />
+          <ion-label>{{ translate("Authorization") }}</ion-label>
+        </ion-tab-button>
         <ion-tab-button v-if="!userStore.hasPermission('USERS_LIST_VIEW OR PARTYMGR_VIEW OR PARTYMGR_ADMIN')" tab="me" :href="`/tabs/me`">
           <ion-icon :icon="personOutline" />
           <ion-label>{{ translate("Me") }}</ion-label>
@@ -26,7 +30,7 @@
 
 <script setup lang="ts">
 import { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs, IonRouterOutlet } from "@ionic/vue";
-import { settingsOutline, personOutline, idCardOutline } from "ionicons/icons";
+import { settingsOutline, personOutline, idCardOutline, keyOutline } from "ionicons/icons";
 import { translate } from "@common";
 import { useUserStore } from '@/store/user';
 

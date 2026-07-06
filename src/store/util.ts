@@ -85,22 +85,19 @@ export const useUtilStore = defineStore('util', {
     async fetchShopifyShopConfigs() {
       let shopifyShops = [];
       const params = {
-        "entityName": "ShopifyShopAndConfig",
-        "noConditionFind": "Y",
         "fieldList": ["shopifyConfigId", "name", "shopId", "productStoreId"],
-        "viewSize": 250
+        "pageSize": 250
       };
 
       try {
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "performFind",
+          url: "admin/shopifyShops",
           method: "get",
           params,
           cache: true
         });
         if (!commonUtil.hasError(resp)) {
-          shopifyShops = resp.data.docs;
+          shopifyShops = resp.data;
         } else {
           throw resp.data;
         }
@@ -166,6 +163,18 @@ export const useUtilStore = defineStore('util', {
       this.userGroups = userGroups;
     },
 
+    async updateUserGroup(payload: { userGroupId: string; description: string }): Promise<any> {
+      return api({
+        url: `admin/userGroups/${payload.userGroupId}`,
+        method: "put",
+        data: payload
+      });
+    },
+
+    updateUserGroupInState(updatedGroup: { userGroupId: string; description: string }) {
+      this.userGroups = this.userGroups.map((group: any) => group.userGroupId === updatedGroup.userGroupId ? { ...group, ...updatedGroup } : group);
+    },
+
     async fetchClassificationSecurityGroups() {
       const payload = {
         entityName: "SecurityGroup",
@@ -203,64 +212,42 @@ export const useUtilStore = defineStore('util', {
 
     async fetchFacilities() {
       let facilities: Array<any> = [];
-      let viewIndex = 0;
-      let respCount = 0;
-      const viewSize = 100;
 
-      do {
-        try {
-          const payload = {
-            "inputFields": {
-              "parentTypeId": "VIRTUAL_FACILITY",
-              "parentTypeId_op": "notEqual",
-              "facilityTypeId": "VIRTUAL_FACILITY",
-              "facilityTypeId_op": "notEqual"
-            },
-            "entityName": "FacilityAndType",
-            viewSize,
-            viewIndex
-          };
-
-          const resp = await api({
-            baseURL: commonUtil.getOmsURL(),
-            url: "performFind",
-            method: "POST",
-            data: payload,
-            cache: true
-          });
-          if (!commonUtil.hasError(resp) && resp.data?.docs?.length > 0) {
-            facilities = facilities.concat(resp.data.docs);
-            respCount = resp.data.docs.length;
-            viewIndex++;
-          } else {
-            throw resp.data;
-          }
-        } catch (err) {
-          logger.error('Failed to fetch facilities', err);
-          respCount = 0;
+      try {
+        const resp = await api({
+          url: "admin/facilities",
+          method: "GET",
+          params: {
+            pageSize: 500,
+            facilityTypeId: "VIRTUAL_FACILITY",
+            facilityTypeId_not: "Y",
+            parentTypeId: "VIRTUAL_FACILITY",
+            parentTypeId_not: "Y",
+          },
+          cache: true
+        });
+        if (!commonUtil.hasError(resp)) {
+          facilities = resp.data;
+        } else {
+          throw resp.data;
         }
-      } while (respCount >= viewSize);
+      } catch (err) {
+        logger.error('Failed to fetch facilities', err);
+      }
       this.facilities = facilities;
     },
 
     async fetchProductStores() {
       let stores = [];
       try {
-        const payload = {
-          "entityName": "ProductStore",
-          "noConditionFind": "Y",
-          "viewSize": 100
-        };
-
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "performFind",
-          method: "POST",
-          data: payload,
+          url: "admin/productStores",
+          method: "GET",
+          params: { pageSize: 500 },
           cache: true
         });
-        if (!commonUtil.hasError(resp) && resp.data.count > 0) {
-          stores = resp.data.docs;
+        if (!commonUtil.hasError(resp)) {
+          stores = resp.data;
         } else {
           throw resp.data;
         }

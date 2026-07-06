@@ -12,10 +12,10 @@
 
   <ion-content>
     <ion-list v-if="userGroupAssocHistories.length">
-      <ion-item v-for="assocHistory in userGroupAssocHistories" :key="assocHistory.groupId">
+      <ion-item v-for="assocHistory in userGroupAssocHistories" :key="assocHistory.userGroupId">
         <ion-label>
-          {{ assocHistory.groupName ? assocHistory.groupName : assocHistory.groupId }}
-          <p>{{ assocHistory.groupId }}</p>
+          {{ assocHistory.description ? assocHistory.description : assocHistory.userGroupId }}
+          <p>{{ assocHistory.userGroupId }}</p>
         </ion-label>
         <ion-note slot="end">{{ commonUtil.getDateWithOrdinalSuffix(assocHistory.fromDate) }} - {{ assocHistory.thruDate ? commonUtil.getDateWithOrdinalSuffix(assocHistory.thruDate) : translate('Current') }}</ion-note>
       </ion-item>
@@ -32,13 +32,10 @@ import { ref, computed, onMounted } from "vue";
 import { closeOutline } from "ionicons/icons";
 import { commonUtil, translate } from '@common';
 import { useUserStore } from "@/store/user";
-import { useUtilStore } from "@/store/util";
 
 const userStore = useUserStore();
-const utilStore = useUtilStore();
 
 const selectedUser = computed(() => userStore.getSelectedUser);
-const securityGroups = computed(() => utilStore.getSecurityGroups);
 
 const userGroupAssocHistories = ref<any[]>([]);
 
@@ -49,29 +46,12 @@ const closeModal = () => {
 const fetchUserSecurityGroupAssoHistory = async () => {
   if (!selectedUser.value.userLoginId) return;
 
-  const securityGroupNameByGroupId = {} as any;
   let histories = [] as any;
   try {
-    const resp = await userStore.fetchUserSecurityGroupAssocHistory({
-      entityName: "UserLoginAndSecurityGroup",
-      inputFields: {
-        userLoginId: selectedUser.value.userLoginId,
-      },
-      orderBy: "thruDate DESC",
-      viewSize: 250
-    });
-    if (!commonUtil.hasError(resp)) {
-      histories = resp.data.docs;
-      securityGroups.value.forEach((group: any) => securityGroupNameByGroupId[group.groupId] = group.groupName);
-      histories.forEach((history: any) => {
-        history["groupName"] = securityGroupNameByGroupId[history.groupId];
-      });
-      const currentSecurityGroups = histories.filter((history: any) => !history.thruDate);
-      const expiredSecurityGroups = histories.filter((history: any) => history.thruDate);
-      histories = currentSecurityGroups.concat(expiredSecurityGroups);
-    } else {
-      throw resp.data;
-    }
+    histories = await userStore.getUserGroups(selectedUser.value.userLoginId);
+    const currentSecurityGroups = histories.filter((history: any) => !history.thruDate);
+    const expiredSecurityGroups = histories.filter((history: any) => history.thruDate);
+    histories = currentSecurityGroups.concat(expiredSecurityGroups);
   } catch (error: any) {
     console.error(error);
   }

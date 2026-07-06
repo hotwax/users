@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { DateTime, Settings } from "luxon"
-import { api, client, commonUtil, emitter, i18n, logger, translate, useAuth } from '@common';
+import { api, commonUtil, emitter, i18n, logger, translate, useAuth } from '@common';
 import { useUtilStore } from '@/store/util';
 
 export interface UserState {
@@ -93,20 +93,18 @@ export const useUserStore = defineStore('user', {
     setPermissionsState(payload: any) {
       this.permissions = payload
     },
-    async addPartyToFacility(payload: any): Promise<any> {
+    async addPartyToFacility(payload: { partyId: string; facilityId: string; roleTypeId: string; fromDate?: any }): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/addPartyToFacility",
+        url: `oms/facilities/${payload.facilityId}/parties`,
         method: "post",
-        data: payload
+        data: { partyId: payload.partyId, roleTypeId: payload.roleTypeId, fromDate: payload.fromDate }
       });
     },
-    async addUserToSecurityGroup(payload: any): Promise<any> {
+    async addUserToSecurityGroup(payload: { userId: string; userGroupId: string }): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/addPartyUserPermission",
+        url: `admin/users/${payload.userId}/groups`,
         method: "post",
-        data: payload
+        data: { userGroupId: payload.userGroupId }
       });
     },
     async createNewUserLogin(payload: any): Promise<any> {
@@ -117,12 +115,11 @@ export const useUserStore = defineStore('user', {
         data: payload
       });
     },
-    async createProductStoreRole(payload: any): Promise<any> {
+    async createProductStoreRole(payload: { partyId: string; productStoreId: string; roleTypeId: string; fromDate?: any }): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/createProductStoreRole",
+        url: `admin/user/${payload.partyId}/productStores`,
         method: "post",
-        data: payload
+        data: { productStoreId: payload.productStoreId, roleTypeId: payload.roleTypeId, fromDate: payload.fromDate }
       });
     },
     async createRoleType(payload: any): Promise<any> {
@@ -133,20 +130,18 @@ export const useUserStore = defineStore('user', {
         data: payload
       });
     },
-    async createUpdatePartyEmailAddress(payload: any): Promise<any> {
+    async createUpdatePartyEmailAddress(payload: { partyId: string; contactMechId?: string; emailAddress: string; contactMechPurposeTypeId?: string }): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/createUpdatePartyEmailAddress",
-        method: "post",
-        data: payload
+        url: `oms/customers/${payload.partyId}/emails`,
+        method: payload.contactMechId ? "put" : "post",
+        data: { contactMechId: payload.contactMechId, infoString: payload.emailAddress, contactMechPurposeTypeId: payload.contactMechPurposeTypeId }
       });
     },
-    async createUpdatePartyTelecomNumber(payload: any): Promise<any> {
+    async createUpdatePartyTelecomNumber(payload: { partyId: string; contactMechId?: string; contactNumber: string; contactMechPurposeTypeId?: string }): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/createUpdatePartyTelecomNumber",
-        method: "post",
-        data: payload
+        url: `oms/customers/${payload.partyId}/telecomNumbers`,
+        method: payload.contactMechId ? "put" : "post",
+        data: { contactMechId: payload.contactMechId, contactNumber: payload.contactNumber, contactMechPurposeTypeId: payload.contactMechPurposeTypeId }
       });
     },
     async createUser(payload: any): Promise<any> {
@@ -157,12 +152,10 @@ export const useUserStore = defineStore('user', {
         data: payload
       });
     },
-    async deletePartyContactMech(payload: any): Promise<any> {
+    async deletePartyContactMech(payload: { partyId: string; contactMechId: string }): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/deletePartyContactMech",
-        method: "post",
-        data: payload
+        url: `oms/customers/${payload.partyId}/contactMechs/${payload.contactMechId}`,
+        method: "delete"
       });
     },
     async deletePartyRole(payload: any): Promise<any> {
@@ -173,101 +166,33 @@ export const useUserStore = defineStore('user', {
         data: payload
       });
     },
-    async ensurePartyRole(payload: any): Promise<any> {
+    async ensurePartyRole(payload: { partyId: string; roleTypeId: string }): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/ensurePartyRole",
+        url: `oms/parties/${payload.partyId}/roles`,
         method: "post",
-        data: payload
+        data: { roleTypeId: payload.roleTypeId }
       });
     },
-    async fetchUserSecurityGroupAssocHistory(payload: any): Promise<any> {
+    async forceLogout(payload: { userId: string }): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "performFind",
-        method: "post",
-        data: payload
-      });
-    },
-    async fetchLogoImageForParty(partyId: any): Promise<any> {
-      let profileImage = {};
-
-      try {
-        let resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: 'performFind',
-          method: 'POST',
-          data: {
-            entityName: "PartyContentDetail",
-            inputFields: {
-              partyId,
-            },
-            viewSize: 1,
-            fieldList: ['partyId', 'dataResourceId'],
-            noConditionFind: 'Y',
-            filterByDate: 'Y'
-          }
-        }) as any
-
-        if (!commonUtil.hasError(resp) && resp.data.count > 0) {
-          const partyContents = resp.data.docs;
-
-          resp = await api({
-            baseURL: commonUtil.getOmsURL(),
-            url: 'performFind',
-            method: 'POST',
-            data: {
-              entityName: "DataResource",
-              inputFields: {
-                dataResourceId: partyContents[0].dataResourceId
-              },
-              viewSize: 1,
-              fieldList: ['dataResourceId', 'objectInfo'],
-              noConditionFind: 'Y'
-            }
-          })
-
-          if (!commonUtil.hasError(resp) && resp.data.count > 0) {
-            profileImage = resp.data.docs[0]
-          } else {
-            throw resp.data
-          }
-        }
-        return profileImage;
-      } catch (error) {
-        return Promise.reject(error);
-      }
-    },
-    async forceLogout(payload: any): Promise<any> {
-      return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/forceLogout",
-        method: "post",
-        data: payload
+        url: "admin/user/profile",
+        method: "put",
+        data: { userId: payload.userId, hasLoggedOut: 'Y' }
       });
     },
     async getUserFacilities(partyId: string): Promise<any> {
       let facilities = []
-      const payload = {
-        inputFields: {
-          partyId
-        },
-        noConditionFind: "Y",
-        filterByDate: "Y",
-        entityName: "FacilityParty",
-        viewSize: 100,
-      }
 
       try {
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "performFind",
-          method: "POST",
-          data: payload
+          url: `admin/user/${partyId}/facilities`,
+          method: "GET",
+          params: { pageSize: 100 }
         }) as any
 
-        if (!commonUtil.hasError(resp) || resp.data.error === 'No record found') {
-          facilities = resp.data.docs ? resp.data.docs : []
+        if (!commonUtil.hasError(resp)) {
+          const now = Date.now();
+          facilities = (resp.data || []).filter((facility: any) => !facility.thruDate || facility.thruDate > now);
         } else {
           throw resp.data;
         }
@@ -279,29 +204,24 @@ export const useUserStore = defineStore('user', {
     },
     async getUserProductStores(partyId: string): Promise<any> {
       let productStores = []
-      const payload = {
-        inputFields: {
-          partyId,
-        },
-        viewSize: 100,
-        entityName: 'ProductStoreAndRole',
-        filterByDate: 'Y',
-        fieldList: ['partyId', 'storeName', 'roleTypeId', 'productStoreId', 'fromDate']
-      }
 
       try {
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "performFind",
-          method: "POST",
-          data: payload
+          url: `admin/user/${partyId}/productStores`,
+          method: "GET"
         }) as any
 
         const utilStore = useUtilStore();
-        Promise.allSettled([utilStore.fetchProductStores(), utilStore.fetchRoles()])
+        await Promise.allSettled([utilStore.fetchProductStores(), utilStore.fetchRoles()])
 
-        if (!commonUtil.hasError(resp) || resp.data.error === 'No record found') {
-          productStores = resp.data.docs ? resp.data.docs : []
+        if (!commonUtil.hasError(resp)) {
+          const now = Date.now();
+          const storeNameByProductStoreId = {} as any;
+          utilStore.getProductStores.forEach((store: any) => storeNameByProductStoreId[store.productStoreId] = store.storeName);
+
+          productStores = (resp.data || [])
+            .filter((productStoreRole: any) => !productStoreRole.thruDate || productStoreRole.thruDate > now)
+            .map((productStoreRole: any) => ({ ...productStoreRole, storeName: storeNameByProductStoreId[productStoreRole.productStoreId] }));
         } else {
           throw resp.data
         }
@@ -309,37 +229,6 @@ export const useUserStore = defineStore('user', {
         logger.error('Failed to fetch user associated product stores.', error)
       }
       return productStores
-    },
-    async getUserSecurityGroups(userLoginId: string): Promise<any> {
-      let userSecurityGroups = [] as any
-      const payload = {
-        inputFields: {
-          userLoginId,
-        },
-        entityName: "UserLoginSecurityGroup",
-        filterByDate: "Y",
-        viewSize: 20,
-        fieldList: ["groupId", "userLoginId", "fromDate"]
-      }
-
-      try {
-        const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "performFind",
-          method: "POST",
-          data: payload
-        }) as any
-
-        if (!commonUtil.hasError(resp) || resp.data.error === 'No record found') {
-          userSecurityGroups = resp.data.docs ? resp.data.docs : []
-        } else {
-          throw resp.data
-        }
-      } catch (error) {
-        logger.error('Failed to fetch user associated security groups.', error)
-      }
-
-      return userSecurityGroups
     },
     async getUserGroups(userId: string): Promise<any> {
       let userGroups = [] as any
@@ -416,21 +305,10 @@ export const useUserStore = defineStore('user', {
     async isUserLoginIdAlreadyExists(username: string): Promise<any> {
       try {
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: 'performFind',
-          method: 'POST',
-          data: {
-            entityName: "UserLogin",
-            inputFields: {
-              userLoginId: username
-            },
-            viewSize: 1,
-            fieldList: ['userLoginId', 'partyId'],
-            distinct: 'Y',
-            noConditionFind: 'Y'
-          }
+          url: `admin/users/${username}`,
+          method: 'GET'
         }) as any
-        if (!commonUtil.hasError(resp) && resp.data.docs.length) {
+        if (!commonUtil.hasError(resp) && resp.data?.userId) {
           commonUtil.showToast(translate('Could not create login user: user with ID already exists.', { userLoginId: username }))
           return true
         }
@@ -439,20 +317,20 @@ export const useUserStore = defineStore('user', {
         return false
       }
     },
-    async removePartyFromFacility(payload: any): Promise<any> {
+    async removePartyFromFacility(payload: { partyId: string; facilityId: string; roleTypeId: string; fromDate: any; thruDate: any }): Promise<any> {
+      // Soft-expire: FacilityParty history is preserved, so this updates thruDate on the existing record rather than deleting it.
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/removePartyFromFacility",
-        method: "post",
-        data: payload
+        url: `oms/facilities/${payload.facilityId}/parties`,
+        method: "put",
+        data: { partyId: payload.partyId, roleTypeId: payload.roleTypeId, fromDate: payload.fromDate, thruDate: payload.thruDate }
       });
     },
-    async removeUserSecurityGroup(payload: any): Promise<any> {
+    async removeUserSecurityGroup(payload: { userId: string; userGroupId: string; fromDate: any; thruDate: any }): Promise<any> {
+      // Soft-expire: UserGroupMember history is preserved, so this updates thruDate on the existing record rather than deleting it.
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/removePartyUserPermission",
-        method: "post",
-        data: payload
+        url: `admin/users/${payload.userId}/groups`,
+        method: "put",
+        data: { userGroupId: payload.userGroupId, fromDate: payload.fromDate, thruDate: payload.thruDate }
       });
     },
     async resetPassword(payload: any): Promise<any> {
@@ -471,6 +349,34 @@ export const useUserStore = defineStore('user', {
         data: payload
       });
     },
+    async updatePartyExternalId(payload: { partyId: string; externalId: string }): Promise<any> {
+      return api({
+        url: `oms/parties/${payload.partyId}`,
+        method: "put",
+        data: { externalId: payload.externalId }
+      });
+    },
+    async updatePartyPersonName(payload: { partyId: string; firstName: string; lastName: string }): Promise<any> {
+      return api({
+        url: `oms/parties/${payload.partyId}/person`,
+        method: "put",
+        data: { firstName: payload.firstName, lastName: payload.lastName }
+      });
+    },
+    async updatePartyGroupName(payload: { partyId: string; groupName: string }): Promise<any> {
+      return api({
+        url: `oms/parties/${payload.partyId}/partyGroup`,
+        method: "put",
+        data: { groupName: payload.groupName }
+      });
+    },
+    async updatePartyStatus(payload: { partyId: string; statusId: string }): Promise<any> {
+      return api({
+        url: `oms/parties/${payload.partyId}`,
+        method: "put",
+        data: { statusId: payload.statusId }
+      });
+    },
     async updatePartyGroup(payload: any): Promise<any> {
       return api({
         baseURL: commonUtil.getOmsURL(),
@@ -487,28 +393,26 @@ export const useUserStore = defineStore('user', {
         data: payload
       });
     },
-    async updateProductStoreRole(payload: any): Promise<any> {
+    async updateProductStoreRole(payload: { partyId: string; productStoreId: string; roleTypeId: string; fromDate: any; thruDate: any }): Promise<any> {
+      // Soft-expire: ProductStoreRole history is preserved, so this updates thruDate on the existing record rather than deleting it.
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/updateProductStoreRole",
-        method: "post",
-        data: payload
+        url: `admin/user/${payload.partyId}/productStores`,
+        method: "put",
+        data: { productStoreId: payload.productStoreId, roleTypeId: payload.roleTypeId, fromDate: payload.fromDate, thruDate: payload.thruDate }
       });
     },
-    async updateUserLoginStatus(payload: any): Promise<any> {
+    async updateUserLoginStatus(payload: { userId: string; disabled: string }): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/updateUserLoginStatus",
-        method: "post",
-        data: payload
+        url: "admin/user/profile",
+        method: "put",
+        data: { userId: payload.userId, disabled: payload.disabled }
       });
     },
-    async uploadPartyImage(payload: any): Promise<any> {
-      return client({
-        url: 'service/uploadPartyLogoImage',
-        method: 'POST',
-        data: payload,
-        baseURL: commonUtil.getOmsURL(),
+    async uploadPartyImage(payload: { userId: string; formData: FormData }): Promise<any> {
+      return api({
+        url: `admin/users/${payload.userId}/profileImage`,
+        method: "post",
+        data: payload.formData,
         headers: { "Content-Type": "multipart/form-data" },
       })
     },
@@ -796,65 +700,65 @@ export const useUserStore = defineStore('user', {
         return Promise.reject(error)
       }
     },
-    async getSelectedUserDetails(payload: { partyId: string; isFetchRequired?: boolean }) {
+    async getSelectedUserDetails(payload: { userId?: string; partyId?: string; isFetchRequired?: boolean }) {
       const currentSelectedUser = JSON.parse(JSON.stringify(this.selectedUser));
-      if (currentSelectedUser.partyId === payload.partyId && !payload.isFetchRequired) {
+      const identifier = payload.userId || payload.partyId;
+      if ((currentSelectedUser.userLoginId === identifier || currentSelectedUser.partyId === identifier) && !payload.isFetchRequired) {
         return;
       }
 
-      let userResp = {} as any, selectedUser = {} as any, params = {
-        inputFields: {
-          "roleTypeIdTo": "APPLICATION_USER",
-          partyId: payload.partyId,
-        },
-        fromDateName: "relationshipFromDate",
-        thruDateName: "relationshipThruDate",
-        filterByDate: "Y",
-        viewSize: 1,
-        entityName: 'PartyAndUserLoginSecurityGroupDetails',
-        fieldList: ['createdByUserLogin', 'userLoginId', 'enabled', "hasLoggedOut", 'firstName', 'lastName', 'partyId', 'partyTypeId', 'groupName', 'externalId', 'statusId'],
-      };
+      let selectedUser = {} as any;
 
       try {
-        userResp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: 'performFind',
-          method: 'POST',
-          data: params
-        });
-        if (!commonUtil.hasError(userResp)) {
+        const userResp = payload.userId
+          ? await api({ url: `admin/users/${payload.userId}`, method: 'GET' }) as any
+          : await api({ url: 'admin/users', method: 'GET', params: { partyId: payload.partyId, pageSize: 1 } }) as any;
+
+        const user = payload.userId ? userResp.data : userResp.data.users?.[0];
+        if (!commonUtil.hasError(userResp) && user) {
+          const partyId = user.partyId;
           selectedUser = {
-            ...userResp.data.docs[0]
+            ...user,
+            userLoginId: user.userId
           };
 
-          params = {
-            inputFields: {
-              partyId: payload.partyId,
-              contactMechPurposeTypeId: ['PRIMARY_EMAIL', 'PRIMARY_PHONE'],
-              contactMechPurposeTypeId_op: 'in'
-            },
-            viewSize: 2,
-            filterByDate: 'Y',
-            entityName: 'PartyContactDetailByPurpose',
-            fieldList: ['areaCode', 'countryCode', 'contactNumber', 'infoString', 'contactMechId', 'contactMechPurposeTypeId']
-          } as any;
+          const partyResp = await api({
+            url: `oms/parties/${partyId}`,
+            method: 'GET'
+          }) as any;
+          if (!commonUtil.hasError(partyResp)) {
+            selectedUser = {
+              ...selectedUser,
+              partyTypeId: partyResp.data.partyTypeId,
+              firstName: partyResp.data.firstName,
+              lastName: partyResp.data.lastName,
+              groupName: partyResp.data.groupName,
+              externalId: partyResp.data.externalId,
+              statusId: partyResp.data.statusId
+            };
+          }
 
           const contactResp = await api({
-            baseURL: commonUtil.getOmsURL(),
-            url: 'performFind',
-            method: 'POST',
-            data: params
-          });
+            url: 'oms/partyContactMechs',
+            method: 'GET',
+            params: {
+              partyId: partyId,
+              contactMechPurposeTypeId: 'PRIMARY_EMAIL,PRIMARY_PHONE',
+              contactMechPurposeTypeId_op: 'in',
+              thruDate_op: 'empty',
+              pageSize: 2
+            }
+          }) as any;
           if (!commonUtil.hasError(contactResp)) {
             let emailDetails = {}, phoneNumberDetails = {};
 
-            contactResp.data.docs.map((doc: any) => {
+            (contactResp.data || []).forEach((doc: any) => {
               if (doc.contactMechPurposeTypeId === 'PRIMARY_EMAIL') {
                 emailDetails = {
                   email: doc.infoString,
                   contactMechId: doc.contactMechId
                 };
-              } else {
+              } else if (doc.contactMechPurposeTypeId === 'PRIMARY_PHONE') {
                 phoneNumberDetails = {
                   contactNumber: doc.contactNumber,
                   contactMechId: doc.contactMechId
@@ -879,7 +783,9 @@ export const useUserStore = defineStore('user', {
 
       if (Object.keys(selectedUser).length) {
         selectedUser.facilities = await this.getUserFacilities(selectedUser.partyId);
-        selectedUser.securityGroups = await this.getUserSecurityGroups(selectedUser.userLoginId);
+        const userGroups = await this.getUserGroups(selectedUser.userLoginId);
+        const now = Date.now();
+        selectedUser.securityGroups = userGroups.filter((group: any) => !group.thruDate || group.thruDate > now);
         selectedUser.productStores = await this.getUserProductStores(selectedUser.partyId);
         if (selectedUser.userLoginId) {
           let userPreferences = [] as any;
@@ -910,21 +816,15 @@ export const useUserStore = defineStore('user', {
         }
 
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: 'performFind',
-          method: 'POST',
-          data: {
-            inputFields: {
-              partyId: selectedUser.partyId,
-              roleTypeId: 'WAREHOUSE_PICKER'
-            },
-            viewSize: 1,
-            entityName: 'PartyRole',
-            fieldList: ['partyId', 'roleTypeId']
+          url: `oms/parties/${selectedUser.partyId}/roles`,
+          method: 'GET',
+          params: {
+            roleTypeId: 'WAREHOUSE_PICKER',
+            pageSize: 1
           }
         });
 
-        if (!commonUtil.hasError(resp) && resp.data.docs.length) {
+        if (!commonUtil.hasError(resp) && resp.data.length) {
           selectedUser.isWarehousePicker = true;
         }
       }

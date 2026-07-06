@@ -1,7 +1,7 @@
 <template>
   <ion-content>
     <ion-list>
-      <ion-list-header>{{ securityGroup.groupName || securityGroup.groupId }}</ion-list-header>
+      <ion-list-header>{{ securityGroup.description || securityGroup.userGroupId }}</ion-list-header>
       <ion-item>
         <ion-label>
           {{ getDateTime(securityGroup.fromDate) }}
@@ -44,10 +44,12 @@ const getDateTime = (time: any) => {
 const removeUserSecurityGroup = async () => {
   try {
     const resp = await userStore.removeUserSecurityGroup({
-        groupId: props.securityGroup.groupId,
-        userLoginId: selectedUser.value.userLoginId
+        userGroupId: props.securityGroup.userGroupId,
+        userId: selectedUser.value.userLoginId,
+        fromDate: props.securityGroup.fromDate,
+        thruDate: DateTime.now().toMillis()
     })
-    
+
     if (commonUtil.hasError(resp)) throw resp.data
     commonUtil.showToast(translate('Security group removed successfully.'))
   } catch (error) {
@@ -55,7 +57,9 @@ const removeUserSecurityGroup = async () => {
     logger.error(error)
   }
   // refetching security groups
-  const userSecurityGroups = await userStore.getUserSecurityGroups(selectedUser.value.userLoginId)
+  const userGroups = await userStore.getUserGroups(selectedUser.value.userLoginId)
+  const now = Date.now();
+  const userSecurityGroups = userGroups.filter((group: any) => !group.thruDate || group.thruDate > now);
   userStore.updateSelectedUser({ ...selectedUser.value, securityGroups: userSecurityGroups })
   closePopover(userSecurityGroups)
 };

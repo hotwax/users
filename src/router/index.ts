@@ -69,12 +69,18 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           permissionId: "SECURITY_VIEW OR SECURITY_ADMIN"
         }
+      },{
+        path: 'manage-authorization',
+        component: () => import('@/views/ManageAuthorization.vue'),
+        meta: {
+          permissionId: "SECURITY_VIEW OR SECURITY_ADMIN"
+        }
       },
     ],
     beforeEnter: authGuard,
   },
   {
-    path: '/user-details/:partyId',
+    path: '/user-details/:userId',
     name: 'UserDetails',
     component: UserDetails,
     beforeEnter: authGuard,

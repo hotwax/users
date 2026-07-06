@@ -71,7 +71,7 @@ const quickSetup = async () => {
 };
 
 const setupManually = async () => {
-  await router.replace({ path: `/user-details/${props.partyId}` });
+  await router.replace({ path: `/user-details/${selectedUser.value.userLoginId}` });
 };
 
 const confirmSetupManually = async () => {

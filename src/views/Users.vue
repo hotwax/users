@@ -191,7 +191,7 @@ const fetchCurrentUser = async () => {
 
 const viewUserDetails = async (user: any) => {
   await userStore.updateSelectedUser(user);
-  router.push({ path: `/user-details/${user.partyId}` });
+  router.push({ path: `/user-details/${user.userId}` });
 };
 
 const loadMoreUsers = async (event: any) => {
