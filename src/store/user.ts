@@ -176,7 +176,7 @@ export const useUserStore = defineStore('user', {
     async forceLogout(payload: { userId: string }): Promise<any> {
       return api({
         url: "admin/user/profile",
-        method: "put",
+        method: "post",
         data: { userId: payload.userId, hasLoggedOut: 'Y' }
       });
     },
@@ -404,7 +404,7 @@ export const useUserStore = defineStore('user', {
     async updateUserLoginStatus(payload: { userId: string; disabled: string }): Promise<any> {
       return api({
         url: "admin/user/profile",
-        method: "put",
+        method: "post",
         data: { userId: payload.userId, disabled: payload.disabled }
       });
     },
