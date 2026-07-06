@@ -485,15 +485,13 @@ const userProductStores = computed(() => userStore.getSelectedUserProductStores)
 const userSecurityGroups = computed(() => userStore.getSelectedUserSecurityGroups);
 const getRoleTypeDesc = (roleTypeId: string) => utilStore.getRoleTypeDesc(roleTypeId);
 const userProfile = computed(() => userStore.getUserProfile);
-const baseUrl = computed(() => userStore.getBaseUrl);
 const shopifyShops = computed(() => utilStore.getShopifyShops);
 const organizationPartyId = computed(() => utilStore.getOrganizationPartyId);
 const redirectedFromUrl = computed(() => userStore.getRedirectedFromUrl);
 const imageUrl = computed(() => {
   const partyImageUrl = selectedUser.value.partyImageUrl;
   if (!partyImageUrl) return "";
-  if (partyImageUrl.startsWith("data:") || partyImageUrl.startsWith("http")) return partyImageUrl;
-  return (baseUrl.value.startsWith('http') ? baseUrl.value.replace(/api\/?/, "") : `https://${baseUrl.value}.hotwax.io/`) + partyImageUrl;
+  return (commonUtil.getMaargBaseURL().startsWith('http') ? commonUtil.getMaargBaseURL().replace(/api\/?/, "") : `https://${commonUtil.getMaargBaseURL()}.hotwax.io/`) + partyImageUrl;
 });
 
 onIonViewWillLeave(async () => {
