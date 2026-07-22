@@ -78,17 +78,15 @@ export const usePermissionStore = defineStore('permission', {
   actions: {
     async addSecurityPermissionToSecurityGroup(payload: any): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/addSecurityPermissionToSecurityGroup",
+        url: `admin/permissions/${payload.permissionId}`,
         method: "post",
-        data: payload
+        data: { groupId: payload.groupId, fromDate: payload.fromDate }
       });
     },
 
     async createSecurityGroup(payload: any): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/createSecurityGroup",
+        url: `admin/groups/${payload.groupId}`,
         method: "post",
         data: payload
       });
@@ -96,19 +94,16 @@ export const usePermissionStore = defineStore('permission', {
 
     async getSecurityGroupUsers(payload: any): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "performFind",
-        method: "POST",
-        data: payload
+        url: `admin/groups/${payload.inputFields?.securityGroupId}/users`,
+        method: "get",
       });
     },
 
     async removeSecurityPermissionFromSecurityGroup(payload: any): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/updateSecurityPermissionToSecurityGroup",
-        method: "post",
-        data: payload
+        url: `admin/permissions/${payload.permissionId}`,
+        method: "put",
+        data: { groupId: payload.groupId, fromDate: payload.fromDate, thruDate: payload.thruDate }
       });
     },
 
@@ -118,16 +113,12 @@ export const usePermissionStore = defineStore('permission', {
 
       do {
         resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "performFind",
-          method: "POST",
-          data: {
-            entityName: "SecurityGroupAndPermission",
-            distinct: "Y",
-            noConditionFind: "Y",
-            viewSize: 250,
-            viewIndex,
-            inputFields,
+          url: "admin/groups",
+          method: "get",
+          params: {
+            pageSize: 250,
+            pageIndex: viewIndex,
+            ...inputFields,
             ...options
           }
         }) as any;
@@ -136,19 +127,30 @@ export const usePermissionStore = defineStore('permission', {
           throw resp.data;
         }
 
-        permissions.push(...(resp.data.docs || []));
+        permissions.push(...(resp.data || []));
         viewIndex++;
-      } while ((resp.data.docs || []).length >= 250);
+      } while ((resp.data || []).length >= 250);
 
       return permissions;
     },
 
     async getActiveGroupsByPermission(permissionId: string): Promise<any[]> {
-      return this.getPagedSecurityGroupPermissions({ permissionId }, { filterByDate: "Y" });
+      const now = Date.now();
+      const groups = await this.getPagedSecurityGroupPermissions({ permissionId });
+      return groups.filter((group: any) => {
+        const fromDate = group.fromDate ? new Date(group.fromDate).getTime() : 0;
+        const thruDate = group.thruDate ? new Date(group.thruDate).getTime() : Number.POSITIVE_INFINITY;
+        return fromDate <= now && thruDate > now;
+      });
     },
 
     async getPermissionHistory(permissionId: string): Promise<any[]> {
-      return this.getPagedSecurityGroupPermissions({ permissionId }, { filterByDate: "N", orderBy: "-thruDate" });
+      const groups = await this.getPagedSecurityGroupPermissions({ permissionId }, { orderByField: "-thruDate" });
+      return groups.sort((a: any, b: any) => {
+        const aDate = a.thruDate ? new Date(a.thruDate).getTime() : Number.POSITIVE_INFINITY;
+        const bDate = b.thruDate ? new Date(b.thruDate).getTime() : Number.POSITIVE_INFINITY;
+        return bDate - aDate;
+      });
     },
 
     async grantPermissionToGroup(payload: { groupId: string; permissionId: string; fromDate?: number }): Promise<any> {
@@ -172,29 +174,24 @@ export const usePermissionStore = defineStore('permission', {
       try {
         do {
           resp = await api({
-            baseURL: commonUtil.getOmsURL(),
-            url: "performFind",
-            method: "POST",
+            url: "admin/permissions",
+            method: "get",
             cache: true,
-            data: {
-              entityName: "SecurityPermission",
-              distinct: "Y",
-              noConditionFind: "Y",
-              fieldList: ["description", "permissionId"],
-              viewSize: 250,
-              viewIndex: viewIndex,
+            params: {
+              pageSize: 250,
+              pageIndex: viewIndex,
             }
           });
 
-          if (!commonUtil.hasError(resp) && resp.data.count) {
-            resp.data.docs.map((permission: any) => {
+          if (!commonUtil.hasError(resp)) {
+            resp.data.map((permission: any) => {
               permissions[permission.permissionId] = permission;
             });
             viewIndex++;
           } else {
             throw resp.data;
           }
-        } while (resp.data.docs.length >= 250);
+        } while (resp.data.length >= 250);
       } catch (error) {
         logger.error(error);
       }
@@ -209,31 +206,28 @@ export const usePermissionStore = defineStore('permission', {
       try {
         do {
           resp = await api({
-            baseURL: commonUtil.getOmsURL(),
-            url: "performFind",
-            method: "POST",
+            url: "admin/groups",
+            method: "get",
             cache: true,
-            data: {
-              entityName: "SecurityGroupAndPermission",
-              distinct: "Y",
-              noConditionFind: "Y",
-              filterByDate: "Y",
-              fieldList: ["description", "permissionId", "groupId", "groupName"],
-              viewSize: 250,
-              viewIndex: viewIndex,
-              inputFields: {
-                groupTypeEnumId: "PRM_CLASS_TYPE"
-              }
+            params: {
+              groupTypeEnumId: "PRM_CLASS_TYPE",
+              pageSize: 250,
+              pageIndex: viewIndex,
             }
           });
 
           if (!commonUtil.hasError(resp)) {
-            permissions = permissions.concat(resp.data.docs);
+            const now = Date.now();
+            permissions = permissions.concat((resp.data || []).filter((permission: any) => {
+              const fromDate = permission.fromDate ? new Date(permission.fromDate).getTime() : 0;
+              const thruDate = permission.thruDate ? new Date(permission.thruDate).getTime() : Number.POSITIVE_INFINITY;
+              return fromDate <= now && thruDate > now;
+            }));
             viewIndex++;
           } else {
             throw resp.data;
           }
-        } while (resp.data.docs.length >= 250);
+        } while (resp.data.length >= 250);
       } catch (error) {
         logger.error(error);
       }
@@ -288,25 +282,23 @@ export const usePermissionStore = defineStore('permission', {
       try {
         do {
           resp = await api({
-            baseURL: commonUtil.getOmsURL(),
-            url: "performFind",
-            method: "POST",
-            data: {
-              entityName: "SecurityGroupAndPermission",
-              distinct: "Y",
-              noConditionFind: "Y",
-              filterByDate: "Y",
-              viewSize: 250,
-              viewIndex: viewIndex,
-              inputFields: {
-                groupId
-              }
+            url: "admin/groups",
+            method: "get",
+            params: {
+              groupId,
+              pageSize: 250,
+              pageIndex: viewIndex,
             },
             cache: true
           });
 
-          if (!commonUtil.hasError(resp) && resp.data.count) {
-            resp.data.docs.map((permission: any) => {
+          if (!commonUtil.hasError(resp)) {
+            const now = Date.now();
+            resp.data.filter((permission: any) => {
+              const fromDate = permission.fromDate ? new Date(permission.fromDate).getTime() : 0;
+              const thruDate = permission.thruDate ? new Date(permission.thruDate).getTime() : Number.POSITIVE_INFINITY;
+              return fromDate <= now && thruDate > now;
+            }).map((permission: any) => {
               if (!permissions[permission.permissionId]) {
                 permissions[permission.permissionId] = permission;
               }
@@ -315,7 +307,7 @@ export const usePermissionStore = defineStore('permission', {
           } else {
             throw resp.data;
           }
-        } while (resp.data.docs.length >= 250);
+        } while (resp.data.length >= 250);
       } catch (error) {
         logger.error(error);
       }

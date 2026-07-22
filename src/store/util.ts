@@ -43,30 +43,15 @@ export const useUtilStore = defineStore('util', {
       }
 
       let roles = [];
-      const params = {
-        inputFields: {
-          parentTypeId_value: 'APPLICATION_USER',
-          parentTypeId_op: 'equals',
-          parentTypeId_grp: '1',
-          roleTypeId_value: 'APPLICATION_USER',
-          roleTypeId_op: 'equals',
-          roleTypeId_grp: '2',
-        },
-        viewSize: 100,
-        entityName: 'RoleType',
-        fieldList: ['roleTypeId', 'parentTypeId', 'description']
-      };
-
       try {
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: 'performFind',
-          method: 'POST',
-          data: params,
+          url: 'admin/roleTypes',
+          method: 'get',
+          params: { pageSize: 500 },
           cache: true
         });
         if (!commonUtil.hasError(resp)) {
-          roles = resp.data.docs;
+          roles = (resp.data || []).filter((role: any) => role.parentTypeId === 'APPLICATION_USER' || role.roleTypeId === 'APPLICATION_USER');
           roles.push({
             roleTypeId: 'none',
             parentTypeId: 'none',
@@ -108,29 +93,21 @@ export const useUtilStore = defineStore('util', {
     },
 
     async fetchSecurityGroups() {
-      const payload = {
-        entityName: "SecurityGroup",
-        viewSize: 200,
-        distinct: "Y",
-        noConditionFind: "Y",
-        fieldList: ["description", "groupId", "groupName"],
-        inputFields: {
-          groupTypeEnumId: "PRM_CLASS_TYPE",
-          groupTypeEnumId_op: "notEqual"
-        }
-      };
-      let securityGroups = [];
+      let securityGroups: any[] = [];
 
       try {
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "performFind",
-          method: "POST",
-          data: payload,
+          url: "admin/groups",
+          method: "get",
+          params: { pageSize: 500 },
           cache: true
         });
         if (!commonUtil.hasError(resp)) {
-          securityGroups = resp.data.docs;
+          securityGroups = Array.from(
+            new Map((resp.data || [])
+              .filter((group: any) => group.groupTypeEnumId !== 'PRM_CLASS_TYPE')
+              .map((group: any) => [group.groupId, group])).values()
+          );
         } else {
           throw resp.data;
         }
@@ -176,31 +153,21 @@ export const useUtilStore = defineStore('util', {
     },
 
     async fetchClassificationSecurityGroups() {
-      const payload = {
-        entityName: "SecurityGroup",
-        viewSize: 250,
-        distinct: "Y",
-        noConditionFind: "Y",
-        fieldList: ["description", "groupId", "groupName"],
-        orderBy: 'groupName ASC',
-        inputFields: {
-          groupTypeEnumId: "PRM_CLASS_TYPE",
-          groupId: "SGC_HIDDEN",
-          groupId_op: "notEqual"
-        }
-      };
-      let securityGroups = [];
+      let securityGroups: any[] = [];
 
       try {
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "performFind",
-          method: "POST",
-          data: payload,
+          url: "admin/groups",
+          method: "get",
+          params: { groupTypeEnumId: 'PRM_CLASS_TYPE', pageSize: 500, orderByField: 'groupName' },
           cache: true
         });
         if (!commonUtil.hasError(resp)) {
-          securityGroups = resp.data.docs;
+          securityGroups = Array.from(
+            new Map((resp.data || [])
+              .filter((group: any) => group.groupId !== 'SGC_HIDDEN')
+              .map((group: any) => [group.groupId, group])).values()
+          );
         } else {
           throw resp.data;
         }
@@ -279,9 +246,8 @@ export const useUtilStore = defineStore('util', {
 
     async updateSecurityGroup(payload: any): Promise<any> {
       const resp = await api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/updateSecurityGroup",
-        method: "post",
+        url: `admin/groups/${payload.groupId}`,
+        method: "put",
         data: payload
       });
 

@@ -9,7 +9,6 @@ import UserConfirmation from '@/views/UserConfirmation.vue'
 import UserQuickSetup from '@/views/UserQuickSetup.vue'
 import CreateSecurityGroup from '@/views/CreateSecurityGroup.vue';
 import AddPermissions from '@/views/AddPermissions.vue';
-import AppPermissions from '@/views/AppPermissions.vue';
 import 'vue-router'
 
 const authGuard = async (to: any, from: any, next: any) => {
@@ -52,28 +51,28 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Settings.vue')
       },{
         path: 'me',
-        component: () => import('@/views/UserDetails.vue'),
+        component: UserDetails,
         props: () => {
           const user = useUserStore().getUserProfile || {};
-          return { partyId: user.partyId };
+          return { userId: user.userId };
         }
       },{
         path: 'permissions',
         redirect: '/tabs/app-permissions?view=group',
         meta: {
-          permissionId: "SECURITY_VIEW OR SECURITY_ADMIN"
+          permissionId: "SECURITY_VIEW OR SECURITY_ADMIN OR SECURITY_CREATE OR SECURITY_UPDATE"
         }
       },{
         path: 'app-permissions',
         component: () => import('@/views/AppPermissions.vue'),
         meta: {
-          permissionId: "SECURITY_VIEW OR SECURITY_ADMIN"
+          permissionId: "SECURITY_VIEW OR SECURITY_ADMIN OR SECURITY_CREATE OR SECURITY_UPDATE"
         }
       },{
         path: 'manage-authorization',
         component: () => import('@/views/ManageAuthorization.vue'),
         meta: {
-          permissionId: "SECURITY_VIEW OR SECURITY_ADMIN"
+          permissionId: "SECURITY_VIEW OR SECURITY_ADMIN OR SECURITY_CREATE OR SECURITY_UPDATE"
         }
       },
     ],
@@ -82,6 +81,16 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/user-details/:userId',
     name: 'UserDetails',
+    component: UserDetails,
+    beforeEnter: authGuard,
+    meta: {
+      permissionId: "USERS_LIST_VIEW OR PARTYMGR_VIEW OR PARTYMGR_ADMIN"
+    },
+    props: true
+  },
+  {
+    path: '/user-details/party/:partyId',
+    name: 'PartyUserDetails',
     component: UserDetails,
     beforeEnter: authGuard,
     meta: {
@@ -144,7 +153,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from) => {
-  const permissionId = to.meta.permissionId;
+  const permissionId = to.meta.permissionId as string | undefined;
   if (permissionId && !useUserStore().hasPermission(permissionId)) {
     commonUtil.showToast(translate('The requested page was not available to your user. Please contact your administrator to update your permissions.'));
     if (from.path === '/login' || from.path === '/') {

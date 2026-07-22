@@ -109,10 +109,19 @@ export const useUserStore = defineStore('user', {
     },
     async createNewUserLogin(payload: any): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/createNewUserLoginAndSetUserPreference",
+        url: "admin/users",
         method: "post",
-        data: payload
+        data: {
+          partyId: payload.partyId,
+          username: payload.userLoginId,
+          newPassword: payload.currentPassword,
+          newPasswordVerify: payload.currentPasswordVerify,
+          requirePasswordChange: payload.requirePasswordChange || 'N',
+          disabled: payload.enabled === 'N' ? 'Y' : 'N',
+          ...(payload.emailAddress && { emailAddress: payload.emailAddress }),
+          ...(payload.userPrefTypeId && { preferenceKey: payload.userPrefTypeId }),
+          ...(payload.userPrefValue && { preferenceValue: payload.userPrefValue })
+        }
       });
     },
     async createProductStoreRole(payload: { partyId: string; productStoreId: string; roleTypeId: string; fromDate?: any }): Promise<any> {
@@ -124,8 +133,7 @@ export const useUserStore = defineStore('user', {
     },
     async createRoleType(payload: any): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/createRoleType",
+        url: "admin/roleTypes",
         method: "post",
         data: payload
       });
@@ -146,8 +154,7 @@ export const useUserStore = defineStore('user', {
     },
     async createUser(payload: any): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/createRelationship",
+        url: "admin/userParties",
         method: "post",
         data: payload
       });
@@ -160,17 +167,15 @@ export const useUserStore = defineStore('user', {
     },
     async deletePartyRole(payload: any): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/deletePartyRole",
-        method: "post",
-        data: payload
+        url: `admin/organizations/${payload.partyId}/roles/${payload.roleTypeId}`,
+        method: "delete"
       });
     },
     async ensurePartyRole(payload: { partyId: string; roleTypeId: string }): Promise<any> {
       return api({
         url: `oms/parties/${payload.partyId}/roles`,
         method: "post",
-        data: { roleTypeId: payload.roleTypeId }
+        data: { roleTypeId: payload.roleTypeId, fromDate: DateTime.now().toMillis() }
       });
     },
     async forceLogout(payload: { userId: string }): Promise<any> {
@@ -240,7 +245,7 @@ export const useUserStore = defineStore('user', {
         }) as any
 
         if (!commonUtil.hasError(resp)) {
-          userGroups = resp.data
+          userGroups = resp.data.groups || resp.data
         } else {
           throw resp.data
         }
@@ -253,20 +258,11 @@ export const useUserStore = defineStore('user', {
     async isRoleTypeExists(roleTypeId: string): Promise<any> {
       try {
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: 'performFind',
-          method: 'POST',
-          data: {
-            entityName: "RoleType",
-            inputFields: {
-              roleTypeId
-            },
-            viewSize: 1,
-            fieldList: ['roleTypeId'],
-            noConditionFind: 'Y'
-          }
+          url: 'admin/roleTypes',
+          method: 'get',
+          params: { roleTypeId, pageSize: 1 }
         }) as any
-        if (!commonUtil.hasError(resp) && resp.data.docs.length) {
+        if (!commonUtil.hasError(resp) && resp.data.length) {
           return true
         }
         return false
@@ -274,30 +270,19 @@ export const useUserStore = defineStore('user', {
         return false
       }
     },
-    async isUserFulfillmentAdmin(groupIds: string): Promise<any> {
-      const payload = {
-        inputFields: {
-          groupId: groupIds,
-          groupId_op: "in",
-          permissionId: "STOREFULFILLMENT_ADMIN"
-        },
-        entityName: "SecurityGroupPermission",
-        filterByDate: "Y",
-        viewSize: 1,
-        fieldList: ["groupId", "permissionId", "fromDate"]
-      };
-
+    async isUserFulfillmentAdmin(groupIds: string[]): Promise<any> {
       try {
-        const resp: any = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: "performFind",
-          method: "POST",
-          data: payload,
-        });
-        if (!commonUtil.hasError(resp) && resp.data.docs.length) {
-          return true
-        }
-        return false
+        const responses: any[] = await Promise.all(groupIds.map((groupId: string) => api({
+          url: "admin/groups",
+          method: "get",
+          params: { groupId, permissionId: 'STOREFULFILLMENT_ADMIN', pageSize: 10 },
+        })));
+        const now = Date.now();
+        return responses.some((resp: any) => !commonUtil.hasError(resp) && resp.data.some((permission: any) => {
+          const fromDate = permission.fromDate ? new Date(permission.fromDate).getTime() : 0;
+          const thruDate = permission.thruDate ? new Date(permission.thruDate).getTime() : Number.POSITIVE_INFINITY;
+          return fromDate <= now && thruDate > now;
+        }));
       } catch (err) {
         return false
       }
@@ -305,10 +290,12 @@ export const useUserStore = defineStore('user', {
     async isUserLoginIdAlreadyExists(username: string): Promise<any> {
       try {
         const resp = await api({
-          url: `admin/users/${username}`,
-          method: 'GET'
+          url: 'admin/users',
+          method: 'get',
+          params: { keyword: username, pageSize: 20 }
         }) as any
-        if (!commonUtil.hasError(resp) && resp.data?.userId) {
+        const exists = !commonUtil.hasError(resp) && (resp.data?.users || []).some((user: any) => user.username?.toLowerCase() === username.toLowerCase());
+        if (exists) {
           commonUtil.showToast(translate('Could not create login user: user with ID already exists.', { userLoginId: username }))
           return true
         }
@@ -335,18 +322,16 @@ export const useUserStore = defineStore('user', {
     },
     async resetPassword(payload: any): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/resetPassword",
+        url: `admin/users/${payload.userId}/password/update`,
         method: "post",
-        data: payload
+        data: { newPassword: payload.newPassword, newPasswordVerify: payload.newPasswordVerify }
       });
     },
     async sendResetPasswordEmail(payload: any): Promise<any> {
       return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "sendResetPasswordMail",
+        url: "admin/users/password/reset-email",
         method: "post",
-        data: payload
+        data: { username: payload.username }
       });
     },
     async updatePartyExternalId(payload: { partyId: string; externalId: string }): Promise<any> {
@@ -358,16 +343,16 @@ export const useUserStore = defineStore('user', {
     },
     async updatePartyPersonName(payload: { partyId: string; firstName: string; lastName: string }): Promise<any> {
       return api({
-        url: `oms/parties/${payload.partyId}`,
+        url: `admin/userParties/${payload.partyId}/person`,
         method: "put",
-        data: { person: { firstName: payload.firstName, lastName: payload.lastName } }
+        data: { firstName: payload.firstName, lastName: payload.lastName }
       });
     },
     async updatePartyGroupName(payload: { partyId: string; groupName: string }): Promise<any> {
       return api({
-        url: `oms/parties/${payload.partyId}`,
-        method: "put",
-        data: { partyGroup: { groupName: payload.groupName } }
+        url: `admin/organizations/${payload.partyId}`,
+        method: "post",
+        data: { groupName: payload.groupName }
       });
     },
     async updatePartyStatus(payload: { partyId: string; statusId: string }): Promise<any> {
@@ -378,20 +363,16 @@ export const useUserStore = defineStore('user', {
       });
     },
     async updatePartyGroup(payload: any): Promise<any> {
-      return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/updatePartyGroup",
-        method: "post",
-        data: payload
-      });
+      return Promise.all([
+        this.updatePartyExternalId(payload),
+        this.updatePartyGroupName(payload)
+      ]);
     },
     async updatePerson(payload: any): Promise<any> {
-      return api({
-        baseURL: commonUtil.getOmsURL(),
-        url: "service/updatePerson",
-        method: "post",
-        data: payload
-      });
+      return Promise.all([
+        this.updatePartyExternalId(payload),
+        this.updatePartyPersonName(payload)
+      ]);
     },
     async updateProductStoreRole(payload: { partyId: string; productStoreId: string; roleTypeId: string; fromDate: any; thruDate: any }): Promise<any> {
       // Soft-expire: ProductStoreRole history is preserved, so this updates thruDate on the existing record rather than deleting it.
@@ -423,6 +404,7 @@ export const useUserStore = defineStore('user', {
           method: "get",
         }) as any;
         this.current = userProfileResp.data
+        this.current.userLoginId = this.current.username
         useAuth().updateUserId(this.current.userId)
 
         if (this.current.timeZone) {
@@ -558,6 +540,7 @@ export const useUserStore = defineStore('user', {
         const selectedTemplate = payload.selectedTemplate;
         const partyId = selectedUser.partyId;
         const promises = [];
+        let createdUserId = selectedUser.userId || '';
 
         if (selectedTemplate.isUserLoginRequired || selectedUser.partyTypeId === "PARTY_GROUP") {
           if (await this.isUserLoginIdAlreadyExists(payload.formData.userLoginId)) {
@@ -573,13 +556,15 @@ export const useUserStore = defineStore('user', {
             "currentPasswordVerify": payload.formData.currentPassword,
             "requirePasswordChange": payload.formData.requirePasswordChange ? "Y" : "N",
             "enabled": "Y",
+            "emailAddress": payload.formData.emailAddress,
             "userPrefTypeId": "ORGANIZATION_PARTY",
             "userPrefValue": organizationPartyId
           });
           if (!commonUtil.hasError(resp)) {
-            this.addUserToSecurityGroup({
-              "userLoginId": payload.formData.userLoginId,
-              "groupIds": payload.selectedTemplate.securityGroupId ? [payload.selectedTemplate.securityGroupId] : ["STORE_MANAGER"],
+            createdUserId = resp.data.userId;
+            await this.addUserToSecurityGroup({
+              userId: resp.data.userId,
+              userGroupId: payload.selectedTemplate.securityGroupId || "STORE_MANAGER",
             });
           } else {
             throw resp.data;
@@ -668,7 +653,7 @@ export const useUserStore = defineStore('user', {
           });
 
           if (selectedUser.partyTypeId === "PARTY_GROUP") {
-            const facilityId = [...selectedFacilityIds][0]
+            const facilityId = [...selectedFacilityIds][0] as string
 
             if (!await this.isRoleTypeExists("FAC_LOGIN")) {
               const resp = await this.createRoleType({
@@ -695,6 +680,7 @@ export const useUserStore = defineStore('user', {
             }
           });
         })
+        return { userId: createdUserId };
 
       } catch (error: any) {
         return Promise.reject(error)
@@ -703,7 +689,7 @@ export const useUserStore = defineStore('user', {
     async getSelectedUserDetails(payload: { userId?: string; partyId?: string; isFetchRequired?: boolean }) {
       const currentSelectedUser = JSON.parse(JSON.stringify(this.selectedUser));
       const identifier = payload.userId || payload.partyId;
-      if ((currentSelectedUser.userLoginId === identifier || currentSelectedUser.partyId === identifier) && !payload.isFetchRequired) {
+      if ((currentSelectedUser.userId === identifier || currentSelectedUser.userLoginId === identifier || currentSelectedUser.partyId === identifier) && !payload.isFetchRequired) {
         return;
       }
 
@@ -715,11 +701,12 @@ export const useUserStore = defineStore('user', {
           : await api({ url: 'admin/users', method: 'GET', params: { partyId: payload.partyId, pageSize: 1 } }) as any;
 
         const user = payload.userId ? userResp.data : userResp.data.users?.[0];
-        if (!commonUtil.hasError(userResp) && user) {
-          const partyId = user.partyId;
+        if (!commonUtil.hasError(userResp) && (user || payload.partyId)) {
+          const partyId = user?.partyId || payload.partyId;
           selectedUser = {
-            ...user,
-            userLoginId: user.userId
+            ...(user || {}),
+            partyId,
+            userLoginId: user?.username || ''
           };
 
           const partyResp = await api({
@@ -734,7 +721,8 @@ export const useUserStore = defineStore('user', {
               lastName: partyResp.data.lastName,
               groupName: partyResp.data.groupName,
               externalId: partyResp.data.externalId,
-              statusId: partyResp.data.statusId
+              statusId: partyResp.data.statusId,
+              createdByUserLogin: partyResp.data.createdByUserLogin
             };
           }
 
@@ -783,7 +771,7 @@ export const useUserStore = defineStore('user', {
 
       if (Object.keys(selectedUser).length) {
         selectedUser.facilities = await this.getUserFacilities(selectedUser.partyId);
-        const userGroups = await this.getUserGroups(selectedUser.userLoginId);
+        const userGroups = selectedUser.userId ? await this.getUserGroups(selectedUser.userId) : [];
         const now = Date.now();
         selectedUser.securityGroups = userGroups.filter((group: any) => !group.thruDate || group.thruDate > now);
         selectedUser.productStores = await this.getUserProductStores(selectedUser.partyId);
@@ -794,7 +782,7 @@ export const useUserStore = defineStore('user', {
               url: 'admin/user/preferences',
               method: 'GET',
               params: {
-                userId: selectedUser.userLoginId,
+                userId: selectedUser.userId,
                 preferenceKey: 'FAVORITE_PRODUCT_STORE,FAVORITE_SHOPIFY_SHOP',
                 preferenceKey_op: 'in',
                 pageSize: 2
@@ -816,10 +804,11 @@ export const useUserStore = defineStore('user', {
         }
 
         const resp = await api({
-          url: `oms/parties/${selectedUser.partyId}/roles`,
+          url: `admin/organizations/${selectedUser.partyId}/roles`,
           method: 'GET',
           params: {
             roleTypeId: 'WAREHOUSE_PICKER',
+            filterByDate: 'Y',
             pageSize: 1
           }
         });
@@ -831,23 +820,15 @@ export const useUserStore = defineStore('user', {
 
       if (selectedUser['createdByUserLogin']) {
         const resp = await api({
-          baseURL: commonUtil.getOmsURL(),
-          url: 'performFind',
-          method: 'POST',
-          data: {
-            entityName: "UserLogin",
-            inputFields: {
-              userLoginId: selectedUser['createdByUserLogin']
-            },
-            viewSize: 1,
-            fieldList: ['partyId'],
-            distinct: 'Y',
-            noConditionFind: 'Y'
-          }
+          url: 'admin/users',
+          method: 'get',
+          params: { keyword: selectedUser.createdByUserLogin, pageSize: 20 }
         });
 
         if (!commonUtil.hasError(resp)) {
-          selectedUser['createdByUserPartyId'] = resp.data.docs[0].partyId;
+          const createdByUser = resp.data.users?.find((user: any) => user.username === selectedUser.createdByUserLogin);
+          selectedUser.createdByUserId = createdByUser?.userId;
+          selectedUser.createdByUserPartyId = createdByUser?.partyId;
         }
       }
       this.selectedUser = selectedUser;

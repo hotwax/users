@@ -59,7 +59,8 @@ import { computed, onMounted, ref } from 'vue';
 import { IonAvatar, IonButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonHeader, IonIcon, IonItem, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import { openOutline } from 'ionicons/icons'
 import Image from '@/components/Image.vue';
-import { translate, useAuth } from "@common";
+import { translate } from "@common";
+import { useAuth } from "@common/composables/useAuth";
 import { DateTime } from 'luxon';
 import { useUserStore } from '@/store/user';
 import DxpOmsInstanceNavigator from "@/components/DxpOmsInstanceNavigator.vue";

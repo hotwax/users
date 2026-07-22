@@ -7,11 +7,11 @@
           <ion-icon :icon="personOutline" />
           <ion-label>{{ translate("Users") }}</ion-label>
         </ion-tab-button>
-        <ion-tab-button v-if="userStore.hasPermission('SECURITY_VIEW OR SECURITY_ADMIN')" tab="permissions" href="/tabs/app-permissions">
+        <ion-tab-button v-if="userStore.hasPermission('SECURITY_VIEW OR SECURITY_ADMIN OR SECURITY_CREATE OR SECURITY_UPDATE')" tab="permissions" href="/tabs/app-permissions">
           <ion-icon :icon="idCardOutline" />
           <ion-label>{{ translate("Permissions") }}</ion-label>
         </ion-tab-button>
-        <ion-tab-button v-if="userStore.hasPermission('SECURITY_VIEW OR SECURITY_ADMIN')" tab="manage-authorization" href="/tabs/manage-authorization">
+        <ion-tab-button v-if="userStore.hasPermission('SECURITY_VIEW OR SECURITY_ADMIN OR SECURITY_CREATE OR SECURITY_UPDATE')" tab="manage-authorization" href="/tabs/manage-authorization">
           <ion-icon :icon="keyOutline" />
           <ion-label>{{ translate("Authorization") }}</ion-label>
         </ion-tab-button>

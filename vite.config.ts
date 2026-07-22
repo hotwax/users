@@ -25,6 +25,9 @@ export default defineConfig({
     })
   ],
   define: {
+    // Users is Moqui-only. Keep shared authentication and URL routing off the OFBiz /api/ path
+    // even when a local or deployment-specific .env omits VITE_OMS_TYPE.
+    'import.meta.env.VITE_OMS_TYPE': JSON.stringify('MOQUI'),
     'import.meta.env.VITE_APP_VERSION_INFO': JSON.stringify(JSON.stringify(versionInfoUtil.getVersionInfo(pkg.version)))
   },
   build: {

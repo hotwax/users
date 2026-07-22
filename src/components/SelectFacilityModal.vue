@@ -58,15 +58,11 @@ import { closeOutline, saveOutline } from "ionicons/icons";
 import { translate } from '@common';
 import { useUtilStore } from "@/store/util";
 
-const props = defineProps({
-  selectedFacilities: {
-    type: Array,
-    required: true
-  },
-  isFacilityLogin: {
-    type: Boolean,
-    default: false
-  }
+const props = withDefaults(defineProps<{
+  selectedFacilities: any[];
+  isFacilityLogin?: boolean;
+}>(), {
+  isFacilityLogin: false
 });
 
 const utilStore = useUtilStore();

@@ -61,7 +61,7 @@
             <ion-item lines="none">
               <div class="tablet" slot="end">
                 <ion-chip outline v-if="currentUser.groups?.length">
-                  <ion-label>{{ currentUser.groups.map((group) => group.description || group.userGroupId).join(', ') }}</ion-label>
+                  <ion-label>{{ currentUser.groups.map((group: any) => group.description || group.userGroupId).join(', ') }}</ion-label>
                 </ion-chip>
                 <ion-label v-else>
                   {{ '-' }}
@@ -91,7 +91,7 @@
 
               <div class="tablet">
                 <ion-chip outline v-if="user.groups?.length">
-                  <ion-label>{{ user.groups.map((group) => group.description || group.userGroupId).join(', ') }}</ion-label>
+                  <ion-label>{{ user.groups.map((group: any) => group.description || group.userGroupId).join(', ') }}</ion-label>
                 </ion-chip>
                 <ion-label v-else>
                   {{ '-' }}

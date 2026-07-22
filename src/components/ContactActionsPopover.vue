@@ -162,14 +162,14 @@ const deleteContactField = async () => {
         try {
           if (props.type === 'email') {
             const resp = await userStore.deletePartyContactMech({
-              contactMechId: props.contactMechId,
+              contactMechId: props.contactMechId as string,
               partyId: selectedUser.value.partyId
             });
             if (commonUtil.hasError(resp)) throw resp.data;
             delete updatedSelectedUser.emailDetails;
           } else if (props.type === 'phoneNumber') {
             const resp = await userStore.deletePartyContactMech({
-              contactMechId: props.contactMechId,
+              contactMechId: props.contactMechId as string,
               partyId: selectedUser.value.partyId
             });
             if (commonUtil.hasError(resp)) throw resp.data;

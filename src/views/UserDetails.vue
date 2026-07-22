@@ -449,7 +449,11 @@ import Image from "@/components/Image.vue";
 const props = defineProps({
   userId: {
     type: String,
-    required: true
+    default: ''
+  },
+  partyId: {
+    type: String,
+    default: ''
   }
 });
 
@@ -491,7 +495,10 @@ const redirectedFromUrl = computed(() => userStore.getRedirectedFromUrl);
 const imageUrl = computed(() => {
   const partyImageUrl = selectedUser.value.partyImageUrl;
   if (!partyImageUrl) return "";
-  return (commonUtil.getMaargBaseURL().startsWith('http') ? commonUtil.getMaargBaseURL().replace(/api\/?/, "") : `https://${commonUtil.getMaargBaseURL()}.hotwax.io/`) + partyImageUrl;
+  if (partyImageUrl.startsWith('http')) return partyImageUrl;
+  const maargBase = commonUtil.getMaargBaseURL();
+  const origin = maargBase.startsWith('http') ? new URL(maargBase).origin : `https://${maargBase}.hotwax.io`;
+  return `${origin}${partyImageUrl.startsWith('/') ? '' : '/'}${partyImageUrl}`;
 });
 
 onIonViewWillLeave(async () => {
@@ -500,19 +507,20 @@ onIonViewWillLeave(async () => {
 
 onIonViewWillEnter(async () => {
   isUserFetched.value = false;
-  await userStore.getSelectedUserDetails({ userId: props.userId, isFetchRequired: true });
+  await userStore.getSelectedUserDetails({ userId: props.userId || undefined, partyId: props.partyId || undefined, isFetchRequired: true });
   await Promise.all([utilStore.fetchUserGroups(), utilStore.fetchShopifyShopConfigs()]);
   const productStoreId = selectedUser.value.favoriteProductStorePref?.preferenceValue;
   if (productStoreId) {
     getShopifyShops(productStoreId);
   }
-  isUserFulfillmentAdmin.value = selectedUser.value.securityGroups?.length ? await userStore.isUserFulfillmentAdmin(selectedUser.value.securityGroups.map((group: any) => group.userGroupId)) : false;
+  isUserFulfillmentAdmin.value = selectedUser.value.securityGroups?.length ? await userStore.isUserFulfillmentAdmin(selectedUser.value.securityGroups.map((group: any) => group.legacyGroupId || group.userGroupId)) : false;
   isUserFetched.value = true;
   username.value = selectedUser.value.groupName ? (selectedUser.value.groupName)?.toLowerCase() : (`${selectedUser.value.firstName}.${selectedUser.value.lastName}`?.toLowerCase()) || "";
 });
 
 const checkUserAssociatedSecurityGroup = (securityGroupId: any) => {
-  return userSecurityGroups.value?.some((userSecurityGroup: any) => userSecurityGroup.userGroupId === securityGroupId);
+  return userSecurityGroups.value?.some((userSecurityGroup: any) =>
+    userSecurityGroup.userGroupId === securityGroupId || userSecurityGroup.legacyGroupId === securityGroupId);
 };
 
 const getShopifyShops = (productStoreId: string) => {
@@ -522,7 +530,7 @@ const getShopifyShops = (productStoreId: string) => {
 const updateFavoriteProductStore = (event: any) => {
   const selectedProductStoreId = event.target.value;
   if (selectedProductStoreId && selectedProductStoreId !== selectedUser.value?.favoriteProductStorePref?.preferenceValue) {
-    userStore.setFavoriteProductStore({ "userId": selectedUser.value?.userLoginId, "productStoreId": selectedProductStoreId })
+    userStore.setFavoriteProductStore({ "userId": selectedUser.value?.userId, "productStoreId": selectedProductStoreId })
     .then(() => {
       getShopifyShops(selectedProductStoreId);
       commonUtil.showToast(translate('Favorite product store updated successfully.'));
@@ -540,7 +548,7 @@ const goBack = ($event: any) => {
 const updateFavoriteShopifyShop = (event: any) => {
   const selectedShopId = event.target.value;
   if (selectedShopId && selectedShopId !== selectedUser.value?.favoriteShopifyShopPref?.preferenceValue) {
-    userStore.setFavoriteShopifyShop({ "userId": selectedUser.value?.userLoginId, "shopId": selectedShopId })
+    userStore.setFavoriteShopifyShop({ "userId": selectedUser.value?.userId, "shopId": selectedShopId })
     .then(() => {
       commonUtil.showToast(translate('Favorite shopify shop updated successfully.'));
     }).catch(() => {
@@ -572,7 +580,7 @@ const openCreatedByUserDetail = async () => {
   if (isCreatedBySystem()) {
     window.open('https://youtu.be/dQw4w9WgXcQ?si=cPE1jkfRLPiebJuW', '_blank');
   } else {
-    router.push({ path: `/user-details/${selectedUser.value.createdByUserPartyId}` });
+    if (selectedUser.value.createdByUserId) router.push({ path: `/user-details/${selectedUser.value.createdByUserId}` });
   }
 };
 
@@ -705,12 +713,13 @@ const createNewUserLogin = async () => {
       currentPassword: password.value,
       currentPasswordVerify: password.value,
       userLoginId: username.value,
+      emailAddress: selectedUser.value.emailDetails?.email,
       enabled: 'Y',
       userPrefTypeId: 'ORGANIZATION_PARTY',
       userPrefValue: organizationPartyId.value,
     });
     if (!commonUtil.hasError(resp)) {
-      await userStore.getSelectedUserDetails({ userId: username.value, isFetchRequired: true });
+      await userStore.getSelectedUserDetails({ userId: resp.data.userId, isFetchRequired: true });
     } else {
       throw resp.data;
     }
@@ -725,7 +734,8 @@ const resetPassword = async () => {
     component: ResetPasswordModal,
     componentProps: {
       email: selectedUser.value.emailDetails?.email,
-      userLoginId: selectedUser.value.userLoginId
+      userId: selectedUser.value.userId,
+      username: selectedUser.value.userLoginId
     }
   });
 
@@ -755,12 +765,12 @@ const confirmForceLogout = async () => {
 const forceLogout = async () => {
   try {
     const resp = await userStore.forceLogout({
-      userId: selectedUser.value.userLoginId
+      userId: selectedUser.value.userId
     });
     if (commonUtil.hasError(resp)) {
       throw resp;
     }
-    await userStore.getSelectedUserDetails({ userId: props.userId, isFetchRequired: true });
+    await userStore.getSelectedUserDetails({ userId: props.userId || undefined, partyId: props.partyId || undefined, isFetchRequired: true });
     commonUtil.showToast(translate('User has been logged out.'));
   } catch (error) {
     commonUtil.showToast(translate('Failed to perform force logout.'));
@@ -787,7 +797,7 @@ const updateUserLoginStatus = async (event: any) => {
       handler: async () => {
         try {
           const resp = await userStore.updateUserLoginStatus({
-            userId: selectedUser.value.userLoginId,
+            userId: selectedUser.value.userId,
             disabled: isChecked ? 'Y' : 'N'
           });
           if (!commonUtil.hasError(resp)) {
@@ -820,7 +830,7 @@ const openSecurityGroupActionsPopover = async (event: Event, securityGroup: any)
   securityGroupActionsPopover.present();
 
   const result = await securityGroupActionsPopover.onDidDismiss();
-  isUserFulfillmentAdmin.value = result.data?.length ? await userStore.isUserFulfillmentAdmin(result.data.map((group: any) => group.userGroupId)) : false;
+  isUserFulfillmentAdmin.value = result.data?.length ? await userStore.isUserFulfillmentAdmin(result.data.map((group: any) => group.legacyGroupId || group.userGroupId)) : false;
 };
 
 const openProductStoreActionsPopover = async (event: Event, store: any) => {
@@ -917,7 +927,7 @@ const selectSecurityGroup = async () => {
         const updateResponses = await Promise.allSettled(securityGroupsToRemove
           .map(async (payload: any) => await userStore.removeUserSecurityGroup({
             userGroupId: payload.userGroupId,
-            userId: selectedUser.value.userLoginId,
+            userId: selectedUser.value.userId,
             fromDate: payload.fromDate,
             thruDate: DateTime.now().toMillis()
           }))
@@ -926,7 +936,7 @@ const selectSecurityGroup = async () => {
         const createResponses = await Promise.allSettled(securityGroupsToCreate
           .map(async (payload: any) => await userStore.addUserToSecurityGroup({
             userGroupId: payload.userGroupId,
-            userId: selectedUser.value.userLoginId
+            userId: selectedUser.value.userId
           }))
         );
 
@@ -936,11 +946,11 @@ const selectSecurityGroup = async () => {
         } else {
           commonUtil.showToast(translate('Security group(s) updated successfully.'));
         }
-        const userGroups = await userStore.getUserGroups(selectedUser.value.userLoginId);
+        const userGroups = await userStore.getUserGroups(selectedUser.value.userId);
         const now = Date.now();
         const updatedUserSecurityGroups = userGroups.filter((group: any) => !group.thruDate || group.thruDate > now);
         userStore.updateSelectedUser({ ...selectedUser.value, securityGroups: updatedUserSecurityGroups });
-        isUserFulfillmentAdmin.value = updatedUserSecurityGroups.length ? await userStore.isUserFulfillmentAdmin(updatedUserSecurityGroups.map((group: any) => group.userGroupId)) : false;
+        isUserFulfillmentAdmin.value = updatedUserSecurityGroups.length ? await userStore.isUserFulfillmentAdmin(updatedUserSecurityGroups.map((group: any) => group.legacyGroupId || group.userGroupId)) : false;
       } catch (error) {
         logger.error(error);
         commonUtil.showToast(translate('Failed to update some security group(s).'));
@@ -1110,12 +1120,12 @@ const updateUserStatus = async (event: any) => {
   emitter.emit('presentLoader');
 
   try {
-    if (isChecked && selectedUser.value.userLoginId) {
+    if (selectedUser.value.userId) {
       await userStore.updateUserLoginStatus({
-        userId: selectedUser.value.userLoginId,
-        disabled: 'Y'
+        userId: selectedUser.value.userId,
+        disabled: isChecked ? 'Y' : 'N'
       });
-      selectedUser.value.disabled = 'Y';
+      selectedUser.value.disabled = isChecked ? 'Y' : 'N';
     }
     const resp = await userStore.updatePartyStatus(payload);
 
@@ -1172,7 +1182,7 @@ const uploadImage = async (event: any) => {
   const formData = new FormData();
   formData.append('uploadedFile', selectedFile, selectedFile?.name);
   try {
-    const resp = await userStore.uploadPartyImage({ userId: selectedUser.value.userLoginId, formData });
+    const resp = await userStore.uploadPartyImage({ userId: selectedUser.value.userId, formData });
     if (!commonUtil.hasError(resp)) {
       commonUtil.showToast(translate("Image uploaded successfully."));
       userStore.updateSelectedUser({ ...selectedUser.value, partyImageUrl: resp.data.partyImageUrl });

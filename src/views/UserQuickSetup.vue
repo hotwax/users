@@ -137,6 +137,7 @@ const formData = ref({
   externalId: '',
   requirePasswordChange: true,
 });
+const createdUserId = ref('');
 
 const userTemplates = [
   {
@@ -326,17 +327,18 @@ const finishSetup = async () => {
       commonUtil.showToast(translate(errorMessages));
       return;
     }
-    await userStore.finishSetup({
+    const setupResult = await userStore.finishSetup({
       selectedUser: selectedUser.value,
       selectedTemplate: selectedUserTemplate.value,
       formData: formData.value,
       productStores: selectedProductStores.value,
       facilities: selectedFacilities.value
     });
+    createdUserId.value = setupResult?.userId || selectedUser.value.userId || '';
     if (selectedUserTemplate.value.isUserLoginRequired) {
       await finishSetupAlert(formData.value.userLoginId);
     } else {
-      router.replace({ path: `/user-details/${formData.value.userLoginId}` });
+      router.replace({ path: `/user-details/party/${selectedUser.value.partyId}` });
     }
   } catch (err: any) {
     logger.error('error', err);
@@ -375,7 +377,10 @@ const copyCredentials = (data: any) => {
     const dataToCopy = `username: ${formData.value.userLoginId}, password: ${formData.value.currentPassword}`;
     commonUtil.copyToClipboard(dataToCopy, 'Copied to clipboard');
   }
-  router.replace({ path: `/user-details/${formData.value.userLoginId}` });
+  const path = createdUserId.value
+    ? `/user-details/${createdUserId.value}`
+    : `/user-details/party/${selectedUser.value.partyId}`;
+  router.replace({ path });
 };
 
 const confirmSetupManually = async () => {
@@ -399,7 +404,7 @@ const confirmSetupManually = async () => {
 };
 
 const setupManually = async () => {
-  await router.replace({ path: `/user-details/${formData.value.userLoginId}` });
+  await router.replace({ path: `/user-details/party/${selectedUser.value.partyId}` });
 };
 
 const finishAndCreateNewUser = async () => {

@@ -46,8 +46,7 @@ const props = defineProps({
   }
 });
 
-const token = commonUtil.getToken() as string
-const oms = commonUtil.getOmsURL() as string
+const oms = commonUtil.getMaargURL() as string
 </script>
 
 <style scoped>

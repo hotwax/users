@@ -45,7 +45,7 @@ const removeUserSecurityGroup = async () => {
   try {
     const resp = await userStore.removeUserSecurityGroup({
         userGroupId: props.securityGroup.userGroupId,
-        userId: selectedUser.value.userLoginId,
+        userId: selectedUser.value.userId,
         fromDate: props.securityGroup.fromDate,
         thruDate: DateTime.now().toMillis()
     })
@@ -57,7 +57,7 @@ const removeUserSecurityGroup = async () => {
     logger.error(error)
   }
   // refetching security groups
-  const userGroups = await userStore.getUserGroups(selectedUser.value.userLoginId)
+  const userGroups = await userStore.getUserGroups(selectedUser.value.userId)
   const now = Date.now();
   const userSecurityGroups = userGroups.filter((group: any) => !group.thruDate || group.thruDate > now);
   userStore.updateSelectedUser({ ...selectedUser.value, securityGroups: userSecurityGroups })

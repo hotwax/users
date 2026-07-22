@@ -62,7 +62,7 @@
 
     <!-- TODO improve disable button logic -->
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button :disabled="(!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN') && userProfile?.userLoginId !== userLoginId) || checkResetButtonStatus()" @click="resetPassword()">
+      <ion-fab-button :disabled="(!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN') && userProfile?.userId !== userId) || checkResetButtonStatus()" @click="resetPassword()">
         <ion-icon :icon="lockClosedOutline" />  
       </ion-fab-button>
     </ion-fab>
@@ -78,7 +78,8 @@ import { useUserStore } from "@/store/user";
 
 const props = defineProps<{
   email?: string;
-  userLoginId?: string;
+  userId?: string;
+  username?: string;
 }>();
 
 const userStore = useUserStore();
@@ -103,7 +104,7 @@ const resetPassword = async () => {
     const resp = await userStore.resetPassword({
       newPassword: newPassword.value,
       newPasswordVerify: confirmPassword.value,
-      userLoginId: props.userLoginId
+      userId: props.userId
     });
     if (!commonUtil.hasError(resp)) {
       commonUtil.showToast(translate('Password reset successful.'));
@@ -150,8 +151,7 @@ const validateConfirmPassword = () => {
 const sendResetPasswordEmail = async () => {
   try {
     const resp = await userStore.sendResetPasswordEmail({
-      emailAddress: props.email,
-      userName: props.userLoginId
+      username: props.username
     });
     if (!commonUtil.hasError(resp)) {
       commonUtil.showToast(translate('Password reset email sent successfully.'));
