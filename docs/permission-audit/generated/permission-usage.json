@@ -1147,12 +1147,6 @@
       "permissions": []
     },
     {
-      "appId": "shopify-bopis",
-      "root": "../shopify-bopis",
-      "allowNoPermissions": true,
-      "permissions": []
-    },
-    {
       "appId": "transfers",
       "root": "../transfers",
       "permissions": [

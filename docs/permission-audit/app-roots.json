@@ -14,7 +14,6 @@
   { "appId": "receiving", "root": "../receiving" },
   { "appId": "reroute-fulfilment", "root": "../reroute-fulfilment" },
   { "appId": "returns", "root": "../returns", "allowNoPermissions": true },
-  { "appId": "shopify-bopis", "root": "../shopify-bopis", "allowNoPermissions": true },
   { "appId": "transfers", "root": "../transfers" },
   { "appId": "users", "root": "." }
 ]
