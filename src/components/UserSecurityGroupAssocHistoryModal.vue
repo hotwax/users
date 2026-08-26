@@ -12,7 +12,7 @@
 
   <ion-content>
     <ion-list v-if="userGroupAssocHistories.length">
-      <ion-item v-for="assocHistory in userGroupAssocHistories" :key="assocHistory.userGroupId">
+      <ion-item v-for="assocHistory in userGroupAssocHistories" :key="`${assocHistory.userGroupId}-${assocHistory.fromDate}`">
         <ion-label>
           {{ assocHistory.description ? assocHistory.description : assocHistory.userGroupId }}
           <p>{{ assocHistory.userGroupId }}</p>

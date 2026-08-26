@@ -6,7 +6,7 @@
       </ion-toolbar>
     </ion-header>
     
-    <ion-content>
+    <ion-content data-testid="settings-page">
       <div class="user-profile">
         <ion-card>
           <ion-item lines="full">
@@ -21,7 +21,7 @@
               <ion-card-title>{{ userProfile?.partyName }}</ion-card-title>
             </ion-card-header>
           </ion-item>
-          <ion-button color="danger" @click="logout()">{{ translate("Logout") }}</ion-button>
+          <ion-button data-testid="settings-logout" color="danger" @click="logout()">{{ translate("Logout") }}</ion-button>
           <ion-button :standalone-hidden="!userStore.hasPermission('COMMON_ADMIN')" fill="outline" @click="goToLaunchpad()">
             {{ translate("Go to Launchpad") }}
             <ion-icon slot="end" :icon="openOutline" />

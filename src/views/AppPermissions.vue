@@ -16,7 +16,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content>
+    <ion-content data-testid="app-permissions-page">
       <div v-if="viewMode === 'app'" class="app-permissions">
         <aside>
           <ion-searchbar :placeholder="translate('Search permissions')" v-model="query" />
@@ -301,7 +301,7 @@ const editSecurityGroup = async () => {
 };
 
 const openCurrentGroupUsers = async () => {
-  userStore.updateQuery({ queryString: '', securityGroup: currentGroup.value.groupId, status: '', hideDisabledUser: true });
+  userStore.updateQuery({ queryString: '', userGroupId: currentGroup.value.groupId, status: '', hideDisabledUser: true });
   router.push('users');
 };
 

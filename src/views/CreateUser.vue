@@ -6,7 +6,7 @@
         <ion-title>{{ translate("Create user") }}</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content>
+    <ion-content data-testid="create-user-page">
       <main>
         <h1 class="ion-margin-start">{{ translate('Create a new user') }}</h1>
         <ion-item>

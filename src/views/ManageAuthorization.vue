@@ -16,7 +16,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content>
+    <ion-content data-testid="manage-authorization-page">
       <div class="manage-authorization">
         <aside>
           <h1>{{ translate("User Groups") }}</h1>

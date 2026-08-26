@@ -3,23 +3,23 @@
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button v-if="userStore.hasPermission('USERS_LIST_VIEW OR PARTYMGR_VIEW OR PARTYMGR_ADMIN')" tab="users" href="/tabs/users">
+        <ion-tab-button data-testid="users-tab" v-if="userStore.hasPermission('USERS_LIST_VIEW OR PARTYMGR_VIEW OR PARTYMGR_ADMIN')" tab="users" href="/tabs/users">
           <ion-icon :icon="personOutline" />
           <ion-label>{{ translate("Users") }}</ion-label>
         </ion-tab-button>
-        <ion-tab-button v-if="userStore.hasPermission('SECURITY_VIEW OR SECURITY_ADMIN OR SECURITY_CREATE OR SECURITY_UPDATE')" tab="permissions" href="/tabs/app-permissions">
+        <ion-tab-button data-testid="permissions-tab" v-if="userStore.hasPermission('SECURITY_VIEW OR SECURITY_ADMIN OR SECURITY_CREATE OR SECURITY_UPDATE')" tab="permissions" href="/tabs/app-permissions">
           <ion-icon :icon="idCardOutline" />
           <ion-label>{{ translate("Permissions") }}</ion-label>
         </ion-tab-button>
-        <ion-tab-button v-if="userStore.hasPermission('SECURITY_VIEW OR SECURITY_ADMIN OR SECURITY_CREATE OR SECURITY_UPDATE')" tab="manage-authorization" href="/tabs/manage-authorization">
+        <ion-tab-button data-testid="authorization-tab" v-if="userStore.hasPermission('SECURITY_VIEW OR SECURITY_ADMIN OR SECURITY_CREATE OR SECURITY_UPDATE')" tab="manage-authorization" href="/tabs/manage-authorization">
           <ion-icon :icon="keyOutline" />
           <ion-label>{{ translate("Authorization") }}</ion-label>
         </ion-tab-button>
-        <ion-tab-button v-if="!userStore.hasPermission('USERS_LIST_VIEW OR PARTYMGR_VIEW OR PARTYMGR_ADMIN')" tab="me" :href="`/tabs/me`">
+        <ion-tab-button data-testid="me-tab" v-if="!userStore.hasPermission('USERS_LIST_VIEW OR PARTYMGR_VIEW OR PARTYMGR_ADMIN')" tab="me" :href="`/tabs/me`">
           <ion-icon :icon="personOutline" />
           <ion-label>{{ translate("Me") }}</ion-label>
         </ion-tab-button>
-        <ion-tab-button tab="more" href="/tabs/settings">
+        <ion-tab-button data-testid="settings-tab" tab="more" href="/tabs/settings">
           <ion-icon :icon="settingsOutline" />
           <ion-label>{{ translate("Settings") }}</ion-label>
         </ion-tab-button>

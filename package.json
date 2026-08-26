@@ -8,6 +8,7 @@
     "build": "vite build",
     "serve": "vite preview",
     "test:unit": "vitest",
+    "test:e2e": "playwright test",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "catalog:",
+    "@playwright/test": "^1.58.0",
     "@types/file-saver": "catalog:",
     "@types/luxon": "catalog:",
     "@types/papaparse": "catalog:",
@@ -38,6 +40,7 @@
     "@vue/compiler-sfc": "^3.0.0-0",
     "@vue/eslint-config-typescript": "^9.1.0",
     "@vue/test-utils": "^2.0.0-0",
+    "dotenv": "^17.2.3",
     "eslint": "catalog:",
     "eslint-plugin-vue": "^8.0.3",
     "terser": "^5.44.0",

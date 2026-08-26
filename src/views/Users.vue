@@ -11,24 +11,24 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content id="filter-menu">
+    <ion-content id="filter-menu" data-testid="users-page">
       <div class="find">
         <section class="search">
-          <ion-searchbar :placeholder="translate('Search users')" v-model="userStore.query.queryString" @keyup.enter="updateQuery()" />
+          <ion-searchbar data-testid="users-search" :placeholder="translate('Search users')" v-model="userStore.query.queryString" @keyup.enter="updateQuery()" @ionClear="clearSearch" />
         </section>
 
         <aside class="filters">
           <ion-list>
             <ion-item lines="none">
               <ion-icon :icon="idCardOutline" slot="start" />
-              <ion-select :label="translate('Clearance')" interface="popover" v-model="userStore.query.userGroupId" @ionChange="updateQuery()">
+              <ion-select data-testid="users-clearance-filter" :label="translate('Clearance')" interface="popover" v-model="userStore.query.userGroupId" @ionChange="updateQuery()">
                 <ion-select-option value="">{{ translate("All") }}</ion-select-option>
                 <ion-select-option :value="userGroup.userGroupId" :key="index" v-for="(userGroup, index) in userGroups">{{ userGroup.description || userGroup.userGroupId }}</ion-select-option>
               </ion-select>
             </ion-item>
             <ion-item lines="none">
               <ion-icon :icon="toggleOutline" slot="start" />
-              <ion-select :label="translate('Login')" interface="popover" v-model="userStore.query.status" @ionChange="updateQuery()">
+              <ion-select data-testid="users-login-filter" :label="translate('Login')" interface="popover" v-model="userStore.query.status" @ionChange="updateQuery()">
                 <ion-select-option value="">{{ translate("All") }}</ion-select-option>
                 <ion-select-option value="Y">{{ translate("Active") }}</ion-select-option>
                 <ion-select-option value="N">{{ translate("Inactive") }}</ion-select-option>
@@ -37,8 +37,8 @@
           </ion-list>
         </aside>
 
-        <main>
-          <ion-card class="list-item" v-if="currentUser.userId" @click=viewUserDetails(currentUser)>
+        <main data-testid="users-list">
+          <ion-card data-testid="users-current-user" class="list-item" v-if="currentUser.userId" @click=viewUserDetails(currentUser)>
             <ion-item lines="none">
               <ion-label>
                 {{ currentUser.userFullName }}
@@ -99,14 +99,14 @@
               </div>
             </div>
           </div>
-          <div v-else>
+          <div data-testid="users-empty-state" v-else>
             <p class="ion-text-center">{{ translate("No users found") }}</p>
           </div>
         </main>
       </div>
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" @click="createUser()">
+        <ion-fab-button data-testid="users-create-button" :disabled="!userStore.hasPermission('SECURITY_CREATE OR SECURITY_ADMIN')" @click="createUser()">
           <ion-icon :icon="addOutline" />
         </ion-fab-button>
       </ion-fab>
@@ -167,6 +167,11 @@ const getDate = (date: any) => {
 const updateQuery = async () => {
   await userStore.updateQuery(userStore.query);
   fetchUsers();
+};
+
+const clearSearch = async () => {
+  userStore.query.queryString = '';
+  await updateQuery();
 };
 
 const fetchUsers = async (pSize?: any, pIndex?: any) => {

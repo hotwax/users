@@ -27,6 +27,7 @@ npm-debug.log*
 /.versions
 /.vscode
 /coverage
+/output/playwright
 /dist
 /node_modules
 /platforms

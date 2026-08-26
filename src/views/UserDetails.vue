@@ -8,7 +8,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content>
+    <ion-content data-testid="user-details-page">
       <div v-if="!isUserFetched" class="empty-state">
         <ion-item lines="none">
           <ion-spinner color="secondary" name="crescent" slot="start" />
