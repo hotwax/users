@@ -89,9 +89,6 @@
             {{ translate("Finish setup") }}
             <ion-icon slot="end" :icon="arrowForwardOutline"/>
           </ion-button>
-          <ion-button class="ion-margin-top" fill="outline" size="small" @click="confirmSetupManually()">
-            {{ translate("Setup manually") }}
-          </ion-button>
           <ion-button color="medium" fill="outline" size="small" @click="finishAndCreateNewUser()">
             {{ translate("Finish and create new user") }}
           </ion-button>
@@ -238,6 +235,7 @@ export default defineComponent({
           "templateName": "Fulfillment",
           "securityGroupId": "",
           "roleTypeId": "WAREHOUSE_PICKER",
+          "isUserLoginRequired": true,
           "isEmployeeIdRequired": true,
           "isFacilityRequired": false,
           "facilityRoleTypeId": "",
@@ -413,28 +411,6 @@ export default defineComponent({
         copyToClipboard(dataToCopy, 'Copied to clipboard')
       }
       this.$router.replace({ path: `/user-details/${this.partyId}` });
-    },
-    async confirmSetupManually() {
-      const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?'
-      const alert = await alertController.create({
-        header: translate("Setup manually"),
-        message: translate(message),
-        buttons: [
-          {
-            text: translate("Cancel"),
-          },
-          {
-            text: translate("Setup manually"),
-            handler: async () => {
-              await this.setupManually();
-            }
-          }
-        ],
-      });
-      return alert.present();
-    },
-    async setupManually() {
-      await this.$router.replace({ path: `/user-details/${this.partyId}` })
     },
     async finishAndCreateNewUser() {
       try {

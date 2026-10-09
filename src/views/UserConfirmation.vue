@@ -32,9 +32,6 @@
             {{ translate("Quick Setup") }}
             <ion-icon slot="end" :icon="arrowForwardOutline"/>
           </ion-button>
-          <ion-button color="medium" fill="outline" @click="confirmSetupManually()">
-            {{ translate("Setup Manually") }}
-          </ion-button>
         </div>
       </main>
     </ion-content>
@@ -56,8 +53,7 @@
     IonNote,
     IonPage,
     IonTitle,
-    IonToolbar,
-    alertController
+    IonToolbar
   } from "@ionic/vue";
   import { defineComponent } from "vue";
   import { mapGetters, useStore } from "vuex";
@@ -103,28 +99,6 @@
     methods: {
       async quickSetup() {
         await this.$router.replace({ path: `/user-quick-setup/${this.partyId}` })
-      },
-      async setupManually() {
-        await this.$router.replace({ path: `/user-details/${this.partyId}` })
-      },
-      async confirmSetupManually() {
-        const message = 'Automatic user setup helps configure various settings to get them up and running with most frequently used settings. Are you sure you want to set up this user manually?'
-        const alert = await alertController.create({
-          header: translate("Setup manually"),
-          message: translate(message),
-          buttons: [
-            {
-              text: translate("Cancel"),
-            },
-            {
-              text: translate("Setup manually"),
-              handler: async () => {
-                await this.setupManually();
-              }
-            }
-          ],
-        });
-        return alert.present();
       }
     },
     setup() {
