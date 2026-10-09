@@ -307,7 +307,6 @@ const actions: ActionTree<UserState, RootState> = {
     }
 
     if(state.query.status) {
-      filters['userLoginId_op'] = 'not-empty'
       if (state.query.status === "N") {
         filters['enabled'] = state.query.status
         filters['enabled_op'] = 'equals'
@@ -349,13 +348,9 @@ const actions: ActionTree<UserState, RootState> = {
 
     const params = {
       "inputFields": {
-        "roleTypeIdTo": "APPLICATION_USER", 
         ...filters
       },
-      "fromDateName": "relationshipFromDate",
-      "thruDateName": "relationshipThruDate",
-      "filterByDate": "Y",
-      "entityName": "PartyAndUserLoginSecurityGroupDetails",
+      "entityName": "UserLoginPartyAndSecurityGroupDetails",
       "noConditionFind": "Y",
       "distinct": "Y",
       "fieldList": ['partyId', 'createdByUserLogin', 'createdDate', 'enabled', 'firstName', 'lastName', "groupName", 'securityGroupId', 'securityGroupName', 'statusId', 'userLoginId'],
